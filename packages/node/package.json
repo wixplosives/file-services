@@ -1,0 +1,28 @@
+{
+  "name": "@file-services/node",
+  "version": "1.0.0",
+  "main": "cjs/index.js",
+  "types": "cjs/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "prebuild": "yarn clean",
+    "build": "tsc --project src",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint --project src",
+    "lint:test": "tslint --project test",
+    "test": "mocha -r typescript-support/warn \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
+  },
+  "dependencies": {
+    "proper-fs": "^1.0.0"
+  },
+  "devDependencies": {
+    "@file-services/test-kit": "^1.0.0",
+    "@file-services/types": "^1.0.0"
+  },
+  "files": [
+    "cjs",
+    "src"
+  ],
+  "license": "MIT",
+  "repository": "git@github.com:wixplosives/file-services.git"
+}
