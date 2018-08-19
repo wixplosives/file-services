@@ -1,0 +1,27 @@
+{
+  "name": "@file-services/utils",
+  "version": "1.0.0",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs ./esm",
+    "prebuild": "yarn clean",
+    "build": "run-p build:cjs build:esm",
+    "build:cjs": "tsc --project src --outDir cjs --module commonjs",
+    "build:esm": "tsc --project src --outDir esm --module esnext",
+    "lint": "run-p lint:src",
+    "lint:src": "tslint --project src"
+  },
+  "devDependencies": {
+    "@file-services/test-kit": "^1.0.0",
+    "@file-services/types": "^1.0.0"
+  },
+  "files": [
+    "cjs",
+    "esm",
+    "src"
+  ],
+  "license": "MIT",
+  "repository": "git@github.com:wixplosives/file-services.git"
+}
