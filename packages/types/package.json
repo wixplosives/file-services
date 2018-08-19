@@ -1,0 +1,20 @@
+{
+  "name": "@file-services/types",
+  "description": "Common file system interfaces",
+  "version": "1.0.0",
+  "main": "cjs/index.js",
+  "types": "cjs/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs",
+    "prebuild": "yarn clean",
+    "build": "run-p build:cjs",
+    "build:cjs": "tsc --project src --outDir cjs --module commonjs",
+    "lint": "tslint --project src"
+  },
+  "files": [
+    "cjs",
+    "src"
+  ],
+  "license": "MIT",
+  "repository": "git@github.com:wixplosives/file-services.git"
+}
