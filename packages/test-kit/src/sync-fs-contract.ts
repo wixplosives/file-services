@@ -141,7 +141,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed>):
                 fs.mkdirSync(directoryPath)
                 const expectedToFail = () => fs.unlinkSync(directoryPath)
 
-                expect(expectedToFail).to.throw('EISDIR')
+                expect(expectedToFail).to.throw() // linux throws `EISDIR`, mac throws `EPERM`
             })
         })
 
