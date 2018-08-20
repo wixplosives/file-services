@@ -16,7 +16,7 @@ export interface IWatchEventValidatorOptions {
     /**
      * Timeout (in ms) to wait for each event.
      *
-     * @default 750
+     * @default 2000
      */
     singleEventTimeout?: number
 
@@ -39,7 +39,7 @@ export class WatchEventsValidator {
     private options: Required<IWatchEventValidatorOptions>
 
     constructor(private watchService: IWatchService, options?: IWatchEventValidatorOptions) {
-        this.options = { singleEventTimeout: 750, noMoreEventsTimeout: 1000, ...options }
+        this.options = { singleEventTimeout: 2000, noMoreEventsTimeout: 1000, ...options }
 
         this.watchService.addListener(e => {
             this.capturedEvents.push(e)
