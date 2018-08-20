@@ -60,7 +60,7 @@ export class WatchEventsValidator {
             const nextIdx = this.expectedEvents.length
 
             const timeoutId = setTimeout(() => rejectPromise(
-                new Error(`Timeout while waiting for watch event #${nextIdx}:\n${watchEventToSring(expectedEvent)}`)
+                new Error(`Timeout while waiting for watch event #${nextIdx}:\n${watchEventToString(expectedEvent)}`)
             ), this.options.singleEventTimeout)
 
             this.expectedEvents.push({
