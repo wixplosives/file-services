@@ -58,11 +58,11 @@ describe('Node Watch Service', function() {
             await validate.noMoreEvents()
         })
 
-        it('emits two different watch events when changes are >100ms appart', async () => {
+        it('emits two different watch events when changes are >200ms appart', async () => {
             await writeFile(testFilePath, SAMPLE_CONTENT)
             const firstWriteStats = await stat(testFilePath)
 
-            await sleep(100)
+            await sleep(200)
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 

@@ -17,7 +17,7 @@ export interface INodeWatchServiceOptions {
      * How much time (in ms) to wait for next native watch event before
      * emitting a service watch event
      *
-     * @default 100
+     * @default 200
      */
     debounceWait?: number
 }
@@ -50,7 +50,7 @@ export class NodeWatchService implements IWatchService {
      * Construct a new Node file system watch service
      */
     constructor(options?: INodeWatchServiceOptions) {
-        this.options = { persistent: true, debounceWait: 100, ...options }
+        this.options = { persistent: true, debounceWait: 200, ...options }
     }
 
     /**
