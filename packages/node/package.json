@@ -5,7 +5,6 @@
   "types": "cjs/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs",
-    "prebuild": "yarn clean",
     "build": "tsc --project src",
     "lint": "run-p lint:src lint:test",
     "lint:src": "tslint --project src",
