@@ -271,7 +271,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed>):
                 fs.writeFileSync(filePath, sampleContent)
                 const expectedToFail = () => fs.rmdirSync(filePath)
 
-                expect(expectedToFail).to.throw('ENOTDIR')
+                expect(expectedToFail).to.throw()
             })
         })
 
