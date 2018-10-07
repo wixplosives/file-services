@@ -12,7 +12,7 @@
     "lint": "tslint --project src"
   },
   "dependencies": {
-    "chai": "^4.1.2"
+    "chai": "^4.2.0"
   },
   "devDependencies": {
     "@file-services/types": "^1.0.0"
