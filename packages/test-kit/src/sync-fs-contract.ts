@@ -1,33 +1,13 @@
 import { expect } from 'chai'
 import { IBaseFileSystemSync } from '@file-services/types'
+import { IFileSystemTestbed } from './types'
 
 const sampleContent = 'content'
 const differentContent = 'another content'
 
-/**
- * Represents everything required to run a single
- * contract test.
- */
-export interface IFileSystemTestbed {
-    /**
-     * SYNC file system to be tested
-     */
-    fs: IBaseFileSystemSync
-
-    /**
-     * Absolute path to an empty directory
-     */
-    tempDirectoryPath: string
-
-    /**
-     * Post-test cleanup
-     */
-    dispose(): Promise<void>
-}
-
-export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed>): void {
-    describe('sync file system contract', () => {
-        let testbed: IFileSystemTestbed
+export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IBaseFileSystemSync>>): void {
+    describe('SYNC file system contract', () => {
+        let testbed: IFileSystemTestbed<IBaseFileSystemSync>
 
         beforeEach(async () => testbed = await testProvider())
         afterEach(async () => await testbed.dispose())
@@ -238,7 +218,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed>):
                 fs.mkdirSync(directoryPath)
                 fs.rmdirSync(directoryPath)
 
-                expect(() => fs.statSync(directoryPath).isDirectory()).to.throw('ENOENT')
+                expect(() => fs.statSync(directoryPath)).to.throw('ENOENT')
             })
 
             it('fails if removing a non-empty directory', () => {
@@ -284,7 +264,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed>):
             fs.writeFileSync(filePath, sampleContent)
 
             if (fs.isCaseSensitive) {
-                expect(() => fs.statSync(upperCaseFilePath).isFile()).to.throw('ENOENT')
+                expect(() => fs.statSync(upperCaseFilePath)).to.throw('ENOENT')
             } else {
                 expect(fs.statSync(upperCaseFilePath).isFile()).to.equal(true)
             }
