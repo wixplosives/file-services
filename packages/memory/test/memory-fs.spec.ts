@@ -23,7 +23,8 @@ describe('In-memory File System Implementation', () => {
 
         expect(webpackStats.hasErrors(), statsOutputText).to.equal(false)
         expect(webpackStats.hasWarnings(), statsOutputText).to.equal(false)
-    })
+
+    }).timeout(10000) // bundling can take time (especially on CI), so increase timeout for specific it
 
     syncFsContract(async () => {
         const fs = createBaseMemoryFs()
