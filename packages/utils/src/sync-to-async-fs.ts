@@ -39,7 +39,7 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
 
     return {
         path: syncFs.path,
-        watcher: syncFs.watcher,
+        watchService: syncFs.watchService,
         isCaseSensitive: syncFs.isCaseSensitive,
 
         readFile,

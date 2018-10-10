@@ -1,5 +1,11 @@
 import pathMain from 'path'
-import { IBaseFileSystem, IBaseFileSystemSync, IFileSystemStats } from '@file-services/types'
+import {
+    IBaseFileSystem,
+    IBaseFileSystemSync,
+    IFileSystemStats,
+    WatchEventListener,
+    IWatchEvent
+} from '@file-services/types'
 import { syncToAsyncFs } from '@file-services/utils'
 import { FsErrorCodes } from './error-codes'
 
@@ -30,10 +36,17 @@ export function createBaseMemoryFs(): IBaseFileSystem {
 
 export function createBaseMemoryFsSync(): IBaseFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
+    const watchListeners: Set<WatchEventListener> = new Set()
 
     return {
         path,
-        watcher: {} as any, // TODO: implement watcher
+        watchService: {
+            addListener: listener => { watchListeners.add(listener) },
+            removeListener: listener => watchListeners.delete(listener),
+            removeAllListeners: () => watchListeners.clear(),
+            async watchPath() { /* in-mem, so events are free */ },
+            async unwatchAll() { /* in-mem, so events are free */ }
+        },
         isCaseSensitive: false,
         lstatSync: statSync, // TODO: implement links
         mkdirSync,
@@ -72,16 +85,23 @@ export function createBaseMemoryFsSync(): IBaseFileSystemSync {
 
         if (!fileNode) {
             const currentDate = new Date()
-            parentNode.contents[lowerCaseFileName] = {
+
+            const newFileNode: IFsMemFileNode = {
                 type: 'file',
                 name: fileName,
                 birthtime: currentDate,
                 mtime: currentDate,
                 contents: fileContent
             }
+
+            parentNode.contents[lowerCaseFileName] = newFileNode
+            emitWatchEvent({ path: filePath, stats: createStatsFromNode(newFileNode) })
+
         } else if (fileNode.type === 'file') {
             fileNode.mtime = new Date()
             fileNode.contents = fileContent
+            emitWatchEvent({ path: filePath, stats: createStatsFromNode(fileNode) })
+
         } else {
             throw new Error(`${filePath} EISDIR ${FsErrorCodes.PATH_IS_DIRECTORY}`)
         }
@@ -106,6 +126,7 @@ export function createBaseMemoryFsSync(): IBaseFileSystemSync {
         }
 
         delete parentNode.contents[lowerCaseFileName]
+        emitWatchEvent({ path: filePath, stats: null })
     }
 
     function readdirSync(directoryPath: string): string[] {
@@ -136,7 +157,10 @@ export function createBaseMemoryFsSync(): IBaseFileSystemSync {
             throw new Error(`${directoryPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
         }
 
-        parentNode.contents[lowerCaseDirectoryName] = createMemDirectory(directoryName, parentNode)
+        const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName, parentNode)
+        parentNode.contents[lowerCaseDirectoryName] = newDirNode
+
+        emitWatchEvent({ path: directoryPath, stats: createStatsFromNode(newDirNode) })
     }
 
     function rmdirSync(directoryPath: string): void {
@@ -158,6 +182,7 @@ export function createBaseMemoryFsSync(): IBaseFileSystemSync {
         }
 
         delete parentNode.contents[lowerCaseDirectoryName]
+        emitWatchEvent({ path: directoryPath, stats: null })
     }
 
     function statSync(nodePath: string): IFileSystemStats {
@@ -182,6 +207,12 @@ export function createBaseMemoryFsSync(): IBaseFileSystemSync {
                 prevNode.contents[depthName.toLowerCase()]) || null
         }, root)
     }
+
+    function emitWatchEvent(watchEvent: IWatchEvent): void {
+        for (const listener of watchListeners) {
+            listener(watchEvent)
+        }
+    }
 }
 
 function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemDirectoryNode {
@@ -203,10 +234,15 @@ function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemD
     return memDirectory
 }
 
-function returnsTrue() {
-    return true
-}
+const returnsTrue = () => true
+const returnsFalse = () => false
 
-function returnsFalse() {
-    return false
+function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode): IFileSystemStats {
+    return {
+        birthtime: node.birthtime,
+        mtime: node.mtime,
+        isFile: node.type === 'file' ? returnsTrue : returnsFalse,
+        isDirectory: node.type === 'dir' ? returnsTrue : returnsFalse,
+        isSymbolicLink: returnsFalse
+    }
 }

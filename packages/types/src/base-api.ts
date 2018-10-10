@@ -13,7 +13,7 @@ export interface IBaseFileSystem extends IBaseFileSystemAsync, IBaseFileSystemSy
  */
 export interface IBaseFileSystemSync {
     path: IFileSystemPath
-    watcher: IWatchService
+    watchService: IWatchService
     isCaseSensitive: boolean
 
     /**
@@ -69,7 +69,7 @@ export interface IBaseFileSystemSync {
  */
 export interface IBaseFileSystemAsync {
     path: IFileSystemPath
-    watcher: IWatchService
+    watchService: IWatchService
     isCaseSensitive: boolean
 
     /**

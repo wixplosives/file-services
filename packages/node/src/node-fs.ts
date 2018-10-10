@@ -13,7 +13,7 @@ export interface ICreateNodeFsOptions {
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {
     return {
         path,
-        watcher: new NodeWatchService(options && options.watchOptions),
+        watchService: new NodeWatchService(options && options.watchOptions),
         isCaseSensitive,
         lstat,
         lstatSync,
