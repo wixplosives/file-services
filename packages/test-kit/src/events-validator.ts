@@ -32,8 +32,8 @@ export class WatchEventsValidator {
     // actual captured events from watch service
     private capturedEvents: IWatchEvent[] = []
 
-    // event expections (added via nextEvent() calls)
-    private expectedEvents: IDeferredEventAssertion[] = []
+    // pending event expections (added via nextEvent() calls)
+    private pendingExpects: IDeferredEventAssertion[] = []
 
     // resolved options (defaults + user overrides)
     private options: Required<IWatchEventValidatorOptions>
@@ -43,9 +43,7 @@ export class WatchEventsValidator {
 
         this.watchService.addListener(e => {
             this.capturedEvents.push(e)
-            if (this.expectedEvents.length >= this.capturedEvents.length) {
-                this.validateEventsMatch(this.capturedEvents.length - 1)
-            }
+            this.validatePendingExpects()
         })
     }
 
@@ -57,13 +55,18 @@ export class WatchEventsValidator {
      */
     public nextEvent(expectedEvent: IWatchEvent): Promise<void> {
         return new Promise<void>((resolvePromise, rejectPromise) => {
-            const nextIdx = this.expectedEvents.length
+            const timeoutId = setTimeout(() => {
+                rejectPromise(
+                    new Error(
+                        `Timeout while waiting for watch event:\n` +
+                        `${watchEventToString(expectedEvent)}\n` +
+                        `${this.capturedEvents.length} other captured events.\n` +
+                        this.capturedEvents.map(watchEventToString).join('\n')
+                    )
+                )
+            }, this.options.singleEventTimeout)
 
-            const timeoutId = setTimeout(() => rejectPromise(
-                new Error(`Timeout while waiting for watch event #${nextIdx}:\n${watchEventToString(expectedEvent)}`)
-            ), this.options.singleEventTimeout)
-
-            this.expectedEvents.push({
+            this.pendingExpects.push({
                 resolve() {
                     clearTimeout(timeoutId)
                     resolvePromise()
@@ -75,11 +78,7 @@ export class WatchEventsValidator {
                 event: expectedEvent
             })
 
-            // if we already captured events before nextEvent was called,
-            // use them for validation
-            if (this.capturedEvents.length >= this.expectedEvents.length) {
-                this.validateEventsMatch(nextIdx)
-            }
+            this.validatePendingExpects()
         })
     }
 
@@ -89,45 +88,46 @@ export class WatchEventsValidator {
     public async noMoreEvents(): Promise<void> {
         await sleep(this.options.noMoreEventsTimeout)
 
-        if (this.capturedEvents.length > this.expectedEvents.length) {
-            const extraEvents = this.capturedEvents.length - this.expectedEvents.length
+        if (this.capturedEvents.length) {
             throw new Error(
-                `Expected no additional events, but captured ${extraEvents}:\n` +
-                this.capturedEvents.slice(-extraEvents).map(watchEventToString).join(`\n`)
+                `Expected no additional events, but captured ${this.capturedEvents.length}:\n` +
+                this.capturedEvents.map(watchEventToString).join(`\n`)
             )
         }
     }
 
-    private validateEventsMatch(eventIdx: number): void {
-        const actualEvent = this.capturedEvents[eventIdx]
-        const expectedEventAssertion = this.expectedEvents[eventIdx]
-        const { event: expectedEvent } = expectedEventAssertion
-
-        const { path: actualPath, stats: actualStats } = actualEvent
-        const { path: expectedPath, stats: expectedStats } = expectedEvent
-
-        const getErrorMessage = () => `Watch event #${eventIdx} validation error\n` +
-            `Expected: ${watchEventToString(expectedEvent)}\n` +
-            `Actual  : ${watchEventToString(actualEvent)}`
-
-        if (actualPath !== expectedPath) {
-            expectedEventAssertion.reject(new Error(getErrorMessage()))
-        } else if (actualStats === null || expectedStats === null) {
-            if (actualStats !== expectedStats) {
-                expectedEventAssertion.reject(new Error(getErrorMessage()))
-            }
-        } else if (
-            actualStats.mtime.getTime() !== expectedStats.mtime.getTime() ||
-            actualStats.birthtime.getTime() !== expectedStats.birthtime.getTime()
-        ) {
-            expectedEventAssertion.reject(new Error(getErrorMessage()))
+    private validatePendingExpects(): void {
+        if (!this.pendingExpects.length || !this.capturedEvents.length) {
+            return
         }
-        expectedEventAssertion.resolve()
+
+        const actualEvent = this.capturedEvents[this.capturedEvents.length - 1]
+        const [pendingExpect] = this.pendingExpects
+        const { event: expectedEvent } = pendingExpect
+
+        if (areEventsEqual(expectedEvent, actualEvent)) {
+            this.capturedEvents.length = 0
+            this.pendingExpects.shift()
+            pendingExpect.resolve()
+        }
     }
 }
 
-// internal watch events stringifiers, for useful failure messages
+const areEventsEqual = (first: IWatchEvent, second: IWatchEvent): boolean => {
+    const { path: firstPath, stats: firstStats } = first
+    const { path: secondPath, stats: secondStats } = second
 
+    if (firstPath !== secondPath) {
+        return false
+    } else if (firstStats === null || secondStats === null) {
+        return firstStats === secondStats
+    }
+
+    return firstStats.mtime.getTime() === secondStats.mtime.getTime() &&
+        firstStats.birthtime.getTime() === secondStats.birthtime.getTime()
+}
+
+// internal watch events stringifiers, for useful failure messages
 const statsToString = (stats: IFileSystemStats | null) =>
     stats ? `{ birthtime: ${stats.birthtime.getTime()}, mtime: ${stats.mtime.getTime()} }` : `null`
 
