@@ -12,11 +12,11 @@
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
+    "@file-services/types": "^1.0.0",
     "proper-fs": "^1.0.0"
   },
   "devDependencies": {
-    "@file-services/test-kit": "^1.0.0",
-    "@file-services/types": "^1.0.0"
+    "@file-services/test-kit": "^1.0.0"
   },
   "files": [
     "cjs",
