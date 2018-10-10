@@ -4,16 +4,17 @@
 
 Various file system packages.
 
-### Included packages
+### Packages
 
-- **@file-services/types**
-  - Common file system types and interfaces.
+- **[@file-services/types](https://github.com/wixplosives/file-services/tree/master/packages/types)** - Common file system types and interfaces.
 
-- **@file-services/node**
-  - Node.js-specific file system implementation.
+- **[@file-services/node](https://github.com/wixplosives/file-services/tree/master/packages/node)** - Node.js-specific file system implementation.
 
-- **@file-services/test-kit**
-  - File system test validators and behavior contracts.
+- **[@file-services/memory](https://github.com/wixplosives/file-services/tree/master/packages/memory)** - An in-memory, sync/async, file system implementation.
+
+- **[@file-services/utils](https://github.com/wixplosives/file-services/tree/master/packages/utils)** - Common file system utility functions.
+
+- **[@file-services/test-kit](https://github.com/wixplosives/file-services/tree/master/packages/test-kit)** - File system test validators and behavior contracts.
 
 ### License
 
