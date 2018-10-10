@@ -9,9 +9,7 @@ node_js:
   - 10 # current
   - 8  # lts
 
-addons:
-  firefox: latest
-  chrome: stable
+script: yarn lerna run test --stream -- --colors
 
 cache:
   yarn: true
