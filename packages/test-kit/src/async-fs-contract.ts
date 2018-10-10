@@ -2,11 +2,12 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import { IBaseFileSystemAsync } from '@file-services/types'
 import { IFileSystemTestbed } from './types'
+import { WatchEventsValidator } from './events-validator'
 
 chai.use(chaiAsPromised)
 
-const sampleContent = 'content'
-const differentContent = 'another content'
+const SAMPLE_CONTENT = 'content'
+const DIFFERENT_CONTENT = 'another content'
 
 export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<IBaseFileSystemAsync>>): void {
     describe('ASYNC file system contract', async () => {
@@ -21,10 +22,10 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, sampleContent)
+                await fs.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect((await fs.stat(filePath)).isFile()).to.equal(true)
-                expect(await fs.readFile(filePath)).to.eql(sampleContent)
+                expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
             })
 
             it('can overwrite an existing file', async () => {
@@ -32,11 +33,11 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, sampleContent)
-                await fs.writeFile(filePath, differentContent)
+                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await fs.writeFile(filePath, DIFFERENT_CONTENT)
 
                 expect((await fs.stat(filePath)).isFile()).to.equal(true)
-                expect(await fs.readFile(filePath)).to.eql(differentContent)
+                expect(await fs.readFile(filePath)).to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if writing a file to a non-existing directory', async () => {
@@ -44,7 +45,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-dir', 'file')
 
-                expect(fs.writeFile(filePath, sampleContent)).to.be.rejectedWith('ENOENT')
+                expect(fs.writeFile(filePath, SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if writing a file to a path already pointing to a directory', async () => {
@@ -54,7 +55,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
 
                 await fs.mkdir(directoryPath)
 
-                expect(fs.writeFile(directoryPath, sampleContent)).to.be.rejectedWith('EISDIR')
+                expect(fs.writeFile(directoryPath, SAMPLE_CONTENT)).to.be.rejectedWith('EISDIR')
             })
         })
 
@@ -65,11 +66,11 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const firstFilePath = join(tempDirectoryPath, 'first-file')
                 const secondFilePath = join(tempDirectoryPath, 'second-file')
 
-                await fs.writeFile(firstFilePath, sampleContent)
-                await fs.writeFile(secondFilePath, differentContent)
+                await fs.writeFile(firstFilePath, SAMPLE_CONTENT)
+                await fs.writeFile(secondFilePath, DIFFERENT_CONTENT)
 
-                expect(await fs.readFile(firstFilePath), 'contents of first-file').to.eql(sampleContent)
-                expect(await fs.readFile(secondFilePath), 'contents of second-file').to.eql(differentContent)
+                expect(await fs.readFile(firstFilePath), 'contents of first-file').to.eql(SAMPLE_CONTENT)
+                expect(await fs.readFile(secondFilePath), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if reading a non-existing file', async () => {
@@ -94,7 +95,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, sampleContent)
+                await fs.writeFile(filePath, SAMPLE_CONTENT)
                 await fs.unlink(filePath)
 
                 expect(fs.stat(filePath)).to.be.rejectedWith('ENOENT')
@@ -116,6 +117,57 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 await fs.mkdir(directoryPath)
 
                 expect(fs.unlink(directoryPath)).to.be.rejectedWith() // linux throws `EISDIR`, mac throws `EPERM`
+            })
+        })
+
+        describe('watching files', function() {
+            this.timeout(10000)
+
+            let validate: WatchEventsValidator
+            let testFilePath: string
+
+            beforeEach('create temp fixture file and intialize validator', async () => {
+                const { fs, tempDirectoryPath } = testbed
+                const { watchService, path } = fs
+                validate = new WatchEventsValidator(watchService)
+
+                testFilePath = path.join(tempDirectoryPath, 'test-file')
+
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await watchService.watchPath(testFilePath)
+            })
+
+            it('emits watch event when a watched file changes', async () => {
+                const { fs } = testbed
+
+                await fs.writeFile(testFilePath, DIFFERENT_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+                await validate.noMoreEvents()
+            })
+
+            it('emits watch event when a watched file is removed', async () => {
+                const { fs } = testbed
+
+                fs.unlink(testFilePath)
+
+                await validate.nextEvent({ path: testFilePath, stats: null })
+                await validate.noMoreEvents()
+            })
+
+            it('keeps watching if file is deleted and recreated immediately', async () => {
+                const { fs } = testbed
+
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await fs.unlink(testFilePath)
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+                await validate.noMoreEvents()
             })
         })
 
@@ -146,7 +198,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, sampleContent)
+                await fs.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect(fs.mkdir(filePath)).to.be.rejectedWith('EEXIST')
             })
@@ -167,8 +219,8 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
                 await fs.mkdir(directoryPath)
-                await fs.writeFile(join(directoryPath, 'file1'), sampleContent)
-                await fs.writeFile(join(directoryPath, 'camelCasedName'), sampleContent)
+                await fs.writeFile(join(directoryPath, 'file1'), SAMPLE_CONTENT)
+                await fs.writeFile(join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT)
 
                 expect(await fs.readdir(tempDirectoryPath)).to.eql(['dir'])
                 const directoryContents = await fs.readdir(directoryPath)
@@ -190,7 +242,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, sampleContent)
+                await fs.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect(fs.readdir(filePath)).to.be.rejectedWith('ENOTDIR')
             })
@@ -214,7 +266,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
                 await fs.mkdir(directoryPath)
-                await fs.writeFile(join(directoryPath, 'file'), sampleContent)
+                await fs.writeFile(join(directoryPath, 'file'), SAMPLE_CONTENT)
 
                 expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOTEMPTY')
             })
@@ -232,9 +284,111 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, sampleContent)
+                await fs.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect(fs.rmdir(filePath)).to.be.rejectedWith()
+            })
+        })
+
+        describe('watching directories', function() {
+            this.timeout(10000)
+
+            let validate: WatchEventsValidator
+            let testDirectoryPath: string
+
+            beforeEach('create temp fixture directory and intialize validator', async () => {
+                const { fs, tempDirectoryPath } = testbed
+                const { watchService, path } = fs
+                validate = new WatchEventsValidator(watchService)
+
+                testDirectoryPath = path.join(tempDirectoryPath, 'test-directory')
+                await fs.mkdir(testDirectoryPath)
+            })
+
+            it('fires a watch event when a file is added inside a watched directory', async () => {
+                const { fs } = testbed
+                const { watchService, path } = fs
+
+                await watchService.watchPath(testDirectoryPath)
+
+                const testFilePath = path.join(testDirectoryPath, 'test-file')
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+                await validate.noMoreEvents()
+            })
+
+            it('fires a watch event when a file is changed inside inside a watched directory', async () => {
+                const { fs } = testbed
+                const { watchService, path } = fs
+
+                const testFilePath = path.join(testDirectoryPath, 'test-file')
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await watchService.watchPath(testDirectoryPath)
+
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+                await validate.noMoreEvents()
+            })
+
+            it('fires a watch event when a file is removed inside inside a watched directory', async () => {
+                const { fs } = testbed
+                const { watchService, path } = fs
+
+                const testFilePath = path.join(testDirectoryPath, 'test-file')
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await watchService.watchPath(testDirectoryPath)
+
+                await fs.unlink(testFilePath)
+
+                await validate.nextEvent({ path: testFilePath, stats: null })
+                await validate.noMoreEvents()
+            })
+        })
+
+        describe('watching both directories and files', function() {
+            this.timeout(10000)
+
+            let validate: WatchEventsValidator
+            let testDirectoryPath: string
+            let testFilePath: string
+
+            beforeEach('create temp fixture directory and intialize watch service', async () => {
+                const { fs, tempDirectoryPath } = testbed
+                const { watchService, path } = fs
+                validate = new WatchEventsValidator(watchService)
+
+                testDirectoryPath = path.join(tempDirectoryPath, 'test-directory')
+                await fs.mkdir(testDirectoryPath)
+                testFilePath = path.join(testDirectoryPath, 'test-file')
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+            })
+
+            it('allows watching watching a file and its containing directory', async () => {
+                const { fs } = testbed
+                const { watchService } = fs
+
+                await watchService.watchPath(testFilePath)
+                await watchService.watchPath(testDirectoryPath)
+
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+                await validate.noMoreEvents()
+            })
+
+            it('allows watching in any order', async () => {
+                const { fs } = testbed
+                const { watchService } = fs
+
+                await watchService.watchPath(testDirectoryPath)
+                await watchService.watchPath(testFilePath)
+
+                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+
+                await validate.nextEvent({ path: testFilePath, stats: await fs.stat(testFilePath) })
+                await validate.noMoreEvents()
             })
         })
 
@@ -244,7 +398,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
             const filePath = join(tempDirectoryPath, 'file')
             const upperCaseFilePath = filePath.toUpperCase()
 
-            await fs.writeFile(filePath, sampleContent)
+            await fs.writeFile(filePath, SAMPLE_CONTENT)
 
             if (fs.isCaseSensitive) {
                 expect(fs.stat(upperCaseFilePath)).to.be.rejectedWith('ENOENT')

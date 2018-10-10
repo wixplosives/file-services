@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { writeFile, stat, unlink, mkdir, rmdir } from 'proper-fs'
+import { writeFile, stat, mkdir, rmdir } from 'proper-fs'
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory'
 import { IWatchService } from '@file-services/types'
 import { sleep, WatchEventsValidator } from '@file-services/test-kit'
@@ -24,7 +24,7 @@ describe('Node Watch Service', function() {
         let validate: WatchEventsValidator
         let testFilePath: string
 
-        beforeEach('create temp fixture file and intialize watcher', async () => {
+        beforeEach('create temp fixture file and intialize watch service', async () => {
             watchService = new NodeWatchService()
             validate = new WatchEventsValidator(watchService)
 
@@ -33,20 +33,6 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
             await watchService.watchPath(testFilePath)
-        })
-
-        it('emits watch event when a watched file changes', async () => {
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
-        })
-
-        it('emits watch event when a watched file is removed', async () => {
-            await unlink(testFilePath)
-
-            await validate.nextEvent({ path: testFilePath, stats: null })
-            await validate.noMoreEvents()
         })
 
         it('debounces several consecutive watch events as a single watch event', async () => {
@@ -72,26 +58,13 @@ describe('Node Watch Service', function() {
             await validate.nextEvent({ path: testFilePath, stats: secondStats })
             await validate.noMoreEvents()
         })
-
-        it('keeps watching if file is deleted and recreated immediately', async () => {
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-            await unlink(testFilePath)
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
-
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
-        })
     })
 
     describe('watching directories', () => {
         let validate: WatchEventsValidator
         let testDirectoryPath: string
 
-        beforeEach('create temp fixture directory and intialize watcher', async () => {
+        beforeEach('create temp fixture directory and intialize watch service', async () => {
             watchService = new NodeWatchService()
             validate = new WatchEventsValidator(watchService)
 
@@ -109,38 +82,6 @@ describe('Node Watch Service', function() {
             await validate.nextEvent({ path: testDirectoryPath, stats: null })
             await validate.noMoreEvents()
         })
-
-        it('fires a watch event when a file is added inside a watched directory', async () => {
-            await watchService.watchPath(testDirectoryPath)
-
-            const testFilePath = join(testDirectoryPath, 'test-file')
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
-        })
-
-        it('fires a watch event when a file is changed inside inside a watched directory', async () => {
-            const testFilePath = join(testDirectoryPath, 'test-file')
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-            await watchService.watchPath(testDirectoryPath)
-
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
-        })
-
-        it('fires a watch event when a file is removed inside inside a watched directory', async () => {
-            const testFilePath = join(testDirectoryPath, 'test-file')
-            await writeFile(testFilePath, SAMPLE_CONTENT)
-            await watchService.watchPath(testDirectoryPath)
-
-            await unlink(testFilePath)
-
-            await validate.nextEvent({ path: testFilePath, stats: null })
-            await validate.noMoreEvents()
-        })
     })
 
     describe('mixing watch of directories and files', () => {
@@ -148,7 +89,7 @@ describe('Node Watch Service', function() {
         let testDirectoryPath: string
         let testFilePath: string
 
-        beforeEach('create temp fixture directory and intialize watcher', async () => {
+        beforeEach('create temp fixture directory and intialize watch service', async () => {
             watchService = new NodeWatchService()
             validate = new WatchEventsValidator(watchService)
 

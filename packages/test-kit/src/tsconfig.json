@@ -3,8 +3,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "outDir": "../cjs",
+    "lib": [
+      "es2017",
+      "dom" // needed for setTimeout
+    ],
     "types": [
-      "node", // needed for setTimeout, although we could have used lib: "dom", "es2017" as well
       "mocha" // contract uses mocha functions
     ]
   }

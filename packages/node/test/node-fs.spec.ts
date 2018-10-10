@@ -4,13 +4,18 @@ import { createBaseNodeFs } from '../src'
 
 describe('Node File System Implementation', () => {
     const fs = createBaseNodeFs()
+    const {watchService} = fs
 
     const testProvider = async () => {
         const tempDirectory = await createTempDirectory('fs-test-')
 
         return {
             fs,
-            dispose: tempDirectory.remove,
+            dispose: async () => {
+                await watchService.unwatchAll()
+                watchService.removeAllListeners()
+                await tempDirectory.remove()
+            },
             tempDirectoryPath: tempDirectory.path
         }
     }
