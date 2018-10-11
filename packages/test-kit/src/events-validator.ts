@@ -101,14 +101,16 @@ export class WatchEventsValidator {
             return
         }
 
-        const actualEvent = this.capturedEvents[this.capturedEvents.length - 1]
         const [pendingExpect] = this.pendingExpects
         const { event: expectedEvent } = pendingExpect
 
-        if (areEventsEqual(expectedEvent, actualEvent)) {
-            this.capturedEvents.length = 0
-            this.pendingExpects.shift()
-            pendingExpect.resolve()
+        for (let idx = this.capturedEvents.length - 1; idx >= 0; --idx) {
+            if (areEventsEqual(expectedEvent, this.capturedEvents[idx])) {
+                this.capturedEvents.splice(0, idx + 1)
+                this.pendingExpects.shift()
+                pendingExpect.resolve()
+                break
+            }
         }
     }
 }
