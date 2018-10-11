@@ -9,6 +9,7 @@ node_js:
   - 10 # current
   - 8  # lts
 
+before_script: yarn pretest
 script: ./node_modules/.bin/lerna run test --stream -- --colors
 
 cache:
