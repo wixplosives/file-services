@@ -21,6 +21,9 @@ describe('Node File System Implementation', () => {
         }
     }
 
+    // disable sync contract on mac
+    // async contract passes, which is really what we care about.
+    // avoid introducing more and more workarounds to support mac watcher being ready synchronously.
     if (platform() !== 'darwin') {
         syncFsContract(testProvider)
     }
