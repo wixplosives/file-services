@@ -2,7 +2,6 @@ import { expect } from 'chai'
 import { IBaseFileSystemSync } from '@file-services/types'
 import { IFileSystemTestbed } from './types'
 import { WatchEventsValidator } from './events-validator'
-import { sleep } from 'promise-assist'
 
 const SAMPLE_CONTENT = 'content'
 const DIFFERENT_CONTENT = 'another content'
@@ -142,7 +141,6 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
                 await watchService.watchPath(testFilePath)
-                await sleep(100) // mac needs more time to set up a new file watcher
             })
 
             it('emits watch event when a watched file changes', async () => {
@@ -169,8 +167,6 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
                 fs.unlinkSync(testFilePath)
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
-
-                await sleep(100) // mac needs more time to set up a new file watcher
 
                 await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
 
