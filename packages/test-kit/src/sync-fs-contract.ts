@@ -142,7 +142,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
                 await watchService.watchPath(testFilePath)
-                await sleep(100) // mac needs more time to set up file watcher
+                await sleep(100) // mac needs more time to set up a new file watcher
             })
 
             it('emits watch event when a watched file changes', async () => {
@@ -169,6 +169,8 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
                 fs.unlinkSync(testFilePath)
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
+
+                await sleep(100) // mac needs more time to set up a new file watcher
 
                 await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
 
