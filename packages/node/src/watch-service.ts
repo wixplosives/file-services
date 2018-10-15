@@ -1,6 +1,8 @@
-import { IWatchService, WatchEventListener, IFileSystemStats } from '@file-services/types'
-import { FSWatcher, watch, stat, Stats, readdir } from 'proper-fs'
+import { platform } from 'os'
 import { join } from 'path'
+import { FSWatcher, watch, stat, Stats, readdir } from 'proper-fs'
+import { sleep } from 'promise-assist'
+import { IWatchService, WatchEventListener, IFileSystemStats } from '@file-services/types'
 
 type RawWatchEventType = 'rename' | 'change'
 
@@ -104,6 +106,13 @@ export class NodeWatchService implements IWatchService {
                     this.watchedPaths.add(subNodePath)
                 }
             }
+        }
+
+        // ugly, but node uses fsevents (via libuv) on mac, and watcher is not
+        // ready synchronously. there is no event, and our contract tests are fast.
+        // so wait 100ms before resolving the "i'm now watching" promise
+        if (platform() === 'darwin') {
+            await sleep(100)
         }
     }
 
