@@ -44,7 +44,7 @@ export class WatchEventsValidator {
         await waitFor(() => {
             expect(capturedEvents).to.have.length.gte(1)
             validateEqualEvents(expectedEvent, capturedEvents[capturedEvents.length - 1])
-        }, { timeout: this.options.singleEventTimeout })
+        }, { timeout: this.options.singleEventTimeout, delay: 100 })
 
         this.capturedEvents.length = 0
     }
