@@ -4572,10 +4572,10 @@ process@^0.11.10:
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
 
-promise-assist@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/promise-assist/-/promise-assist-1.1.1.tgz#8529cb39dadb1b4ff0f6ebc1d36bdb4229d8858b"
-  integrity sha512-qiC7Mcv/aRF+H6XVtR/5UAXAwx2XsEhHQsNJg7AhGsUsHTsy3ctmlljg7JbMKr0VASrETzF/SHSEnc5GAhkKIw==
+promise-assist@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/promise-assist/-/promise-assist-1.2.0.tgz#f02524cd263f1dc61b1a2de308ae8d358edb5bc4"
+  integrity sha512-7RAq7dUNpDan+SttzRJdCuWJeb2zwuxgo2p5eanN4bHADIVNfD+Y1i/pIYxHzilun/cXdOCAuQwY3u+hkFzvgA==
 
 promise-inflight@^1.0.1:
   version "1.0.1"
