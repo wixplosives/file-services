@@ -149,7 +149,7 @@ export function asyncFsContract(testProvider: () => Promise<IFileSystemTestbed<I
             it('emits watch event when a watched file is removed', async () => {
                 const { fs } = testbed
 
-                fs.unlink(testFilePath)
+                await fs.unlink(testFilePath)
 
                 await validate.nextEvent({ path: testFilePath, stats: null })
                 await validate.noMoreEvents()
