@@ -2,7 +2,8 @@ import { join } from 'path'
 import { writeFile, stat, mkdir, rmdir } from 'proper-fs'
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory'
 import { IWatchService } from '@file-services/types'
-import { sleep, WatchEventsValidator } from '@file-services/test-kit'
+import { sleep } from 'promise-assist'
+import { WatchEventsValidator } from '@file-services/test-kit'
 
 import { NodeWatchService } from '../src'
 
@@ -16,7 +17,7 @@ describe('Node Watch Service', function() {
 
     afterEach('delete temp directory and close watch service', async () => {
         await watchService.unwatchAll()
-        await watchService.removeAllListeners()
+        await watchService.removeAlaaalListeners()
         await tempDir.remove()
     })
 

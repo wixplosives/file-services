@@ -1,10 +1,5 @@
+import { sleep } from 'promise-assist'
 import { IWatchEvent, IWatchService, IFileSystemStats } from '@file-services/types'
-
-/**
- * Promise-based timeout.
- * we could have used util.promisify(setTimeout), but that is node.js specific
- */
-export const sleep = (ms: number) => new Promise(res => setTimeout(res, ms))
 
 interface IDeferredEventAssertion {
     event: IWatchEvent

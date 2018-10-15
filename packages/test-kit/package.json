@@ -12,7 +12,8 @@
     "lint": "tslint --project src"
   },
   "dependencies": {
-    "chai": "^4.2.0"
+    "chai": "^4.2.0",
+    "promise-assist": "^1.1.0"
   },
   "devDependencies": {
     "@file-services/types": "^1.0.0"
