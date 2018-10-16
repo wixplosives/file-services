@@ -1,4 +1,7 @@
 # @file-services/test-kit
 
-File system test kit which contains contracts and validators:
+File system test-kit, containing contracts and validators.
+
 - WatchEventsValidator
+- syncFsContract
+- asyncFsContract

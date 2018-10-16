@@ -1,7 +1,7 @@
 {
   "name": "@file-services/node",
-  "description": "Node.js file system implementation",
-  "version": "1.0.0",
+  "description": "Node.js file system implementation.",
+  "version": "0.0.1",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
@@ -13,11 +13,11 @@
     "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
-    "@file-services/types": "^1.0.0",
+    "@file-services/types": "^0.0.1",
     "proper-fs": "^1.0.0"
   },
   "devDependencies": {
-    "@file-services/test-kit": "^1.0.0"
+    "@file-services/test-kit": "^0.0.1"
   },
   "files": [
     "cjs",
