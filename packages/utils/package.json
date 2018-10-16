@@ -22,5 +22,8 @@
     "src"
   ],
   "license": "MIT",
-  "repository": "git@github.com:wixplosives/file-services.git"
+  "repository": "git@github.com:wixplosives/file-services.git",
+  "publishConfig": {
+    "access": "public"
+  }
 }
