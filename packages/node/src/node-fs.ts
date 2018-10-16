@@ -14,7 +14,7 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
     return {
         path,
         watchService: new NodeWatchService(options && options.watchOptions),
-        isCaseSensitive,
+        caseSensitive: isCaseSensitive,
         lstat,
         lstatSync,
         mkdir,

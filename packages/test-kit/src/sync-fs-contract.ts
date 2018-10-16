@@ -1,21 +1,21 @@
 import { expect } from 'chai'
 import { IBaseFileSystemSync } from '@file-services/types'
-import { IFileSystemTestbed } from './types'
+import { ITestInput } from './types'
 import { WatchEventsValidator } from './events-validator'
 
 const SAMPLE_CONTENT = 'content'
 const DIFFERENT_CONTENT = 'another content'
 
-export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IBaseFileSystemSync>>): void {
+export function syncFsContract(testProvider: () => Promise<ITestInput<IBaseFileSystemSync>>): void {
     describe('SYNC file system contract', () => {
-        let testbed: IFileSystemTestbed<IBaseFileSystemSync>
+        let testInput: ITestInput<IBaseFileSystemSync>
 
-        beforeEach(async () => testbed = await testProvider())
-        afterEach(async () => await testbed.dispose())
+        beforeEach(async () => testInput = await testProvider())
+        afterEach(async () => await testInput.dispose())
 
         describe('writing files', () => {
             it('can write a new file into an existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
@@ -26,7 +26,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('can overwrite an existing file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
@@ -38,7 +38,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if writing a file to a non-existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-dir', 'file')
 
@@ -48,7 +48,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if writing a file to a path already pointing to a directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
@@ -61,7 +61,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
         describe('reading files', () => {
             it('can read the contents of a file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const firstFilePath = join(tempDirectoryPath, 'first-file')
                 const secondFilePath = join(tempDirectoryPath, 'second-file')
@@ -74,7 +74,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if reading a non-existing file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-file')
 
@@ -84,7 +84,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if reading a directory as a file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const expectedToFail = () => fs.readFileSync(tempDirectoryPath)
 
                 expect(expectedToFail).to.throw('EISDIR')
@@ -94,7 +94,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
         describe('removing files', () => {
             it('can remove files', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
@@ -105,7 +105,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if trying to remove a non-existing file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-file')
 
@@ -115,7 +115,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if trying to remove a directory as a file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
@@ -133,7 +133,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             let testFilePath: string
 
             beforeEach('create temp fixture file and intialize validator', async () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { watchService, path } = fs
                 validate = new WatchEventsValidator(watchService)
 
@@ -144,7 +144,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('emits watch event when a watched file changes', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
 
                 fs.writeFileSync(testFilePath, DIFFERENT_CONTENT)
 
@@ -153,7 +153,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('emits watch event when a watched file is removed', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
 
                 fs.unlinkSync(testFilePath)
 
@@ -162,7 +162,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('keeps watching if file is deleted and recreated immediately', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
                 fs.unlinkSync(testFilePath)
@@ -179,7 +179,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
         describe('creating directories', () => {
             it('can create an empty directory inside an existing one', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'new-dir')
 
@@ -190,7 +190,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if creating in a path pointing to an existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
@@ -201,7 +201,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if creating in a path pointing to an existing file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
@@ -212,7 +212,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if creating a directory inside a non-existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'outer', 'inner')
 
@@ -224,7 +224,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
         describe('listing directories', () => {
             it('can list an existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
@@ -240,7 +240,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if listing a non-existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'missing-dir')
 
@@ -250,7 +250,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if listing a path pointing to a file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
@@ -263,7 +263,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
 
         describe('removing directories', () => {
             it('can remove an existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
@@ -274,7 +274,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if removing a non-empty directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
@@ -286,7 +286,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if removing a non-existing directory', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'missing-dir')
 
@@ -296,7 +296,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fails if removing a path pointing to a file', () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
@@ -314,7 +314,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             let testDirectoryPath: string
 
             beforeEach('create temp fixture directory and intialize validator', async () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { watchService, path } = fs
                 validate = new WatchEventsValidator(watchService)
 
@@ -323,7 +323,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fires a watch event when a file is added inside a watched directory', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
                 const { watchService, path } = fs
 
                 await watchService.watchPath(testDirectoryPath)
@@ -336,7 +336,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fires a watch event when a file is changed inside inside a watched directory', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
                 const { watchService, path } = fs
 
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
@@ -350,7 +350,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('fires a watch event when a file is removed inside inside a watched directory', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
                 const { watchService, path } = fs
 
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
@@ -372,7 +372,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             let testFilePath: string
 
             beforeEach('create temp fixture directory and intialize watchService', async () => {
-                const { fs, tempDirectoryPath } = testbed
+                const { fs, tempDirectoryPath } = testInput
                 const { watchService, path } = fs
                 validate = new WatchEventsValidator(watchService)
 
@@ -383,7 +383,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('allows watching watching a file and its containing directory', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
                 const { watchService } = fs
 
                 await watchService.watchPath(testFilePath)
@@ -396,7 +396,7 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
             })
 
             it('allows watching in any order', async () => {
-                const { fs } = testbed
+                const { fs } = testInput
                 const { watchService } = fs
 
                 await watchService.watchPath(testDirectoryPath)
@@ -410,14 +410,14 @@ export function syncFsContract(testProvider: () => Promise<IFileSystemTestbed<IB
         })
 
         it('correctly exposes whether it is case sensitive', () => {
-            const { fs, tempDirectoryPath } = testbed
+            const { fs, tempDirectoryPath } = testInput
             const { join } = fs.path
             const filePath = join(tempDirectoryPath, 'file')
             const upperCaseFilePath = filePath.toUpperCase()
 
             fs.writeFileSync(filePath, SAMPLE_CONTENT)
 
-            if (fs.isCaseSensitive) {
+            if (fs.caseSensitive) {
                 expect(() => fs.statSync(upperCaseFilePath)).to.throw('ENOENT')
             } else {
                 expect(fs.statSync(upperCaseFilePath).isFile()).to.equal(true)

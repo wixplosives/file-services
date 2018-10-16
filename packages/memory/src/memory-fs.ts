@@ -47,7 +47,7 @@ export function createBaseMemoryFsSync(): IBaseFileSystemSync {
             async watchPath() { /* in-mem, so events are free */ },
             async unwatchAll() { /* in-mem, so events are free */ }
         },
-        isCaseSensitive: false,
+        caseSensitive: false,
         lstatSync: statSync, // TODO: implement links
         mkdirSync,
         readdirSync,

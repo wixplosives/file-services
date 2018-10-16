@@ -1,7 +1,7 @@
 /**
  * Represents everything required to run a single contract test.
  */
-export interface IFileSystemTestbed<T> {
+export interface ITestInput<T> {
     /**
      * file system to be tested
      */

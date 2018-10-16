@@ -14,7 +14,7 @@ export interface IBaseFileSystem extends IBaseFileSystemAsync, IBaseFileSystemSy
 export interface IBaseFileSystemSync {
     path: IFileSystemPath
     watchService: IWatchService
-    isCaseSensitive: boolean
+    caseSensitive: boolean
 
     /**
      * Reads the entire contents of a file.
@@ -70,7 +70,7 @@ export interface IBaseFileSystemSync {
 export interface IBaseFileSystemAsync {
     path: IFileSystemPath
     watchService: IWatchService
-    isCaseSensitive: boolean
+    caseSensitive: boolean
 
     /**
      * Reads the entire contents of a file.
