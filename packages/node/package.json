@@ -27,7 +27,8 @@
     "node": ">=8"
   },
   "license": "MIT",
-  "repository": "git@github.com:wixplosives/file-services.git",
+  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/node",
+  "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"
   }
