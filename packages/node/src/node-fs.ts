@@ -35,3 +35,5 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         writeFileSync
     }
 }
+
+export const nodeFs: IBaseFileSystem = createBaseNodeFs()
