@@ -1,3 +1,3 @@
 export * from './base-api'
-export * from './high-level-api'
+export * from './extended-api'
 export * from './watch-api'

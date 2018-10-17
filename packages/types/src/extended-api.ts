@@ -30,28 +30,28 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     /**
      * Ensure that a directory and all its parent directories exist
      */
-    ensureDirectorySync(directoryPath: string): void
+    // ensureDirectorySync(directoryPath: string): void
 
     /**
      * Search for a specific file name in parent chain.
      * Useful for finding configuration files.
      */
-    searchParentDirectoriesSync(startDirectory: string, fileName: string): string[]
+    // searchParentDirectoriesSync(startDirectory: string, fileName: string): string[]
 
     /**
      * Populates the provided directory with given contents.
      */
-    populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void
+    // populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void
 
     /**
      * Recursively remove a path.
      */
-    removeSync(path: string): void
+    // removeSync(path: string): void
 
     /**
      * Recursively walk over a directory and its contents
      */
-    walkSync(rootDirectory: string, options?: IWalkOptions): IFileSystemDescriptor[]
+    // walkSync(rootDirectory: string, options?: IWalkOptions): IFileSystemDescriptor[]
 }
 
 /**
@@ -78,28 +78,28 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
     /**
      * Ensure that a directory and all its parent directories exist
      */
-    ensureDirectory(directoryPath: string): Promise<void>
+    // ensureDirectory(directoryPath: string): Promise<void>
 
     /**
      * Search for a specific file name in parent chain.
      * Useful for finding configuration files.
      */
-    searchParentDirectories(startDirectory: string, fileName: string): Promise<string[]>
+    // searchParentDirectories(startDirectory: string, fileName: string): Promise<string[]>
 
     /**
      * Populates the provided directory with given contents.
      */
-    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void>
+    // populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void>
 
     /**
      * Recursively remove a path.
      */
-    remove(path: string): Promise<void>
+    // remove(path: string): Promise<void>
 
     /**
      * Recursively walk over a directory and its contents
      */
-    walk(rootDirectory: string, options?: IWalkOptions): Promise<IFileSystemDescriptor[]>
+    // walk(rootDirectory: string, options?: IWalkOptions): Promise<IFileSystemDescriptor[]>
 }
 
 /**
