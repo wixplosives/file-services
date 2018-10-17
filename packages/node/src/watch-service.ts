@@ -130,8 +130,8 @@ export class NodeWatchService implements IWatchService {
         for (const watcher of this.fsWatchers.values()) {
             watcher.close()
         }
-        this.fsWatchers = new Map()
-        this.watchedPaths = new Set()
+        this.fsWatchers.clear()
+        this.watchedPaths.clear()
     }
 
     /**
@@ -152,7 +152,7 @@ export class NodeWatchService implements IWatchService {
      * unsubscribe all listeners
      */
     public removeAllListeners(): void {
-        this.listeners = new Set()
+        this.listeners.clear()
     }
 
     // private helpers
