@@ -3,11 +3,21 @@ import {
     lstat, lstatSync, mkdir, mkdirSync, readdir, readdirSync, readFile, readFileSync, realpath, realpathSync,
     rmdir, rmdirSync, stat, statSync, unlink, unlinkSync, writeFile, writeFileSync, isCaseSensitive
 } from 'proper-fs'
-import { IBaseFileSystem } from '@file-services/types'
+import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
+import { IBaseFileSystem, IFileSystem } from '@file-services/types'
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service'
 
 export interface ICreateNodeFsOptions {
     watchOptions?: INodeWatchServiceOptions
+}
+
+export function createNodeFs(): IFileSystem {
+    const baseFs = createBaseNodeFs()
+
+    return {
+        ...createSyncFileSystem(baseFs),
+        ...createAsyncFileSystem(baseFs),
+    }
 }
 
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {
@@ -36,4 +46,4 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
     }
 }
 
-export const nodeFs: IBaseFileSystem = createBaseNodeFs()
+export const nodeFs: IFileSystem = createNodeFs()
