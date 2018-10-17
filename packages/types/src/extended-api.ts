@@ -65,7 +65,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
      * @param path possible file path
      * @param statFn optional custom stat function (e.g. lstat to detect links)
      */
-    fileExists(path: string, statFn?: IBaseFileSystemSync['statSync']): Promise<boolean>
+    fileExists(path: string, statFn?: IBaseFileSystemAsync['stat']): Promise<boolean>
 
     /**
      * Check if a path points to an existing directory.
@@ -73,7 +73,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
      * @param path possible directory path
      * @param statFn optional custom stat function (e.g. lstatSync to detect links)
      */
-    directoryExists(path: string, statFn?: IBaseFileSystemSync['statSync']): Promise<boolean>
+    directoryExists(path: string, statFn?: IBaseFileSystemAsync['stat']): Promise<boolean>
 
     /**
      * Ensure that a directory and all its parent directories exist
