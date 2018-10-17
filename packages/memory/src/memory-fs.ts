@@ -1,38 +1,32 @@
 import pathMain from 'path'
+import { syncToAsyncFs, createSyncFileSystem, createAsyncFileSystem } from '@file-services/utils'
 import {
-    IBaseFileSystem,
     IBaseFileSystemSync,
     IFileSystemStats,
     WatchEventListener,
-    IWatchEvent
+    IWatchEvent,
+    IBaseFileSystem,
+    IFileSystem
 } from '@file-services/types'
-import { syncToAsyncFs } from '@file-services/utils'
 import { FsErrorCodes } from './error-codes'
+import { IFsMemDirectoryNode, IFsMemFileNode } from './types'
 
-export interface IFsMemNode {
-    type: 'file' | 'dir'
-    name: string
-    birthtime: Date
-    mtime: Date
+export function createMemoryFs(): IFileSystem {
+    const baseFs = createBaseMemoryFs()
+
+    return {
+        ...createSyncFileSystem(baseFs),
+        ...createAsyncFileSystem(baseFs),
+    }
 }
-
-export interface IFsMemFileNode extends IFsMemNode {
-    type: 'file'
-    contents: string
-}
-
-export interface IFsMemDirectoryNode extends IFsMemNode {
-    type: 'dir'
-    contents: { [nodeName: string]: IFsMemDirectoryNode | IFsMemFileNode }
-}
-
-// ugly workaround for webpack's polyfilled path
-const path = pathMain.posix as typeof pathMain || pathMain
 
 export function createBaseMemoryFs(): IBaseFileSystem {
     const syncMemFs = createBaseMemoryFsSync()
     return { ...syncMemFs, ...syncToAsyncFs(syncMemFs) }
 }
+
+// ugly workaround for webpack's polyfilled path
+const path = pathMain.posix as typeof pathMain || pathMain
 
 export function createBaseMemoryFsSync(): IBaseFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
