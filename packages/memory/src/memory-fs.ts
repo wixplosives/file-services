@@ -6,18 +6,22 @@ import {
     WatchEventListener,
     IWatchEvent,
     IBaseFileSystem,
-    IFileSystem
+    IFileSystem,
+    IDirectoryContents
 } from '@file-services/types'
 import { FsErrorCodes } from './error-codes'
 import { IFsMemDirectoryNode, IFsMemFileNode } from './types'
 
-export function createMemoryFs(): IFileSystem {
+export function createMemoryFs(rootContents?: IDirectoryContents): IFileSystem {
     const baseFs = createBaseMemoryFs()
 
-    return {
-        ...createSyncFileSystem(baseFs),
-        ...createAsyncFileSystem(baseFs),
+    const fs: IFileSystem = { ...createSyncFileSystem(baseFs), ...createAsyncFileSystem(baseFs) }
+
+    if (rootContents) {
+        fs.populateDirectorySync('/', rootContents)
     }
+
+    return fs
 }
 
 export function createBaseMemoryFs(): IBaseFileSystem {
