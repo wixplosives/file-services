@@ -14,23 +14,23 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     /**
      * Check if a path points to an existing file.
      *
-     * @param path possible file path
+     * @param filePath possible file path
      * @param statFn optional custom stat function (e.g. lstat to detect links)
      */
-    fileExistsSync(path: string, statFn?: IBaseFileSystemSync['statSync']): boolean
+    fileExistsSync(filePath: string, statFn?: IBaseFileSystemSync['statSync']): boolean
 
     /**
      * Check if a path points to an existing directory.
      *
-     * @param path possible directory path
+     * @param directoryPath possible directory path
      * @param statFn optional custom stat function (e.g. lstatSync to detect links)
      */
-    directoryExistsSync(path: string, statFn?: IBaseFileSystemSync['statSync']): boolean
+    directoryExistsSync(directoryPath: string, statFn?: IBaseFileSystemSync['statSync']): boolean
 
     /**
      * Ensure that a directory and all its parent directories exist
      */
-    // ensureDirectorySync(directoryPath: string): void
+    ensureDirectorySync(directoryPath: string): void
 
     /**
      * Search for a specific file name in parent chain.
@@ -62,23 +62,23 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
     /**
      * Check if a path points to an existing file.
      *
-     * @param path possible file path
+     * @param filePath possible file path
      * @param statFn optional custom stat function (e.g. lstat to detect links)
      */
-    fileExists(path: string, statFn?: IBaseFileSystemAsync['stat']): Promise<boolean>
+    fileExists(filePath: string, statFn?: IBaseFileSystemAsync['stat']): Promise<boolean>
 
     /**
      * Check if a path points to an existing directory.
      *
-     * @param path possible directory path
+     * @param directoryPath possible directory path
      * @param statFn optional custom stat function (e.g. lstatSync to detect links)
      */
-    directoryExists(path: string, statFn?: IBaseFileSystemAsync['stat']): Promise<boolean>
+    directoryExists(directoryPath: string, statFn?: IBaseFileSystemAsync['stat']): Promise<boolean>
 
     /**
      * Ensure that a directory and all its parent directories exist
      */
-    // ensureDirectory(directoryPath: string): Promise<void>
+    ensureDirectory(directoryPath: string): Promise<void>
 
     /**
      * Search for a specific file name in parent chain.
