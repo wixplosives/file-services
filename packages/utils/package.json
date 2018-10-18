@@ -1,7 +1,7 @@
 {
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -14,10 +14,10 @@
     "lint:src": "tslint --project src"
   },
   "dependencies": {
-    "@file-services/types": "^0.1.1"
+    "@file-services/types": "^0.2.0"
   },
   "devDependencies": {
-    "@file-services/test-kit": "^0.1.1"
+    "@file-services/test-kit": "^0.2.0"
   },
   "files": [
     "cjs",
