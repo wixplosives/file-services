@@ -1,7 +1,13 @@
-import { IBaseFileSystemAsync, IBaseFileSystemSync, IFileSystemAsync, IFileSystemSync } from '@file-services/types'
+import {
+    IBaseFileSystemAsync,
+    IBaseFileSystemSync,
+    IFileSystemAsync,
+    IFileSystemSync,
+    IDirectoryContents
+} from '@file-services/types'
 
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
-    const { statSync, path, mkdirSync } = baseFs
+    const { statSync, path, mkdirSync, writeFileSync } = baseFs
 
     function fileExistsSync(filePath: string, statFn = statSync): boolean {
         try {
@@ -35,16 +41,30 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
+    function populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void {
+        ensureDirectorySync(directoryPath)
+
+        for (const [nodeName, nodeValue] of Object.entries(contents)) {
+            const nodePath = path.join(directoryPath, nodeName)
+            if (typeof nodeValue === 'string') {
+                writeFileSync(nodePath, nodeValue)
+            } else {
+                populateDirectorySync(nodePath, nodeValue)
+            }
+        }
+    }
+
     return {
         ...baseFs,
         fileExistsSync,
         directoryExistsSync,
-        ensureDirectorySync
+        ensureDirectorySync,
+        populateDirectorySync
     }
 }
 
 export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystemAsync {
-    const { stat, path, mkdir } = baseFs
+    const { stat, path, mkdir, writeFile } = baseFs
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
         try {
@@ -78,10 +98,24 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
+    async function populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void> {
+        await ensureDirectory(directoryPath)
+
+        for (const [nodeName, nodeValue] of Object.entries(contents)) {
+            const nodePath = path.join(directoryPath, nodeName)
+            if (typeof nodeValue === 'string') {
+                await writeFile(nodePath, nodeValue)
+            } else {
+                await populateDirectory(nodePath, nodeValue)
+            }
+        }
+    }
+
     return {
         ...baseFs,
         fileExists,
         directoryExists,
-        ensureDirectory
+        ensureDirectory,
+        populateDirectory
     }
 }

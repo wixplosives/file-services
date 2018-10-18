@@ -41,7 +41,7 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     /**
      * Populates the provided directory with given contents.
      */
-    // populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void
+    populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void
 
     /**
      * Recursively remove a path.
@@ -89,7 +89,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
     /**
      * Populates the provided directory with given contents.
      */
-    // populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void>
+    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void>
 
     /**
      * Recursively remove a path.
