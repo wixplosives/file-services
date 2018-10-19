@@ -1,3 +1,9 @@
+import { IBaseFileSystemSync } from '@file-services/types'
+
+export interface IBaseMemFileSystemSync extends IBaseFileSystemSync {
+    root: IFsMemDirectoryNode
+}
+
 export interface IFsMemNode {
     type: 'file' | 'dir'
     name: string

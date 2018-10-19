@@ -1,16 +1,15 @@
 import pathMain from 'path'
 import { syncToAsyncFs, createSyncFileSystem, createAsyncFileSystem } from '@file-services/utils'
 import {
-    IBaseFileSystemSync,
-    IFileSystemStats,
-    WatchEventListener,
-    IWatchEvent,
     IBaseFileSystem,
+    IDirectoryContents,
     IFileSystem,
-    IDirectoryContents
+    IFileSystemStats,
+    IWatchEvent,
+    WatchEventListener,
 } from '@file-services/types'
 import { FsErrorCodes } from './error-codes'
-import { IFsMemDirectoryNode, IFsMemFileNode } from './types'
+import { IFsMemDirectoryNode, IFsMemFileNode, IBaseMemFileSystemSync } from './types'
 
 export function createMemoryFs(rootContents?: IDirectoryContents): IFileSystem {
     const baseFs = createBaseMemoryFs()
@@ -32,11 +31,12 @@ export function createBaseMemoryFs(): IBaseFileSystem {
 // ugly workaround for webpack's polyfilled path
 const path = pathMain.posix as typeof pathMain || pathMain
 
-export function createBaseMemoryFsSync(): IBaseFileSystemSync {
+export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
     const watchListeners: Set<WatchEventListener> = new Set()
 
     return {
+        root,
         path,
         watchService: {
             addListener: listener => { watchListeners.add(listener) },
