@@ -27,11 +27,11 @@
     "esm",
     "src"
   ],
-  "sideEffects": false,
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/memory",
   "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "sideEffects": false
 }

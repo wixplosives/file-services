@@ -29,5 +29,6 @@
   "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "sideEffects": false
 }
