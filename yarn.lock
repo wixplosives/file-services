@@ -574,25 +574,25 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.2.tgz#54c5a964462be3d4d78af631363c18d6fa91ac26"
   integrity sha512-yprFYuno9FtNsSHVlSWd+nRlmGoAbqbeCwOryP6sC/zoCjhpArcRMYp19EvpSUSizJAlsXEwJv+wcWS9XaXdMw==
 
-"@ts-tools/node@^0.6.5":
-  version "0.6.5"
-  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.6.5.tgz#2796a491ba5116f4e8b42cea1b1ece1faa4ac6c5"
-  integrity sha512-ZFNqq/7xZaVs0a+ROFidmbkoZvE7MqbNATQqGET1TVwrHJ/ODQoFafM3USdhQmb7Sf/82ylqgVyNed6jCJIDLA==
+"@ts-tools/node@^0.6.7":
+  version "0.6.7"
+  resolved "https://registry.yarnpkg.com/@ts-tools/node/-/node-0.6.7.tgz#a623fb0f2a40b5987505bace5d64aab9044de0a7"
+  integrity sha512-/wY6nTWTl9gMd154bvlNOkZDMLZv93HBn55hELNwDQg4YQRXaX2rjjvpnSQzKoox1ua6d5NofDpajaET/2Wc+g==
   dependencies:
-    "@ts-tools/typescript-service" "^0.7.1"
+    "@ts-tools/typescript-service" "^0.8.1"
     source-map-support "^0.5.9"
 
-"@ts-tools/typescript-service@^0.7.1":
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/@ts-tools/typescript-service/-/typescript-service-0.7.1.tgz#d0d52e62cd5f4697293a1b62c2ef437f78ba270c"
-  integrity sha512-WTePj5zgXrntNMdpdnMFls5Jy+3f2Y7TFAKjShSjz548tMs3ZHZIZLCt8reiax2T3obMQ6ab1ILC/PIsf7PtDA==
+"@ts-tools/typescript-service@^0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@ts-tools/typescript-service/-/typescript-service-0.8.1.tgz#044093a69c7412af4b68e28b6b5de9eeca49ebe8"
+  integrity sha512-/aKyvqRVqs6Sh7s9bISfiEJ201KgxR9B+wlFn0apXFM22SFQZ9yV4MIwRArkNhGC9FZpFXtfHnd/zZYBH6mBVA==
 
-"@ts-tools/webpack-loader@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-0.3.1.tgz#973f9d00fc9a4aada12b14b42abe7bbce44f79c3"
-  integrity sha512-lI2og6I9m/LGbtJHrnyEOewZbht89SCNZt6G7BVO6MesMhJMWz7HhL9h2eI3/4HZ4Bgqk3M6SAJYkPgdr/vnJA==
+"@ts-tools/webpack-loader@^0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@ts-tools/webpack-loader/-/webpack-loader-0.3.3.tgz#3400ad6f306f676837f979f7bce98b4363ad6b71"
+  integrity sha512-MlXIdj9MpojZQFjnGefukxjuNyawhe7hyx11fgkS0CYPrPJv0te9PbXN0cvJ4rPJoq2e06ubammZQQrnFsm1Gg==
   dependencies:
-    "@ts-tools/typescript-service" "^0.7.1"
+    "@ts-tools/typescript-service" "^0.8.1"
     loader-utils "^1.1.0"
 
 "@types/chai-as-promised@^7.1.0":
@@ -857,9 +857,9 @@ agent-base@4, agent-base@^4.1.0, agent-base@~4.2.0:
     es6-promisify "^5.0.0"
 
 agentkeepalive@^3.4.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-3.5.1.tgz#4eba75cf2ad258fc09efd506cdb8d8c2971d35a4"
-  integrity sha512-Cte/sTY9/XcygXjJ0q58v//SnEQ7ViWExKyJpLJlLqomDbQyMLh6Is4KuWJ/wmxzhiwkGRple7Gqv1zf6Syz5w==
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/agentkeepalive/-/agentkeepalive-3.5.2.tgz#a113924dd3fa24a0bc3b78108c450c2abee00f67"
+  integrity sha512-e0L/HNe6qkQ7H19kTlRRqUibEAwDK5AFk6y3PtMsuut2VAH6+Q4xZml1tNDJD7kSAyqmbG/K08K5WEJYtUrSlQ==
   dependencies:
     humanize-ms "^1.2.1"
 
@@ -1289,9 +1289,9 @@ byline@^5.0.0:
   integrity sha1-dBxSFkaOrcRXsDQQEYrXfejB3bE=
 
 byte-size@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-4.0.3.tgz#b7c095efc68eadf82985fccd9a2df43a74fa2ccd"
-  integrity sha512-JGC3EV2bCzJH/ENSh3afyJrH4vwxbHTuO5ljLoI5+2iJOcEpMgP8T782jH9b5qGxf2mSUIp1lfGnfKNrRHpvVg==
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-4.0.4.tgz#29d381709f41aae0d89c631f1c81aec88cd40b23"
+  integrity sha512-82RPeneC6nqCdSwCX2hZUz3JPOvN5at/nTEw/CMf05Smu3Hrpo9Psb7LjN+k+XndNArG1EY8L4+BM3aTM4BCvw==
 
 cacache@^10.0.4:
   version "10.0.4"
