@@ -11,6 +11,12 @@ import {
 import { FsErrorCodes } from './error-codes'
 import { IFsMemDirectoryNode, IFsMemFileNode, IBaseMemFileSystemSync } from './types'
 
+/**
+ * This is the main function to use, returning a sync/async
+ * in-memory file system with extended API.
+ *
+ * @param rootContents optional data to populate / with
+ */
 export function createMemoryFs(rootContents?: IDirectoryContents): IFileSystem {
     const baseFs = createBaseMemoryFs()
 
@@ -23,14 +29,23 @@ export function createMemoryFs(rootContents?: IDirectoryContents): IFileSystem {
     return fs
 }
 
+/**
+ * Utility function to create a *base* sync/async
+ * in-memory file system (without the extended API).
+ */
 export function createBaseMemoryFs(): IBaseFileSystem {
     const syncMemFs = createBaseMemoryFsSync()
     return { ...syncMemFs, ...syncToAsyncFs(syncMemFs) }
 }
 
-// ugly workaround for webpack's polyfilled path
+// ugly workaround for webpack's polyfilled path not implementing posix
+// TODO: inline path-posix implementation taked from latest node's source (faster!)
 const path = pathMain.posix as typeof pathMain || pathMain
 
+/**
+ * Utility function to create a *base* sync-only
+ * in-memory file system (without the extended API).
+ */
 export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
     const watchListeners: Set<WatchEventListener> = new Set()

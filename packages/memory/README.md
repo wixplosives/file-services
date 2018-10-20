@@ -8,8 +8,8 @@ Contains a subset of node's `fs` API with additional helper functions.
 Features:
 - Tiny.
 - Isomorphic. Works in both Node.js and web-browsers.
-- Implements the watch service API (for events)
-- Case insensitive
+- Implements the watch service API (for events).
+- Case insensitive.
 
 ## Getting started
 
