@@ -1,5 +1,5 @@
 import { platform } from 'os'
-import { syncFsContract, asyncFsContract } from '@file-services/test-kit'
+import { syncBaseFsContract, asyncBaseFsContract } from '@file-services/test-kit'
 import { createTempDirectory } from 'create-temp-directory'
 import { createBaseNodeFs } from '../src'
 
@@ -25,7 +25,7 @@ describe('Node File System Implementation', () => {
     // async contract passes, which is really what we care about.
     // avoid introducing more and more workarounds to support mac watcher being ready synchronously.
     if (platform() !== 'darwin') {
-        syncFsContract(testProvider)
+        syncBaseFsContract(testProvider)
     }
-    asyncFsContract(testProvider)
+    asyncBaseFsContract(testProvider)
 })

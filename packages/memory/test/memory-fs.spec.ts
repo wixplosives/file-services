@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { expect } from 'chai'
 import webpack from 'webpack'
-import { syncFsContract, asyncFsContract } from '@file-services/test-kit'
+import { syncBaseFsContract, asyncBaseFsContract } from '@file-services/test-kit'
 import { createBaseMemoryFs } from '../src'
 
 describe('In-memory File System Implementation', () => {
@@ -36,8 +36,8 @@ describe('In-memory File System Implementation', () => {
         }
     }
 
-    syncFsContract(testProvider)
-    asyncFsContract(testProvider)
+    syncBaseFsContract(testProvider)
+    asyncBaseFsContract(testProvider)
 })
 
 const noopOutputFileSystem: webpack.OutputFileSystem = {
