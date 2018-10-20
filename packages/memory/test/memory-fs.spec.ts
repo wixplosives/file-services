@@ -1,8 +1,8 @@
 import { join } from 'path'
 import { expect } from 'chai'
 import webpack from 'webpack'
-import { syncBaseFsContract, asyncBaseFsContract } from '@file-services/test-kit'
-import { createBaseMemoryFs } from '../src'
+import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit'
+import { createMemoryFs } from '../src'
 
 describe('In-memory File System Implementation', () => {
 
@@ -27,7 +27,7 @@ describe('In-memory File System Implementation', () => {
     }).timeout(10000) // bundling can take time (especially on CI), so increase timeout for specific test
 
     const testProvider = async () => {
-        const fs = createBaseMemoryFs()
+        const fs = createMemoryFs()
 
         return {
             fs,
@@ -38,6 +38,8 @@ describe('In-memory File System Implementation', () => {
 
     syncBaseFsContract(testProvider)
     asyncBaseFsContract(testProvider)
+    syncFsContract(testProvider)
+    asyncFsContract(testProvider)
 })
 
 const noopOutputFileSystem: webpack.OutputFileSystem = {

@@ -1,10 +1,10 @@
 import { platform } from 'os'
-import { syncBaseFsContract, asyncBaseFsContract } from '@file-services/test-kit'
+import { syncBaseFsContract, asyncBaseFsContract, asyncFsContract, syncFsContract } from '@file-services/test-kit'
 import { createTempDirectory } from 'create-temp-directory'
-import { createBaseNodeFs } from '../src'
+import { createNodeFs } from '../src'
 
 describe('Node File System Implementation', () => {
-    const fs = createBaseNodeFs()
+    const fs = createNodeFs()
     const { watchService } = fs
 
     const testProvider = async () => {
@@ -28,4 +28,7 @@ describe('Node File System Implementation', () => {
         syncBaseFsContract(testProvider)
     }
     asyncBaseFsContract(testProvider)
+
+    asyncFsContract(testProvider)
+    syncFsContract(testProvider)
 })
