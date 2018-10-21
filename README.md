@@ -15,6 +15,8 @@ Various file system packages.
 
 - **[@file-services/test-kit](https://github.com/wixplosives/file-services/tree/master/packages/test-kit)** - File system test validators and behavior contracts.
 
+- **[@file-services/typescript](https://github.com/wixplosives/file-services/tree/master/packages/typescript)** - Methods for creation of TypeScript hosts.
+
 ### License
 
 MIT
