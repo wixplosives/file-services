@@ -8,7 +8,8 @@ describe('In-memory File System Implementation', () => {
 
     it('can be bundled using webpack', async () => {
         const webpackCompiler = webpack({
-            mode: 'production',
+            mode: 'development',
+            devtool: false,
             entry: join(__dirname, '..'), // use root so package.json is picked
         })
 
