@@ -72,7 +72,7 @@ export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost {
         useCaseSensitiveFileNames: caseSensitive,
         getCanonicalFileName: caseSensitive ? identity : toLowerCase,
         getCurrentDirectory: () => cwd,
-        getNewLine: () => ts.sys.newLine,
+        getNewLine: () => ts.sys ? ts.sys.newLine : '\n',
         dirname,
         normalize
     }
