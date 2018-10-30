@@ -382,7 +382,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
             })
 
-            it('allows watching watching a file and its containing directory', async () => {
+            it('allows watching a file and its containing directory', async () => {
                 const { fs } = testInput
                 const { watchService } = fs
 

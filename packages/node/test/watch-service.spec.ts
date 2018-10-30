@@ -101,7 +101,7 @@ describe('Node Watch Service', function() {
             await writeFile(testFilePath, SAMPLE_CONTENT)
         })
 
-        it('allows watching watching a file and its containing directory', async () => {
+        it('allows watching a file and its containing directory', async () => {
             await watchService.watchPath(testFilePath)
             await watchService.watchPath(testDirectoryPath)
 

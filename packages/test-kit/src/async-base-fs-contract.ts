@@ -365,7 +365,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(testFilePath, SAMPLE_CONTENT)
             })
 
-            it('allows watching watching a file and its containing directory', async () => {
+            it('allows watching a file and its containing directory', async () => {
                 const { fs } = testInput
                 const { watchService } = fs
 
