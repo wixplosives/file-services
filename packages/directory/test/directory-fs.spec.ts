@@ -1,21 +1,23 @@
 import {directoryFsContract} from './directory-fs-contract'
 import { createMemoryFs } from '@file-services/memory'
+import {createDirectoryFs} from '../src'
 
 describe('Directory File System Implementation', () => {
     const memTestProvider = async () => {
+        const basePath = 'basePath'
         const rootContents = {
-            somePath: {
+            [basePath]: {
                 src: {
                     'index.ts': 'content'
                 }
             }
         }
-        const fs = createMemoryFs(rootContents)
+        const fs = createDirectoryFs(createMemoryFs(rootContents), basePath)
 
         return {
             fs,
             dispose: async () => undefined,
-            baseDirectoryPath: '/somePath/'
+            baseDirectoryPath: basePath
         }
     }
 
