@@ -1,53 +1,101 @@
 import {IBaseFileSystem} from '@file-services/types'
 
-type fsAsyncMethod<T> = (path: string) => Promise<T>
-type fsSyncMethod<T> = (path: string) => T
-type fsWriteAsyncMethod<T> = (path: string, c: string) => Promise<T>
-type fsWriteSyncMethod<T> = (path: string, c: string) => T
-
 export function createDirectoryFs(fs: IBaseFileSystem, basePath = '/'): IBaseFileSystem {
     const pathFinder = (path: string) => fs.path.join(basePath, path)
-    const asyncWrapper: <T>(f: fsAsyncMethod<T>) => fsAsyncMethod<T> = f => {
-        return (path: string) => {
-            return f(pathFinder(path))
-        }
+
+    async function lstat(path: string) {
+        return fs.lstat(pathFinder(path))
     }
-    const syncWrapper: <T>(f: fsSyncMethod<T>) => fsSyncMethod<T> = f => {
-        return (path: string) => {
-            return f(pathFinder(path))
-        }
+
+    function lstatSync(path: string) {
+        return fs.lstatSync(pathFinder(path))
     }
-    const asyncWriteWrapper: <T>(f: fsWriteAsyncMethod<T>) => fsWriteAsyncMethod<T> = f => {
-        return (path: string, content: string) => {
-            return f(pathFinder(path), content)
-        }
+
+    async function mkdir(path: string) {
+        return fs.mkdir(pathFinder(path))
     }
-    const syncWriteWrapper: <T>(f: fsWriteSyncMethod<T>) => fsWriteSyncMethod<T> = f => {
-        return (path: string, content: string) => {
-            return f(pathFinder(path), content)
-        }
+
+    function mkdirSync(path: string) {
+        return fs.mkdirSync(pathFinder(path))
     }
+
+    async function readdir(path: string) {
+        return fs.readdir(pathFinder(path))
+    }
+
+    function readdirSync(path: string) {
+        return fs.readdirSync(pathFinder(path))
+    }
+
+    async function readFile(path: string) {
+        return fs.readFile(pathFinder(path))
+    }
+
+    function readFileSync(path: string) {
+        return fs.readFileSync(pathFinder(path))
+    }
+
+    async function realpath(path: string) {
+        return fs.realpath(pathFinder(path))
+    }
+
+    function realpathSync(path: string) {
+        return fs.realpathSync(pathFinder(path))
+    }
+
+    async function rmdir(path: string) {
+        return fs.rmdir(pathFinder(path))
+    }
+
+    function rmdirSync(path: string) {
+        return fs.rmdirSync(pathFinder(path))
+    }
+
+    async function stat(path: string) {
+        return fs.stat(pathFinder(path))
+    }
+
+    function statSync(path: string) {
+        return fs.statSync(pathFinder(path))
+    }
+
+    async function unlink(path: string) {
+        return fs.unlink(pathFinder(path))
+    }
+
+    function unlinkSync(path: string) {
+        return fs.unlinkSync(pathFinder(path))
+    }
+
+    async function writeFile(path: string, content: string) {
+        return fs.writeFile(pathFinder(path), content)
+    }
+
+    function writeFileSync(path: string, content: string) {
+        return fs.writeFileSync(pathFinder(path), content)
+    }
+
     return {
-        readFile: asyncWrapper(fs.readFile),
-        stat: asyncWrapper(fs.stat),
         path: fs.path,
         watchService: fs.watchService,
         caseSensitive: fs.caseSensitive,
-        lstat: asyncWrapper(fs.lstat),
-        lstatSync: syncWrapper(fs.lstatSync),
-        mkdir: asyncWrapper(fs.mkdir),
-        mkdirSync: syncWrapper(fs.mkdirSync),
-        readdir: asyncWrapper(fs.readdir),
-        readdirSync: syncWrapper(fs.readdirSync),
-        readFileSync: syncWrapper(fs.readFileSync),
-        realpath: asyncWrapper(fs.realpath),
-        realpathSync: syncWrapper(fs.realpathSync),
-        rmdir: asyncWrapper(fs.rmdir),
-        rmdirSync: syncWrapper(fs.rmdirSync),
-        statSync: syncWrapper(fs.statSync),
-        unlink: asyncWrapper(fs.unlink),
-        unlinkSync: syncWrapper(fs.unlinkSync),
-        writeFile: asyncWriteWrapper(fs.writeFile),
-        writeFileSync: syncWriteWrapper(fs.writeFileSync)
+        lstat,
+        lstatSync,
+        mkdir,
+        mkdirSync,
+        readdir,
+        readdirSync,
+        readFile,
+        readFileSync,
+        realpath,
+        realpathSync,
+        rmdir,
+        rmdirSync,
+        stat,
+        statSync,
+        unlink,
+        unlinkSync,
+        writeFile,
+        writeFileSync
     }
 }
