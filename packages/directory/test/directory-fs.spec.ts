@@ -3,7 +3,14 @@ import { createMemoryFs } from '@file-services/memory'
 
 describe('Directory File System Implementation', () => {
     const memTestProvider = async () => {
-        const fs = createMemoryFs()
+        const rootContents = {
+            somePath: {
+                src: {
+                    'index.ts': 'content'
+                }
+            }
+        }
+        const fs = createMemoryFs(rootContents)
 
         return {
             fs,
