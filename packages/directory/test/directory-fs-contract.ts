@@ -1,6 +1,9 @@
 import {IBaseFileSystem} from '../../types/src'
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 import { ITestInput } from './types'
+
+chai.use(chaiAsPromised)
 
 const SAMPLE_CONTENT = 'content'
 
@@ -17,6 +20,15 @@ export function directoryFsContract(testProvider: () => Promise<ITestInput<IBase
 
             expect((await fs.stat(filePath)).isFile()).to.equal(true)
             expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
+        })
+
+        it('Cannot access a file outside of the base path', async () => {
+            const { fs } = testInput
+            const filePath = '../illegalFile.ts'
+
+            expect((await fs.stat(filePath)).isFile()).to.equal(false)
+            expect(fs.readFile(filePath)).to.be.rejectedWith('ENOENT')
+            // expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
         })
     })
 }

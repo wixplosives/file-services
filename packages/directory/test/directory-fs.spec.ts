@@ -11,7 +11,8 @@ describe('Directory File System Implementation', () => {
                 src: {
                     'index.ts': 'content'
                 }
-            }
+            },
+            'illegalFile.ts': 'content'
         }
         const fs = createDirectoryFs(createMemoryFs(rootContents), basePath)
 
@@ -25,11 +26,7 @@ describe('Directory File System Implementation', () => {
     const asyncTestProvider = async () => {
         const basePath = 'basePath'
         const rootContents = {
-            [basePath]: {
-                src: {
-                    'index.ts': 'content'
-                }
-            }
+            [basePath]: {}
         }
         const fs = createDirectoryFs(createMemoryFs(rootContents), basePath)
         return {

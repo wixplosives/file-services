@@ -1,7 +1,10 @@
-import {IBaseFileSystem} from '@file-services/types'
+import {IBaseFileSystem, IWatchService, WatchEventListener} from '@file-services/types'
 
-export function createDirectoryFs(fs: IBaseFileSystem, basePath = '/'): IBaseFileSystem {
-    const pathFinder = (path: string) => fs.path.join(basePath, path)
+export function createDirectoryFs(fs: IBaseFileSystem, basePath: string): IBaseFileSystem {
+    const pathFinder = (path: string) => {
+        // const z = fs.path.relative(path, basePath)
+        return fs.path.join(basePath, path)
+    }
 
     async function lstat(path: string) {
         return fs.lstat(pathFinder(path))
@@ -75,9 +78,44 @@ export function createDirectoryFs(fs: IBaseFileSystem, basePath = '/'): IBaseFil
         return fs.writeFileSync(pathFinder(path), content)
     }
 
+    // const systemPath: IFileSystemPath = {
+    //     basename: (path, ext) => fs.path.basename(pathFinder(path), ext),
+    //     dirname: path => fs.path.dirname(pathFinder(path)),
+    //     extname: path => fs.path.extname(pathFinder(path)),
+    //     join: (...paths) => fs.path.join(pathFinder(paths[0]), ...paths.slice(1)),
+    //     normalize: path => fs.path.normalize(pathFinder(path)),
+    //     resolve: (...paths) => fs.path.resolve(...paths.map(p => pathFinder(p))),
+    //     relative: (from, to) => fs.path.relative(pathFinder(from), pathFinder(to)),
+    //     isAbsolute: fs.path.isAbsolute
+    // }
+    const watchListeners: Map<WatchEventListener, WatchEventListener> = new Map()
+    const watchService: IWatchService = {
+        addListener: listener => {
+            const relativePathListener: WatchEventListener = e => listener({
+                stats: e.stats,
+                path: fs.path.relative(basePath, e.path)
+            })
+            watchListeners.set(listener, relativePathListener)
+            fs.watchService.addListener(relativePathListener)
+        },
+        removeListener: listener => {
+            const relativePathListener = watchListeners.get(listener)
+            if (relativePathListener) {
+                fs.watchService.removeListener(relativePathListener)
+                watchListeners.delete(listener)
+            }
+        },
+        removeAllListeners: () => {
+            watchListeners.clear()
+            fs.watchService.removeAllListeners()
+        },
+        async watchPath(path: string) { fs.watchService.watchPath(pathFinder(path)) },
+        unwatchAll: fs.watchService.unwatchAll
+    }
+
     return {
         path: fs.path,
-        watchService: fs.watchService,
+        watchService,
         caseSensitive: fs.caseSensitive,
         lstat,
         lstatSync,
