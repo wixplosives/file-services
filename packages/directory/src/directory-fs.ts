@@ -1,7 +1,7 @@
-import {IBaseFileSystem, IWatchService, WatchEventListener} from '@file-services/types'
+import {IBaseFileSystem, WatchEventListener} from '@file-services/types'
 
 export function createDirectoryFs(fs: IBaseFileSystem, basePath: string): IBaseFileSystem {
-    const pathFinder = (path: string) => {
+    const joinPath = (path: string) => {
         const joinedPath = fs.path.join(basePath, path)
         const relative = fs.path.relative(basePath, joinedPath)
         if (relative.includes('..')) {
@@ -9,135 +9,51 @@ export function createDirectoryFs(fs: IBaseFileSystem, basePath: string): IBaseF
         }
         return joinedPath
     }
-
-    async function lstat(path: string) {
-        return fs.lstat(pathFinder(path))
-    }
-
-    function lstatSync(path: string) {
-        return fs.lstatSync(pathFinder(path))
-    }
-
-    async function mkdir(path: string) {
-        return fs.mkdir(pathFinder(path))
-    }
-
-    function mkdirSync(path: string) {
-        return fs.mkdirSync(pathFinder(path))
-    }
-
-    async function readdir(path: string) {
-        return fs.readdir(pathFinder(path))
-    }
-
-    function readdirSync(path: string) {
-        return fs.readdirSync(pathFinder(path))
-    }
-
-    async function readFile(path: string) {
-        return fs.readFile(pathFinder(path))
-    }
-
-    function readFileSync(path: string) {
-        return fs.readFileSync(pathFinder(path))
-    }
-
-    async function realpath(path: string) {
-        return fs.realpath(pathFinder(path))
-    }
-
-    function realpathSync(path: string) {
-        return fs.realpathSync(pathFinder(path))
-    }
-
-    async function rmdir(path: string) {
-        return fs.rmdir(pathFinder(path))
-    }
-
-    function rmdirSync(path: string) {
-        return fs.rmdirSync(pathFinder(path))
-    }
-
-    async function stat(path: string) {
-        return fs.stat(pathFinder(path))
-    }
-
-    function statSync(path: string) {
-        return fs.statSync(pathFinder(path))
-    }
-
-    async function unlink(path: string) {
-        return fs.unlink(pathFinder(path))
-    }
-
-    function unlinkSync(path: string) {
-        return fs.unlinkSync(pathFinder(path))
-    }
-
-    async function writeFile(path: string, content: string) {
-        return fs.writeFile(pathFinder(path), content)
-    }
-
-    function writeFileSync(path: string, content: string) {
-        return fs.writeFileSync(pathFinder(path), content)
-    }
-
-    // const systemPath: IFileSystemPath = {
-    //     basename: (path, ext) => fs.path.basename(pathFinder(path), ext),
-    //     dirname: path => fs.path.dirname(pathFinder(path)),
-    //     extname: path => fs.path.extname(pathFinder(path)),
-    //     join: (...paths) => fs.path.join(pathFinder(paths[0]), ...paths.slice(1)),
-    //     normalize: path => fs.path.normalize(pathFinder(path)),
-    //     resolve: (...paths) => fs.path.resolve(...paths.map(p => pathFinder(p))),
-    //     relative: (from, to) => fs.path.relative(pathFinder(from), pathFinder(to)),
-    //     isAbsolute: fs.path.isAbsolute
-    // }
     const watchListeners: Map<WatchEventListener, WatchEventListener> = new Map()
-    const watchService: IWatchService = {
-        addListener: listener => {
-            const relativePathListener: WatchEventListener = e => listener({
-                stats: e.stats,
-                path: fs.path.relative(basePath, e.path)
-            })
-            watchListeners.set(listener, relativePathListener)
-            fs.watchService.addListener(relativePathListener)
-        },
-        removeListener: listener => {
-            const relativePathListener = watchListeners.get(listener)
-            if (relativePathListener) {
-                fs.watchService.removeListener(relativePathListener)
-                watchListeners.delete(listener)
-            }
-        },
-        removeAllListeners: () => {
-            watchListeners.clear()
-            fs.watchService.removeAllListeners()
-        },
-        async watchPath(path: string) { fs.watchService.watchPath(pathFinder(path)) },
-        unwatchAll: fs.watchService.unwatchAll
-    }
 
     return {
-        path: fs.path,
-        watchService,
         caseSensitive: fs.caseSensitive,
-        lstat,
-        lstatSync,
-        mkdir,
-        mkdirSync,
-        readdir,
-        readdirSync,
-        readFile,
-        readFileSync,
-        realpath,
-        realpathSync,
-        rmdir,
-        rmdirSync,
-        stat,
-        statSync,
-        unlink,
-        unlinkSync,
-        writeFile,
-        writeFileSync
+        lstat: async path => fs.lstat(joinPath(path)),
+        lstatSync: path => fs.lstatSync(joinPath(path)),
+        mkdir: async path => fs.mkdir(joinPath(path)),
+        mkdirSync: path => fs.mkdirSync(joinPath(path)),
+        path: fs.path,
+        readdir: async path => fs.readdir(joinPath(path)),
+        readdirSync: path => fs.readdirSync(joinPath(path)),
+        readFile: async path => fs.readFile(joinPath(path)),
+        readFileSync: path => fs.readFileSync(joinPath(path)),
+        realpath: async path => fs.realpath(joinPath(path)),
+        realpathSync: path => fs.realpathSync(joinPath(path)),
+        rmdir: async path => fs.rmdir(joinPath(path)),
+        rmdirSync: path => fs.rmdirSync(joinPath(path)),
+        stat: async path => fs.stat(joinPath(path)),
+        statSync: path => fs.statSync(joinPath(path)),
+        unlink: async path => fs.unlink(joinPath(path)),
+        unlinkSync: path => fs.unlinkSync(joinPath(path)),
+        writeFile: async (path, content) => fs.writeFile(joinPath(path), content),
+        writeFileSync: (path, content) => fs.writeFileSync(joinPath(path), content),
+        watchService: {
+            addListener: listener => {
+                const relativePathListener: WatchEventListener = e => listener({
+                    stats: e.stats,
+                    path: fs.path.relative(basePath, e.path)
+                })
+                watchListeners.set(listener, relativePathListener)
+                fs.watchService.addListener(relativePathListener)
+            },
+            removeListener: listener => {
+                const relativePathListener = watchListeners.get(listener)
+                if (relativePathListener) {
+                    fs.watchService.removeListener(relativePathListener)
+                    watchListeners.delete(listener)
+                }
+            },
+            removeAllListeners: () => {
+                watchListeners.clear()
+                fs.watchService.removeAllListeners()
+            },
+            async watchPath(path: string) { fs.watchService.watchPath(joinPath(path)) },
+            unwatchAll: fs.watchService.unwatchAll
+        }
     }
 }
