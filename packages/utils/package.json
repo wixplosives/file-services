@@ -11,7 +11,8 @@
     "build:cjs": "tsc --project src --outDir cjs --module commonjs",
     "build:esm": "tsc --project src --outDir esm --module esnext",
     "lint": "run-p lint:src",
-    "lint:src": "tslint --project src"
+    "lint:src": "tslint --project src",
+    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx"
   },
   "dependencies": {
     "@file-services/types": "^0.2.2"
