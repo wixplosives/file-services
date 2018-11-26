@@ -26,9 +26,7 @@ export function directoryFsContract(testProvider: () => Promise<ITestInput<IBase
             const { fs } = testInput
             const filePath = '../illegalFile.ts'
 
-            expect((await fs.stat(filePath)).isFile()).to.equal(false)
-            expect(fs.readFile(filePath)).to.be.rejectedWith('ENOENT')
-            // expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
+            expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
         })
     })
 }

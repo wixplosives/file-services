@@ -2,8 +2,12 @@ import {IBaseFileSystem, IWatchService, WatchEventListener} from '@file-services
 
 export function createDirectoryFs(fs: IBaseFileSystem, basePath: string): IBaseFileSystem {
     const pathFinder = (path: string) => {
-        // const z = fs.path.relative(path, basePath)
-        return fs.path.join(basePath, path)
+        const joinedPath = fs.path.join(basePath, path)
+        const relative = fs.path.relative(basePath, joinedPath)
+        if (relative.includes('..')) {
+            throw new Error(`path ${path} is outside of home directory`)
+        }
+        return joinedPath
     }
 
     async function lstat(path: string) {

@@ -1,40 +1,34 @@
 # @file-services/directory
-[![npm version](https://img.shields.io/npm/v/@file-services/memory.svg)](https://www.npmjs.com/package/@file-services/memory)
+<!-- TODO: Remove? replace? -->
+[![npm version](https://img.shields.io/npm/v/@file-services/memory.svg)](https://www.npmjs.com/package/@file-services/directory)
 
-An in-memory, sync/async, file system implementation.
+A file system wrapper that adds scoping to any sync/async, file system implementation.
 
-Contains a subset of node's `fs` API with additional helper functions.
-
-Features:
-- Tiny.
-- Isomorphic. Works in both Node.js and web-browsers.
-- Implements the watch service API (for events).
-- Case insensitive.
+It receives a fs and a directory path to serve as the base path and all fs methods will work using relative paths to the base path.  
+If a path leads to a file / directory outside of the base path, it will throw an error.
 
 ## Getting started
 
 Install library in project:
 ```sh
-yarn add @file-services/memory
+yarn add @file-services/directory
 ```
 
 Then, use the programmatic API:
 ```ts
-import { createMemoryFs } from '@file-services/memory'
+import { fs } from 'mySecretFs'
+import { createDirectoryFs } from '@file-services/directory'
 
-const fs = createMemoryFs()
+const basePath = '/Projects/secret-folder'
+const dFs = createDirectoryFs(fs, basePath)
 
-// library uses `posix`-style paths
-// and exposes a subset of `fs` API
-fs.writeFileSync('/file-in-root', 'file contents')
+// This content will be written to /Projects/secret-folder/file.js
+dFs.writeFileSync('/file.js', 'file contents')
 
-// several helper functions are included
-fs.populateDirectorySync('/src', {
-    'index.ts': '/* source code */',
-    'another-file.ts': '/* more source code */',
-})
-
-fs.fileExistsSync('/src/another-file.ts') // returns true
+// These will throw, as the files we are trying to reach are outside
+// of the base path
+dFs.readFileSync('/Projects/other-folder/file.js')
+dFs.readFileSync('../other-folder/file.js')
 ```
 
 ## License
