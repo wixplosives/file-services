@@ -18,10 +18,10 @@ yarn add @file-services/directory
 
 Then, use the programmatic API:
 ```ts
-import { fs } from 'mySecretFs'
+import { fs } from 'some-fs'
 import { createDirectoryFs } from '@file-services/directory'
 
-const basePath = '/Projects/secret-folder'
+const basePath = '/projects/secret-folder'
 const dFs = createDirectoryFs(fs, basePath)
 
 // This content will be written to /Projects/secret-folder/file.js

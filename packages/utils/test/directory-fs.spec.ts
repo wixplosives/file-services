@@ -1,58 +1,59 @@
 import { asyncBaseFsContract, syncBaseFsContract } from '@file-services/test-kit'
 import { createMemoryFs } from '@file-services/memory'
-import {IBaseFileSystem} from '../../types/src'
-import {createDirectoryFs} from '../src'
+import { IBaseFileSystem } from '@file-services/types'
+import { createDirectoryFs } from '../src'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 
 chai.use(chaiAsPromised)
-const basePath = 'basePath'
+const directoryName = 'test-directory'
+const basePath = `/${directoryName}`
 const SAMPLE_CONTENT = 'content'
 
-describe('Directory File System Implementation', () => {
-        let fs: IBaseFileSystem
-
-        beforeEach(async () => {
-            const rootContents = {
-                [basePath]: {
+describe('File system directory scoping utility', () => {
+    let fs: IBaseFileSystem
+    beforeEach(async () => {
+        fs = createDirectoryFs(
+            createMemoryFs({
+                [directoryName]: {
                     src: {
-                        'index.ts': 'content'
+                        'index.ts': SAMPLE_CONTENT
                     }
                 },
-                'illegalFile.ts': 'content'
-            }
-            fs = createDirectoryFs(createMemoryFs(rootContents), basePath)
-        })
-
-        it('Can access a file from a relative path', async () => {
-            const filePath = 'src/index.ts'
-
-            expect((await fs.stat(filePath)).isFile()).to.equal(true)
-            expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
-        })
-
-        it('Cannot access a file outside of the base path', async () => {
-            const filePath = '../illegalFile.ts'
-
-            expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
-        })
-
-        it('Cannot access a file outside of the base path (absolute path)', async () => {
-            const filePath = '/illegalFile.ts'
-
-            expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
-        })
+                'outside-scope-file.ts': SAMPLE_CONTENT
+            }),
+            basePath
+        )
     })
 
-describe('Directory file system sanity tests', () => {
+    it('can access a file from a relative path', async () => {
+        const filePath = '/src/index.ts'
+
+        expect((await fs.stat(filePath)).isFile()).to.equal(true)
+        expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
+    })
+
+    it('cannot use a relative path to access a file outside of the scoped directory path', async () => {
+        const filePath = '../outside-scope-file.ts'
+
+        expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
+    })
+
+    it('cannot access a file outside of the scoped directory path', async () => {
+        const filePath = '/outside-scope-file.ts'
+
+        expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
+    })
 
     const testProvider = async () => {
-        const rootContents = {
-            [basePath]: {}
-        }
-        const fs = createDirectoryFs(createMemoryFs(rootContents), basePath)
+        const testFs = createDirectoryFs(
+            createMemoryFs({
+                [directoryName]: {}
+            }),
+            basePath
+        )
         return {
-            fs,
+            fs: testFs,
             dispose: async () => undefined,
             tempDirectoryPath: ''
         }
