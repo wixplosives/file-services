@@ -1,6 +1,4 @@
 # @file-services/directory
-<!-- TODO: Remove? replace? -->
-[![npm version](https://img.shields.io/npm/v/@file-services/memory.svg)](https://www.npmjs.com/package/@file-services/directory)
 
 A file system wrapper that adds scoping to any sync/async, file system implementation.
 
