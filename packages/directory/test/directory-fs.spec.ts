@@ -4,7 +4,7 @@ import { createMemoryFs } from '@file-services/memory'
 import {createDirectoryFs} from '../src'
 
 describe('Directory File System Implementation', () => {
-    const memTestProvider = async () => {
+    const directoryTestProvider = async () => {
         const basePath = 'basePath'
         const rootContents = {
             [basePath]: {
@@ -23,7 +23,7 @@ describe('Directory File System Implementation', () => {
         }
     }
 
-    const asyncTestProvider = async () => {
+    const baseTestProvider = async () => {
         const basePath = 'basePath'
         const rootContents = {
             [basePath]: {}
@@ -36,7 +36,7 @@ describe('Directory File System Implementation', () => {
         }
     }
 
-    directoryFsContract(memTestProvider)
-    asyncBaseFsContract(asyncTestProvider)
-    syncBaseFsContract(asyncTestProvider)
+    directoryFsContract(directoryTestProvider)
+    asyncBaseFsContract(baseTestProvider)
+    syncBaseFsContract(baseTestProvider)
 })

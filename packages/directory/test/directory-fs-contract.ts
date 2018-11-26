@@ -28,5 +28,12 @@ export function directoryFsContract(testProvider: () => Promise<ITestInput<IBase
 
             expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
         })
+
+        it('Cannot access a file outside of the base path (absolute path)', async () => {
+            const { fs } = testInput
+            const filePath = '/illegalFile.ts'
+
+            expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of home directory`)
+        })
     })
 }
