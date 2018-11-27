@@ -25,12 +25,12 @@
     "create-temp-directory": "^1.0.1",
     "lerna": "^3.4.3",
     "mocha": "^5.2.0",
-    "npm-run-all": "^4.1.3",
+    "npm-run-all": "^4.1.5",
     "promise-assist": "^1.2.1",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
     "typescript": "~3.1.6",
-    "webpack": "^4.25.1"
+    "webpack": "^4.26.1"
   },
   "license": "MIT",
   "private": true
