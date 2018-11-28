@@ -2,10 +2,11 @@ import {IBaseFileSystem, WatchEventListener} from '@file-services/types'
 
 export function createDirectoryFs(fs: IBaseFileSystem, basePath: string): IBaseFileSystem {
     const joinPath = (path: string) => {
-        const joinedPath = fs.path.join(basePath, path)
-        const relative = fs.path.relative(basePath, joinedPath)
-        if (relative.includes('..')) {
-            throw new Error(`path ${path} is outside of home directory`)
+        const {join, relative} = fs.path
+        const joinedPath = join(basePath, path)
+        const relativePath = relative(basePath, joinedPath)
+        if (relativePath.startsWith('..')) {
+            throw new Error(`path ${path} is outside of scoped directory`)
         }
         return joinedPath
     }

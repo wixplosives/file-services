@@ -26,7 +26,7 @@ describe('File system directory scoping utility', () => {
         )
     })
 
-    it('can access a file from a relative path', async () => {
+    it('can access a file using a relative path', async () => {
         const filePath = '/src/index.ts'
 
         expect((await fs.stat(filePath)).isFile()).to.equal(true)
