@@ -17,14 +17,21 @@ export interface IBaseFileSystemSync {
     caseSensitive: boolean
 
     /**
-     * Reads the entire contents of a file.
+     * Read the entire contents of a file as a string.
+     * If `encoding` isn't specified, 'utf8' is assumed.
      */
-    readFileSync(filePath: string): string
+    readFileSync(filePath: string, encoding?: string): string
 
     /**
-     * Writes data to a file, replacing the file if already exists.
+     * Read the entire contents of a file as a Buffer.
      */
-    writeFileSync(filePath: string, content: string): void
+    readFileRawSync(filePath: string): Buffer
+
+    /**
+     * Write data to a file, replacing the file if already exists.
+     * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
+     */
+    writeFileSync(filePath: string, content: string | Buffer, encoding?: string): void
 
     /**
      * Delete a name and possibly the file it refers to.
@@ -47,17 +54,17 @@ export interface IBaseFileSystemSync {
     rmdirSync(directoryPath: string): void
 
     /**
-     * Get path's stats.
+     * Get path's `IFileSystemStats`.
      */
     statSync(path: string): IFileSystemStats
 
     /**
-     * Get path's stats. Does not dereference symbolic links.
+     * Get path's `IFileSystemStats`. Does not dereference symbolic links.
      */
     lstatSync(path: string): IFileSystemStats
 
     /**
-     * Returns the canonicalized absolute pathname.
+     * Get the canonicalized absolute pathname.
      * If path is linked, returns the actual target path.
      */
     realpathSync(path: string): string
@@ -73,14 +80,21 @@ export interface IBaseFileSystemAsync {
     caseSensitive: boolean
 
     /**
-     * Reads the entire contents of a file.
+     * Read the entire contents of a file as a string.
+     * If `encoding` isn't specified, 'utf8' is assumed.
      */
-    readFile(filePath: string): Promise<string>
+    readFile(filePath: string, encoding?: string): Promise<string>
 
     /**
-     * Writes data to a file, replacing the file if it already exists.
+     * Read the entire contents of a file as a Buffer.
      */
-    writeFile(filePath: string, content: string): Promise<void>
+    readFileRaw(filePath: string): Promise<Buffer>
+
+    /**
+     * Write data to a file, replacing the file if already exists.
+     * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
+     */
+    writeFile(filePath: string, content: string | Buffer, encoding?: string): Promise<void>
 
     /**
      * Delete a name and possibly the file it refers to.
@@ -103,17 +117,17 @@ export interface IBaseFileSystemAsync {
     rmdir(directoryPath: string): Promise<void>
 
     /**
-     * Get path's stats.
+     * Get path's `IFileSystemStats`.
      */
     stat(path: string): Promise<IFileSystemStats>
 
     /**
-     * Get path's stats. Does not dereference symbolic links.
+     * Get path's `IFileSystemStats`. Does not dereference symbolic links.
      */
     lstat(path: string): Promise<IFileSystemStats>
 
     /**
-     * Returns the canonicalized absolute pathname.
+     * Gets the canonicalized absolute pathname.
      * If path is linked, returns the actual target path.
      */
     realpath(path: string): Promise<string>
