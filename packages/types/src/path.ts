@@ -4,6 +4,16 @@
  */
 export interface IFileSystemPath {
     /**
+     * Platform-specific file separator. usually '\\' or '/'
+     */
+    sep: string
+
+    /**
+     * Platform-specific file delimiter. usually ';' or ':'.
+     */
+    delimiter: string
+
+    /**
      * Return the last portion of a path. Similar to the Unix basename command.
      * Often used to extract the file name from a fully qualified path.
      *
