@@ -13,7 +13,8 @@ export interface IFsMemNode {
 
 export interface IFsMemFileNode extends IFsMemNode {
     type: 'file'
-    contents: string
+    contents?: string
+    rawContents: Buffer
 }
 
 export interface IFsMemDirectoryNode extends IFsMemNode {

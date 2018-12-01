@@ -40,7 +40,7 @@ export function createBaseMemoryFs(): IBaseFileSystem {
 
 // ugly workaround for webpack's polyfilled path not implementing posix
 // TODO: inline path-posix implementation taked from latest node's source (faster!)
-const path = pathMain.posix as typeof pathMain || pathMain
+const posixPath = pathMain.posix as typeof pathMain || pathMain
 
 /**
  * Utility function to create a *base* sync-only
@@ -52,7 +52,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     return {
         root,
-        path,
+        path: posixPath,
         watchService: {
             addListener: listener => { watchListeners.add(listener) },
             removeListener: listener => watchListeners.delete(listener),
@@ -65,6 +65,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         mkdirSync,
         readdirSync,
         readFileSync,
+        readFileRawSync,
         realpathSync: p => p, // TODO: implement links
         rmdirSync,
         statSync,
@@ -72,7 +73,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         writeFileSync
     }
 
-    function readFileSync(filePath: string): string {
+    function readFileSync(filePath: string, encoding?: string): string {
         const fileNode = getNode(filePath)
 
         if (!fileNode) {
@@ -81,38 +82,64 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             throw new Error(`${filePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
         }
 
-        return fileNode.contents
+        const { contents, rawContents } = fileNode
+        if (!encoding && contents) {
+            return contents
+        } else {
+            return rawContents.toString(encoding)
+        }
     }
 
-    function writeFileSync(filePath: string, fileContent: string): void {
-        const parentPath = path.dirname(filePath)
+    function readFileRawSync(filePath: string): Buffer {
+        const fileNode = getNode(filePath)
+
+        if (!fileNode) {
+            throw new Error(`${filePath} ${FsErrorCodes.NO_FILE}`)
+        } else if (fileNode.type === 'dir') {
+            throw new Error(`${filePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+        }
+
+        return fileNode.rawContents
+    }
+
+    function writeFileSync(filePath: string, fileContent: string | Buffer, encoding?: string): void {
+        const parentPath = posixPath.dirname(filePath)
         const parentNode = getNode(parentPath)
 
         if (!parentNode || parentNode.type !== 'dir') {
             throw new Error(`${filePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
         }
 
-        const fileName = path.basename(filePath)
+        const fileName = posixPath.basename(filePath)
         const lowerCaseFileName = fileName.toLowerCase()
         const fileNode = parentNode.contents[lowerCaseFileName]
 
         if (!fileNode) {
             const currentDate = new Date()
 
-            const newFileNode: IFsMemFileNode = {
-                type: 'file',
+            const partialNode = {
+                type: 'file' as 'file',
                 name: fileName,
                 birthtime: currentDate,
                 mtime: currentDate,
-                contents: fileContent
             }
+
+            const newFileNode: IFsMemFileNode = typeof fileContent === 'string' ?
+                { ...partialNode, contents: fileContent, rawContents: new Buffer(fileContent, encoding) } :
+                { ...partialNode, rawContents: fileContent }
 
             parentNode.contents[lowerCaseFileName] = newFileNode
             emitWatchEvent({ path: filePath, stats: createStatsFromNode(newFileNode) })
 
         } else if (fileNode.type === 'file') {
             fileNode.mtime = new Date()
-            fileNode.contents = fileContent
+            if (typeof fileContent === 'string') {
+                fileNode.contents = fileContent
+                fileNode.rawContents = new Buffer(fileContent, encoding)
+            } else {
+                delete fileNode.contents
+                fileNode.rawContents = fileContent
+            }
             emitWatchEvent({ path: filePath, stats: createStatsFromNode(fileNode) })
 
         } else {
@@ -121,14 +148,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     function unlinkSync(filePath: string): void {
-        const parentPath = path.dirname(filePath)
+        const parentPath = posixPath.dirname(filePath)
         const parentNode = getNode(parentPath)
 
         if (!parentNode || parentNode.type !== 'dir') {
             throw new Error(`${filePath} ${FsErrorCodes.NO_FILE}`)
         }
 
-        const fileName = path.basename(filePath)
+        const fileName = posixPath.basename(filePath)
         const lowerCaseFileName = fileName.toLowerCase()
         const fileNode = parentNode.contents[lowerCaseFileName]
 
@@ -155,14 +182,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     function mkdirSync(directoryPath: string): void {
-        const parentPath = path.dirname(directoryPath)
+        const parentPath = posixPath.dirname(directoryPath)
         const parentNode = getNode(parentPath)
 
         if (!parentNode || parentNode.type !== 'dir') {
             throw new Error(`${directoryPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
         }
 
-        const directoryName = path.basename(directoryPath)
+        const directoryName = posixPath.basename(directoryPath)
         const lowerCaseDirectoryName = directoryName.toLowerCase()
         const currentNode = parentNode.contents[lowerCaseDirectoryName]
 
@@ -177,14 +204,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     function rmdirSync(directoryPath: string): void {
-        const parentPath = path.dirname(directoryPath)
+        const parentPath = posixPath.dirname(directoryPath)
         const parentNode = getNode(parentPath)
 
         if (!parentNode || parentNode.type !== 'dir') {
             throw new Error(`${directoryPath} ${FsErrorCodes.NO_DIRECTORY}`)
         }
 
-        const directoryName = path.basename(directoryPath)
+        const directoryName = posixPath.basename(directoryPath)
         const lowerCaseDirectoryName = directoryName.toLowerCase()
         const directoryNode = parentNode.contents[lowerCaseDirectoryName]
 
@@ -212,8 +239,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     function getNode(nodePath: string): IFsMemFileNode | IFsMemDirectoryNode | null {
-        const normalizedPath = path.normalize(nodePath)
-        const splitPath = normalizedPath.split(path.sep)
+        const normalizedPath = posixPath.normalize(nodePath)
+        const splitPath = normalizedPath.split(posixPath.sep)
 
         return splitPath.reduce((prevNode: IFsMemDirectoryNode | IFsMemFileNode | null, depthName: string) => {
             return (prevNode && prevNode.type === 'dir' &&
