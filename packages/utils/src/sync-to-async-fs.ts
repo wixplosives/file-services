@@ -1,57 +1,49 @@
-import { IBaseFileSystemSync, IBaseFileSystemAsync, IFileSystemStats } from '@file-services/types'
+import { IBaseFileSystemSync, IBaseFileSystemAsync } from '@file-services/types'
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
-    async function readFile(filePath: string): Promise<string> {
-        return syncFs.readFileSync(filePath)
-    }
-
-    async function writeFile(filePath: string, content: string): Promise<void> {
-        return syncFs.writeFileSync(filePath, content)
-    }
-
-    async function unlink(filePath: string): Promise<void> {
-        return syncFs.unlinkSync(filePath)
-    }
-
-    async function readdir(directoryPath: string): Promise<string[]> {
-        return syncFs.readdirSync(directoryPath)
-    }
-
-    async function mkdir(directoryPath: string): Promise<void> {
-        return syncFs.mkdirSync(directoryPath)
-    }
-
-    async function rmdir(directoryPath: string): Promise<void> {
-        return syncFs.rmdirSync(directoryPath)
-    }
-
-    async function stat(nodePath: string): Promise<IFileSystemStats> {
-        return syncFs.statSync(nodePath)
-    }
-
-    async function lstat(nodePath: string): Promise<IFileSystemStats> {
-        return syncFs.lstatSync(nodePath)
-    }
-
-    async function realpath(nodePath: string): Promise<string> {
-        return syncFs.realpathSync(nodePath)
-    }
-
     return {
         path: syncFs.path,
         watchService: syncFs.watchService,
         caseSensitive: syncFs.caseSensitive,
 
-        readFile,
-        writeFile,
-        unlink,
+        async readFile(filePath, encoding) {
+            return syncFs.readFileSync(filePath, encoding)
+        },
 
-        readdir,
-        mkdir,
-        rmdir,
+        async readFileRaw(filePath) {
+            return syncFs.readFileRawSync(filePath)
+        },
 
-        stat,
-        lstat,
-        realpath
+        async writeFile(filePath, content, encoding) {
+            return syncFs.writeFileSync(filePath, content, encoding)
+        },
+
+        async unlink(filePath) {
+            return syncFs.unlinkSync(filePath)
+        },
+
+        async readdir(directoryPath) {
+            return syncFs.readdirSync(directoryPath)
+        },
+
+        async mkdir(directoryPath) {
+            return syncFs.mkdirSync(directoryPath)
+        },
+
+        async rmdir(directoryPath) {
+            return syncFs.rmdirSync(directoryPath)
+        },
+
+        async stat(nodePath) {
+            return syncFs.statSync(nodePath)
+        },
+
+        async lstat(nodePath) {
+            return syncFs.lstatSync(nodePath)
+        },
+
+        async realpath(nodePath) {
+            return syncFs.realpathSync(nodePath)
+        }
     }
 }
