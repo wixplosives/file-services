@@ -7,10 +7,9 @@
   "types": "esm/index.d.ts",
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
-    "build": "run-p build:cjs build:esm",
-    "build:cjs": "tsc --project src --outDir cjs --module commonjs",
-    "build:esm": "tsc --project src --outDir esm --module esnext",
-    "lint": "tslint --project src"
+    "build": "ts-build ./src --cjs --esm",
+    "lint": "tslint --project src",
+    "prepack": "yarn build"
   },
   "dependencies": {
     "@file-services/types": "^0.2.2",
