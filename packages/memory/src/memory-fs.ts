@@ -125,7 +125,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             }
 
             const newFileNode: IFsMemFileNode = typeof fileContent === 'string' ?
-                { ...partialNode, contents: fileContent, rawContents: new Buffer(fileContent, encoding) } :
+                { ...partialNode, contents: fileContent, rawContents: Buffer.from(fileContent, encoding) } :
                 { ...partialNode, rawContents: fileContent }
 
             parentNode.contents[lowerCaseFileName] = newFileNode
@@ -135,7 +135,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             fileNode.mtime = new Date()
             if (typeof fileContent === 'string') {
                 fileNode.contents = fileContent
-                fileNode.rawContents = new Buffer(fileContent, encoding)
+                fileNode.rawContents = Buffer.from(fileContent, encoding)
             } else {
                 delete fileNode.contents
                 fileNode.rawContents = fileContent
