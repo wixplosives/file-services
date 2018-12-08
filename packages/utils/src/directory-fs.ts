@@ -1,4 +1,4 @@
-import { IBaseFileSystem, IFileSystem, WatchEventListener } from '@file-services/types'
+import { IBaseFileSystem, IFileSystem, WatchEventListener, IWatchService } from '@file-services/types'
 import pathMain from 'path'
 import {createAsyncFileSystem, createSyncFileSystem} from './create-extended-api'
 
@@ -13,9 +13,10 @@ const posixPath = pathMain.posix as typeof pathMain || pathMain
  * @param directoryPath the directory path to scope to
  */
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
+    const { watchService } = fs
     const { join, relative, sep } = fs.path
 
-    const joinPath = (path: string) => {
+    function joinPath(path: string) {
         const joinedPath = join(directoryPath, path)
         const relativePath = relative(directoryPath, joinedPath)
         if (relativePath.startsWith(`..${sep}`)) {
@@ -25,9 +26,43 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     }
     const watchListeners: Map<WatchEventListener, WatchEventListener> = new Map()
 
+    const scopedWatchService: IWatchService = {
+        async watchPath(path) {
+            return watchService.watchPath(joinPath(path))
+        },
+        addGlobalListener: listener => {
+            const relativePathListener: WatchEventListener = e => {
+                const relativeEventPath = relative(directoryPath, e.path)
+                // we don't want to pass events outside of scoped directory
+                if (!relativeEventPath.startsWith(`..${sep}`)) {
+                    listener({
+                        stats: e.stats,
+                        // use posixPath to ensure we give posix-style paths back
+                        path: posixPath.join('/', relativeEventPath)
+                    })
+                }
+            }
+            watchListeners.set(listener, relativePathListener)
+            watchService.addGlobalListener(relativePathListener)
+        },
+        removeGlobalListener(listener) {
+            const relativePathListener = watchListeners.get(listener)
+            if (relativePathListener) {
+                watchService.removeGlobalListener(relativePathListener)
+                watchListeners.delete(listener)
+            }
+        },
+        clearGlobalListeners() {
+            watchListeners.clear()
+            watchService.clearGlobalListeners()
+        },
+        unwatchAll: watchService.unwatchAll
+    }
+
     const scopedBaseFs: IBaseFileSystem = {
         path: fs.path,
         caseSensitive: fs.caseSensitive,
+        watchService: scopedWatchService,
         async lstat(path) {
             return fs.lstat(joinPath(path))
         },
@@ -87,38 +122,6 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         },
         writeFileSync(path, content, encoding) {
             return fs.writeFileSync(joinPath(path), content, encoding)
-        },
-        watchService: {
-            async watchPath(path) {
-                return fs.watchService.watchPath(joinPath(path))
-            },
-            addGlobalListener: listener => {
-                const relativePathListener: WatchEventListener = e => {
-                    const relativeEventPath = relative(directoryPath, e.path)
-                    // we don't want to pass events outside of scoped directory
-                    if (!relativeEventPath.startsWith(`..${sep}`)) {
-                        listener({
-                            stats: e.stats,
-                            // use posixPath to ensure we give posix-style paths back
-                            path: posixPath.join('/', relativeEventPath)
-                        })
-                    }
-                }
-                watchListeners.set(listener, relativePathListener)
-                fs.watchService.addGlobalListener(relativePathListener)
-            },
-            removeGlobalListener(listener) {
-                const relativePathListener = watchListeners.get(listener)
-                if (relativePathListener) {
-                    fs.watchService.removeGlobalListener(relativePathListener)
-                    watchListeners.delete(listener)
-                }
-            },
-            clearGlobalListeners() {
-                watchListeners.clear()
-                fs.watchService.clearGlobalListeners()
-            },
-            unwatchAll: fs.watchService.unwatchAll
         }
     }
 
