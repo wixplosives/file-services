@@ -1,5 +1,4 @@
 language: node_js
-sudo: required # needed for headless chrome (puppeteer)
 
 os:
   - linux
@@ -13,6 +12,11 @@ node_js:
 
 cache:
   yarn: true
+
+# needed for windows travis, which gets stuck after running tests
+# https://travis-ci.community/t/build-doesnt-finish-after-completing-tests/288/9
+env:
+  - YARN_GPG=no
 
 # Travis uses yarn@1.3.2 on linux, and yarn@latest on other platforms.
 before_install:
