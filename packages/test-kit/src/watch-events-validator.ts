@@ -28,7 +28,7 @@ export class WatchEventsValidator {
     constructor(private watchService: IWatchService, options?: IWatchEventValidatorOptions) {
         this.options = { singleEventTimeout: 5000, noMoreEventsTimeout: 500, ...options }
 
-        this.watchService.addListener(e => this.capturedEvents.push(e))
+        this.watchService.addGlobalListener(e => this.capturedEvents.push(e))
     }
 
     /**

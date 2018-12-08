@@ -48,15 +48,15 @@ const posixPath = pathMain.posix as typeof pathMain || pathMain
  */
 export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
-    const watchListeners: Set<WatchEventListener> = new Set()
+    const globalListeners: Set<WatchEventListener> = new Set()
 
     return {
         root,
         path: posixPath,
         watchService: {
-            addListener: listener => { watchListeners.add(listener) },
-            removeListener: listener => watchListeners.delete(listener),
-            removeAllListeners: () => watchListeners.clear(),
+            addGlobalListener: listener => { globalListeners.add(listener) },
+            removeGlobalListener: listener => globalListeners.delete(listener),
+            clearGlobalListeners: () => globalListeners.clear(),
             async watchPath() { /* in-mem, so events are free */ },
             async unwatchAll() { /* in-mem, so events are free */ }
         },
@@ -249,7 +249,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     function emitWatchEvent(watchEvent: IWatchEvent): void {
-        for (const listener of watchListeners) {
+        for (const listener of globalListeners) {
             listener(watchEvent)
         }
     }

@@ -16,22 +16,20 @@ export interface IWatchService {
     unwatchAll(): Promise<void>
 
     /**
-     * Add a listener function.
-     * It will start receiving watch events for all watched paths.
+     * Add a global watch event listener.
+     * It will receive watch events for all watched paths.
      */
-    addListener(listener: WatchEventListener): void
+    addGlobalListener(listener: WatchEventListener): void
 
     /**
-     * Remove a listener function.
-     * It will stop receiving watch events.
+     * Remove a global watch event listener.
      */
-    removeListener(listener: WatchEventListener): void
+    removeGlobalListener(listener: WatchEventListener): void
 
     /**
-     * Remove all existing listeners.
+     * Clears all registered global watch event listeners.
      */
-    removeAllListeners(): void
-}
+    clearGlobalListeners(): void}
 
 /**
  * Watch event. Emitted when a file system change

@@ -13,8 +13,8 @@ describe('Node File System Implementation', () => {
         return {
             fs,
             dispose: async () => {
+                watchService.clearGlobalListeners()
                 await watchService.unwatchAll()
-                watchService.removeAllListeners()
                 await tempDirectory.remove()
             },
             tempDirectoryPath: tempDirectory.path

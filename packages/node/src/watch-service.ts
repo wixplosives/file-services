@@ -31,8 +31,8 @@ interface IPendingEvent {
 }
 
 export class NodeWatchService implements IWatchService {
-    /** user's subsribed listeners */
-    private listeners: Set<WatchEventListener> = new Set()
+    /** user's subsribed global listeners */
+    private globalListeners: Set<WatchEventListener> = new Set()
 
     /** resolved options (default + user) */
     private options: Required<INodeWatchServiceOptions>
@@ -107,9 +107,6 @@ export class NodeWatchService implements IWatchService {
         }
     }
 
-    /**
-     * Unwatch a specific path.
-     */
     public async unwatchPath(path: string) {
         const existingWatcher = this.fsWatchers.get(path)
 
@@ -122,10 +119,6 @@ export class NodeWatchService implements IWatchService {
         }
     }
 
-    /**
-     * Unwatches all paths and closes all opened fswatchers.
-     * Does not clear any listeners registered with `addListener()`.
-     */
     public async unwatchAll(): Promise<void> {
         for (const watcher of this.fsWatchers.values()) {
             watcher.close()
@@ -134,25 +127,16 @@ export class NodeWatchService implements IWatchService {
         this.watchedPaths.clear()
     }
 
-    /**
-     * subscribe a new watch events listener
-     */
-    public addListener(eventCb: WatchEventListener): void {
-        this.listeners.add(eventCb)
+    public addGlobalListener(eventCb: WatchEventListener): void {
+        this.globalListeners.add(eventCb)
     }
 
-    /**
-     * unsubsribe watch events listener
-     */
-    public removeListener(eventCb: WatchEventListener): void {
-        this.listeners.delete(eventCb)
+    public removeGlobalListener(eventCb: WatchEventListener): void {
+        this.globalListeners.delete(eventCb)
     }
 
-    /**
-     * unsubscribe all listeners
-     */
-    public removeAllListeners(): void {
-        this.listeners.clear()
+    public clearGlobalListeners(): void {
+        this.globalListeners.clear()
     }
 
     // private helpers
@@ -190,7 +174,7 @@ export class NodeWatchService implements IWatchService {
         }
 
         // inform listeners of the event
-        for (const listener of this.listeners) {
+        for (const listener of this.globalListeners) {
             listener({ path, stats })
         }
     }
