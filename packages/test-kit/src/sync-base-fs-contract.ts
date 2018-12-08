@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { IBaseFileSystemSync } from '@file-services/types'
 import { ITestInput } from './types'
-import { WatchEventsValidator } from './events-validator'
+import { WatchEventsValidator } from './watch-events-validator'
 
 const SAMPLE_CONTENT = 'content'
 const DIFFERENT_CONTENT = 'another content'
@@ -148,7 +148,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, DIFFERENT_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
                 await validate.noMoreEvents()
             })
 
@@ -157,7 +157,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.unlinkSync(testFilePath)
 
-                await validate.nextEvent({ path: testFilePath, stats: null })
+                await validate.lastEvent({ path: testFilePath, stats: null })
                 await validate.noMoreEvents()
             })
 
@@ -168,11 +168,11 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.unlinkSync(testFilePath)
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
                 await validate.noMoreEvents()
             })
         })
@@ -331,7 +331,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
                 await validate.noMoreEvents()
             })
 
@@ -345,7 +345,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
                 await validate.noMoreEvents()
             })
 
@@ -359,7 +359,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.unlinkSync(testFilePath)
 
-                await validate.nextEvent({ path: testFilePath, stats: null })
+                await validate.lastEvent({ path: testFilePath, stats: null })
                 await validate.noMoreEvents()
             })
         })
@@ -391,7 +391,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
                 await validate.noMoreEvents()
             })
 
@@ -404,7 +404,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.nextEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
                 await validate.noMoreEvents()
             })
         })

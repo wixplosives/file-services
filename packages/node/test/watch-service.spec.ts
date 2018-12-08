@@ -41,7 +41,7 @@ describe('Node Watch Service', function() {
             await writeFile(testFilePath, SAMPLE_CONTENT)
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
+            await validate.lastEvent({ path: testFilePath, stats: await stat(testFilePath) })
             await validate.noMoreEvents()
         })
 
@@ -55,8 +55,8 @@ describe('Node Watch Service', function() {
 
             const secondStats = await stat(testFilePath)
 
-            await validate.nextEvent({ path: testFilePath, stats: firstWriteStats })
-            await validate.nextEvent({ path: testFilePath, stats: secondStats })
+            await validate.lastEvent({ path: testFilePath, stats: firstWriteStats })
+            await validate.lastEvent({ path: testFilePath, stats: secondStats })
             await validate.noMoreEvents()
         })
     })
@@ -80,7 +80,7 @@ describe('Node Watch Service', function() {
 
             await rmdir(testDirectoryPath)
 
-            await validate.nextEvent({ path: testDirectoryPath, stats: null })
+            await validate.lastEvent({ path: testDirectoryPath, stats: null })
             await validate.noMoreEvents()
         })
     })
@@ -107,7 +107,7 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
+            await validate.lastEvent({ path: testFilePath, stats: await stat(testFilePath) })
             await validate.noMoreEvents()
         })
 
@@ -117,7 +117,7 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            await validate.nextEvent({ path: testFilePath, stats: await stat(testFilePath) })
+            await validate.lastEvent({ path: testFilePath, stats: await stat(testFilePath) })
             await validate.noMoreEvents()
         })
     })
