@@ -1,8 +1,7 @@
 import { join } from 'path'
-import { FSWatcher, watch, stat, Stats, readdir } from 'proper-fs'
-import { IWatchService, WatchEventListener } from '@file-services/types'
-
-type RawWatchEventType = 'rename' | 'change'
+import { stat, watch, FSWatcher } from 'proper-fs'
+import { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types'
+import { SetMultiMap } from '@file-services/utils'
 
 export interface INodeWatchServiceOptions {
     /**
@@ -38,7 +37,7 @@ export class NodeWatchService implements IWatchService {
     private options: Required<INodeWatchServiceOptions>
 
     /** all watched paths (including files inside watched directories) */
-    private watchedPaths: Set<string> = new Set()
+    private watchedPaths = new SetMultiMap<string, WatchEventListener>()
 
     /** path to actual FSWatcher instance opened for it */
     private fsWatchers: Map<string, FSWatcher> = new Map()
@@ -53,68 +52,26 @@ export class NodeWatchService implements IWatchService {
         this.options = { persistent: true, debounceWait: 200, ...options }
     }
 
-    /**
-     * Begin watching a path and emitting events for it
-     *
-     * @param path absolute path to watch
-     * @param stats optional stats, if already queried on user code
-     */
-    public async watchPath(path: string): Promise<void> {
-        if (this.watchedPaths.has(path)) {
-            // path is already being watched directly (fs watcher on its path)
-            // or indirectly (fs watcher on its containing directory)
-            return
+    public async watchPath(path: string, listener?: WatchEventListener): Promise<void> {
+        if (listener) {
+            this.watchedPaths.add(path, listener)
         }
-
-        const pathStats = await getStats(path)
-        if (!pathStats) {
-            return
-        }
-
-        if (pathStats.isFile()) {
-            const fsWatcher = watch(
-                path,
-                { persistent: this.options.persistent },
-                eventType => this.onPathEvent(path, eventType as RawWatchEventType)
-            ).on('error', e => this.onWatchError(e))
-            this.fsWatchers.set(path, fsWatcher)
-            this.watchedPaths.add(path)
-        } else if (pathStats.isDirectory()) {
-            // directories require a special handler,
-            // as you also receive events for files inside that directory
-            const fsWatcher = watch(
-                path,
-                { persistent: this.options.persistent },
-                (eventType, fileName) => this.onDirectoryEvent(path, eventType as RawWatchEventType, fileName)
-            ).on('error', e => this.onWatchError(e))
-            this.fsWatchers.set(path, fsWatcher)
-            this.watchedPaths.add(path) // mark the directory itself as being watched
-
-            // mark directory files as being watched as well
-            const directoryContents = await readdir(path)
-            for (const subNodePath of directoryContents.map(nodeName => join(path, nodeName))) {
-                const subStats = await getStats(subNodePath)
-                if (subStats && subStats.isFile()) {
-                    // close existing fs watcher, if any, to save file handles
-                    // the directory watcher covers these paths as well
-                    this.unwatchPath(subNodePath)
-
-                    // mark the file as being watched, even though it has no watcher on its own
-                    this.watchedPaths.add(subNodePath)
-                }
-            }
-        }
+        await this.ensureFsWatcher(path)
     }
 
-    public async unwatchPath(path: string): Promise<void> {
-        const existingWatcher = this.fsWatchers.get(path)
+    public async unwatchPath(path: string, listener?: WatchEventListener): Promise<void> {
+        if (listener) {
+            this.watchedPaths.delete(path, listener)
+        } else {
+            this.watchedPaths.deleteKey(path)
+        }
 
-        // path has a direct watcher, so we can close it and unwatch,
-        // otherwise, it might still be watched by a parent directory watcher
-        if (existingWatcher) {
-            existingWatcher.close()
-            this.watchedPaths.delete(path)
-            this.fsWatchers.delete(path)
+        if (!this.watchedPaths.hasKey(path)) {
+            const fsWatcher = this.fsWatchers.get(path)
+            if (fsWatcher) {
+                fsWatcher.close()
+                this.fsWatchers.delete(path)
+            }
         }
     }
 
@@ -126,76 +83,117 @@ export class NodeWatchService implements IWatchService {
         this.watchedPaths.clear()
     }
 
-    public addGlobalListener(eventCb: WatchEventListener): void {
-        this.globalListeners.add(eventCb)
+    public addGlobalListener(listener: WatchEventListener): void {
+        this.globalListeners.add(listener)
     }
 
-    public removeGlobalListener(eventCb: WatchEventListener): void {
-        this.globalListeners.delete(eventCb)
+    public removeGlobalListener(listener: WatchEventListener): void {
+        this.globalListeners.delete(listener)
     }
 
-    public clearGlobalListeners(): void {
+    public clearGlobalListeners() {
         this.globalListeners.clear()
     }
 
-    // private helpers
-
     /**
-     * Helper to debounce watch events while retaining
-     * whether one of those events was a 'rename' event
+     * Debounces watch events while retaining whether one of
+     * them was a 'rename' event
      */
-    private async onPathEvent(path: string, eventType: RawWatchEventType) {
-        const pendingEvent = this.pendingEvents.get(path)
-        const timerId = setTimeout(() => this.emitEvent(path), this.options.debounceWait)
+    private onPathEvent(eventType: string, eventPath: string) {
+        const pendingEvent = this.pendingEvents.get(eventPath)
+        const timerId = setTimeout(() => this.emitEvent(eventPath), this.options.debounceWait)
         if (pendingEvent) {
             clearTimeout(pendingEvent.timerId)
             pendingEvent.renamed = pendingEvent.renamed || eventType === 'rename'
             pendingEvent.timerId = timerId
         } else {
-            this.pendingEvents.set(path, { renamed: eventType === 'rename', timerId })
+            this.pendingEvents.set(eventPath, { renamed: eventType === 'rename', timerId })
         }
     }
 
-    private async emitEvent(path: string) {
+    private async emitEvent(path: string): Promise<void> {
         const pendingEvent = this.pendingEvents.get(path)
+        if (!pendingEvent) {
+            return
+        }
         this.pendingEvents.delete(path)
-        const stats = await getStats(path)
+
+        const stats = await this.statSafe(path)
+
         if (pendingEvent!.renamed) {
             // if one of the bounced events was a rename, make sure to unwatch,
             // as the underlying native inode is now different, and our watcher
             // is not receiving events for the new one
-            this.unwatchPath(path)
+            const existingWatcher = this.fsWatchers.get(path)
+            if (existingWatcher) {
+                existingWatcher.close()
+                this.fsWatchers.delete(path)
+            }
 
-            // if the path was recreated since, rewatch it
+            // rewatch if path points to a new inode
             if (stats) {
-                this.watchPath(path)
+                this.ensureFsWatcher(path, stats)
             }
         }
 
-        // inform listeners of the event
+        const watchEvent: IWatchEvent = { path, stats }
+
+        // inform global listeners
         for (const listener of this.globalListeners) {
-            listener({ path, stats })
+            listener(watchEvent)
+        }
+
+        // inform path listeners
+        const listeners = this.watchedPaths.get(path)
+        if (listeners) {
+            for (const listener of listeners) {
+                listener({ path, stats })
+            }
         }
     }
 
-    private async onDirectoryEvent(directoryPath: string, eventType: RawWatchEventType, fileName: string) {
+    private async ensureFsWatcher(path: string, stats?: IFileSystemStats) {
+        if (this.fsWatchers.has(path)) {
+            return
+        }
+
+        // accepting the optional stats saves us getting the stats ourselves
+        const pathStats = stats || await this.statSafe(path)
+        if (!pathStats) {
+            throw new Error(`cannot watch non-existing path: ${path}`)
+        }
+
+        // open fsWatcher
+        const watchOptions = { persistent: this.options.persistent }
+        if (pathStats.isFile()) {
+            this.fsWatchers.set(
+                path,
+                watch(path, watchOptions, type => this.onPathEvent(type, path))
+            )
+        } else if (pathStats.isDirectory()) {
+            this.fsWatchers.set(
+                path,
+                watch(path, watchOptions, (type, fileName) => this.onDirectoryEvent(type, path, fileName))
+            )
+        } else {
+            throw new Error(`${path} does not point to a file or a directory`)
+        }
+    }
+
+    private async onDirectoryEvent(eventType: string, directoryPath: string, fileName: string) {
         // we must stats the directory, as the raw event gives us no indication
         // whether an inner file or the directory itself was removed.
         // Upon removal of the directory itself, the fileName parameter is just the directory name,
         // which can also be interpreted as an inner file with that name being removed.
-        const directoryStats = await getStats(directoryPath)
-        await this.onPathEvent(directoryStats ? join(directoryPath, fileName) : directoryPath, eventType)
+        const directoryStats = await this.statSafe(directoryPath)
+        await this.onPathEvent(eventType, directoryStats ? join(directoryPath, fileName) : directoryPath)
     }
 
-    private onWatchError(_e: Error) {
-        // TODO
-    }
-}
-
-async function getStats(nodePath: string): Promise<Stats | null> {
-    try {
-        return await stat(nodePath)
-    } catch {
-        return null
+    private async statSafe(nodePath: string): Promise<IFileSystemStats | null> {
+        try {
+            return await stat(nodePath)
+        } catch {
+            return null
+        }
     }
 }
