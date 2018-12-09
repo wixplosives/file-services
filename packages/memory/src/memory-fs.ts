@@ -1,5 +1,5 @@
 import pathMain from 'path'
-import { syncToAsyncFs, createSyncFileSystem, createAsyncFileSystem } from '@file-services/utils'
+import { syncToAsyncFs, createSyncFileSystem, createAsyncFileSystem, SetMultiMap } from '@file-services/utils'
 import {
     IBaseFileSystem,
     IDirectoryContents,
@@ -48,18 +48,29 @@ const posixPath = pathMain.posix as typeof pathMain || pathMain
  */
 export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
+    const pathListeners = new SetMultiMap<string, WatchEventListener>()
     const globalListeners: Set<WatchEventListener> = new Set()
 
     return {
         root,
         path: posixPath,
         watchService: {
-            async watchPath() { /* in-mem, so events are free */ },
-            async unwatchPath() { /* in-mem, so events are free */ },
-            async unwatchAllPaths() { /* in-mem, so events are free */ },
-            addGlobalListener: listener => { globalListeners.add(listener) },
-            removeGlobalListener: listener => globalListeners.delete(listener),
-            clearGlobalListeners: () => globalListeners.clear()
+            async watchPath(path, listener) {
+                if (listener) {
+                    pathListeners.add(path, listener)
+                }
+            },
+            async unwatchPath(path, listener) {
+                if (listener) {
+                    pathListeners.delete(path, listener)
+                } else {
+                    pathListeners.deleteKey(path)
+                }
+            },
+            async unwatchAllPaths() { pathListeners.clear() },
+            addGlobalListener(listener) { globalListeners.add(listener) },
+            removeGlobalListener(listener) { globalListeners.delete(listener) },
+            clearGlobalListeners() { globalListeners.clear() }
         },
         caseSensitive: false,
         lstatSync: statSync, // TODO: implement links
@@ -252,6 +263,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     function emitWatchEvent(watchEvent: IWatchEvent): void {
         for (const listener of globalListeners) {
             listener(watchEvent)
+        }
+        const listeners = pathListeners.get(watchEvent.path)
+        if (listeners) {
+            for (const listener of listeners) {
+                listener(watchEvent)
+            }
         }
     }
 }
