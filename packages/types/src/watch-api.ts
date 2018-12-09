@@ -38,7 +38,8 @@ export interface IWatchService {
     /**
      * Clears all registered global watch event listeners.
      */
-    clearGlobalListeners(): void}
+    clearGlobalListeners(): void
+}
 
 /**
  * Watch event. Emitted when a file system change
