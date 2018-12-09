@@ -1,6 +1,6 @@
 import { IBaseFileSystem, IFileSystem, WatchEventListener, IWatchService } from '@file-services/types'
 import pathMain from 'path'
-import {createAsyncFileSystem, createSyncFileSystem} from './create-extended-api'
+import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-api'
 
 // ugly workaround for webpack's polyfilled path not implementing posix
 const posixPath = pathMain.posix as typeof pathMain || pathMain
@@ -24,41 +24,49 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         }
         return joinedPath
     }
-    const watchListeners: Map<WatchEventListener, WatchEventListener> = new Map()
+
+    const scopedListeners: WeakMap<WatchEventListener, WatchEventListener> = new WeakMap()
+
+    function createScopedListener(listener: WatchEventListener) {
+        const scopedListener: WatchEventListener = e => {
+            const relativeEventPath = relative(directoryPath, e.path)
+            // we don't want to pass events outside of scoped directory
+            if (!relativeEventPath.startsWith(`..${sep}`)) {
+                listener({
+                    stats: e.stats,
+                    // use posixPath to ensure we give posix-style paths back
+                    path: posixPath.join('/', relativeEventPath)
+                })
+            }
+        }
+        scopedListeners.set(listener, scopedListener)
+        return scopedListener
+    }
 
     const scopedWatchService: IWatchService = {
-        async watchPath(path) {
-            return watchService.watchPath(joinPath(path))
-        },
-        async unwatchPath(path) {
-            return watchService.unwatchPath(joinPath(path))
-        },
-        unwatchAllPaths: watchService.unwatchAllPaths,
-        addGlobalListener: listener => {
-            const relativePathListener: WatchEventListener = e => {
-                const relativeEventPath = relative(directoryPath, e.path)
-                // we don't want to pass events outside of scoped directory
-                if (!relativeEventPath.startsWith(`..${sep}`)) {
-                    listener({
-                        stats: e.stats,
-                        // use posixPath to ensure we give posix-style paths back
-                        path: posixPath.join('/', relativeEventPath)
-                    })
-                }
+        async watchPath(path, listener) {
+            if (listener) {
+                listener = scopedListeners.get(listener) || createScopedListener(listener)
             }
-            watchListeners.set(listener, relativePathListener)
-            watchService.addGlobalListener(relativePathListener)
+            return watchService.watchPath(joinPath(path), listener)
+        },
+        async unwatchPath(path, listener) {
+            if (listener) {
+                listener = scopedListeners.get(listener) || listener
+            }
+            return watchService.unwatchPath(joinPath(path), listener)
+        },
+        async unwatchAllPaths() {
+            return watchService.unwatchAllPaths()
+        },
+        addGlobalListener(listener) {
+            return watchService.addGlobalListener(scopedListeners.get(listener) || createScopedListener(listener))
         },
         removeGlobalListener(listener) {
-            const relativePathListener = watchListeners.get(listener)
-            if (relativePathListener) {
-                watchService.removeGlobalListener(relativePathListener)
-                watchListeners.delete(listener)
-            }
+            return watchService.removeGlobalListener(scopedListeners.get(listener) || listener)
         },
         clearGlobalListeners() {
-            watchListeners.clear()
-            watchService.clearGlobalListeners()
+            return watchService.clearGlobalListeners()
         }
     }
 
