@@ -30,6 +30,10 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         async watchPath(path) {
             return watchService.watchPath(joinPath(path))
         },
+        async unwatchPath(path) {
+            return watchService.unwatchPath(joinPath(path))
+        },
+        unwatchAllPaths: watchService.unwatchAllPaths,
         addGlobalListener: listener => {
             const relativePathListener: WatchEventListener = e => {
                 const relativeEventPath = relative(directoryPath, e.path)
@@ -55,8 +59,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         clearGlobalListeners() {
             watchListeners.clear()
             watchService.clearGlobalListeners()
-        },
-        unwatchAll: watchService.unwatchAll
+        }
     }
 
     const scopedBaseFs: IBaseFileSystem = {

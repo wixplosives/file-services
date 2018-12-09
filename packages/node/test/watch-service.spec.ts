@@ -17,7 +17,7 @@ describe('Node Watch Service', function() {
 
     afterEach('delete temp directory and close watch service', async () => {
         watchService.clearGlobalListeners()
-        await watchService.unwatchAll()
+        await watchService.unwatchAllPaths()
         await tempDir.remove()
     })
 

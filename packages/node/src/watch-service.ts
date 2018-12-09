@@ -1,13 +1,13 @@
 import { join } from 'path'
 import { FSWatcher, watch, stat, Stats, readdir } from 'proper-fs'
-import { IWatchService, WatchEventListener, IFileSystemStats } from '@file-services/types'
+import { IWatchService, WatchEventListener } from '@file-services/types'
 
 type RawWatchEventType = 'rename' | 'change'
 
 export interface INodeWatchServiceOptions {
     /**
      * Should fs watchers be persistent and keep the process open
-     * (until someone calls `unwatchAll()`)
+     * (until someone calls `unwatchAllPaths()`)
      *
      * @default true
      */
@@ -59,15 +59,14 @@ export class NodeWatchService implements IWatchService {
      * @param path absolute path to watch
      * @param stats optional stats, if already queried on user code
      */
-    public async watchPath(path: string, stats?: IFileSystemStats): Promise<void> {
+    public async watchPath(path: string): Promise<void> {
         if (this.watchedPaths.has(path)) {
             // path is already being watched directly (fs watcher on its path)
             // or indirectly (fs watcher on its containing directory)
             return
         }
 
-        // accepting the optional stats saves us getting the stats ourselves
-        const pathStats = stats || await getStats(path)
+        const pathStats = await getStats(path)
         if (!pathStats) {
             return
         }
@@ -107,7 +106,7 @@ export class NodeWatchService implements IWatchService {
         }
     }
 
-    public async unwatchPath(path: string) {
+    public async unwatchPath(path: string): Promise<void> {
         const existingWatcher = this.fsWatchers.get(path)
 
         // path has a direct watcher, so we can close it and unwatch,
@@ -119,7 +118,7 @@ export class NodeWatchService implements IWatchService {
         }
     }
 
-    public async unwatchAll(): Promise<void> {
+    public async unwatchAllPaths(): Promise<void> {
         for (const watcher of this.fsWatchers.values()) {
             watcher.close()
         }
@@ -169,7 +168,7 @@ export class NodeWatchService implements IWatchService {
 
             // if the path was recreated since, rewatch it
             if (stats) {
-                this.watchPath(path, stats)
+                this.watchPath(path)
             }
         }
 

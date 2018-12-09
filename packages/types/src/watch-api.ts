@@ -6,14 +6,23 @@ import { IFileSystemStats } from './base-api'
  */
 export interface IWatchService {
     /**
-     * Start watching a path (file or directory).
+     * Start watching `path` (file or directory).
+     * if `listener` is provided, it will receive watch events for `path`.
+     * Any global listeners will also receive events for path.
      */
-    watchPath(path: string): Promise<void>
+    watchPath(path: string, listener?: WatchEventListener): Promise<void>
+
+    /**
+     * Stop watching `path` (file or directory).
+     * if `listener` is provided, it will stop receiving watch events for `path`.
+     * if `listener is not provided, path will be unwatched with its listeners cleared.
+     */
+    unwatchPath(path: string, listener?: WatchEventListener): Promise<void>
 
     /**
      * Unwatch all watched paths.
      */
-    unwatchAll(): Promise<void>
+    unwatchAllPaths(): Promise<void>
 
     /**
      * Add a global watch event listener.

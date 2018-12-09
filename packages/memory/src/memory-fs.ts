@@ -54,11 +54,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         root,
         path: posixPath,
         watchService: {
+            async watchPath() { /* in-mem, so events are free */ },
+            async unwatchPath() { /* in-mem, so events are free */ },
+            async unwatchAllPaths() { /* in-mem, so events are free */ },
             addGlobalListener: listener => { globalListeners.add(listener) },
             removeGlobalListener: listener => globalListeners.delete(listener),
-            clearGlobalListeners: () => globalListeners.clear(),
-            async watchPath() { /* in-mem, so events are free */ },
-            async unwatchAll() { /* in-mem, so events are free */ }
+            clearGlobalListeners: () => globalListeners.clear()
         },
         caseSensitive: false,
         lstatSync: statSync, // TODO: implement links
