@@ -1,7 +1,7 @@
 {
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -14,10 +14,10 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^0.3.0"
+    "@file-services/types": "^0.4.0"
   },
   "devDependencies": {
-    "@file-services/test-kit": "^0.3.0"
+    "@file-services/test-kit": "^0.4.0"
   },
   "files": [
     "cjs",
