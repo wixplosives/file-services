@@ -15,8 +15,7 @@
   },
   "dependencies": {
     "@file-services/types": "^0.4.11",
-    "@file-services/utils": "^0.4.11",
-    "proper-fs": "^1.1.2"
+    "@file-services/utils": "^0.4.11"
   },
   "files": [
     "cjs",
@@ -24,7 +23,7 @@
     "!src/tsconfig.json"
   ],
   "engines": {
-    "node": ">=8"
+    "node": ">=10"
   },
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/node",

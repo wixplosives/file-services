@@ -1,35 +1,14 @@
 import path from 'path'
 import { chdir, cwd } from 'process'
-import {
-    lstat,
-    lstatSync,
-    mkdir,
-    mkdirSync,
-    readdir,
-    readdirSync,
-    readFile,
-    readFileSync,
-    realpath,
-    realpathSync,
-    rename,
-    renameSync,
-    rmdir,
-    rmdirSync,
-    stat,
-    statSync,
-    unlink,
-    unlinkSync,
-    writeFile,
-    writeFileSync,
-    isCaseSensitive,
-    copyFile,
-    copyFileSync,
-    exists,
-    existsSync
-} from 'proper-fs'
+import fs from 'fs'
+
 import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service'
+
+const {promises, existsSync} = fs
+
+const caseSensitive = !existsSync(__filename.toUpperCase())
 
 export interface ICreateNodeFsOptions {
     watchOptions?: INodeWatchServiceOptions
@@ -50,31 +29,9 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         watchService: new NodeWatchService(options && options.watchOptions),
         chdir,
         cwd,
-        caseSensitive: isCaseSensitive,
-        copyFile,
-        copyFileSync,
-        exists,
-        existsSync,
-        lstat,
-        lstatSync,
-        mkdir,
-        mkdirSync,
-        readdir,
-        readdirSync,
-        readFile,
-        readFileSync,
-        realpath,
-        realpathSync,
-        rename,
-        renameSync,
-        rmdir,
-        rmdirSync,
-        stat,
-        statSync,
-        unlink,
-        unlinkSync,
-        writeFile,
-        writeFileSync
+        caseSensitive,
+        ...fs,
+        ...promises
     }
 }
 

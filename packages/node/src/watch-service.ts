@@ -1,7 +1,9 @@
 import { join } from 'path'
-import { stat, watch, FSWatcher } from 'proper-fs'
+import { promises, watch, FSWatcher } from 'fs'
 import { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types'
 import { SetMultiMap } from '@file-services/utils'
+
+const { stat } = promises
 
 export interface INodeWatchServiceOptions {
     /**
