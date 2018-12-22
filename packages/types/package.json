@@ -12,7 +12,7 @@
   },
   "files": [
     "cjs",
-    "src"
+    "src/**/*.ts"
   ],
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/types",
