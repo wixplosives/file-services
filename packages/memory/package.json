@@ -1,7 +1,7 @@
 {
   "name": "@file-services/memory",
   "description": "An in-memory, sync/async, file system implementation.",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -18,10 +18,10 @@
   },
   "dependencies": {
     "@file-services/types": "^0.4.2",
-    "@file-services/utils": "^0.4.2"
+    "@file-services/utils": "^0.4.3"
   },
   "devDependencies": {
-    "@file-services/test-kit": "^0.4.2"
+    "@file-services/test-kit": "^0.4.3"
   },
   "files": [
     "cjs",
