@@ -12,9 +12,9 @@
     "test": "lerna run test --stream --parallel"
   },
   "devDependencies": {
-    "@ts-tools/build": "^0.1.2",
-    "@ts-tools/node": "^0.7.4",
-    "@ts-tools/webpack-loader": "^0.7.5",
+    "@ts-tools/build": "^0.1.5",
+    "@ts-tools/node": "^0.8.2",
+    "@ts-tools/webpack-loader": "^0.8.2",
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^5.2.5",
@@ -31,7 +31,7 @@
     "rimraf": "^2.6.2",
     "tslint": "^5.12.0",
     "typescript": "~3.2.2",
-    "webpack": "^4.28.2"
+    "webpack": "^4.28.3"
   },
   "license": "MIT",
   "private": true
