@@ -42,11 +42,11 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
     }
 
     function populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void {
-        ensureDirectorySync(directoryPath)
 
         for (const [nodeName, nodeValue] of Object.entries(contents)) {
             const nodePath = path.join(directoryPath, nodeName)
             if (typeof nodeValue === 'string') {
+                ensureDirectorySync(path.dirname(nodePath))
                 writeFileSync(nodePath, nodeValue)
             } else {
                 populateDirectorySync(nodePath, nodeValue)
@@ -99,11 +99,10 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
     }
 
     async function populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void> {
-        await ensureDirectory(directoryPath)
-
         for (const [nodeName, nodeValue] of Object.entries(contents)) {
             const nodePath = path.join(directoryPath, nodeName)
             if (typeof nodeValue === 'string') {
+                await ensureDirectory(path.dirname(nodePath))
                 await writeFile(nodePath, nodeValue)
             } else {
                 await populateDirectory(nodePath, nodeValue)
