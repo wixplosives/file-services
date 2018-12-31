@@ -45,7 +45,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-dir', 'file')
 
-                expect(fs.writeFile(filePath, SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT')
+                await expect(fs.writeFile(filePath, SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if writing a file to a path already pointing to a directory', async () => {
@@ -55,7 +55,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.mkdir(directoryPath)
 
-                expect(fs.writeFile(directoryPath, SAMPLE_CONTENT)).to.be.rejectedWith('EISDIR')
+                await expect(fs.writeFile(directoryPath, SAMPLE_CONTENT)).to.be.rejectedWith('EISDIR')
             })
         })
 
@@ -78,13 +78,13 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-file')
 
-                expect(fs.readFile(filePath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.readFile(filePath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if reading a directory as a file', async () => {
                 const { fs, tempDirectoryPath } = testInput
 
-                expect(fs.readFile(tempDirectoryPath)).to.be.rejectedWith('EISDIR')
+                await expect(fs.readFile(tempDirectoryPath)).to.be.rejectedWith('EISDIR')
             })
 
         })
@@ -98,7 +98,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(filePath, SAMPLE_CONTENT)
                 await fs.unlink(filePath)
 
-                expect(fs.stat(filePath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.stat(filePath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if trying to remove a non-existing file', async () => {
@@ -106,7 +106,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-file')
 
-                expect(fs.unlink(filePath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.unlink(filePath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if trying to remove a directory as a file', async () => {
@@ -116,7 +116,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.mkdir(directoryPath)
 
-                expect(fs.unlink(directoryPath)).to.be.rejectedWith() // linux throws `EISDIR`, mac throws `EPERM`
+                await expect(fs.unlink(directoryPath)).to.be.rejectedWith() // linux throws `EISDIR`, mac throws `EPERM`
             })
         })
 
@@ -190,7 +190,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.mkdir(directoryPath)
 
-                expect(fs.mkdir(directoryPath)).to.be.rejectedWith('EEXIST')
+                await expect(fs.mkdir(directoryPath)).to.be.rejectedWith('EEXIST')
             })
 
             it('fails if creating in a path pointing to an existing file', async () => {
@@ -200,7 +200,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.writeFile(filePath, SAMPLE_CONTENT)
 
-                expect(fs.mkdir(filePath)).to.be.rejectedWith('EEXIST')
+                await expect(fs.mkdir(filePath)).to.be.rejectedWith('EEXIST')
             })
 
             it('fails if creating a directory inside a non-existing directory', async () => {
@@ -208,7 +208,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'outer', 'inner')
 
-                expect(fs.mkdir(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.mkdir(directoryPath)).to.be.rejectedWith('ENOENT')
             })
         })
 
@@ -234,7 +234,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'missing-dir')
 
-                expect(fs.readdir(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.readdir(directoryPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if listing a path pointing to a file', async () => {
@@ -244,7 +244,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.writeFile(filePath, SAMPLE_CONTENT)
 
-                expect(fs.readdir(filePath)).to.be.rejectedWith('ENOTDIR')
+                await expect(fs.readdir(filePath)).to.be.rejectedWith('ENOTDIR')
             })
         })
 
@@ -257,7 +257,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.mkdir(directoryPath)
                 await fs.rmdir(directoryPath)
 
-                expect(fs.stat(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.stat(directoryPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if removing a non-empty directory', async () => {
@@ -268,7 +268,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.mkdir(directoryPath)
                 await fs.writeFile(join(directoryPath, 'file'), SAMPLE_CONTENT)
 
-                expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOTEMPTY')
+                await expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOTEMPTY')
             })
 
             it('fails if removing a non-existing directory', async () => {
@@ -276,7 +276,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'missing-dir')
 
-                expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if removing a path pointing to a file', async () => {
@@ -286,7 +286,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.writeFile(filePath, SAMPLE_CONTENT)
 
-                expect(fs.rmdir(filePath)).to.be.rejectedWith()
+                await expect(fs.rmdir(filePath)).to.be.rejectedWith()
             })
         })
 
@@ -401,9 +401,9 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             await fs.writeFile(filePath, SAMPLE_CONTENT)
 
             if (fs.caseSensitive) {
-                expect(fs.stat(upperCaseFilePath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.stat(upperCaseFilePath)).to.be.rejectedWith('ENOENT')
             } else {
-                expect((await fs.stat(upperCaseFilePath)).isFile()).to.equal(true)
+                await expect((await fs.stat(upperCaseFilePath)).isFile()).to.equal(true)
             }
         })
     })
