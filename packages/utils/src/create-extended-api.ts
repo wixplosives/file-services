@@ -64,6 +64,8 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
             rmdirSync(entryPath)
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             unlinkSync(entryPath)
+        } else {
+            throw new Error(`incorrect node type, cannot delete ${entryPath}`)
         }
     }
 
