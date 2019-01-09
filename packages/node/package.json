@@ -1,7 +1,7 @@
 {
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
@@ -14,12 +14,12 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^0.4.2",
-    "@file-services/utils": "^0.4.3",
+    "@file-services/types": "^0.4.4",
+    "@file-services/utils": "^0.4.4",
     "proper-fs": "^1.1.0"
   },
   "devDependencies": {
-    "@file-services/test-kit": "^0.4.3"
+    "@file-services/test-kit": "^0.4.4"
   },
   "files": [
     "cjs",

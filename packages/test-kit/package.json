@@ -1,7 +1,7 @@
 {
   "name": "@file-services/test-kit",
   "description": "File system test-kit, containing contracts and validators.",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -12,7 +12,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^0.4.2",
+    "@file-services/types": "^0.4.4",
     "chai": "^4.2.0",
     "promise-assist": "^1.2.1"
   },
