@@ -64,6 +64,8 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
             rmdirSync(entryPath)
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             unlinkSync(entryPath)
+        } else {
+            throw new Error(`unknown node type, cannot delete ${entryPath}`)
         }
     }
 
@@ -129,15 +131,12 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         const stats = await lstat(entryPath)
         if (stats.isDirectory()) {
             const directoryItems = await readdir(entryPath)
-            for (const entryName of directoryItems) {
-                await remove(path.join(entryPath, entryName))
-
-            }
+            await Promise.all(directoryItems.map(entryName => remove(path.join(entryPath, entryName))))
             await rmdir(entryPath)
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             await unlink(entryPath)
         } else {
-            throw new Error('incorect node type, cannot delete')
+            throw new Error(`unknown node type, cannot delete ${entryPath}`)
         }
     }
 
