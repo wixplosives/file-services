@@ -59,9 +59,9 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         const isDir = stats.isDirectory()
         if (isDir) {
             const dir = readdirSync(entryPath)
-            dir.forEach(entry => {
+            for (const entry of dir) {
                 removeSync(path.join(entryPath, entry))
-            })
+            }
             rmdirSync(entryPath)
         } else {
             unlinkSync(entryPath)
@@ -131,8 +131,8 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         const isDir = stats.isDirectory()
         if (isDir) {
             const dir = await readdir(entryPath)
-            for (let i = 0, l = dir.length; i < l; i++) {
-                await remove(path.join(entryPath, dir[i]))
+            for (const entry of dir) {
+                await remove(path.join(entryPath, entry))
 
             }
             await rmdir(entryPath)

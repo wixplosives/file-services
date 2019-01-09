@@ -71,27 +71,30 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
             })
         })
 
-        describe('rmrf', () => {
+        describe('remove', () => {
             it('should delete directory recursively', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
-                fs.mkdirSync(directoryPath)
-                fs.mkdirSync(join(directoryPath, '/dir1'))
-                fs.mkdirSync(join(directoryPath, '/dir2'))
-                fs.writeFileSync(join(directoryPath, '/file1'), '')
-                fs.writeFileSync(join(directoryPath, '/file2'), '')
-                fs.writeFileSync(join(directoryPath, '/dir1/file1'), '')
-                fs.writeFileSync(join(directoryPath, '/dir1/file2'), '')
-                fs.writeFileSync(join(directoryPath, '/dir1/file3'), '')
-                fs.writeFileSync(join(directoryPath, '/dir2/file1'), '')
-
-                expect(fs.readdirSync(directoryPath)).to.deep.equal(['dir1', 'dir2', 'file1', 'file2'])
+                fs.populateDirectorySync(directoryPath, {
+                    'file1.ts': '',
+                    'file2.ts': '',
+                    'folder1': {
+                        'file1.ts': '',
+                        'file2.ts': '',
+                        'file3.ts': ''
+                    },
+                    'folder2': {
+                        'file1.ts': '',
+                        'file2.ts': '',
+                        'file3.ts': ''
+                    }
+                })
 
                 fs.removeSync(directoryPath)
 
-                expect(fs.readdirSync(tempDirectoryPath)).to.deep.equal([])
+                expect(fs.directoryExistsSync(directoryPath)).to.equal(false)
             })
 
             it('should delete a file', () => {
@@ -105,7 +108,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
                 fs.removeSync(filePath)
 
-                expect(fs.readdirSync(tempDirectoryPath)).to.deep.equal([])
+                expect(fs.fileExistsSync(tempDirectoryPath)).to.equal(false)
             })
 
             it('should fail on nonexistant', () => {
