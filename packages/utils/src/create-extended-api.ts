@@ -7,7 +7,7 @@ import {
 } from '@file-services/types'
 
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
-    const { statSync, path, mkdirSync, writeFileSync } = baseFs
+    const { statSync, path, mkdirSync, writeFileSync, unlinkSync, rmdirSync, lstatSync, readdirSync } = baseFs
 
     function fileExistsSync(filePath: string, statFn = statSync): boolean {
         try {
@@ -54,17 +54,32 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
+    function removeSync(entryPath: string) {
+        const stats = lstatSync(entryPath)
+        const isDir = stats.isDirectory()
+        if (isDir) {
+            const dir = readdirSync(entryPath)
+            dir.forEach(entry => {
+                removeSync(path.join(entryPath, entry))
+            })
+            rmdirSync(entryPath)
+        } else {
+            unlinkSync(entryPath)
+        }
+    }
+
     return {
         ...baseFs,
         fileExistsSync,
         directoryExistsSync,
         ensureDirectorySync,
-        populateDirectorySync
+        populateDirectorySync,
+        removeSync
     }
 }
 
 export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystemAsync {
-    const { stat, path, mkdir, writeFile } = baseFs
+    const { stat, path, mkdir, writeFile, lstat, rmdir, unlink, readdir } = baseFs
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
         try {
@@ -111,11 +126,27 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
+    async function remove(entryPath: string) {
+        const stats = await lstat(entryPath)
+        const isDir = stats.isDirectory()
+        if (isDir) {
+            const dir = await readdir(entryPath)
+            for (let i = 0, l = dir.length; i < l; i++) {
+                await remove(path.join(entryPath, dir[i]))
+
+            }
+            await rmdir(entryPath)
+        } else {
+            await unlink(entryPath)
+        }
+    }
+
     return {
         ...baseFs,
         fileExists,
         directoryExists,
         ensureDirectory,
-        populateDirectory
+        populateDirectory,
+        remove
     }
 }
