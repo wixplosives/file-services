@@ -56,14 +56,13 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 
     function removeSync(entryPath: string) {
         const stats = lstatSync(entryPath)
-        const isDir = stats.isDirectory()
-        if (isDir) {
-            const dir = readdirSync(entryPath)
-            for (const entry of dir) {
-                removeSync(path.join(entryPath, entry))
+        if (stats.isDirectory()) {
+            const directoryItems = readdirSync(entryPath)
+            for (const entryName of directoryItems) {
+                removeSync(path.join(entryPath, entryName))
             }
             rmdirSync(entryPath)
-        } else {
+        } else if (stats.isFile() || stats.isSymbolicLink()) {
             unlinkSync(entryPath)
         }
     }
@@ -128,16 +127,17 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
 
     async function remove(entryPath: string) {
         const stats = await lstat(entryPath)
-        const isDir = stats.isDirectory()
-        if (isDir) {
-            const dir = await readdir(entryPath)
-            for (const entry of dir) {
-                await remove(path.join(entryPath, entry))
+        if (stats.isDirectory()) {
+            const directoryItems = await readdir(entryPath)
+            for (const entryName of directoryItems) {
+                await remove(path.join(entryPath, entryName))
 
             }
             await rmdir(entryPath)
-        } else {
+        } else if (stats.isFile() || stats.isSymbolicLink()) {
             await unlink(entryPath)
+        } else {
+            throw new Error('incorect node type, cannot delete')
         }
     }
 

@@ -116,9 +116,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                function thrower() {
-                    fs.removeSync(filePath)
-                }
+                const thrower = () => fs.removeSync(filePath)
                 expect(thrower).to.throw(/ENOENT/)
             })
         })
