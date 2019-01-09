@@ -46,7 +46,7 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     /**
      * Recursively remove a path.
      */
-    // removeSync(path: string): void
+    removeSync(path: string): void
 
     /**
      * Recursively walk over a directory and its contents
@@ -94,7 +94,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
     /**
      * Recursively remove a path.
      */
-    // remove(path: string): Promise<void>
+    remove(path: string): Promise<void>
 
     /**
      * Recursively walk over a directory and its contents

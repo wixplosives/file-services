@@ -7,7 +7,7 @@ import {
 } from '@file-services/types'
 
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
-    const { statSync, path, mkdirSync, writeFileSync } = baseFs
+    const { statSync, path, mkdirSync, writeFileSync, unlinkSync, rmdirSync, lstatSync, readdirSync } = baseFs
 
     function fileExistsSync(filePath: string, statFn = statSync): boolean {
         try {
@@ -54,17 +54,31 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
+    function removeSync(entryPath: string) {
+        const stats = lstatSync(entryPath)
+        if (stats.isDirectory()) {
+            const directoryItems = readdirSync(entryPath)
+            for (const entryName of directoryItems) {
+                removeSync(path.join(entryPath, entryName))
+            }
+            rmdirSync(entryPath)
+        } else if (stats.isFile() || stats.isSymbolicLink()) {
+            unlinkSync(entryPath)
+        }
+    }
+
     return {
         ...baseFs,
         fileExistsSync,
         directoryExistsSync,
         ensureDirectorySync,
-        populateDirectorySync
+        populateDirectorySync,
+        removeSync
     }
 }
 
 export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystemAsync {
-    const { stat, path, mkdir, writeFile } = baseFs
+    const { stat, path, mkdir, writeFile, lstat, rmdir, unlink, readdir } = baseFs
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
         try {
@@ -111,11 +125,28 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
+    async function remove(entryPath: string) {
+        const stats = await lstat(entryPath)
+        if (stats.isDirectory()) {
+            const directoryItems = await readdir(entryPath)
+            for (const entryName of directoryItems) {
+                await remove(path.join(entryPath, entryName))
+
+            }
+            await rmdir(entryPath)
+        } else if (stats.isFile() || stats.isSymbolicLink()) {
+            await unlink(entryPath)
+        } else {
+            throw new Error('incorect node type, cannot delete')
+        }
+    }
+
     return {
         ...baseFs,
         fileExists,
         directoryExists,
         ensureDirectory,
-        populateDirectory
+        populateDirectory,
+        remove
     }
 }
