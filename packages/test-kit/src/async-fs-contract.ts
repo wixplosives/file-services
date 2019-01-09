@@ -70,5 +70,53 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 expect(await fs.directoryExists(filePath)).to.equal(false)
             })
         })
+
+        describe('rmrf', () => {
+            it('should delete directory recursively', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const directoryPath = join(tempDirectoryPath, 'dir')
+
+                await fs.mkdir(directoryPath)
+                await fs.mkdir(join(directoryPath, '/dir1'))
+                await fs.mkdir(join(directoryPath, '/dir2'))
+                await fs.writeFile(join(directoryPath, '/file1'), '')
+                await fs.writeFile(join(directoryPath, '/file2'), '')
+                await fs.writeFile(join(directoryPath, '/dir1/file1'), '')
+                await fs.writeFile(join(directoryPath, '/dir1/file2'), '')
+                await fs.writeFile(join(directoryPath, '/dir1/file3'), '')
+                await fs.writeFile(join(directoryPath, '/dir2/file1'), '')
+
+                expect(await fs.readdir(directoryPath)).to.deep.equal(['dir1', 'dir2', 'file1', 'file2'])
+
+                await fs.remove(directoryPath)
+
+                expect(await fs.readdir(tempDirectoryPath)).to.deep.equal([])
+            })
+        })
+
+        it('should delete a file', async () => {
+            const { fs, tempDirectoryPath } = testInput
+            const { join } = fs.path
+            const filePath = join(tempDirectoryPath, 'file')
+
+            await fs.writeFile(filePath, '')
+
+            expect(await fs.readdir(tempDirectoryPath)).to.deep.equal(['file'])
+
+            await fs.remove(filePath)
+
+            expect(await fs.readdir(tempDirectoryPath)).to.deep.equal([])
+        })
+
+        it('should fail on nonexistant', async () => {
+            const { fs, tempDirectoryPath } = testInput
+            const { join } = fs.path
+            const filePath = await join(tempDirectoryPath, 'file')
+
+            await fs.remove(filePath).catch(err => {
+                expect(err).to.match(/ENOENT/)
+            })
+        })
     })
 }
