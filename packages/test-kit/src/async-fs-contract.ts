@@ -116,10 +116,6 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
             const filePath = await join(tempDirectoryPath, 'file')
 
             return expect(fs.remove(filePath)).to.eventually.rejectedWith(/ENOENT/)
-
-            // await fs.remove(filePath).catch(err => {
-            //     expect(err).to.match(/ENOENT/)
-            // })
         })
     })
 }
