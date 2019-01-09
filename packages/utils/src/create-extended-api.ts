@@ -65,7 +65,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             unlinkSync(entryPath)
         } else {
-            throw new Error(`incorrect node type, cannot delete ${entryPath}`)
+            throw new Error(`unknown node type, cannot delete ${entryPath}`)
         }
     }
 
@@ -136,7 +136,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             await unlink(entryPath)
         } else {
-            throw new Error(`incorrect node type, cannot delete ${entryPath}`)
+            throw new Error(`unknown node type, cannot delete ${entryPath}`)
         }
     }
 
