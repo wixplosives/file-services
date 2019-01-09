@@ -1,7 +1,7 @@
 {
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
