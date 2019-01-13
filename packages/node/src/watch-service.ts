@@ -132,7 +132,7 @@ export class NodeWatchService implements IWatchService {
 
             // rewatch if path points to a new inode
             if (stats) {
-                this.ensureFsWatcher(path, stats)
+                await this.ensureFsWatcher(path, stats)
             }
         }
 
