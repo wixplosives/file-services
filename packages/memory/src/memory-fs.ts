@@ -79,6 +79,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         readFileSync,
         readFileRawSync,
         realpathSync: p => p, // TODO: implement links
+        renameSync,
         rmdirSync,
         statSync,
         unlinkSync,
@@ -270,6 +271,54 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
                 listener(watchEvent)
             }
         }
+    }
+
+    function renameSync(sourcePath: string, targetPath: string): void {
+        const sourceParentPath = posixPath.dirname(sourcePath)
+        const sourceParentNode = getNode(sourceParentPath)
+
+        if (!sourceParentNode || sourceParentNode.type !== 'dir') {
+            throw new Error(`${sourcePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        }
+
+        const sourceName = posixPath.basename(sourcePath)
+        const lowerCaseSourceName = sourceName.toLowerCase()
+        const sourceNode = sourceParentNode.contents[lowerCaseSourceName]
+
+        if (!sourceNode) {
+            throw new Error(`${sourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        }
+
+        const targetParentPath = posixPath.dirname(targetPath)
+        const targetParentNode = getNode(targetParentPath)
+
+        if (!targetParentNode || targetParentNode.type !== 'dir') {
+            throw new Error(`${targetPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        }
+
+        const targetName = posixPath.basename(targetPath)
+        const lowerCaseTargetName = targetName.toLowerCase()
+        const targetNode = targetParentNode.contents[lowerCaseTargetName]
+
+        if (targetNode) {
+            if (targetNode.type === 'dir') {
+                if (Object.keys(targetNode.contents).length > 0) {
+                    throw new Error(`${targetPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
+                }
+            } else {
+                throw new Error(`${sourcePath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+            }
+        }
+
+        delete sourceParentNode.contents[lowerCaseSourceName]
+        sourceNode.name = targetName
+        if (sourceNode.type === 'dir') {
+            Object.getPrototypeOf(sourceNode.contents)['..'] = targetParentNode
+        }
+        targetParentNode.contents[lowerCaseTargetName] = sourceNode
+
+        emitWatchEvent({ path: sourcePath, stats: null })
+        emitWatchEvent({ path: targetPath, stats: createStatsFromNode(sourceNode) })
     }
 }
 

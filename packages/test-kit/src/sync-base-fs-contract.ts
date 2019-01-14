@@ -409,6 +409,119 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             })
         })
 
+        describe('renaming directories and files', () => {
+            it('moves a file', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'file')
+                const destinationPath = join(tempDirectoryPath, 'dir', 'subdir', 'movedFile')
+
+                fs.writeFileSync(sourcePath, SAMPLE_CONTENT)
+                fs.mkdirSync(join(tempDirectoryPath, 'dir'))
+                fs.mkdirSync(join(tempDirectoryPath, 'dir', 'subdir'))
+
+                fs.renameSync(sourcePath, destinationPath)
+
+                expect(fs.statSync(destinationPath).isFile()).to.equal(true)
+                expect(fs.readFileSync(destinationPath)).to.eql(SAMPLE_CONTENT)
+                expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
+            })
+
+            it('moves a directory', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'dir')
+                const destinationPath = join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir')
+                fs.mkdirSync(join(tempDirectoryPath, 'dir'))
+                fs.mkdirSync(join(tempDirectoryPath, 'anotherDir'))
+                fs.mkdirSync(join(tempDirectoryPath, 'anotherDir', 'subdir'))
+                fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                fs.renameSync(sourcePath, destinationPath)
+
+                expect(fs.statSync(destinationPath).isDirectory()).to.equal(true)
+                expect(fs.readFileSync(join(destinationPath, 'file'))).to.eql(SAMPLE_CONTENT)
+                expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
+            })
+
+            it('throws if source path doesn\'t exist', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'file')
+
+                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('ENOENT')
+            })
+
+            it('throws if the containing directory of the source path doesn\'t exist', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'unicorn', 'file')
+
+                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('ENOENT')
+            })
+
+            it('throws if destination containing path doesn\'t exist', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'file')
+
+                fs.writeFileSync(sourcePath, SAMPLE_CONTENT)
+
+                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).not.to.throw('ENOENT')
+                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'dir', 'file2'))).to.throw('ENOENT')
+            })
+
+            it('throws if destination path already exists', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'file')
+
+                fs.writeFileSync(sourcePath, SAMPLE_CONTENT)
+                fs.writeFileSync(join(tempDirectoryPath, 'file2'), SAMPLE_CONTENT)
+
+                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('EEXIST')
+            })
+
+            it('doesn\'t throw if destination path already exists for copying a directory over a non-existing directory', () => { //tslint:disable-line
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'sourceDir')
+
+                fs.mkdirSync(sourcePath)
+                fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'destDir'))).not.to.throw('EEXIST')
+            })
+
+            it('doesn\'t throw if destination path already exists for copying a directory over an empty directory', () => { //tslint:disable-line
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'sourceDir')
+                const destPath = join(tempDirectoryPath, 'destDir')
+
+                fs.mkdirSync(sourcePath)
+                fs.mkdirSync(destPath)
+                fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                expect(() => fs.renameSync(sourcePath, destPath)).not.to.throw('EEXIST')
+            })
+
+            it('updates the parent directory of a renamed entry', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'sourceDir')
+                const destPath = join(tempDirectoryPath, 'destDir')
+
+                fs.mkdirSync(sourcePath)
+                fs.mkdirSync(destPath)
+                fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                fs.renameSync(sourcePath, destPath)
+
+                expect(fs.readdirSync('/')).to.eql(['destDir'])
+            })
+        })
+
         it('correctly exposes whether it is case sensitive', () => {
             const { fs, tempDirectoryPath } = testInput
             const { join } = fs.path

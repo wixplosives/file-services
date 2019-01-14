@@ -68,6 +68,8 @@ export interface IBaseFileSystemSync {
      * If path is linked, returns the actual target path.
      */
     realpathSync(path: string): string
+
+    renameSync(filePath: string, newFilePath: string): void
 }
 
 /**

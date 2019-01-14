@@ -110,6 +110,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         realpathSync(path) {
             return fs.realpathSync(joinPath(path))
         },
+        renameSync(path, newPath) {
+            return fs.renameSync(joinPath(path), joinPath(newPath))
+        },
         async rmdir(path) {
             return fs.rmdir(joinPath(path))
         },
