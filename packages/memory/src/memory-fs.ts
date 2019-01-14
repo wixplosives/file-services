@@ -306,7 +306,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
                     throw new Error(`${targetPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
                 }
             } else {
-                throw new Error(`${sourcePath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+                throw new Error(`${targetPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
             }
         }
 

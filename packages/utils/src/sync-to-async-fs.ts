@@ -44,6 +44,10 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
 
         async realpath(nodePath) {
             return syncFs.realpathSync(nodePath)
+        },
+
+        async rename(path, newPath) {
+            return syncFs.renameSync(path, newPath)
         }
     }
 }
