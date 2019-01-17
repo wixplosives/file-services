@@ -538,5 +538,70 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(fs.statSync(upperCaseFilePath).isFile()).to.equal(true)
             }
         })
+
+        describe('copying files/directories', () => {
+            const SOURCE_FILE_NAME = 'file.txt'
+            const COPYFILE_EXCL = 1
+            let targetDirectoryPath: string
+            let sourceFilePath: string
+
+            beforeEach(() => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                targetDirectoryPath = join(tempDirectoryPath, 'dir')
+                fs.mkdirSync(targetDirectoryPath)
+                sourceFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME)
+                fs.writeFileSync(sourceFilePath, SAMPLE_CONTENT)
+            })
+
+            it('can copy file', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                fs.copyFileSync(sourceFilePath, targetPath)
+                expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
+            })
+
+            it('can copy directory (without contents)', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+
+                const testDirName = 'dirToCopy'
+                const srcPath = join(tempDirectoryPath, testDirName)
+                fs.mkdirSync(srcPath)
+                fs.writeFileSync(join(srcPath, SOURCE_FILE_NAME), SAMPLE_CONTENT)
+
+                const targetPath = join(targetDirectoryPath, testDirName)
+                fs.copyFileSync(srcPath, targetPath)
+                expect(fs.readdirSync(targetPath)).to.be.eql([])
+            })
+
+            it('fails if source does not exist', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const sourcePath = fs.path.join(tempDirectoryPath, 'nonExistingFileName.txt')
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                expect(() => fs.copyFileSync(sourcePath, targetPath)).to.throw('ENOENT')
+            })
+
+            it('fails if target containing directory does not exist', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME)
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('ENOENT')
+            })
+
+            it('overwrites destination file by default', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                fs.writeFileSync(targetPath, 'content to be overwritten')
+                fs.copyFileSync(sourceFilePath, targetPath)
+                expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
+            })
+
+            it('fails if destination exists and flag COPYFILE_EXCL passed', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                fs.writeFileSync(targetPath, 'content to be overwritten')
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath, COPYFILE_EXCL)).to.throw('EEXIST')
+            })
+        })
     })
 }
