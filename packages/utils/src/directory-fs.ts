@@ -74,6 +74,12 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         path: fs.path,
         caseSensitive: fs.caseSensitive,
         watchService: scopedWatchService,
+        async copyFile(src, dest, flags) {
+            return fs.copyFile(joinPath(src), joinPath(dest), flags)
+        },
+        copyFileSync(src, dest, flags) {
+            return fs.copyFileSync(joinPath(src), joinPath(dest), flags)
+        },
         async lstat(path) {
             return fs.lstat(joinPath(path))
         },

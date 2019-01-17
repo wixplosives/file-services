@@ -48,6 +48,10 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
 
         async rename(path, newPath) {
             return syncFs.renameSync(path, newPath)
+        },
+
+        async copyFile(src, dest, flags) {
+            return syncFs.copyFileSync(src, dest, flags)
         }
     }
 }

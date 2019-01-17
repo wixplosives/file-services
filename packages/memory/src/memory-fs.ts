@@ -9,6 +9,7 @@ import {
     WatchEventListener,
 } from '@file-services/types'
 import { FsErrorCodes } from './error-codes'
+import { FsConstants } from './constants'
 import { IFsMemDirectoryNode, IFsMemFileNode, IBaseMemFileSystemSync } from './types'
 
 /**
@@ -83,7 +84,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         rmdirSync,
         statSync,
         unlinkSync,
-        writeFileSync
+        writeFileSync,
+        copyFileSync
     }
 
     function readFileSync(filePath: string, encoding?: string): string {
@@ -321,6 +323,37 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
         emitWatchEvent({ path: sourcePath, stats: null })
         emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(sourceNode) })
+    }
+
+    function copyFileSync(src: string, dest: string, flags?: number): void {
+        const node = getNode(src)
+
+        if (!node) {
+            throw new Error(`${src} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        }
+
+        const destParentPath = posixPath.dirname(dest)
+        const destParentNode = getNode(destParentPath)
+
+        if (!destParentNode || destParentNode.type !== 'dir') {
+            throw new Error(`${dest} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        }
+
+        if (flags === FsConstants.COPYFILE_EXCL) {
+            const targetName = posixPath.basename(dest)
+            const targetNode = destParentNode.contents[targetName.toLowerCase()]
+
+            if (targetNode) {
+                throw new Error(`${dest} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+            }
+        }
+
+        if (node.type === 'dir') {
+            mkdirSync(dest)
+        } else {
+            const fileContents = readFileRawSync(src)
+            writeFileSync(dest, fileContents)
+        }
     }
 }
 

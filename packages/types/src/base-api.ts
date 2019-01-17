@@ -17,6 +17,11 @@ export interface IBaseFileSystemSync {
     caseSensitive: boolean
 
     /**
+     * Synchronously copies src to dest. By default, dest is overwritten if it already exists. Returns undefined
+     */
+    copyFileSync(src: string, dest: string, flags?: number): void
+
+    /**
      * Read the entire contents of a file as a string.
      * If `encoding` isn't specified, 'utf8' is assumed.
      */
@@ -83,6 +88,11 @@ export interface IBaseFileSystemAsync {
     path: IFileSystemPath
     watchService: IWatchService
     caseSensitive: boolean
+
+    /**
+     * Asynchronously copies src to dest. By default, dest is overwritten if it already exists.
+     */
+    copyFile(src: string, dest: string, flags?: number): Promise<void>
 
     /**
      * Read the entire contents of a file as a string.
