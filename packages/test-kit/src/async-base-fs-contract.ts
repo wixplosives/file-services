@@ -406,5 +406,70 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await expect((await fs.stat(upperCaseFilePath)).isFile()).to.equal(true)
             }
         })
+
+        describe('copying files/directories', () => {
+            const SOURCE_FILE_NAME = 'file.txt'
+            const COPYFILE_EXCL = 1
+            let targetDirectoryPath: string
+            let sourceFilePath: string
+
+            beforeEach(async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                targetDirectoryPath = join(tempDirectoryPath, 'dir')
+                await fs.mkdir(targetDirectoryPath)
+                sourceFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME)
+                await fs.writeFile(sourceFilePath, SAMPLE_CONTENT)
+            })
+
+            it('can copy file', async () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                await fs.copyFile(sourceFilePath, targetPath)
+                expect(await fs.readFile(targetPath)).to.be.eql(SAMPLE_CONTENT)
+            })
+
+            it('can copy directory (without contents)', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+
+                const testDirName = 'dirToCopy'
+                const srcPath = join(tempDirectoryPath, testDirName)
+                await fs.mkdir(srcPath)
+                await fs.writeFile(join(srcPath, SOURCE_FILE_NAME), SAMPLE_CONTENT)
+
+                const targetPath = join(targetDirectoryPath, testDirName)
+                await fs.copyFile(srcPath, targetPath)
+                expect(await fs.readdir(targetPath)).to.be.eql([])
+            })
+
+            it('fails if source does not exist', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const sourcePath = fs.path.join(tempDirectoryPath, 'nonExistingFileName.txt')
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                await expect(fs.copyFile(sourcePath, targetPath)).to.be.rejectedWith('ENOENT')
+            })
+
+            it('fails if target containing directory does not exist', async () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME)
+                await expect(fs.copyFile(sourceFilePath, targetPath)).to.be.rejectedWith('ENOENT')
+            })
+
+            it('overwrites destination file by default', async () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                await fs.writeFile(targetPath, 'content to be overwritten')
+                await fs.copyFile(sourceFilePath, targetPath)
+                expect(await fs.readFile(targetPath)).to.be.eql(SAMPLE_CONTENT)
+            })
+
+            it('fails if destination exists and flag COPYFILE_EXCL passed', async () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                await fs.writeFile(targetPath, 'content to be overwritten')
+                await expect(fs.copyFile(sourceFilePath, targetPath, COPYFILE_EXCL)).to.be.rejectedWith('EEXIST')
+            })
+        })
     })
 }
