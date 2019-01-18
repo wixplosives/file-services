@@ -457,7 +457,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
             })
 
-            it('throws if source path doesn\'t exist', () => {
+            it(`throws if source path doesn't exist`, () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const sourcePath = join(tempDirectoryPath, 'file')
@@ -465,7 +465,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('ENOENT')
             })
 
-            it('throws if the containing directory of the source path doesn\'t exist', () => {
+            it(`throws if the containing directory of the source path doesn't exist`, () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const sourcePath = join(tempDirectoryPath, 'unicorn', 'file')
@@ -473,7 +473,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('ENOENT')
             })
 
-            it('throws if destination containing path doesn\'t exist', () => {
+            it(`throws if destination containing path doesn't exist`, () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const sourcePath = join(tempDirectoryPath, 'file')
@@ -484,7 +484,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'dir', 'file2'))).to.throw('ENOENT')
             })
 
-            it('doesn\'t throw if destination path already exists for copying a directory over a non-existing directory', () => { //tslint:disable-line
+            it(`doesn't throw if destination path already exists for copying a directory over a non-existing directory`, () => { //tslint:disable-line
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const sourcePath = join(tempDirectoryPath, 'sourceDir')
@@ -495,7 +495,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'destDir'))).not.to.throw('EEXIST')
             })
 
-            it('doesn\'t throw if destination path already exists for copying a directory over an empty directory', () => { //tslint:disable-line
+            it(`doesn't throw if destination path already exists for copying a directory over an empty directory`, () => { //tslint:disable-line
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
                 const sourcePath = join(tempDirectoryPath, 'sourceDir')
