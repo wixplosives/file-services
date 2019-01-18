@@ -1,14 +1,3 @@
 {
-  "extends": "../../../tsconfig.base.json",
-  "compilerOptions": {
-    "module": "commonjs",
-    "outDir": "../cjs",
-    "lib": [
-      "es2017",
-      "dom" // needed for setTimeout
-    ],
-    "types": [
-      "mocha" // contract uses mocha functions
-    ]
-  }
+  "extends": "../../../tsconfig.test.json"
 }

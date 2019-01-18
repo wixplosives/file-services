@@ -26,7 +26,7 @@ interface IPendingEvent {
     renamed: boolean
 
     /* id of the setTimeout call, for debouncing */
-    timerId: NodeJS.Timer
+    timerId: ReturnType<typeof setTimeout>
 }
 
 export class NodeWatchService implements IWatchService {
