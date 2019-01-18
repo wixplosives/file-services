@@ -463,7 +463,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(sourcePath, SAMPLE_CONTENT)
 
-                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).not.to.throw('ENOENT')
                 expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'dir', 'file2'))).to.throw('ENOENT')
             })
 
