@@ -312,6 +312,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
         delete sourceParentNode.contents[lowerCaseSourceName]
         sourceNode.name = targetName
+        sourceNode.mtime = new Date()
         if (sourceNode.type === 'dir') {
             Object.getPrototypeOf(sourceNode.contents)['..'] = targetParentNode
         }

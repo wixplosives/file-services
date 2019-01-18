@@ -427,6 +427,19 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
             })
 
+            it('updates mtime', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'file')
+                const destinationPath = join(tempDirectoryPath, 'file2')
+
+                fs.writeFileSync(sourcePath, SAMPLE_CONTENT)
+                const sourceMtime = fs.statSync(sourcePath).mtime
+                fs.renameSync(sourcePath, destinationPath)
+
+                expect(fs.statSync(destinationPath).mtime).not.to.equal(sourceMtime)
+            })
+
             it('moves a directory', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
