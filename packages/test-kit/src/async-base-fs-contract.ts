@@ -470,6 +470,34 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(targetPath, 'content to be overwritten')
                 await expect(fs.copyFile(sourceFilePath, targetPath, COPYFILE_EXCL)).to.be.rejectedWith('EEXIST')
             })
+
+            it('should preserve birthtime', async () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                const originalBirthtime = (await fs.lstat(sourceFilePath)).birthtime
+
+                // postpone copying for 1s to make sure timestamps can be different
+                await new Promise(resolve => setTimeout(resolve, 1000))
+
+                await fs.copyFile(sourceFilePath, targetPath)
+                const copiedBirthtime = (await fs.lstat(targetPath)).birthtime
+
+                expect(originalBirthtime).to.be.eql(copiedBirthtime)
+            })
+
+            it('should change mtime', async () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                const originalMtime = (await fs.lstat(sourceFilePath)).mtime
+
+                // postpone copying for 1s to make sure timestamps can be different
+                await new Promise(resolve => setTimeout(resolve, 1000))
+
+                await fs.copyFile(sourceFilePath, targetPath)
+                const copiedMtime = (await fs.lstat(targetPath)).mtime
+
+                expect(originalMtime).to.not.be.eql(copiedMtime)
+            })
         })
     })
 }

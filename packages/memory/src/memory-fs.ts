@@ -130,33 +130,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const fileNode = parentNode.contents[lowerCaseFileName]
 
         if (!fileNode) {
-            const currentDate = new Date()
-
-            const partialNode = {
-                type: 'file' as 'file',
-                name: fileName,
-                birthtime: currentDate,
-                mtime: currentDate,
-            }
-
-            const newFileNode: IFsMemFileNode = typeof fileContent === 'string' ?
-                { ...partialNode, contents: fileContent, rawContents: Buffer.from(fileContent, encoding) } :
-                { ...partialNode, rawContents: fileContent }
-
+            const newFileNode = createMemFile(fileName, fileContent, encoding)
             parentNode.contents[lowerCaseFileName] = newFileNode
             emitWatchEvent({ path: filePath, stats: createStatsFromNode(newFileNode) })
-
         } else if (fileNode.type === 'file') {
-            fileNode.mtime = new Date()
-            if (typeof fileContent === 'string') {
-                fileNode.contents = fileContent
-                fileNode.rawContents = Buffer.from(fileContent, encoding)
-            } else {
-                delete fileNode.contents
-                fileNode.rawContents = fileContent
-            }
+            updateMemFile(fileNode, fileContent, encoding)
             emitWatchEvent({ path: filePath, stats: createStatsFromNode(fileNode) })
-
         } else {
             throw new Error(`${filePath} EISDIR ${FsErrorCodes.PATH_IS_DIRECTORY}`)
         }
@@ -325,47 +304,57 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(sourceNode) })
     }
 
-    function copyFileSync(src: string, dest: string, flags?: number): void {
-        const node = getNode(src)
+    function copyFileSync(srcPath: string, destPath: string, flags?: number): void {
+        const node = getNode(srcPath)
 
         if (!node) {
-            throw new Error(`${src} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+            throw new Error(`${srcPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
         }
 
-        const destParentPath = posixPath.dirname(dest)
+        const destParentPath = posixPath.dirname(destPath)
         const destParentNode = getNode(destParentPath)
 
         if (!destParentNode || destParentNode.type !== 'dir') {
-            throw new Error(`${dest} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${destPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
         }
 
-        if (flags === FsConstants.COPYFILE_EXCL) {
-            const targetName = posixPath.basename(dest)
-            const targetNode = destParentNode.contents[targetName.toLowerCase()]
+        const targetName = posixPath.basename(destPath)
+        const lowerCaseTargetName = targetName.toLowerCase()
+        let targetNode = destParentNode.contents[lowerCaseTargetName]
 
-            if (targetNode) {
-                throw new Error(`${dest} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+        const shouldOverride = flags !== FsConstants.COPYFILE_EXCL
+
+        if (targetNode && !shouldOverride) {
+            throw new Error(`${destPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+        }
+
+        if (targetNode) {
+            if (node.type === 'file' && targetNode.type === 'file') {
+                updateMemFile(targetNode, node.rawContents)
+            } else {
+                targetNode.mtime = new Date()
             }
+        } else {
+            targetNode = node.type === 'dir' ?
+                createMemDirectory(targetName, destParentNode, node.birthtime) :
+                createMemFile(targetName, node.rawContents, undefined, node.birthtime)
+
+            destParentNode.contents[lowerCaseTargetName] = targetNode
         }
 
-        if (node.type === 'dir') {
-            mkdirSync(dest)
-        } else {
-            const fileContents = readFileRawSync(src)
-            writeFileSync(dest, fileContents)
-        }
+        emitWatchEvent({ path: destPath, stats: createStatsFromNode(targetNode) })
     }
 }
 
-function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemDirectoryNode {
-    const shadowEntries = Object.create(null)
+function createMemDirectory(name: string, parent?: IFsMemDirectoryNode, birthtime?: Date): IFsMemDirectoryNode {
+    const shadowEntries  = Object.create(null)
     const actualEntries = Object.create(shadowEntries)
     const currentDate = new Date()
     const memDirectory: IFsMemDirectoryNode = {
         type: 'dir',
         name,
         contents: actualEntries,
-        birthtime: currentDate,
+        birthtime: birthtime || currentDate,
         mtime: currentDate
     }
 
@@ -374,6 +363,35 @@ function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemD
         shadowEntries['..'] = parent
     }
     return memDirectory
+}
+
+function createMemFile(name: string, content: string | Buffer, encoding?: string, birthtime?: Date): IFsMemFileNode {
+    const currentDate = new Date()
+
+    const partialNode = {
+        type: 'file' as 'file',
+        name,
+        birthtime: birthtime || currentDate,
+        mtime: currentDate,
+    }
+
+    const newFileNode: IFsMemFileNode = typeof content === 'string' ?
+        { ...partialNode, contents: content, rawContents: Buffer.from(content, encoding) } :
+        { ...partialNode, rawContents: content }
+
+    return newFileNode
+}
+
+function updateMemFile(fileNode: IFsMemFileNode, content: string | Buffer, encoding?: string): void {
+    fileNode.mtime = new Date()
+
+    if (typeof content === 'string') {
+        fileNode.contents = content
+        fileNode.rawContents = Buffer.from(content, encoding)
+    } else {
+        delete fileNode.contents
+        fileNode.rawContents = content
+    }
 }
 
 const returnsTrue = () => true
