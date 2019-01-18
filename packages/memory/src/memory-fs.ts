@@ -273,7 +273,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         }
     }
 
-    function renameSync(sourcePath: string, targetPath: string): void {
+    function renameSync(sourcePath: string, destinationPath: string): void {
         const sourceParentPath = posixPath.dirname(sourcePath)
         const sourceParentNode = getNode(sourceParentPath)
 
@@ -289,37 +289,37 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             throw new Error(`${sourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
         }
 
-        const targetParentPath = posixPath.dirname(targetPath)
-        const targetParentNode = getNode(targetParentPath)
+        const destinationParentPath = posixPath.dirname(destinationPath)
+        const destinationParentNode = getNode(destinationParentPath)
 
-        if (!targetParentNode || targetParentNode.type !== 'dir') {
-            throw new Error(`${targetPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        if (!destinationParentNode || destinationParentNode.type !== 'dir') {
+            throw new Error(`${destinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
         }
 
-        const targetName = posixPath.basename(targetPath)
-        const lowerCaseTargetName = targetName.toLowerCase()
-        const targetNode = targetParentNode.contents[lowerCaseTargetName]
+        const destinationName = posixPath.basename(destinationPath)
+        const lowerCaseDestinationName = destinationName.toLowerCase()
+        const destinationNode = destinationParentNode.contents[lowerCaseDestinationName]
 
-        if (targetNode) {
-            if (targetNode.type === 'dir') {
-                if (Object.keys(targetNode.contents).length > 0) {
-                    throw new Error(`${targetPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
+        if (destinationNode) {
+            if (destinationNode.type === 'dir') {
+                if (Object.keys(destinationNode.contents).length > 0) {
+                    throw new Error(`${destinationPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
                 }
             } else {
-                throw new Error(`${targetPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+                throw new Error(`${destinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
             }
         }
 
         delete sourceParentNode.contents[lowerCaseSourceName]
-        sourceNode.name = targetName
+        sourceNode.name = destinationName
         sourceNode.mtime = new Date()
         if (sourceNode.type === 'dir') {
-            Object.getPrototypeOf(sourceNode.contents)['..'] = targetParentNode
+            Object.getPrototypeOf(sourceNode.contents)['..'] = destinationParentNode
         }
-        targetParentNode.contents[lowerCaseTargetName] = sourceNode
+        destinationParentNode.contents[lowerCaseDestinationName] = sourceNode
 
         emitWatchEvent({ path: sourcePath, stats: null })
-        emitWatchEvent({ path: targetPath, stats: createStatsFromNode(sourceNode) })
+        emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(sourceNode) })
     }
 }
 

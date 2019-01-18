@@ -72,7 +72,7 @@ export interface IBaseFileSystemSync {
     /**
      * Rename (move) a file or a directory
      */
-    renameSync(filePath: string, newFilePath: string): void
+    renameSync(sourcePath: string, destinationPath: string): void
 }
 
 /**
@@ -140,7 +140,7 @@ export interface IBaseFileSystemAsync {
     /**
      * Rename (move) a file or a directory
      */
-    rename(filePath: string, newFilePath: string): Promise<void>
+    rename(sourcePath: string, destinationPath: string): Promise<void>
 }
 
 /**
