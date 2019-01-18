@@ -314,6 +314,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         sourceNode.name = destinationName
         sourceNode.mtime = new Date()
         if (sourceNode.type === 'dir') {
+            // Shadow (non-listed) entries such as ".." reside in directory nodes' prototypes
             Object.getPrototypeOf(sourceNode.contents)['..'] = destinationParentNode
         }
         destinationParentNode.contents[lowerCaseDestinationName] = sourceNode
