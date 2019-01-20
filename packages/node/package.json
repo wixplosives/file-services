@@ -16,7 +16,7 @@
   "dependencies": {
     "@file-services/types": "^0.4.4",
     "@file-services/utils": "^0.4.5",
-    "proper-fs": "^1.1.0"
+    "proper-fs": "^1.1.1"
   },
   "devDependencies": {
     "@file-services/test-kit": "^0.4.4"
