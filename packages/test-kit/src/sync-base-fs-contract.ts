@@ -427,6 +427,31 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
             })
 
+            it('fires two file watch events: for the original and for the new file/directory', async () => {
+                const { fs, fs: { watchService }, tempDirectoryPath } = testInput
+
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'file')
+                const destinationPath = join(tempDirectoryPath, 'dir', 'subdir', 'movedFile')
+
+                fs.writeFileSync(sourcePath, SAMPLE_CONTENT)
+                fs.mkdirSync(join(tempDirectoryPath, 'dir'))
+                fs.mkdirSync(join(tempDirectoryPath, 'dir', 'subdir'))
+
+                const validator = new WatchEventsValidator(watchService)
+                await watchService.watchPath(tempDirectoryPath)
+
+                fs.renameSync(sourcePath, destinationPath)
+
+                await validator.sequence([
+                    { path: sourcePath, stats: null },
+                    { path: destinationPath, stats: fs.statSync(destinationPath) }
+                ])
+                await validator.noMoreEvents()
+
+                await watchService.unwatchPath(tempDirectoryPath)
+            })
+
             it('updates mtime', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
