@@ -428,20 +428,6 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 expect(await fs.readFile(targetPath)).to.be.eql(SAMPLE_CONTENT)
             })
 
-            it('fails if source is a directory', async () => {
-                const { fs, tempDirectoryPath } = testInput
-                const { join } = fs.path
-                const srcDirectoryPath = join(tempDirectoryPath, 'src')
-                await fs.mkdir(srcDirectoryPath)
-                const targetPath = targetDirectoryPath
-                await expect(fs.copyFile(sourceFilePath, targetPath)).to.be.rejectedWith('EISDIR')
-            })
-
-            it('fails if target is a directory', async () => {
-                const { fs } = testInput
-                await expect(fs.copyFile(sourceFilePath, targetDirectoryPath)).to.be.rejectedWith('EISDIR')
-            })
-
             it('fails if source does not exist', async () => {
                 const { fs, tempDirectoryPath } = testInput
                 const sourcePath = fs.path.join(tempDirectoryPath, 'nonExistingFileName.txt')

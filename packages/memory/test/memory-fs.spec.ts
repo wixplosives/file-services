@@ -1,9 +1,8 @@
-import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract,
-    ITestInput } from '@file-services/test-kit'
-import { sleep } from 'promise-assist'
-import { expect } from 'chai'
+import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit'
 import { createMemoryFs } from '../src'
-import { IBaseFileSystemAsync, IBaseFileSystemSync } from '@file-services/types'
+import { expect } from 'chai'
+import { sleep } from 'promise-assist'
+import { IFileSystem } from '@file-services/types'
 
 describe('In-memory File System Implementation', () => {
     const testProvider = async () => {
@@ -23,48 +22,68 @@ describe('In-memory File System Implementation', () => {
 
     describe('copying files/directories timestamps', () => {
         const SOURCE_FILE_NAME = 'file.txt'
-        const DEST_FILE_NAME = 'file.txt'
+        const TEST_DIRECTORY_NAME = 'dir'
+        const tempDirectoryPath = '/'
+        let fs: IFileSystem
         let sourceFilePath: string
+        let destFilePath: string
+        let testDirectoryPath: string
 
-        it('sync: should preserve birthtime and change mtime', async () => {
-            const testInput: ITestInput<IBaseFileSystemSync> = await testProvider()
-            const { fs, tempDirectoryPath } = testInput
+        beforeEach(async () => {
+            fs = createMemoryFs({
+                [SOURCE_FILE_NAME]: 'testContent',
+                [TEST_DIRECTORY_NAME]: {}
+            })
+
             sourceFilePath = fs.path.join(tempDirectoryPath, SOURCE_FILE_NAME)
-            fs.writeFileSync(sourceFilePath, 'test')
-            const targetPath = fs.path.join(tempDirectoryPath, DEST_FILE_NAME)
-            const originalBirthtime = fs.statSync(sourceFilePath).birthtime
-            const originalMtime = fs.statSync(sourceFilePath).mtime
-
-            // postpone copying for 1s to make sure timestamps can be different
-            await sleep(1000)
-
-            fs.copyFileSync(sourceFilePath, targetPath)
-            const copiedBirthtime = fs.statSync(targetPath).birthtime
-            const copiedMtime = (await fs.statSync(targetPath)).mtime
-
-            expect(originalBirthtime).to.be.eql(copiedBirthtime)
-            expect(originalMtime).to.not.be.eql(copiedMtime)
+            testDirectoryPath = fs.path.join(tempDirectoryPath, TEST_DIRECTORY_NAME)
+            destFilePath = fs.path.join(testDirectoryPath, SOURCE_FILE_NAME)
         })
 
-        it('async: should preserve birthtime and change mtime', async () => {
-            const testInput: ITestInput<IBaseFileSystemAsync> = await testProvider()
-            const { fs, tempDirectoryPath } = testInput
-            sourceFilePath = fs.path.join(tempDirectoryPath, SOURCE_FILE_NAME)
-            await fs.writeFile(sourceFilePath, 'test')
+        describe('sync', () => {
+            it('fails if source is a directory', () => {
+                expect(() => fs.copyFileSync(testDirectoryPath, destFilePath)).to.throw('EISDIR')
+            })
 
-            const targetPath = fs.path.join(tempDirectoryPath, DEST_FILE_NAME)
-            const originalBirthtime = (await fs.stat(sourceFilePath)).birthtime
-            const originalMtime = (await fs.stat(sourceFilePath)).mtime
+            it('fails if target is a directory', () => {
+                expect(() => fs.copyFileSync(sourceFilePath, testDirectoryPath)).to.throw('EISDIR')
+            })
 
-            // postpone copying for 1s to make sure timestamps can be different
-            await sleep(1000)
+            it('should preserve birthtime and update mtime', async () => {
+                const originalStat = fs.statSync(sourceFilePath)
 
-            await fs.copyFile(sourceFilePath, targetPath)
-            const copiedBirthtime = (await fs.stat(targetPath)).birthtime
-            const copiedMtime = (await fs.stat(targetPath)).mtime
+                // postpone copying for 1s to make sure timestamps can be different
+                await sleep(1000)
 
-            expect(originalBirthtime).to.be.eql(copiedBirthtime)
-            expect(originalMtime).to.not.be.eql(copiedMtime)
+                fs.copyFileSync(sourceFilePath, destFilePath)
+                const copiedStat = fs.statSync(destFilePath)
+
+                expect(originalStat.birthtime).to.be.eql(copiedStat.birthtime)
+                expect(originalStat.mtime).to.not.be.eql(copiedStat.mtime)
+            })
+        })
+
+        describe('async', () => {
+            it('fails if source is a directory', async () => {
+                await expect(fs.copyFile(testDirectoryPath, destFilePath)).to.be.rejectedWith('EISDIR')
+            })
+
+            it('fails if target is a directory', async () => {
+                await expect(fs.copyFile(sourceFilePath, testDirectoryPath)).to.be.rejectedWith('EISDIR')
+            })
+
+            it('should preserve birthtime and update mtime', async () => {
+                const originalStat = await fs.stat(sourceFilePath)
+
+                // postpone copying for 1s to make sure timestamps can be different
+                await sleep(1000)
+
+                await fs.copyFile(sourceFilePath, destFilePath)
+                const copiedStat = await fs.stat(destFilePath)
+
+                expect(originalStat.birthtime).to.be.eql(copiedStat.birthtime)
+                expect(originalStat.mtime).to.not.be.eql(copiedStat.mtime)
+            })
         })
     })
 })

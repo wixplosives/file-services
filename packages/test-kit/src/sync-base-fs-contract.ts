@@ -573,20 +573,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('ENOENT')
             })
 
-            it('fails if source is a directory', () => {
-                const { fs, tempDirectoryPath } = testInput
-                const { join } = fs.path
-                const srcDirectoryPath = join(tempDirectoryPath, 'src')
-                fs.mkdirSync(srcDirectoryPath)
-                const targetPath = targetDirectoryPath
-                expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('EISDIR')
-            })
-
-            it('fails if target is a directory', () => {
-                const { fs } = testInput
-                expect(() => fs.copyFileSync(sourceFilePath, targetDirectoryPath)).to.throw('EISDIR')
-            })
-
             it('overwrites destination file by default', () => {
                 const { fs } = testInput
                 const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
