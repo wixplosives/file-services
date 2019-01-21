@@ -17,7 +17,9 @@ export interface IBaseFileSystemSync {
     caseSensitive: boolean
 
     /**
-     * Synchronously copies src to dest. By default, dest is overwritten if it already exists. Returns undefined
+     * Synchronously copies src to dest.
+     * Param flags is used as modifiers for copy operation. Default: 0 (dest is overwritten if it already exists)
+     * flags = FileSystemConstants.COPYFILE_EXCL will cause copy operation to fail if dest already exists.
      */
     copyFileSync(src: string, dest: string, flags?: number): void
 
@@ -90,7 +92,9 @@ export interface IBaseFileSystemAsync {
     caseSensitive: boolean
 
     /**
-     * Asynchronously copies src to dest. By default, dest is overwritten if it already exists.
+     * Asynchronously copies src to dest.
+     * Param flags is used as modifiers for copy operation. Default: 0 (dest is overwritten if it already exists)
+     * flags = FileSystemConstants.COPYFILE_EXCL will cause copy operation to fail if dest already exists.
      */
     copyFile(src: string, dest: string, flags?: number): Promise<void>
 

@@ -1,6 +1,6 @@
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
-import { IBaseFileSystemAsync } from '@file-services/types'
+import { IBaseFileSystemAsync, FileSystemConstants } from '@file-services/types'
 import { ITestInput } from './types'
 import { WatchEventsValidator } from './watch-events-validator'
 
@@ -409,7 +409,6 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
         describe('copying files/directories', () => {
             const SOURCE_FILE_NAME = 'file.txt'
-            const COPYFILE_EXCL = 1
             let targetDirectoryPath: string
             let sourceFilePath: string
 
@@ -429,18 +428,18 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 expect(await fs.readFile(targetPath)).to.be.eql(SAMPLE_CONTENT)
             })
 
-            it('can copy directory (without contents)', async () => {
+            it('fails if source is a directory', async () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
+                const srcDirectoryPath = join(tempDirectoryPath, 'src')
+                await fs.mkdir(srcDirectoryPath)
+                const targetPath = targetDirectoryPath
+                await expect(fs.copyFile(sourceFilePath, targetPath)).to.be.rejectedWith('EISDIR')
+            })
 
-                const testDirName = 'dirToCopy'
-                const srcPath = join(tempDirectoryPath, testDirName)
-                await fs.mkdir(srcPath)
-                await fs.writeFile(join(srcPath, SOURCE_FILE_NAME), SAMPLE_CONTENT)
-
-                const targetPath = join(targetDirectoryPath, testDirName)
-                await fs.copyFile(srcPath, targetPath)
-                expect(await fs.readdir(targetPath)).to.be.eql([])
+            it('fails if target is a directory', async () => {
+                const { fs } = testInput
+                await expect(fs.copyFile(sourceFilePath, targetDirectoryPath)).to.be.rejectedWith('EISDIR')
             })
 
             it('fails if source does not exist', async () => {
@@ -468,35 +467,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const { fs } = testInput
                 const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
                 await fs.writeFile(targetPath, 'content to be overwritten')
-                await expect(fs.copyFile(sourceFilePath, targetPath, COPYFILE_EXCL)).to.be.rejectedWith('EEXIST')
-            })
-
-            it('should preserve birthtime', async () => {
-                const { fs } = testInput
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
-                const originalBirthtime = (await fs.lstat(sourceFilePath)).birthtime
-
-                // postpone copying for 1s to make sure timestamps can be different
-                await new Promise(resolve => setTimeout(resolve, 1000))
-
-                await fs.copyFile(sourceFilePath, targetPath)
-                const copiedBirthtime = (await fs.lstat(targetPath)).birthtime
-
-                expect(originalBirthtime).to.be.eql(copiedBirthtime)
-            })
-
-            it('should change mtime', async () => {
-                const { fs } = testInput
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
-                const originalMtime = (await fs.lstat(sourceFilePath)).mtime
-
-                // postpone copying for 1s to make sure timestamps can be different
-                await new Promise(resolve => setTimeout(resolve, 1000))
-
-                await fs.copyFile(sourceFilePath, targetPath)
-                const copiedMtime = (await fs.lstat(targetPath)).mtime
-
-                expect(originalMtime).to.not.be.eql(copiedMtime)
+                await expect(fs.copyFile(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL))
+                    .to.be.rejectedWith('EEXIST')
             })
         })
     })

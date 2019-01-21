@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { IBaseFileSystemSync } from '@file-services/types'
+import { IBaseFileSystemSync, FileSystemConstants } from '@file-services/types'
 import { ITestInput } from './types'
 import { WatchEventsValidator } from './watch-events-validator'
 
@@ -541,7 +541,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         describe('copying files/directories', () => {
             const SOURCE_FILE_NAME = 'file.txt'
-            const COPYFILE_EXCL = 1
             let targetDirectoryPath: string
             let sourceFilePath: string
 
@@ -561,20 +560,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
             })
 
-            it('can copy directory (without contents)', () => {
-                const { fs, tempDirectoryPath } = testInput
-                const { join } = fs.path
-
-                const testDirName = 'dirToCopy'
-                const srcPath = join(tempDirectoryPath, testDirName)
-                fs.mkdirSync(srcPath)
-                fs.writeFileSync(join(srcPath, SOURCE_FILE_NAME), SAMPLE_CONTENT)
-
-                const targetPath = join(targetDirectoryPath, testDirName)
-                fs.copyFileSync(srcPath, targetPath)
-                expect(fs.readdirSync(targetPath)).to.be.eql([])
-            })
-
             it('fails if source does not exist', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const sourcePath = fs.path.join(tempDirectoryPath, 'nonExistingFileName.txt')
@@ -586,6 +571,20 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const { fs } = testInput
                 const targetPath = fs.path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME)
                 expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('ENOENT')
+            })
+
+            it('fails if source is a directory', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const srcDirectoryPath = join(tempDirectoryPath, 'src')
+                fs.mkdirSync(srcDirectoryPath)
+                const targetPath = targetDirectoryPath
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('EISDIR')
+            })
+
+            it('fails if target is a directory', () => {
+                const { fs } = testInput
+                expect(() => fs.copyFileSync(sourceFilePath, targetDirectoryPath)).to.throw('EISDIR')
             })
 
             it('overwrites destination file by default', () => {
@@ -600,35 +599,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const { fs } = testInput
                 const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
                 fs.writeFileSync(targetPath, 'content to be overwritten')
-                expect(() => fs.copyFileSync(sourceFilePath, targetPath, COPYFILE_EXCL)).to.throw('EEXIST')
-            })
-
-            it('should preserve birthtime', async () => {
-                const { fs } = testInput
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
-                const originalBirthtime = fs.lstatSync(sourceFilePath).birthtime
-
-                // postpone copying for 1s to make sure timestamps can be different
-                await new Promise(resolve => setTimeout(resolve, 1000))
-
-                fs.copyFileSync(sourceFilePath, targetPath)
-                const copiedBirthtime = fs.lstatSync(targetPath).birthtime
-
-                expect(originalBirthtime).to.be.eql(copiedBirthtime)
-            })
-
-            it('should change mtime', async () => {
-                const { fs } = testInput
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
-                const originalMtime = fs.lstatSync(sourceFilePath).mtime
-
-                // postpone copying for 1s to make sure timestamps can be different
-                await new Promise(resolve => setTimeout(resolve, 1000))
-
-                fs.copyFileSync(sourceFilePath, targetPath)
-                const copiedMtime = (await fs.lstatSync(targetPath)).mtime
-
-                expect(originalMtime).to.not.be.eql(copiedMtime)
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL))
+                    .to.throw('EEXIST')
             })
         })
     })

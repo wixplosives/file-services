@@ -7,9 +7,9 @@ import {
     IFileSystemStats,
     IWatchEvent,
     WatchEventListener,
+    FileSystemConstants
 } from '@file-services/types'
 import { FsErrorCodes } from './error-codes'
-import { FsConstants } from './constants'
 import { IFsMemDirectoryNode, IFsMemFileNode, IBaseMemFileSystemSync } from './types'
 
 /**
@@ -304,49 +304,53 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(sourceNode) })
     }
 
-    function copyFileSync(srcPath: string, destPath: string, flags?: number): void {
-        const node = getNode(srcPath)
+    function copyFileSync(sourcePath: string, destinationPath: string, flags: number = 0): void {
+        const sourceFileNode = getNode(sourcePath)
 
-        if (!node) {
-            throw new Error(`${srcPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        if (!sourceFileNode) {
+            throw new Error(`${sourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
         }
 
-        const destParentPath = posixPath.dirname(destPath)
+        if (sourceFileNode.type !== 'file') {
+            throw new Error(`${sourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+        }
+
+        const destParentPath = posixPath.dirname(destinationPath)
         const destParentNode = getNode(destParentPath)
 
         if (!destParentNode || destParentNode.type !== 'dir') {
-            throw new Error(`${destPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${destinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
         }
 
-        const targetName = posixPath.basename(destPath)
+        const targetName = posixPath.basename(destinationPath)
         const lowerCaseTargetName = targetName.toLowerCase()
-        let targetNode = destParentNode.contents[lowerCaseTargetName]
+        const destinationFileNode = destParentNode.contents[lowerCaseTargetName]
 
-        const shouldOverride = flags !== FsConstants.COPYFILE_EXCL
+        const sourceFileContents = sourceFileNode.contents || sourceFileNode.rawContents
 
-        if (targetNode && !shouldOverride) {
-            throw new Error(`${destPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
-        }
+        if (destinationFileNode) {
+            const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL) // tslint:disable-line no-bitwise
 
-        if (targetNode) {
-            if (node.type === 'file' && targetNode.type === 'file') {
-                updateMemFile(targetNode, node.rawContents)
-            } else {
-                targetNode.mtime = new Date()
+            if (!shouldOverride) {
+                throw new Error(`${destinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
             }
+
+            if (destinationFileNode.type !== 'file') {
+                throw new Error(`${sourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+            }
+
+            updateMemFile(destinationFileNode, sourceFileContents, sourceFileNode.encoding)
+            emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(destinationFileNode) })
         } else {
-            targetNode = node.type === 'dir' ?
-                createMemDirectory(targetName, destParentNode, node.birthtime) :
-                createMemFile(targetName, node.rawContents, undefined, node.birthtime)
-
-            destParentNode.contents[lowerCaseTargetName] = targetNode
+            const newFileNode =
+                createMemFile(targetName, sourceFileContents, sourceFileNode.encoding, sourceFileNode.birthtime)
+            destParentNode.contents[lowerCaseTargetName] = newFileNode
+            emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(newFileNode) })
         }
-
-        emitWatchEvent({ path: destPath, stats: createStatsFromNode(targetNode) })
     }
 }
 
-function createMemDirectory(name: string, parent?: IFsMemDirectoryNode, birthtime?: Date): IFsMemDirectoryNode {
+function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemDirectoryNode {
     const shadowEntries  = Object.create(null)
     const actualEntries = Object.create(shadowEntries)
     const currentDate = new Date()
@@ -354,7 +358,7 @@ function createMemDirectory(name: string, parent?: IFsMemDirectoryNode, birthtim
         type: 'dir',
         name,
         contents: actualEntries,
-        birthtime: birthtime || currentDate,
+        birthtime: currentDate,
         mtime: currentDate
     }
 
@@ -373,6 +377,7 @@ function createMemFile(name: string, content: string | Buffer, encoding?: string
         name,
         birthtime: birthtime || currentDate,
         mtime: currentDate,
+        encoding
     }
 
     const newFileNode: IFsMemFileNode = typeof content === 'string' ?
@@ -392,6 +397,8 @@ function updateMemFile(fileNode: IFsMemFileNode, content: string | Buffer, encod
         delete fileNode.contents
         fileNode.rawContents = content
     }
+
+    fileNode.encoding = encoding
 }
 
 const returnsTrue = () => true

@@ -15,6 +15,7 @@ export interface IFsMemFileNode extends IFsMemNode {
     type: 'file'
     contents?: string
     rawContents: Buffer
+    encoding?: string
 }
 
 export interface IFsMemDirectoryNode extends IFsMemNode {
