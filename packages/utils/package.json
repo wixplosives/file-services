@@ -10,7 +10,7 @@
     "build": "ts-build ./src --cjs --esm",
     "lint": "run-p lint:src",
     "lint:src": "tslint --project src",
-    "test": "mocha -r @ts-tools/node \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors",
+    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors",
     "prepack": "yarn build"
   },
   "dependencies": {
