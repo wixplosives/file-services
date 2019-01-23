@@ -79,6 +79,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         readFileSync,
         readFileRawSync,
         realpathSync: p => p, // TODO: implement links
+        renameSync,
         rmdirSync,
         statSync,
         unlinkSync,
@@ -270,6 +271,56 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
                 listener(watchEvent)
             }
         }
+    }
+
+    function renameSync(sourcePath: string, destinationPath: string): void {
+        const sourceParentPath = posixPath.dirname(sourcePath)
+        const sourceParentNode = getNode(sourceParentPath)
+
+        if (!sourceParentNode || sourceParentNode.type !== 'dir') {
+            throw new Error(`${sourcePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        }
+
+        const sourceName = posixPath.basename(sourcePath)
+        const lowerCaseSourceName = sourceName.toLowerCase()
+        const sourceNode = sourceParentNode.contents[lowerCaseSourceName]
+
+        if (!sourceNode) {
+            throw new Error(`${sourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        }
+
+        const destinationParentPath = posixPath.dirname(destinationPath)
+        const destinationParentNode = getNode(destinationParentPath)
+
+        if (!destinationParentNode || destinationParentNode.type !== 'dir') {
+            throw new Error(`${destinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        }
+
+        const destinationName = posixPath.basename(destinationPath)
+        const lowerCaseDestinationName = destinationName.toLowerCase()
+        const destinationNode = destinationParentNode.contents[lowerCaseDestinationName]
+
+        if (destinationNode) {
+            if (destinationNode.type === 'dir') {
+                if (Object.keys(destinationNode.contents).length > 0) {
+                    throw new Error(`${destinationPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
+                }
+            } else {
+                throw new Error(`${destinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+            }
+        }
+
+        delete sourceParentNode.contents[lowerCaseSourceName]
+        sourceNode.name = destinationName
+        sourceNode.mtime = new Date()
+        if (sourceNode.type === 'dir') {
+            // Shadow (non-listed) entries such as ".." reside in directory nodes' prototypes
+            Object.getPrototypeOf(sourceNode.contents)['..'] = destinationParentNode
+        }
+        destinationParentNode.contents[lowerCaseDestinationName] = sourceNode
+
+        emitWatchEvent({ path: sourcePath, stats: null })
+        emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(sourceNode) })
     }
 }
 

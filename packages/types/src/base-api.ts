@@ -68,6 +68,11 @@ export interface IBaseFileSystemSync {
      * If path is linked, returns the actual target path.
      */
     realpathSync(path: string): string
+
+    /**
+     * Rename (move) a file or a directory
+     */
+    renameSync(sourcePath: string, destinationPath: string): void
 }
 
 /**
@@ -131,6 +136,11 @@ export interface IBaseFileSystemAsync {
      * If path is linked, returns the actual target path.
      */
     realpath(path: string): Promise<string>
+
+    /**
+     * Rename (move) a file or a directory
+     */
+    rename(sourcePath: string, destinationPath: string): Promise<void>
 }
 
 /**
