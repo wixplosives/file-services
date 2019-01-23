@@ -32,23 +32,6 @@ export class WatchEventsValidator {
     }
 
     /**
-     * Resolves or rejects depending whether captured watch events
-     * match a sequence of `expectedEvents`
-     */
-    public async sequence(expectedEvents: IWatchEvent[]): Promise<void> {
-        const { capturedEvents } = this
-
-        await waitFor(() => {
-            expect(capturedEvents).to.have.length.gte(expectedEvents.length)
-            for (const [index, expectedEvent] of expectedEvents.entries()) {
-                expect(stringifyEvent(expectedEvent)).to.equal(stringifyEvent(capturedEvents[index]))
-            }
-        }, { timeout: this.options.singleEventTimeout * expectedEvents.length, delay: 100 })
-
-        this.capturedEvents = []
-    }
-
-    /**
      * Resolves or rejects depending whether last captured watch event
      * equals `expectedEvent`
      */
@@ -60,7 +43,7 @@ export class WatchEventsValidator {
             expect(stringifyEvent(expectedEvent)).to.equal(stringifyEvent(capturedEvents[capturedEvents.length - 1]))
         }, { timeout: this.options.singleEventTimeout, delay: 100 })
 
-        this.capturedEvents = []
+        this.capturedEvents.length = 0
     }
 
     /**
