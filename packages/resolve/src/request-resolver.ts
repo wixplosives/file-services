@@ -41,19 +41,19 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     function resolveImport(contextPath: string, request: string, ): IResolutionOutput | null {
         if (isRelative(request) || isAbsolute(request)) {
-            const importPath = resolve(contextPath, request)
-            return resolveAsFile(importPath) || resolveAsDirectory(importPath)
+            const requestPath = resolve(contextPath, request)
+            return resolveAsFile(requestPath) || resolveAsDirectory(requestPath)
         } else {
             return resolveAsPackage(contextPath, request)
         }
     }
 
-    function resolveAsFile(importPath: string): IResolutionOutput | null {
-        if (fileExistsSync(importPath)) {
-            return { resolvedFile: importPath }
+    function resolveAsFile(requestPath: string): IResolutionOutput | null {
+        if (fileExistsSync(requestPath)) {
+            return { resolvedFile: requestPath }
         } else {
             for (const ext of extensions) {
-                const pathWithExt = importPath + ext
+                const pathWithExt = requestPath + ext
                 if (fileExistsSync(pathWithExt)) {
                     return { resolvedFile: pathWithExt }
                 }
@@ -62,23 +62,23 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         return null
     }
 
-    function resolveAsDirectory(importPath: string): IResolutionOutput | null {
-        const packageJsonPath = join(importPath, 'package.json')
+    function resolveAsDirectory(requestPath: string): IResolutionOutput | null {
+        const packageJsonPath = join(requestPath, 'package.json')
         if (fileExistsSync(packageJsonPath)) {
             try {
                 const packageJson = JSON.parse(readFileSync(packageJsonPath))
                 const browserField = packageJson && packageJson.browser
                 const mainField = packageJson && packageJson.main
                 if (target === 'browser' && typeof browserField === 'string') {
-                    const targetPath = join(importPath, browserField)
+                    const targetPath = join(requestPath, browserField)
                     return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'))
                 } else if (typeof mainField === 'string') {
-                    const targetPath = join(importPath, mainField)
+                    const targetPath = join(requestPath, mainField)
                     return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'))
                 }
             } catch {/* we don't reject, just return null */ }
         }
-        return resolveAsFile(join(importPath, 'index'))
+        return resolveAsFile(join(requestPath, 'index'))
     }
 
     function resolveAsPackage(initialPath: string, request: string): IResolutionOutput | null {
