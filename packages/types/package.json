@@ -1,7 +1,7 @@
 {
   "name": "@file-services/types",
   "description": "Common file system interfaces",
-  "version": "0.4.4",
+  "version": "0.4.6",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
