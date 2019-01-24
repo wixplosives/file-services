@@ -340,19 +340,5 @@ describe('request resolver', () => {
 
             expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js')
         })
-
-        // WIP
-        it.skip('loads mappings defined in "browser" field object', () => {
-            const host = createMemoryFs({
-                lodash: {
-                    'package.json': '{"main": "entry.js", "browser": {"./entry.js": "./browser.js"}}',
-                    'entry.js': EMPTY,
-                    'browser.js': EMPTY
-                }
-            })
-            const resolveRequest = createRequestResolver({ host })
-
-            expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js')
-        })
     })
 })
