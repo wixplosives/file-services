@@ -23,7 +23,8 @@
   },
   "files": [
     "cjs",
-    "src/**/*.ts"
+    "src",
+    "!src/tsconfig.json"
   ],
   "engines": {
     "node": ">=8"
