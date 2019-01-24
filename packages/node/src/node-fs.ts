@@ -1,8 +1,8 @@
 import path from 'path'
 import {
     lstat, lstatSync, mkdir, mkdirSync, readdir, readdirSync, readFile, readFileSync, realpath, realpathSync,
-    rename, renameSync, rmdir, rmdirSync, stat, statSync, unlink, unlinkSync, writeFile, writeFileSync, isCaseSensitive, copyFile,
-    copyFileSync
+    rename, renameSync, rmdir, rmdirSync, stat, statSync, unlink, unlinkSync, writeFile, writeFileSync, isCaseSensitive,
+    copyFile, copyFileSync
 } from 'proper-fs'
 import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
