@@ -27,6 +27,8 @@ export interface IRequestResolverOptions {
     target?: 'node' | 'browser'
 }
 
+const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../')
+
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
     const {
         host: { fileExistsSync, readFileSync, path: { dirname, join, resolve, isAbsolute, basename } },
@@ -38,7 +40,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     return resolveImport
 
     function resolveImport(contextPath: string, request: string, ): IResolutionOutput | null {
-        if (request.startsWith('./') || request.startsWith('../') || isAbsolute(request)) {
+        if (isRelative(request) || isAbsolute(request)) {
             const importPath = resolve(contextPath, request)
             return resolveAsFile(importPath) || resolveAsDirectory(importPath)
         } else {
