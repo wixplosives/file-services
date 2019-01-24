@@ -11,16 +11,4 @@ export function resolutionMatchers(chai: any, util: any) {
             resolvedFilePath || JSON.stringify(resolvedFilePath)
         )
     })
-
-    chai.Assertion.addMethod('mapping', function(this: any, expectedMapping: Record<string, string>) {
-        const {flag} = util
-        const resolutionOutput = flag(this, 'object')
-        const resolvedMapping = resolutionOutput && resolutionOutput.mapping || resolutionOutput
-        this.assert(util.eql(expectedMapping, resolvedMapping),
-            `Expected resolved mappings to match`,
-            `Expected resolved mappings to not match`,
-            expectedMapping || JSON.stringify(expectedMapping),
-            resolvedMapping || JSON.stringify(resolvedMapping)
-        )
-    })
 }

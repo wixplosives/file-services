@@ -1,6 +1,5 @@
 export interface IResolutionOutput {
     resolvedFile: string
-    mapping?: Record<string, string>
 }
 
 /**
@@ -9,8 +8,7 @@ export interface IResolutionOutput {
  */
 export type RequestResolver = (
     contextPath: string,
-    request: string,
-    mapping?: Record<string, string>
+    request: string
 ) => IResolutionOutput | null
 
 /**

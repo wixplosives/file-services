@@ -1,9 +1,9 @@
-import { expect, use } from 'chai'
+import chai, { expect } from 'chai'
 import { createMemoryFs } from '@file-services/memory'
 import { createRequestResolver } from '../src'
 import { resolutionMatchers } from './resolution-matchers'
 
-use(resolutionMatchers)
+chai.use(resolutionMatchers)
 
 const EMPTY = ''
 
@@ -299,46 +299,6 @@ describe('request resolver', () => {
 
             expect(resolveRequest('/project', 'react'))
                 .to.be.resolvedTo('/root_libs/react/index.js')
-        })
-    })
-
-    describe.skip('mapping', () => {
-        it('returns the same unchanged mapping object if requesting a file', () => {
-            const host = createMemoryFs({
-                'file.js': EMPTY
-            })
-            const resolveRequest = createRequestResolver({ host })
-            const mapping: Record<string, string> = { package: 'mappedPackage' }
-
-            const resolutionOutput = resolveRequest('/', './file.js', mapping)
-
-            expect(resolutionOutput).to.have.mapping({ package: 'mappedPackage' })
-            expect(resolutionOutput, 'verify same object').to.have.property('mapping').that.equals(mapping)
-            expect(resolutionOutput).to.be.resolvedTo('/file.js')
-        })
-
-        it('returns mapped path for a file if it was mapped', () => {
-            const host = createMemoryFs({
-                'target.ts': EMPTY,
-                'target.browser.ts': EMPTY
-            })
-            const resolveRequest = createRequestResolver({ host, extensions: ['.ts'] })
-            const mapping: Record<string, string> = { '/target.ts': '/target.browser.ts' }
-
-            expect(resolveRequest('/', './target', mapping)).to.be.resolvedTo('/target.browser.ts')
-        })
-
-        it('returns mapped path for a file resolved from a directory request', () => {
-            const host = createMemoryFs({
-                src: {
-                    'index.js': EMPTY,
-                    'alternate.js': EMPTY
-                }
-            })
-            const resolveRequest = createRequestResolver({ host })
-            const mapping: Record<string, string> = { '/src/index.js': '/src/alternate.js' }
-
-            expect(resolveRequest('/', './src', mapping)).to.be.resolvedTo('/src/alternate.js')
         })
     })
 

@@ -27,47 +27,40 @@ export interface IRequestResolverOptions {
     target?: 'node' | 'browser'
 }
 
-export const defaultPackageRoots = ['node_modules']
-export const defaultExtensions = ['.js', '.json']
-
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
     const {
         host: { fileExistsSync, readFileSync, path: { dirname, join, resolve, isAbsolute, basename } },
-        packageRoots = defaultPackageRoots,
-        extensions = defaultExtensions,
+        packageRoots = ['node_modules'],
+        extensions = ['.js', '.json'],
         target = 'browser'
     } = options
 
     return resolveImport
 
-    function resolveImport(
-        contextPath: string,
-        request: string,
-        mapping?: Record<string, string>
-    ): IResolutionOutput | null {
+    function resolveImport(contextPath: string, request: string, ): IResolutionOutput | null {
         if (request.startsWith('./') || request.startsWith('../') || isAbsolute(request)) {
             const importPath = resolve(contextPath, request)
-            return resolveAsFile(importPath) || resolveAsDirectory(importPath, mapping)
+            return resolveAsFile(importPath) || resolveAsDirectory(importPath)
         } else {
-            return resolveAsPackage(contextPath, request, mapping)
+            return resolveAsPackage(contextPath, request)
         }
     }
 
-    function resolveAsFile(importPath: string, mapping?: Record<string, string>): IResolutionOutput | null {
+    function resolveAsFile(importPath: string): IResolutionOutput | null {
         if (fileExistsSync(importPath)) {
-            return { resolvedFile: importPath, mapping }
+            return { resolvedFile: importPath }
         } else {
             for (const ext of extensions) {
                 const pathWithExt = importPath + ext
                 if (fileExistsSync(pathWithExt)) {
-                    return { resolvedFile: pathWithExt, mapping }
+                    return { resolvedFile: pathWithExt }
                 }
             }
         }
         return null
     }
 
-    function resolveAsDirectory(importPath: string, mapping?: Record<string, string>): IResolutionOutput | null {
+    function resolveAsDirectory(importPath: string): IResolutionOutput | null {
         const packageJsonPath = join(importPath, 'package.json')
         if (fileExistsSync(packageJsonPath)) {
             try {
@@ -76,21 +69,17 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                 const mainField = packageJson && packageJson.main
                 if (target === 'browser' && typeof browserField === 'string') {
                     const targetPath = join(importPath, browserField)
-                    return resolveAsFile(targetPath, mapping) || resolveAsFile(join(targetPath, 'index'), mapping)
+                    return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'))
                 } else if (typeof mainField === 'string') {
                     const targetPath = join(importPath, mainField)
-                    return resolveAsFile(targetPath, mapping) || resolveAsFile(join(targetPath, 'index'), mapping)
+                    return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'))
                 }
             } catch {/* we don't reject, just return null */ }
         }
-        return resolveAsFile(join(importPath, 'index'), mapping)
+        return resolveAsFile(join(importPath, 'index'))
     }
 
-    function resolveAsPackage(
-        initialPath: string,
-        request: string,
-        mapping?: Record<string, string>
-    ): IResolutionOutput | null {
+    function resolveAsPackage(initialPath: string, request: string): IResolutionOutput | null {
         for (const packageRoot of packageRoots) {
             let currentPath = initialPath
             let lastPath: string | undefined
@@ -98,8 +87,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                 const isPackagesRoot = basename(currentPath) === packageRoot
                 const packagesPath = isPackagesRoot ? currentPath : resolve(currentPath, packageRoot)
                 const requestInPackages = join(packagesPath, request)
-                const resolved = resolveAsFile(requestInPackages, mapping)
-                    || resolveAsDirectory(requestInPackages, mapping)
+                const resolved = resolveAsFile(requestInPackages) || resolveAsDirectory(requestInPackages)
                 if (resolved) {
                     return resolved
                 }
