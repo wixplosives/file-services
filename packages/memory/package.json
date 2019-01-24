@@ -20,9 +20,6 @@
     "@file-services/types": "^0.4.7",
     "@file-services/utils": "^0.4.7"
   },
-  "devDependencies": {
-    "@file-services/test-kit": "^0.4.7"
-  },
   "files": [
     "cjs",
     "esm",
