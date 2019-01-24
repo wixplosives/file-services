@@ -326,8 +326,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const lowerCaseTargetName = targetName.toLowerCase()
         const destinationFileNode = destParentNode.contents[lowerCaseTargetName]
 
-        const sourceFileContents = sourceFileNode.contents || sourceFileNode.rawContents
-
         if (destinationFileNode) {
             const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL) // tslint:disable-line no-bitwise
 
@@ -338,15 +336,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             if (destinationFileNode.type !== 'file') {
                 throw new Error(`${sourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
             }
-
-            updateMemFile(destinationFileNode, sourceFileContents, sourceFileNode.encoding)
-            emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(destinationFileNode) })
-        } else {
-            const newFileNode =
-                createMemFile(targetName, sourceFileContents, sourceFileNode.encoding, sourceFileNode.birthtime)
-            destParentNode.contents[lowerCaseTargetName] = newFileNode
-            emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(newFileNode) })
         }
+
+        const newFileNode = {...sourceFileNode, name : targetName, mtime: new Date()}
+        destParentNode.contents[lowerCaseTargetName] = newFileNode
+        emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(newFileNode) })
     }
 }
 
@@ -369,15 +363,14 @@ function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemD
     return memDirectory
 }
 
-function createMemFile(name: string, content: string | Buffer, encoding?: string, birthtime?: Date): IFsMemFileNode {
+function createMemFile(name: string, content: string | Buffer, encoding?: string): IFsMemFileNode {
     const currentDate = new Date()
 
     const partialNode = {
         type: 'file' as 'file',
         name,
-        birthtime: birthtime || currentDate,
-        mtime: currentDate,
-        encoding
+        birthtime: currentDate,
+        mtime: currentDate
     }
 
     const newFileNode: IFsMemFileNode = typeof content === 'string' ?
@@ -397,8 +390,6 @@ function updateMemFile(fileNode: IFsMemFileNode, content: string | Buffer, encod
         delete fileNode.contents
         fileNode.rawContents = content
     }
-
-    fileNode.encoding = encoding
 }
 
 const returnsTrue = () => true
