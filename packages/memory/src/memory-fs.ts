@@ -7,6 +7,7 @@ import {
     IFileSystemStats,
     IWatchEvent,
     WatchEventListener,
+    FileSystemConstants
 } from '@file-services/types'
 import { FsErrorCodes } from './error-codes'
 import { IFsMemDirectoryNode, IFsMemFileNode, IBaseMemFileSystemSync } from './types'
@@ -83,7 +84,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         rmdirSync,
         statSync,
         unlinkSync,
-        writeFileSync
+        writeFileSync,
+        copyFileSync
     }
 
     function readFileSync(filePath: string, encoding?: string): string {
@@ -128,33 +130,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const fileNode = parentNode.contents[lowerCaseFileName]
 
         if (!fileNode) {
-            const currentDate = new Date()
-
-            const partialNode = {
-                type: 'file' as 'file',
-                name: fileName,
-                birthtime: currentDate,
-                mtime: currentDate,
-            }
-
-            const newFileNode: IFsMemFileNode = typeof fileContent === 'string' ?
-                { ...partialNode, contents: fileContent, rawContents: Buffer.from(fileContent, encoding) } :
-                { ...partialNode, rawContents: fileContent }
-
+            const newFileNode = createMemFile(fileName, fileContent, encoding)
             parentNode.contents[lowerCaseFileName] = newFileNode
             emitWatchEvent({ path: filePath, stats: createStatsFromNode(newFileNode) })
-
         } else if (fileNode.type === 'file') {
-            fileNode.mtime = new Date()
-            if (typeof fileContent === 'string') {
-                fileNode.contents = fileContent
-                fileNode.rawContents = Buffer.from(fileContent, encoding)
-            } else {
-                delete fileNode.contents
-                fileNode.rawContents = fileContent
-            }
+            updateMemFile(fileNode, fileContent, encoding)
             emitWatchEvent({ path: filePath, stats: createStatsFromNode(fileNode) })
-
         } else {
             throw new Error(`${filePath} EISDIR ${FsErrorCodes.PATH_IS_DIRECTORY}`)
         }
@@ -322,6 +303,45 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         emitWatchEvent({ path: sourcePath, stats: null })
         emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(sourceNode) })
     }
+
+    function copyFileSync(sourcePath: string, destinationPath: string, flags: number = 0): void {
+        const sourceFileNode = getNode(sourcePath)
+
+        if (!sourceFileNode) {
+            throw new Error(`${sourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        }
+
+        if (sourceFileNode.type !== 'file') {
+            throw new Error(`${sourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+        }
+
+        const destParentPath = posixPath.dirname(destinationPath)
+        const destParentNode = getNode(destParentPath)
+
+        if (!destParentNode || destParentNode.type !== 'dir') {
+            throw new Error(`${destinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+        }
+
+        const targetName = posixPath.basename(destinationPath)
+        const lowerCaseTargetName = targetName.toLowerCase()
+        const destinationFileNode = destParentNode.contents[lowerCaseTargetName]
+
+        if (destinationFileNode) {
+            const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL) // tslint:disable-line no-bitwise
+
+            if (!shouldOverride) {
+                throw new Error(`${destinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+            }
+
+            if (destinationFileNode.type !== 'file') {
+                throw new Error(`${sourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+            }
+        }
+
+        const newFileNode = {...sourceFileNode, name : targetName, mtime: new Date()}
+        destParentNode.contents[lowerCaseTargetName] = newFileNode
+        emitWatchEvent({ path: destinationPath, stats: createStatsFromNode(newFileNode) })
+    }
 }
 
 function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemDirectoryNode {
@@ -341,6 +361,35 @@ function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemD
         shadowEntries['..'] = parent
     }
     return memDirectory
+}
+
+function createMemFile(name: string, content: string | Buffer, encoding?: string): IFsMemFileNode {
+    const currentDate = new Date()
+
+    const partialNode = {
+        type: 'file' as 'file',
+        name,
+        birthtime: currentDate,
+        mtime: currentDate
+    }
+
+    const newFileNode: IFsMemFileNode = typeof content === 'string' ?
+        { ...partialNode, contents: content, rawContents: Buffer.from(content, encoding) } :
+        { ...partialNode, rawContents: content }
+
+    return newFileNode
+}
+
+function updateMemFile(fileNode: IFsMemFileNode, content: string | Buffer, encoding?: string): void {
+    fileNode.mtime = new Date()
+
+    if (typeof content === 'string') {
+        fileNode.contents = content
+        fileNode.rawContents = Buffer.from(content, encoding)
+    } else {
+        delete fileNode.contents
+        fileNode.rawContents = content
+    }
 }
 
 const returnsTrue = () => true

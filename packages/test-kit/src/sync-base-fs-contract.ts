@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { IBaseFileSystemSync } from '@file-services/types'
+import { IBaseFileSystemSync, FileSystemConstants } from '@file-services/types'
 import { ITestInput } from './types'
 import { WatchEventsValidator } from './watch-events-validator'
 
@@ -537,6 +537,57 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             } else {
                 expect(fs.statSync(upperCaseFilePath).isFile()).to.equal(true)
             }
+        })
+
+        describe('copying files/directories', () => {
+            const SOURCE_FILE_NAME = 'file.txt'
+            let targetDirectoryPath: string
+            let sourceFilePath: string
+
+            beforeEach(() => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                targetDirectoryPath = join(tempDirectoryPath, 'dir')
+                fs.mkdirSync(targetDirectoryPath)
+                sourceFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME)
+                fs.writeFileSync(sourceFilePath, SAMPLE_CONTENT)
+            })
+
+            it('can copy file', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                fs.copyFileSync(sourceFilePath, targetPath)
+                expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
+            })
+
+            it('fails if source does not exist', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const sourcePath = fs.path.join(tempDirectoryPath, 'nonExistingFileName.txt')
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                expect(() => fs.copyFileSync(sourcePath, targetPath)).to.throw('ENOENT')
+            })
+
+            it('fails if target containing directory does not exist', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME)
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('ENOENT')
+            })
+
+            it('overwrites destination file by default', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                fs.writeFileSync(targetPath, 'content to be overwritten')
+                fs.copyFileSync(sourceFilePath, targetPath)
+                expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
+            })
+
+            it('fails if destination exists and flag COPYFILE_EXCL passed', () => {
+                const { fs } = testInput
+                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
+                fs.writeFileSync(targetPath, 'content to be overwritten')
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL))
+                    .to.throw('EEXIST')
+            })
         })
     })
 }
