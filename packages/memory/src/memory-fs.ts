@@ -345,7 +345,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 }
 
 function createMemDirectory(name: string, parent?: IFsMemDirectoryNode): IFsMemDirectoryNode {
-    const shadowEntries  = Object.create(null)
+    const shadowEntries = Object.create(null)
     const actualEntries = Object.create(shadowEntries)
     const currentDate = new Date()
     const memDirectory: IFsMemDirectoryNode = {
