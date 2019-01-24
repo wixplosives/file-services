@@ -26,7 +26,8 @@
   "files": [
     "cjs",
     "esm",
-    "src/**/*.ts"
+    "src",
+    "!src/tsconfig.json"
   ],
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/memory",
