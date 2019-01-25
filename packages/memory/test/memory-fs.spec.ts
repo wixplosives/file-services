@@ -2,7 +2,6 @@ import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContrac
 import { createMemoryFs } from '../src'
 import { expect } from 'chai'
 import { sleep } from 'promise-assist'
-import { IFileSystem } from '@file-services/types'
 
 describe('In-memory File System Implementation', () => {
     const testProvider = async () => {
@@ -35,14 +34,13 @@ describe('In-memory File System Implementation', () => {
         const sourceFilePath = '/file.txt'
         const emptyDirectoryPath = '/empty_dir'
 
-        let fs: IFileSystem
-
-        beforeEach(async () => fs = createMemoryFs({
+        const createPopulatedFs = () => createMemoryFs({
             [sourceFilePath]: 'test content',
             [emptyDirectoryPath]: {}
-        }))
+        })
 
         it('preserves birthtime and updates mtime', async () => {
+            const fs = createPopulatedFs()
             const sourceFileStats = fs.statSync(sourceFilePath)
             const destFilePath = fs.path.join(emptyDirectoryPath, 'dest')
 
@@ -57,10 +55,14 @@ describe('In-memory File System Implementation', () => {
         })
 
         it('fails if source is a directory', () => {
+            const fs = createPopulatedFs()
+
             expect(() => fs.copyFileSync(emptyDirectoryPath, '/some_other_folder')).to.throw('EISDIR')
         })
 
         it('fails if target is a directory', () => {
+            const fs = createPopulatedFs()
+
             expect(() => fs.copyFileSync(sourceFilePath, emptyDirectoryPath)).to.throw('EISDIR')
         })
     })
