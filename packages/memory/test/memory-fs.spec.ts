@@ -45,8 +45,8 @@ describe('In-memory File System Implementation', () => {
         it('preserves birthtime and updates mtime', async () => {
             const sourceFileStats = fs.statSync(sourceFilePath)
             const destFilePath = fs.path.join(emptyDirectoryPath, 'dest')
-            // postpone copying for 1s to make sure timestamps can be different
-            await sleep(100)
+
+            await sleep(100) // postpone copying to ensure timestamps are different
 
             fs.copyFileSync(sourceFilePath, destFilePath)
 
