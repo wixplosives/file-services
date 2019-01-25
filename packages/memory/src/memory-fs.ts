@@ -39,7 +39,7 @@ export function createBaseMemoryFs(): IBaseFileSystem {
     return { ...syncMemFs, ...syncToAsyncFs(syncMemFs) }
 }
 
-// ugly workaround for webpack's polyfilled path not implementing posix
+// ugly workaround for webpack's polyfilled path not implementing `.posix` field
 // TODO: inline path-posix implementation taked from latest node's source (faster!)
 const posixPath = pathMain.posix as typeof pathMain || pathMain
 
@@ -237,10 +237,10 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const resolvedPath = resolvePath(nodePath)
         const splitPath = resolvedPath.split(posixPath.sep)
 
-        return splitPath.reduce((prevNode: IFsMemDirectoryNode | IFsMemFileNode | null, depthName: string) => {
+        return splitPath.reduce((fsNode: IFsMemDirectoryNode | IFsMemFileNode | null, depthName: string) => {
             return (depthName === '' || depthName === '.') ?
-                prevNode :
-                (prevNode && prevNode.type === 'dir' && prevNode.contents.get(depthName.toLowerCase())) || null
+                fsNode :
+                (fsNode && fsNode.type === 'dir' && fsNode.contents.get(depthName.toLowerCase())) || null
         }, root)
     }
 
