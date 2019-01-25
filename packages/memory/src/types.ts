@@ -19,5 +19,5 @@ export interface IFsMemFileNode extends IFsMemNode {
 
 export interface IFsMemDirectoryNode extends IFsMemNode {
     type: 'dir'
-    contents: { [nodeName: string]: IFsMemDirectoryNode | IFsMemFileNode }
+    contents: Map<string, IFsMemDirectoryNode | IFsMemFileNode>
 }
