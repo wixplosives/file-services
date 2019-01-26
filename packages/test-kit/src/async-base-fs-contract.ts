@@ -365,6 +365,112 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             })
         })
 
+        describe('renaming directories and files', () => {
+            it('moves a file', async () => {
+                const { fs, tempDirectoryPath, fs: { path } } = testInput
+                const sourcePath = path.join(tempDirectoryPath, 'file')
+                const destinationPath = path.join(tempDirectoryPath, 'dir', 'subdir', 'movedFile')
+
+                await fs.writeFile(sourcePath, SAMPLE_CONTENT)
+                await fs.mkdir(path.join(tempDirectoryPath, 'dir'))
+                await fs.mkdir(path.join(tempDirectoryPath, 'dir', 'subdir'))
+
+                const sourceStats = await fs.stat(sourcePath)
+
+                await fs.rename(sourcePath, destinationPath)
+
+                const destStats = await fs.stat(destinationPath)
+                expect(destStats.isFile()).to.equal(true)
+                expect(destStats.mtime).not.to.equal(sourceStats.mtime)
+                expect(await fs.readFile(destinationPath)).to.eql(SAMPLE_CONTENT)
+                await expect(fs.stat(sourcePath)).to.be.rejectedWith('ENOENT')
+            })
+
+            it(`throws if source path doesn't exist`, async () => {
+                const { fs, tempDirectoryPath, fs: { path } } = testInput
+                const sourcePath = path.join(tempDirectoryPath, 'file')
+                const destPath = path.join(tempDirectoryPath, 'file2')
+
+                await expect(fs.rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
+            })
+
+            it(`throws if the containing directory of the source path doesn't exist`, async () => {
+                const { fs, tempDirectoryPath, fs: { path } } = testInput
+                const sourcePath = path.join(tempDirectoryPath, 'unicorn', 'file')
+                const destPath = path.join(tempDirectoryPath, 'file2')
+
+                await expect(fs.rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
+            })
+
+            it(`throws if destination containing path doesn't exist`, async () => {
+                const { fs, tempDirectoryPath, fs: { path } } = testInput
+                const sourcePath = path.join(tempDirectoryPath, 'file')
+                const destPath = path.join(tempDirectoryPath, 'dir', 'file2')
+
+                await fs.writeFile(sourcePath, SAMPLE_CONTENT)
+
+                await expect(fs.rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
+            })
+
+            it('updates the parent directory of a renamed entry', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const sourcePath = join(tempDirectoryPath, 'sourceDir')
+                const destPath = join(tempDirectoryPath, 'destDir')
+
+                await fs.mkdir(sourcePath)
+                await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                await fs.rename(sourcePath, destPath)
+
+                expect(await fs.readdir(tempDirectoryPath)).to.include('destDir')
+            })
+
+            describe('renaming directories', () => {
+                it('moves a directory', async () => {
+                    const { fs, tempDirectoryPath } = testInput
+                    const { join } = fs.path
+                    const sourcePath = join(tempDirectoryPath, 'dir')
+                    const destinationPath = join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir')
+                    await fs.mkdir(join(tempDirectoryPath, 'dir'))
+                    await fs.mkdir(join(tempDirectoryPath, 'anotherDir'))
+                    await fs.mkdir(join(tempDirectoryPath, 'anotherDir', 'subdir'))
+                    await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                    await fs.rename(sourcePath, destinationPath)
+
+                    expect((await fs.stat(destinationPath)).isDirectory()).to.equal(true)
+                    expect(await fs.readFile(join(destinationPath, 'file'))).to.eql(SAMPLE_CONTENT)
+                    await expect(fs.stat(sourcePath)).to.be.rejectedWith('ENOENT')
+                })
+
+                it(`allows copying a directory over a non-existing directory`, async () => {
+                    const { fs, tempDirectoryPath } = testInput
+                    const { join } = fs.path
+                    const sourcePath = join(tempDirectoryPath, 'sourceDir')
+
+                    await fs.mkdir(sourcePath)
+                    await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                    await expect(fs.rename(sourcePath, join(tempDirectoryPath, 'destDir')))
+                        .to.not.be.rejectedWith('EEXIST')
+                })
+
+                it(`allows copying copying a directory over an empty directory`, async () => {
+                    const { fs, tempDirectoryPath } = testInput
+                    const { join } = fs.path
+                    const sourcePath = join(tempDirectoryPath, 'sourceDir')
+                    const destPath = join(tempDirectoryPath, 'destDir')
+
+                    await fs.mkdir(sourcePath)
+                    await fs.mkdir(destPath)
+                    await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+
+                    await expect(fs.rename(sourcePath, destPath)).to.not.be.rejectedWith('EEXIST')
+                })
+            })
+        })
+
         it('correctly exposes whether it is case sensitive', async () => {
             const { fs, tempDirectoryPath, fs: { path } } = testInput
             const filePath = path.join(tempDirectoryPath, 'file')
