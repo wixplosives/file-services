@@ -22,12 +22,12 @@ describe('Node Watch Service', function() {
     })
 
     describe('watching files', () => {
-        let validate: WatchEventsValidator
+        let validator: WatchEventsValidator
         let testFilePath: string
 
         beforeEach('create temp fixture file and intialize watch service', async () => {
             watchService = new NodeWatchService()
-            validate = new WatchEventsValidator(watchService)
+            validator = new WatchEventsValidator(watchService)
 
             tempDir = await createTempDirectory()
             testFilePath = join(tempDir.path, 'test-file')
@@ -41,8 +41,8 @@ describe('Node Watch Service', function() {
             await writeFile(testFilePath, SAMPLE_CONTENT)
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            await validate.lastEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
+            await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
+            await validator.noMoreEvents()
         })
 
         it('emits two different watch events when changes are >200ms appart', async () => {
@@ -53,21 +53,23 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            const secondStats = await stat(testFilePath)
+            const secondWriteStats = await stat(testFilePath)
 
-            await validate.lastEvent({ path: testFilePath, stats: firstWriteStats })
-            await validate.lastEvent({ path: testFilePath, stats: secondStats })
-            await validate.noMoreEvents()
+            await validator.validateEvents([
+                { path: testFilePath, stats: firstWriteStats },
+                { path: testFilePath, stats: secondWriteStats }
+            ])
+            await validator.noMoreEvents()
         })
     })
 
     describe('watching directories', () => {
-        let validate: WatchEventsValidator
+        let validator: WatchEventsValidator
         let testDirectoryPath: string
 
         beforeEach('create temp fixture directory and intialize watch service', async () => {
             watchService = new NodeWatchService()
-            validate = new WatchEventsValidator(watchService)
+            validator = new WatchEventsValidator(watchService)
 
             tempDir = await createTempDirectory()
             testDirectoryPath = join(tempDir.path, 'test-directory')
@@ -80,19 +82,19 @@ describe('Node Watch Service', function() {
 
             await rmdir(testDirectoryPath)
 
-            await validate.lastEvent({ path: testDirectoryPath, stats: null })
-            await validate.noMoreEvents()
+            await validator.validateEvents([{ path: testDirectoryPath, stats: null }])
+            await validator.noMoreEvents()
         })
     })
 
     describe('mixing watch of directories and files', () => {
-        let validate: WatchEventsValidator
+        let validator: WatchEventsValidator
         let testDirectoryPath: string
         let testFilePath: string
 
         beforeEach('create temp fixture directory and intialize watch service', async () => {
             watchService = new NodeWatchService()
-            validate = new WatchEventsValidator(watchService)
+            validator = new WatchEventsValidator(watchService)
 
             tempDir = await createTempDirectory()
             testDirectoryPath = join(tempDir.path, 'test-directory')
@@ -107,8 +109,8 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            await validate.lastEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
+            await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
+            await validator.noMoreEvents()
         })
 
         it('allows watching in any order', async () => {
@@ -117,8 +119,8 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
-            await validate.lastEvent({ path: testFilePath, stats: await stat(testFilePath) })
-            await validate.noMoreEvents()
+            await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
+            await validator.noMoreEvents()
         })
     })
 })

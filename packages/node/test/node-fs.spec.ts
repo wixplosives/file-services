@@ -32,4 +32,4 @@ describe('Node File System Implementation', () => {
     asyncFsContract(testProvider)
     syncFsContract(testProvider)
 
-}).timeout(5000) // increase timeout to 5s, as local file operations are slower (especially in CI)
+})
