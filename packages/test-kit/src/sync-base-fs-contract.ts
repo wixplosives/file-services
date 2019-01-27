@@ -335,7 +335,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 await validator.noMoreEvents()
             })
 
-            it('fires a watch event when a file is changed inside inside a watched directory', async () => {
+            it('fires a watch event when a file is changed inside a watched directory', async () => {
                 const { fs } = testInput
                 const { watchService, path } = fs
 
@@ -349,7 +349,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 await validator.noMoreEvents()
             })
 
-            it('fires a watch event when a file is removed inside inside a watched directory', async () => {
+            it('fires a watch event when a file is removed inside a watched directory', async () => {
                 const { fs } = testInput
                 const { watchService, path } = fs
 
