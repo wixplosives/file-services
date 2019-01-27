@@ -1,14 +1,14 @@
 import { IBaseFileSystemAsync, IBaseFileSystemSync, IFileSystemStats } from './base-api'
 
 /**
- * SYNC and ASYNC file system containing
- * Contains all base apis, and adds higher level apis
+ * SYNC and ASYNC file system.
+ * Exposes all base fs APIs plus several higher level methods.
  */
 export interface IFileSystem extends IFileSystemAsync, IFileSystemSync { }
 
 /**
- * SYNC-only file system containing
- * Contains all base apis, and adds higher level apis
+ * SYNC-only file system.
+ * Exposes all base fs APIs plus several higher level methods.
  */
 export interface IFileSystemSync extends IBaseFileSystemSync {
     /**
@@ -55,8 +55,8 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
 }
 
 /**
- * ASYNC-only file system containing
- * Contains all base apis, and adds higher level apis
+ * ASYNC-only file system.
+ * Exposes all base fs APIs plus several higher level methods.
  */
 export interface IFileSystemAsync extends IBaseFileSystemAsync {
     /**

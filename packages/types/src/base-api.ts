@@ -2,14 +2,14 @@ import { IWatchService } from './watch-api'
 import { IFileSystemPath } from './path'
 
 /**
- * SYNC and ASYNC file system containing
- * Contains a subset of `fs`, watch service, and path methods
+ * SYNC and ASYNC base file system.
+ * Contains a subset of `fs`, watch service, and path methods.
  */
 export interface IBaseFileSystem extends IBaseFileSystemAsync, IBaseFileSystemSync { }
 
 /**
- * SYNC-only, base file system
- * Contains a subset of `fs`, watch service, and path methods
+ * SYNC-only base file system.
+ * Contains a subset of `fs`, watch service, and path methods.
  */
 export interface IBaseFileSystemSync {
     path: IFileSystemPath
@@ -17,11 +17,12 @@ export interface IBaseFileSystemSync {
     caseSensitive: boolean
 
     /**
-     * Synchronously copies src to dest.
-     * Param flags is used as modifiers for copy operation. Default: 0 (dest is overwritten if it already exists)
-     * flags = FileSystemConstants.COPYFILE_EXCL will cause copy operation to fail if dest already exists.
+     * Copy `sourcePath` to `destinationPath`.
+     * By default, if destination already exists, it will be overwritten.
+     *
+     * @param flags passing `FileSystemConstants.COPYFILE_EXCL` will cause operation to fail if destination exists.
      */
-    copyFileSync(src: string, dest: string, flags?: number): void
+    copyFileSync(sourcePath: string, destinationPath: string, flags?: number): void
 
     /**
      * Read the entire contents of a file as a string.
@@ -83,8 +84,8 @@ export interface IBaseFileSystemSync {
 }
 
 /**
- * ASYNC-only, base file system
- * Contains a subset of `fs`, watch service, and path methods
+ * ASYNC-only base file system.
+ * Contains a subset of `fs`, watch service, and path methods.
  */
 export interface IBaseFileSystemAsync {
     path: IFileSystemPath
@@ -92,11 +93,12 @@ export interface IBaseFileSystemAsync {
     caseSensitive: boolean
 
     /**
-     * Asynchronously copies src to dest.
-     * Param flags is used as modifiers for copy operation. Default: 0 (dest is overwritten if it already exists)
-     * flags = FileSystemConstants.COPYFILE_EXCL will cause copy operation to fail if dest already exists.
+     * Copy `sourcePath` to `destinationPath`.
+     * By default, if destination already exists, it will be overwritten.
+     *
+     * @param flags passing `FileSystemConstants.COPYFILE_EXCL` will cause operation to fail if destination exists.
      */
-    copyFile(src: string, dest: string, flags?: number): Promise<void>
+    copyFile(sourcePath: string, destinationPath: string, flags?: number): Promise<void>
 
     /**
      * Read the entire contents of a file as a string.

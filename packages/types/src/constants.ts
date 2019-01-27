@@ -1,6 +1,7 @@
 export enum FileSystemConstants {
     /**
-     * Used is fs.copyFile flags param, causes copy operation to fail if dest already exists.
+     * When passed as a flag to `copyFile` or `copyFileSync`,
+     * causes operation to fail if destination already exists.
      */
     COPYFILE_EXCL = 1
 }
