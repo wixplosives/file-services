@@ -52,7 +52,7 @@ export class WatchEventsValidator {
      */
     public async noMoreEvents(): Promise<void> {
         await sleep(this.options.noMoreEventsTimeout)
-        expect(this.capturedEvents).to.have.lengthOf(0)
+        expect(this.capturedEvents).to.eql([])
     }
 }
 
