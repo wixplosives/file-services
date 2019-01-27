@@ -57,7 +57,7 @@ export class WatchEventsValidator {
 }
 
 /**
- * Converts watch events' stats to a simpler structure, so they have a nice diff in tests
+ * Converts watch event's stats to an easier to read/diff structure
  */
 const simplifyEvent = ({ path, stats }: IWatchEvent) => ({
     path,
