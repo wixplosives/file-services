@@ -4,11 +4,11 @@ import { IWatchEvent, IWatchService } from '@file-services/types'
 
 export interface IWatchEventValidatorOptions {
     /**
-     * Timeout (in ms) to wait for each event.
+     * Timeout (in ms) for each `validateEvents` call.
      *
      * @default 5000
      */
-    singleEventTimeout?: number
+    validateTimeout?: number
 
     /**
      * Timeout (in ms) to wait before checking for no additional events.
@@ -26,7 +26,7 @@ export class WatchEventsValidator {
     private options: Required<IWatchEventValidatorOptions>
 
     constructor(private watchService: IWatchService, options?: IWatchEventValidatorOptions) {
-        this.options = { singleEventTimeout: 5000, noMoreEventsTimeout: 500, ...options }
+        this.options = { validateTimeout: 5000, noMoreEventsTimeout: 500, ...options }
 
         this.watchService.addGlobalListener(e => this.capturedEvents.push(e))
     }
@@ -42,7 +42,7 @@ export class WatchEventsValidator {
         await waitFor(() => {
             const actual = capturedEvents.slice(-1 * expectedEvents.length).map(simplifyEvent)
             expect(actual).to.eql(expected)
-        }, { timeout: this.options.singleEventTimeout, delay: 100 })
+        }, { timeout: this.options.validateTimeout, delay: 100 })
 
         this.capturedEvents.length = 0
     }
