@@ -129,13 +129,13 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('watching files', function() {
             this.timeout(10000)
 
-            let validate: WatchEventsValidator
+            let validator: WatchEventsValidator
             let testFilePath: string
 
             beforeEach('create temp fixture file and intialize validator', async () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { watchService, path } = fs
-                validate = new WatchEventsValidator(watchService)
+                validator = new WatchEventsValidator(watchService)
 
                 testFilePath = path.join(tempDirectoryPath, 'test-file')
 
@@ -148,8 +148,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, DIFFERENT_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
+                await validator.noMoreEvents()
             })
 
             it('emits watch event when a watched file is removed', async () => {
@@ -157,8 +157,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.unlinkSync(testFilePath)
 
-                await validate.lastEvent({ path: testFilePath, stats: null })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: null }])
+                await validator.noMoreEvents()
             })
 
             it('keeps watching if file is deleted and recreated immediately', async () => {
@@ -168,12 +168,12 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.unlinkSync(testFilePath)
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
+                await validator.noMoreEvents()
             })
         })
 
@@ -310,13 +310,13 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('watching directories', function() {
             this.timeout(10000)
 
-            let validate: WatchEventsValidator
+            let validator: WatchEventsValidator
             let testDirectoryPath: string
 
             beforeEach('create temp fixture directory and intialize validator', async () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { watchService, path } = fs
-                validate = new WatchEventsValidator(watchService)
+                validator = new WatchEventsValidator(watchService)
 
                 testDirectoryPath = path.join(tempDirectoryPath, 'test-directory')
                 fs.mkdirSync(testDirectoryPath)
@@ -331,8 +331,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
+                await validator.noMoreEvents()
             })
 
             it('fires a watch event when a file is changed inside inside a watched directory', async () => {
@@ -345,8 +345,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
+                await validator.noMoreEvents()
             })
 
             it('fires a watch event when a file is removed inside inside a watched directory', async () => {
@@ -359,22 +359,22 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.unlinkSync(testFilePath)
 
-                await validate.lastEvent({ path: testFilePath, stats: null })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: null }])
+                await validator.noMoreEvents()
             })
         })
 
         describe('watching both directories and files', function() {
             this.timeout(10000)
 
-            let validate: WatchEventsValidator
+            let validator: WatchEventsValidator
             let testDirectoryPath: string
             let testFilePath: string
 
             beforeEach('create temp fixture directory and intialize watchService', async () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { watchService, path } = fs
-                validate = new WatchEventsValidator(watchService)
+                validator = new WatchEventsValidator(watchService)
 
                 testDirectoryPath = path.join(tempDirectoryPath, 'test-directory')
                 fs.mkdirSync(testDirectoryPath)
@@ -391,8 +391,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
+                await validator.noMoreEvents()
             })
 
             it('allows watching in any order', async () => {
@@ -404,8 +404,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT)
 
-                await validate.lastEvent({ path: testFilePath, stats: fs.statSync(testFilePath) })
-                await validate.noMoreEvents()
+                await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }])
+                await validator.noMoreEvents()
             })
         })
 
