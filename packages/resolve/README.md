@@ -30,7 +30,7 @@ resolveRequest('/', './some-folder')
 // === '/some-folder/index.js'
 ```
 
-`createRequestResolver` accepts other options as well
+Resolution behavior can be customized:
 
 ```ts
 interface IRequestResolverOptions {
