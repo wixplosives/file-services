@@ -48,9 +48,10 @@ describe('Node Watch Service', function() {
 
         it(`emits two different watch events when changes are >${debounceWait}ms appart`, async () => {
             await writeFile(testFilePath, SAMPLE_CONTENT)
-            const firstWriteStats = await stat(testFilePath)
 
             await sleep(debounceWait)
+
+            const firstWriteStats = await stat(testFilePath)
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
