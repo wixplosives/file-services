@@ -7,6 +7,7 @@ import { WatchEventsValidator } from '@file-services/test-kit'
 
 import { NodeWatchService } from '../src'
 
+const debounceWait = 500
 const SAMPLE_CONTENT = `sample file content`
 
 describe('Node Watch Service', function() {
@@ -26,7 +27,7 @@ describe('Node Watch Service', function() {
         let testFilePath: string
 
         beforeEach('create temp fixture file and intialize watch service', async () => {
-            watchService = new NodeWatchService()
+            watchService = new NodeWatchService({ debounceWait })
             validator = new WatchEventsValidator(watchService)
 
             tempDir = await createTempDirectory()
@@ -45,11 +46,11 @@ describe('Node Watch Service', function() {
             await validator.noMoreEvents()
         })
 
-        it('emits two different watch events when changes are >200ms appart', async () => {
+        it(`emits two different watch events when changes are >${debounceWait}ms appart`, async () => {
             await writeFile(testFilePath, SAMPLE_CONTENT)
             const firstWriteStats = await stat(testFilePath)
 
-            await sleep(200)
+            await sleep(debounceWait)
 
             await writeFile(testFilePath, SAMPLE_CONTENT)
 
@@ -68,7 +69,7 @@ describe('Node Watch Service', function() {
         let testDirectoryPath: string
 
         beforeEach('create temp fixture directory and intialize watch service', async () => {
-            watchService = new NodeWatchService()
+            watchService = new NodeWatchService({ debounceWait })
             validator = new WatchEventsValidator(watchService)
 
             tempDir = await createTempDirectory()
@@ -93,7 +94,7 @@ describe('Node Watch Service', function() {
         let testFilePath: string
 
         beforeEach('create temp fixture directory and intialize watch service', async () => {
-            watchService = new NodeWatchService()
+            watchService = new NodeWatchService({ debounceWait })
             validator = new WatchEventsValidator(watchService)
 
             tempDir = await createTempDirectory()
