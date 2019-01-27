@@ -4,7 +4,7 @@ import { createTempDirectory } from 'create-temp-directory'
 import { createNodeFs } from '../src'
 
 describe('Node File System Implementation', () => {
-    const fs = createNodeFs()
+    const fs = createNodeFs({ watchOptions: { debounceWait: 500 } })
     const { watchService } = fs
 
     const testProvider = async () => {

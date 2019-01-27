@@ -12,8 +12,8 @@ export interface ICreateNodeFsOptions {
     watchOptions?: INodeWatchServiceOptions
 }
 
-export function createNodeFs(): IFileSystem {
-    const baseFs = createBaseNodeFs()
+export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
+    const baseFs = createBaseNodeFs(options)
 
     return {
         ...createSyncFileSystem(baseFs),
