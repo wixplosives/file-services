@@ -24,7 +24,6 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './src/file.js')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/src', './data.json')).to.be.resolvedTo('/src/data.json')
             expect(resolveRequest('/src', './typed.ts')).to.be.resolvedTo('/src/typed.ts')
-            expect(resolveRequest('/src', '../style.css')).to.be.resolvedTo('/style.css')
             expect(resolveRequest('/', './style.css')).to.be.resolvedTo('/style.css')
             expect(resolveRequest('/', './image.jpg')).to.be.resolvedTo('/image.jpg')
             expect(resolveRequest('/', './non-existing.svg')).to.be.resolvedTo(null)
@@ -70,15 +69,21 @@ describe('request resolver', () => {
 
         it('resolves requests to absolute paths', () => {
             const fs = createMemoryFs({
-                'src': {
-                    'file.js': EMPTY
+                src: {
+                    folder: {
+                        'file.js': EMPTY
+                    }
                 },
-                'another.js': EMPTY
+                folder: {
+                    'file.js': EMPTY
+                }
             })
             const resolveRequest = createRequestResolver({ fs })
 
-            expect(resolveRequest('/whatever/origin/path', '/src/file')).to.be.resolvedTo('/src/file.js')
-            expect(resolveRequest('/reques/origin/matters/not', '/another')).to.be.resolvedTo('/another.js')
+            expect(resolveRequest('/reques/origin/matters/not', '/folder/file')).to.be.resolvedTo('/folder/file.js')
+            // next one ensures we don't accidently resolve absolute paths using path.join
+            // which would result in '/src/folder/file.js' instead
+            expect(resolveRequest('/src', '/folder/file')).to.be.resolvedTo('/folder/file.js')
         })
 
         it('resolves requests to files across folders', () => {
@@ -91,8 +96,8 @@ describe('request resolver', () => {
             const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './src/file')).to.be.resolvedTo('/src/file.js')
-            expect(resolveRequest('/demo', '../src/file.js')).to.be.resolvedTo('/src/file.js')
-            expect(resolveRequest('/src/inner', '../file.js')).to.be.resolvedTo('/src/file.js')
+            expect(resolveRequest('/demo', '../src/file')).to.be.resolvedTo('/src/file.js')
+            expect(resolveRequest('/src/inner', '../file')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/src/inner', '../../another')).to.be.resolvedTo('/another.js')
         })
     })
@@ -127,13 +132,13 @@ describe('request resolver', () => {
                     'package.json': '{"main": "main_file"}',
                     'main_file.js': EMPTY
                 },
-                to_file_in_folder: {
-                    'inner': { 'file.js': EMPTY },
-                    'package.json': '{"main": "inner/file.js"}'
-                },
                 to_inner_folder: {
                     'inner': { 'index.js': EMPTY },
                     'package.json': '{"main": "inner"}'
+                },
+                to_file_in_folder: {
+                    'inner': { 'file.js': EMPTY },
+                    'package.json': '{"main": "inner/file.js"}'
                 },
                 preferred: {
                     'package.json': '{"main": "preferred.js"}',
@@ -339,6 +344,19 @@ describe('request resolver', () => {
             const resolveRequest = createRequestResolver({ fs, target: 'node' })
 
             expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js')
+        })
+
+        it('prefers "browser" when resolution "target" is set to "browser" (also default)', () => {
+            const fs = createMemoryFs({
+                lodash: {
+                    'package.json': '{"main": "entry.js", "browser": "./browser.js"}',
+                    'entry.js': EMPTY,
+                    'browser.js': EMPTY
+                }
+            })
+            const resolveRequest = createRequestResolver({ fs, target: 'browser' })
+
+            expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js')
         })
     })
 })
