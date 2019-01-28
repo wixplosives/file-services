@@ -1,0 +1,35 @@
+{
+  "name": "@file-services/resolve",
+  "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
+  "version": "0.1.0",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs ./esm",
+    "build": "ts-build ./src --cjs --esm",
+    "lint": "run-p lint:src lint:test",
+    "lint:src": "tslint -p src",
+    "lint:test": "tslint -p test",
+    "test": "run-p test:node test:browser",
+    "test:node": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors",
+    "test:browser": "mocha-pup \"test/**/*.spec.ts?(x)\" -c ../../webpack.config.js",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@file-services/types": "^0.4.7"
+  },
+  "files": [
+    "cjs",
+    "esm",
+    "src",
+    "!src/tsconfig.json"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/resolve",
+  "homepage": "https://github.com/wixplosives/file-services",
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false
+}
