@@ -46,7 +46,6 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
  */
 export interface IResolutionFileSystem {
     path: IFileSystemPath
-    realpathSync: IFileSystemSync['realpathSync']
     fileExistsSync: IFileSystemSync['fileExistsSync']
     readFileSync: IFileSystemSync['readFileSync']
 }
