@@ -1,31 +1,4 @@
-import { RequestResolver, IResolutionFileSystem, IResolutionOutput } from './types'
-
-export interface IRequestResolverOptions {
-    /**
-     * File system to use when resolving requests.
-     */
-    fs: IResolutionFileSystem
-
-    /**
-     * Folders to use when searching for packages.
-     *
-     * @default ['node_modules']
-     */
-    packageRoots?: string[]
-
-    /**
-     * File extensions to try resolving the request with.
-     *
-     * @default ['.js', '.json']
-     */
-    extensions?: string[]
-
-    /**
-     * Whether to prefer the 'browser' field or 'main' field
-     * in `package.json`.
-     */
-    target?: 'node' | 'browser'
-}
+import { RequestResolver, IResolutionOutput, IRequestResolverOptions } from './types'
 
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../')
 
