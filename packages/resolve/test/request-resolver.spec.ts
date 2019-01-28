@@ -10,7 +10,7 @@ const EMPTY = ''
 describe('request resolver', () => {
     describe('files', () => {
         it('resolves imports to any file if extension is specified', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 'src': {
                     'typed.ts': EMPTY,
                     'file.js': EMPTY,
@@ -19,7 +19,7 @@ describe('request resolver', () => {
                 'style.css': EMPTY,
                 'image.jpg': EMPTY
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './src/file.js')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/src', './data.json')).to.be.resolvedTo('/src/data.json')
@@ -31,14 +31,14 @@ describe('request resolver', () => {
         })
 
         it('resolves imports to js and json files without specified extension', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 'src': {
                     'file.js': EMPTY,
                     'style.css.js': EMPTY
                 },
                 'data.json': EMPTY
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './src/file')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/', './data')).to.be.resolvedTo('/data.json')
@@ -47,7 +47,7 @@ describe('request resolver', () => {
         })
 
         it('allows specifying custom extensions for resolution', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 'src': {
                     'same_name.tsx': EMPTY,
                     'same_name.ts': EMPTY
@@ -57,7 +57,7 @@ describe('request resolver', () => {
                 'style.css.ts': EMPTY,
                 'now_ignored.js': EMPTY
             })
-            const resolveRequest = createRequestResolver({ host, extensions: ['.ts', '.tsx'] })
+            const resolveRequest = createRequestResolver({ fs, extensions: ['.ts', '.tsx'] })
 
             expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.ts')
             expect(resolveRequest('/', './another')).to.be.resolvedTo('/another.tsx')
@@ -69,26 +69,26 @@ describe('request resolver', () => {
         })
 
         it('resolves imports to absolute paths', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 'src': {
                     'file.js': EMPTY
                 },
                 'another.js': EMPTY
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/whatever/origin/path', '/src/file')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/import/origin/matters/not', '/another')).to.be.resolvedTo('/another.js')
         })
 
         it('resolves imports to files across folders', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 'src': {
                     'file.js': EMPTY
                 },
                 'another.js': EMPTY
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './src/file')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/demo', '../src/file.js')).to.be.resolvedTo('/src/file.js')
@@ -99,7 +99,7 @@ describe('request resolver', () => {
 
     describe('folders', () => {
         it('resolves import to a folder if it contains an index file', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 src: {
                     'index.js': EMPTY
                 },
@@ -110,7 +110,7 @@ describe('request resolver', () => {
                     'index.ts': EMPTY
                 }
             })
-            const resolveRequest = createRequestResolver({ host, extensions: ['.ts', '.js', '.json'] })
+            const resolveRequest = createRequestResolver({ fs, extensions: ['.ts', '.js', '.json'] })
 
             expect(resolveRequest('/', './src')).to.be.resolvedTo('/src/index.js')
             expect(resolveRequest('/', './data')).to.be.resolvedTo('/data/index.json')
@@ -118,7 +118,7 @@ describe('request resolver', () => {
         })
 
         it('resolves import to a folder if it contains a package.json with a main', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 with_ext: {
                     'package.json': '{"main": "entry.js"}',
                     'entry.js': EMPTY
@@ -160,7 +160,7 @@ describe('request resolver', () => {
                     'index.js': EMPTY
                 }
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './with_ext')).to.be.resolvedTo('/with_ext/entry.js')
             expect(resolveRequest('/', './without_ext')).to.be.resolvedTo('/without_ext/main_file.js')
@@ -177,7 +177,7 @@ describe('request resolver', () => {
 
     describe('packages', () => {
         it('resolves imports to packages in node_modules', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 node_modules: {
                     'express': {
                         'package.json': '{"main": "main.js"}',
@@ -195,7 +195,7 @@ describe('request resolver', () => {
                     'just-a-file.js': EMPTY
                 }
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', 'express'))
                 .to.be.resolvedTo('/node_modules/express/main.js')
@@ -221,7 +221,7 @@ describe('request resolver', () => {
         })
 
         it('resolves imports correctly when two versions of same package exist in tree', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 node_modules: {
                     express: {
                         'node_modules': {
@@ -241,7 +241,7 @@ describe('request resolver', () => {
                 }
             })
 
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             // local node_modules package overshadows the top level one
             expect(resolveRequest('/node_modules/express', 'lodash'))
@@ -257,7 +257,7 @@ describe('request resolver', () => {
         })
 
         it('resolves imports to scoped packages', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 node_modules: {
                     '@stylable': {
                         cli: {
@@ -267,7 +267,7 @@ describe('request resolver', () => {
                     }
                 }
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', '@stylable/cli'))
                 .to.be.resolvedTo('/node_modules/@stylable/cli/index.js')
@@ -277,7 +277,7 @@ describe('request resolver', () => {
         })
 
         it('allows specifying custom packages roots', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 project: {
                     third_party: {
                         koa: {
@@ -292,7 +292,7 @@ describe('request resolver', () => {
                     }
                 }
             })
-            const resolveRequest = createRequestResolver({ host, packageRoots: ['third_party', '/root_libs'] })
+            const resolveRequest = createRequestResolver({ fs, packageRoots: ['third_party', '/root_libs'] })
 
             expect(resolveRequest('/project', 'koa'))
                 .to.be.resolvedTo('/project/third_party/koa/main-index.js')
@@ -304,39 +304,39 @@ describe('request resolver', () => {
 
     describe('browser field', () => {
         it('prefers "browser" over "main" when loading a package.json', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 lodash: {
                     'package.json': '{"main": "entry.js", "browser": "./browser.js"}',
                     'entry.js': EMPTY,
                     'browser.js': EMPTY
                 }
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js')
         })
 
         it('uses "browser" even if "main" was not defined', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 lodash: {
                     'package.json': '{"browser": "file.js"}',
                     'file.js': EMPTY
                 }
             })
-            const resolveRequest = createRequestResolver({ host })
+            const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/file.js')
         })
 
         it('prefers "main" when resolution "target" is set to "node"', () => {
-            const host = createMemoryFs({
+            const fs = createMemoryFs({
                 lodash: {
                     'package.json': '{"main": "entry.js", "browser": "./browser.js"}',
                     'entry.js': EMPTY,
                     'browser.js': EMPTY
                 }
             })
-            const resolveRequest = createRequestResolver({ host, target: 'node' })
+            const resolveRequest = createRequestResolver({ fs, target: 'node' })
 
             expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js')
         })

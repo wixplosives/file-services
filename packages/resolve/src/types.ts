@@ -1,3 +1,5 @@
+import { IFileSystemPath, IFileSystemSync } from '@file-services/types'
+
 export interface IResolutionOutput {
     resolvedFile: string
 }
@@ -15,18 +17,12 @@ export type RequestResolver = (
 ) => IResolutionOutput | null
 
 /**
- * Required APIs for resolution.
+ * Required fs APIs for request resolution.
  * Currently a subset of the sync base file system API.
  */
-export interface IResolutionHost {
-    path: {
-        basename(path: string): string
-        dirname(path: string): string
-        join(...pathSegments: string[]): string
-        resolve(...pathSegments: string[]): string
-        isAbsolute(path: string): boolean
-    }
-    realpathSync(path: string): string
-    fileExistsSync(filePath: string): boolean
-    readFileSync(filePath: string): string
+export interface IResolutionFileSystem {
+    path: IFileSystemPath
+    realpathSync: IFileSystemSync['realpathSync']
+    fileExistsSync: IFileSystemSync['fileExistsSync']
+    readFileSync: IFileSystemSync['readFileSync']
 }

@@ -1,10 +1,10 @@
-import { RequestResolver, IResolutionHost, IResolutionOutput } from './types'
+import { RequestResolver, IResolutionFileSystem, IResolutionOutput } from './types'
 
 export interface IRequestResolverOptions {
     /**
-     * Required environment APIs for resolution.
+     * File system to use when resolving requests.
      */
-    host: IResolutionHost
+    fs: IResolutionFileSystem
 
     /**
      * Folders to use when searching for packages.
@@ -31,7 +31,7 @@ const isRelative = (request: string) => request.startsWith('./') || request.star
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
     const {
-        host: { fileExistsSync, readFileSync, path: { dirname, join, resolve, isAbsolute, basename } },
+        fs: { fileExistsSync, readFileSync, path: { dirname, join, resolve, isAbsolute, basename } },
         packageRoots = ['node_modules'],
         extensions = ['.js', '.json'],
         target = 'browser'
