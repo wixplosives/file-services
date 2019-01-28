@@ -316,7 +316,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js')
         })
 
-        it('uses "browser" even if "main" was not defined', () => {
+        it('uses "browser" if "main" was not defined', () => {
             const fs = createMemoryFs({
                 lodash: {
                     'package.json': '{"browser": "file.js"}',
