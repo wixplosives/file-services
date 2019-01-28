@@ -9,7 +9,7 @@ const EMPTY = ''
 
 describe('request resolver', () => {
     describe('files', () => {
-        it('resolves imports to any file if extension is specified', () => {
+        it('resolves requests to any file if extension is specified', () => {
             const fs = createMemoryFs({
                 'src': {
                     'typed.ts': EMPTY,
@@ -30,7 +30,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './non-existing.svg')).to.be.resolvedTo(null)
         })
 
-        it('resolves imports to js and json files without specified extension', () => {
+        it('resolves requests to js and json files without specified extension', () => {
             const fs = createMemoryFs({
                 'src': {
                     'file.js': EMPTY,
@@ -68,7 +68,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/src', './same_name')).to.be.resolvedTo('/src/same_name.ts')
         })
 
-        it('resolves imports to absolute paths', () => {
+        it('resolves requests to absolute paths', () => {
             const fs = createMemoryFs({
                 'src': {
                     'file.js': EMPTY
@@ -78,10 +78,10 @@ describe('request resolver', () => {
             const resolveRequest = createRequestResolver({ fs })
 
             expect(resolveRequest('/whatever/origin/path', '/src/file')).to.be.resolvedTo('/src/file.js')
-            expect(resolveRequest('/import/origin/matters/not', '/another')).to.be.resolvedTo('/another.js')
+            expect(resolveRequest('/reques/origin/matters/not', '/another')).to.be.resolvedTo('/another.js')
         })
 
-        it('resolves imports to files across folders', () => {
+        it('resolves requests to files across folders', () => {
             const fs = createMemoryFs({
                 'src': {
                     'file.js': EMPTY
@@ -98,7 +98,7 @@ describe('request resolver', () => {
     })
 
     describe('folders', () => {
-        it('resolves import to a folder if it contains an index file', () => {
+        it('resolves requests to a folder if it contains an index file', () => {
             const fs = createMemoryFs({
                 src: {
                     'index.js': EMPTY
@@ -117,7 +117,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './typed')).to.be.resolvedTo('/typed/index.ts')
         })
 
-        it('resolves import to a folder if it contains a package.json with a main', () => {
+        it('resolves requests to a folder if it contains a package.json with a main', () => {
             const fs = createMemoryFs({
                 with_ext: {
                     'package.json': '{"main": "entry.js"}',
@@ -176,7 +176,7 @@ describe('request resolver', () => {
     })
 
     describe('packages', () => {
-        it('resolves imports to packages in node_modules', () => {
+        it('resolves requests to packages in node_modules', () => {
             const fs = createMemoryFs({
                 node_modules: {
                     'express': {
@@ -220,7 +220,7 @@ describe('request resolver', () => {
                 .to.be.resolvedTo('/node_modules/just-a-file.js')
         })
 
-        it('resolves imports correctly when two versions of same package exist in tree', () => {
+        it('resolves requests correctly when two versions of same package exist in tree', () => {
             const fs = createMemoryFs({
                 node_modules: {
                     express: {
@@ -256,7 +256,7 @@ describe('request resolver', () => {
                 .to.be.resolvedTo('/node_modules/lodash/v2-specific-file.js')
         })
 
-        it('resolves imports to scoped packages', () => {
+        it('resolves requests to scoped packages', () => {
             const fs = createMemoryFs({
                 node_modules: {
                     '@stylable': {
