@@ -3,7 +3,7 @@
 Strictly-typed, tightly tested, synchronous, module resolution.
 Implements the following behaviors:
 - https://nodejs.org/api/modules.html#modules_all_together
-- https://github.com/defunctzombie/package-browser-field-spec
+- https://github.com/defunctzombie/package-browser-field-spec ("basic" section)
 
 
 ## Getting started
@@ -24,41 +24,10 @@ const fs = createMemoryFs({
     }
 })
 
-const resolveRequest = createRequestResolver({ host: fs })
+const resolveRequest = createRequestResolver({ fs })
 
 resolveRequest('/', './some-folder')
 // === '/some-folder/index.js'
-```
-
-Resolution behavior can be customized:
-
-```ts
-interface IRequestResolverOptions {
-    /**
-     * Required environment APIs for resolution.
-     */
-    host: IResolutionHost
-
-    /**
-     * Folders to use when searching for packages.
-     *
-     * @default ['node_modules']
-     */
-    packageRoots?: string[]
-
-    /**
-     * File extensions to try resolving the request with.
-     *
-     * @default ['.js', '.json']
-     */
-    extensions?: string[]
-
-    /**
-     * Whether to prefer the 'browser' field or 'main' field
-     * in `package.json`.
-     */
-    target?: 'node' | 'browser'
-}
 ```
 
 ## License
