@@ -67,6 +67,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                     return resolved
                 }
                 lastPath = currentPath
+
+                // if in /some/path/node_modules, jump directly to /some/node_modules (dirname twice)
                 currentPath = isPackagesRoot ? dirname(dirname(currentPath)) : dirname(currentPath)
             }
         }
