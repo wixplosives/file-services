@@ -100,6 +100,18 @@ describe('request resolver', () => {
             expect(resolveRequest('/src/inner', '../file')).to.be.resolvedTo('/src/file.js')
             expect(resolveRequest('/src/inner', '../../another')).to.be.resolvedTo('/another.js')
         })
+
+        it('resolves requests to dot files', () => {
+            const fs = createMemoryFs({
+                '.npmrc': EMPTY,
+                '.js': EMPTY
+            })
+            const resolveRequest = createRequestResolver({ fs })
+
+            expect(resolveRequest('/', './.npmrc')).to.be.resolvedTo('/.npmrc')
+            // even if dot file is named as possible extension (which is probably improbable)
+            expect(resolveRequest('/', './.js')).to.be.resolvedTo('/.js')
+        })
     })
 
     describe('folders', () => {
