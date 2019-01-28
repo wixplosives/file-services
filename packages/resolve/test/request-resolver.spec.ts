@@ -62,7 +62,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.ts')
             expect(resolveRequest('/', './another')).to.be.resolvedTo('/another.tsx')
             expect(resolveRequest('/src', '../style.css')).to.be.resolvedTo('/style.css.ts')
-            expect(resolveRequest('/origin', './now_ignored')).to.be.resolvedTo(null)
+            expect(resolveRequest('/', './now_ignored')).to.be.resolvedTo(null)
 
             // picked due to order of provided extensions array
             expect(resolveRequest('/src', './same_name')).to.be.resolvedTo('/src/same_name.ts')
