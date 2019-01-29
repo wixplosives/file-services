@@ -12,9 +12,9 @@
     "test": "lerna run test --stream --parallel"
   },
   "devDependencies": {
-    "@ts-tools/build": "^0.1.7",
-    "@ts-tools/node": "^0.9.0",
-    "@ts-tools/webpack-loader": "^0.8.4",
+    "@ts-tools/build": "^0.1.8",
+    "@ts-tools/node": "^0.9.1",
+    "@ts-tools/webpack-loader": "^0.8.5",
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^5.2.5",
