@@ -10,9 +10,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         target = 'browser'
     } = options
 
-    return resolveImport
+    return resolveRequest
 
-    function resolveImport(contextPath: string, request: string, ): IResolutionOutput | null {
+    function resolveRequest(contextPath: string, request: string, ): IResolutionOutput | null {
         if (isRelative(request) || isAbsolute(request)) {
             const requestPath = resolve(contextPath, request)
             return resolveAsFile(requestPath) || resolveAsDirectory(requestPath)

@@ -80,7 +80,7 @@ describe('request resolver', () => {
             })
             const resolveRequest = createRequestResolver({ fs })
 
-            expect(resolveRequest('/reques/origin/matters/not', '/folder/file')).to.be.resolvedTo('/folder/file.js')
+            expect(resolveRequest('/request/origin/matters/not', '/folder/file')).to.be.resolvedTo('/folder/file.js')
             // next one ensures we don't accidently resolve absolute paths using path.join
             // which would result in '/src/folder/file.js' instead
             expect(resolveRequest('/src', '/folder/file')).to.be.resolvedTo('/folder/file.js')
