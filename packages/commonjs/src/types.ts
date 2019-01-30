@@ -48,6 +48,6 @@ export type ModuleEvalFn = (
     process: {
         env: Record<string, string | undefined>
     },
-    require: (request: string) => unknown
-    // global
+    require: (request: string) => unknown,
+    global: unknown
 ) => void

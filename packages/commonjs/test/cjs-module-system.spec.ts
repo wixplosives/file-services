@@ -134,4 +134,14 @@ describe('commonjs module system', () => {
         const b = requireModule('/b.js') as { a: { after: string } }
         expect(b.a.after).to.equal(sampleString)
     })
+
+    it('exposes "global" as the global object in each js runtime (browser/worker/node)', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `module.exports = typeof global`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(requireModule(sampleFilePath)).to.equal('object')
+    })
+
 })

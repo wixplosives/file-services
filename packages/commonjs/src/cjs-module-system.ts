@@ -1,5 +1,6 @@
 import { createRequestResolver } from '@file-services/resolve'
 import { IModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types'
+import { globalThis } from './global-this'
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
     const { fs, fs: { readFileSync, path: { dirname } } } = options
@@ -38,23 +39,24 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
         loadedModules.set(filePath, newModule)
 
         const moduleCode = readFileSync(filePath, 'utf8')
-        const containingDirPath = dirname(filePath)
+        const contextPath = dirname(filePath)
 
         // tslint:disable-next-line:no-eval
         const moduleFn: ModuleEvalFn = eval(
             `(function (module, exports, __filename, __dirname, process, require, global){${moduleCode}\n})`
         )
 
-        const requireFromContext = (request: string) => requireFrom(containingDirPath, request)
-        requireFromContext.resolve = (request: string) => resolveFrom(containingDirPath, request)
+        const requireFromContext = (request: string) => requireFrom(contextPath, request)
+        requireFromContext.resolve = (request: string) => resolveFrom(contextPath, request)
 
         moduleFn(
             newModule,
             newModule.exports,
             filePath,
-            containingDirPath,
+            contextPath,
             processShim,
-            requireFromContext
+            requireFromContext,
+            globalThis
         )
 
         return newModule.exports
