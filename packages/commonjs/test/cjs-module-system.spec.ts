@@ -91,4 +91,31 @@ describe('commonjs module system', () => {
 
         expect(requireModule('/index.js')).to.eql(sampleNumber)
     })
+
+    it('supports recursive requires', () => {
+        const fs = createMemoryFs({
+            'a.js': `
+                exports.before = ${sampleNumber}
+                exports.b = require('./b')
+                exports.after = ${JSON.stringify(sampleString)}
+            `,
+            'b.js': `
+                const a = require('./a')
+                module.exports = {
+                    beforeFromA: a.before,
+                    afterFromA: a.after,
+                }
+            `,
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(requireModule('/a.js')).to.eql({
+            before: sampleNumber,
+            b: {
+                beforeFromA: sampleNumber,
+                afterFromA: undefined,
+            },
+            after: sampleString
+        })
+    })
 })
