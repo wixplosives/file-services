@@ -55,7 +55,7 @@ describe('commonjs module system', () => {
         expect(requireModule(sampleFilePath)).to.equals(requireModule(sampleFilePath))
     })
 
-    it('allows access to current file path via __filename', () => {
+    it('provides current file path via __filename', () => {
         const fs = createMemoryFs({
             [sampleFilePath]: `module.exports = __filename`
         })
@@ -64,12 +64,31 @@ describe('commonjs module system', () => {
         expect(requireModule(sampleFilePath)).to.eql(sampleFilePath)
     })
 
-    it('allows access to current file path via __dirname', () => {
+    it('provides current file path via __dirname', () => {
         const fs = createMemoryFs({
             [sampleFilePath]: `module.exports = __dirname`
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
         expect(requireModule(sampleFilePath)).to.eql(fs.path.dirname(sampleFilePath))
+    })
+
+    it('sets and provides process.env.NODE_ENV === "development"', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `module.exports = process.env.NODE_ENV`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(requireModule(sampleFilePath)).to.eql('development')
+    })
+
+    it('allows requiring other modules', () => {
+        const fs = createMemoryFs({
+            'numeric.js': `module.exports = ${sampleNumber}`,
+            'index.js': `module.exports = require('./numeric')`,
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(requireModule('/index.js')).to.eql(sampleNumber)
     })
 })
