@@ -4,7 +4,7 @@ import { IModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } fr
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
     const { fs, fs: { readFileSync, path: { dirname } } } = options
 
-    const loadedModules: Record<string, IModule> = {}
+    const loadedModules = new Map<string, IModule>()
     const processShim = { env: { NODE_ENV: 'development' } }
 
     const resolveFrom = createRequestResolver({ fs })
@@ -25,11 +25,13 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     }
 
     function requireModule(filePath: string): unknown {
-        if (loadedModules[filePath]) {
-            return loadedModules[filePath].exports
+        const existingModule = loadedModules.get(filePath)
+        if (existingModule) {
+            return existingModule.exports
         }
 
-        const newModule: IModule = loadedModules[filePath] = { exports: {}, filename: filePath }
+        const newModule: IModule = { exports: {}, filename: filePath }
+        loadedModules.set(filePath, newModule)
 
         const moduleCode = readFileSync(filePath, 'utf8')
         const containingDirPath = dirname(filePath)

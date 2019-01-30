@@ -7,9 +7,9 @@ export interface IModuleSystemOptions {
 
 export interface ICommonJsModuleSystem {
     /**
-     * Record of file path to a loaded module.
+     * Map of file path to a loaded module.
      */
-    loadedModules: Record<string, IModule>
+    loadedModules: Map<string, IModule>
 
     /**
      * Resolve a module request from some context (directory path).
