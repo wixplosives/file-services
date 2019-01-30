@@ -144,4 +144,20 @@ describe('commonjs module system', () => {
         expect(requireModule(sampleFilePath)).to.equal('object')
     })
 
+    it('throws when file does not exist', () => {
+        const fs = createMemoryFs()
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(() => requireModule(sampleFilePath)).to.throw('ENOENT')
+    })
+
+    it('throws when it cannot resolve a request', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `module.exports = require('missing')`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(() => requireModule(sampleFilePath)).to.throw('Cannot resolve "missing"')
+    })
+
 })
