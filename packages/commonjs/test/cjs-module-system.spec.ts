@@ -96,26 +96,32 @@ describe('commonjs module system', () => {
         const fs = createMemoryFs({
             'a.js': `
                 exports.before = ${sampleNumber}
-                exports.b = require('./b')
+                exports.bAtEval = require('./b').evalTime
                 exports.after = ${JSON.stringify(sampleString)}
             `,
             'b.js': `
                 const a = require('./a')
-                module.exports = {
+
+                exports.evalTime = {
                     beforeFromA: a.before,
-                    afterFromA: a.after,
+                    afterFromA: a.after
                 }
+                exports.a = a
             `,
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
         expect(requireModule('/a.js')).to.eql({
             before: sampleNumber,
-            b: {
+            bAtEval: {
                 beforeFromA: sampleNumber,
                 afterFromA: undefined,
             },
             after: sampleString
         })
+
+        // after `a.js` completed evaluation, b has access to fields added post its evaluation
+        const b = requireModule('/b.js') as { a: { after: string } }
+        expect(b.a.after).to.equal(sampleString)
     })
 })
