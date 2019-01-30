@@ -7,7 +7,15 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     const loadedModules = new Map<string, IModule>()
     const processShim = { env: { NODE_ENV: 'development' } }
 
-    const resolveFrom = createRequestResolver({ fs })
+    const requestResolver = createRequestResolver({ fs })
+
+    const resolveFrom = (contextPath: string, request: string): string => {
+        const resolvedRequest = requestResolver(contextPath, request)
+        if (!resolvedRequest) {
+            throw new Error(`Cannot resolve "${request}" in ${contextPath}`)
+        }
+        return resolvedRequest.resolvedFile
+    }
 
     return {
         requireModule,
@@ -17,11 +25,7 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     }
 
     function requireFrom(contextPath: string, request: string): unknown {
-        const resolvedRequest = resolveFrom(contextPath, request)
-        if (!resolvedRequest) {
-            throw new Error(`Cannot resolve "${request}" in ${contextPath}`)
-        }
-        return requireModule(resolvedRequest.resolvedFile)
+        return requireModule(resolveFrom(contextPath, request))
     }
 
     function requireModule(filePath: string): unknown {
@@ -41,13 +45,16 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
             `(function (module, exports, __filename, __dirname, process, require, global){${moduleCode}\n})`
         )
 
+        const requireFromContext = (request: string) => requireFrom(containingDirPath, request)
+        requireFromContext.resolve = (request: string) => resolveFrom(containingDirPath, request)
+
         moduleFn(
             newModule,
             newModule.exports,
             filePath,
             containingDirPath,
             processShim,
-            request => requireFrom(containingDirPath, request)
+            requireFromContext
         )
 
         return newModule.exports

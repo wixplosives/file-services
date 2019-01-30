@@ -1,5 +1,4 @@
 import { IFileSystemSync } from '@file-services/types'
-import { RequestResolver } from '@file-services/resolve'
 
 export interface IModuleSystemOptions {
     fs: IFileSystemSync
@@ -12,11 +11,6 @@ export interface ICommonJsModuleSystem {
     loadedModules: Map<string, IModule>
 
     /**
-     * Resolve a module request from some context (directory path).
-     */
-    resolveFrom: RequestResolver
-
-    /**
      * Require a module using an absolute file path.
      */
     requireModule(filePath: string): unknown
@@ -25,6 +19,11 @@ export interface ICommonJsModuleSystem {
      * Require a module from some context (directory path).
      */
     requireFrom(contextPath: string, request: string): unknown
+
+    /**
+     * Resolve a module request from some context (directory path).
+     */
+    resolveFrom(contextPath: string, request: string): string
 }
 
 export interface IModule {

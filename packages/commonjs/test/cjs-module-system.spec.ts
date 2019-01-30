@@ -84,12 +84,22 @@ describe('commonjs module system', () => {
 
     it('allows requiring other modules', () => {
         const fs = createMemoryFs({
-            'numeric.js': `module.exports = ${sampleNumber}`,
             'index.js': `module.exports = require('./numeric')`,
+            'numeric.js': `module.exports = ${sampleNumber}`,
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
         expect(requireModule('/index.js')).to.eql(sampleNumber)
+    })
+
+    it('allows resolving modules using require.resolve', () => {
+        const fs = createMemoryFs({
+            'index.js': `module.exports = require.resolve('./target')`,
+            'target.js': ``,
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(requireModule('/index.js')).to.eql('/target.js')
     })
 
     it('supports recursive requires', () => {
