@@ -1,4 +1,6 @@
 # @file-services/resolve
+[![npm version](https://img.shields.io/npm/v/@file-services/resolve.svg)](https://www.npmjs.com/package/@file-services/resolve)
+[![package size](https://badgen.net/bundlephobia/minzip/@file-services/resolve)](https://bundlephobia.com/result?p=@file-services/resolve)
 
 Isomorphic, fs-agnostic implementation of the Node resolution algorithm.
 

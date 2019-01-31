@@ -1,5 +1,6 @@
 # @file-services/utils
 [![npm version](https://img.shields.io/npm/v/@file-services/utils.svg)](https://www.npmjs.com/package/@file-services/utils)
+[![package size](https://badgen.net/bundlephobia/minzip/@file-services/utils)](https://bundlephobia.com/result?p=@file-services/utils)
 
 Common file system utility functions.
 
