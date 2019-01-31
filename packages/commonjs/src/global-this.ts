@@ -1,5 +1,4 @@
-// instead of adding complete types for "dom", "node", and "webworker"
-// define it locally
+// to appease typescript without having to add types of all js environments
 declare const window: object
 declare const global: object
 declare const self: object
