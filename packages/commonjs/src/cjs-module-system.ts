@@ -5,17 +5,20 @@ import { globalThis } from './global-this'
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
     const {
         fs,
-        fs: { readFileSync, path: { dirname } },
+        fs: {
+            readFileSync,
+            path: { dirname }
+        },
         processEnv = { NODE_ENV: 'development' }
     } = options
+
+    const { resolver = createRequestResolver({ fs }) } = options
 
     const loadedModules = new Map<string, IModule>()
     const processShim = { env: processEnv }
 
-    const requestResolver = createRequestResolver({ fs })
-
     const resolveFrom = (contextPath: string, request: string): string => {
-        const resolvedRequest = requestResolver(contextPath, request)
+        const resolvedRequest = resolver(contextPath, request)
         if (!resolvedRequest) {
             throw new Error(`Cannot resolve "${request}" in ${contextPath}`)
         }
@@ -53,15 +56,7 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
         const requireFromContext = (request: string) => requireFrom(contextPath, request)
         requireFromContext.resolve = (request: string) => resolveFrom(contextPath, request)
 
-        moduleFn(
-            newModule,
-            newModule.exports,
-            filePath,
-            contextPath,
-            processShim,
-            requireFromContext,
-            globalThis
-        )
+        moduleFn(newModule, newModule.exports, filePath, contextPath, processShim, requireFromContext, globalThis)
 
         return newModule.exports
     }

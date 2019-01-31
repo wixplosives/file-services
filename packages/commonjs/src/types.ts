@@ -1,4 +1,5 @@
 import { IFileSystemSync } from '@file-services/types'
+import { RequestResolver } from '@file-services/resolve'
 
 export interface IModuleSystemOptions {
     /**
@@ -13,6 +14,16 @@ export interface IModuleSystemOptions {
      * @default { NODE_ENV: 'development' }
      */
     processEnv?: Record<string, string | undefined>
+
+    /**
+     * Resolver to use for `require(...)` calls.
+     *
+     * @param contextPath absolute path to the context directory of the request
+     * @param request request to resolve
+     *
+     * @default createRequestResolver of `@file-services/resolve`
+     */
+    resolver?(contextPath: string, request: string): ReturnType<RequestResolver>
 }
 
 export interface ICommonJsModuleSystem {

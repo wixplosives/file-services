@@ -12,7 +12,7 @@ describe('commonjs module system', () => {
         const fs = createMemoryFs({
             'numeric.js': `module.exports = ${sampleNumber}`,
             'object.js': `module.exports = ${JSON.stringify(sampleObject)}`,
-            'string.js': `module.exports = ${JSON.stringify(sampleString)}`,
+            'string.js': `module.exports = ${JSON.stringify(sampleString)}`
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
@@ -26,7 +26,7 @@ describe('commonjs module system', () => {
             [sampleFilePath]: `
                     module.exports.a = ${sampleNumber}
                     module.exports.b = ${JSON.stringify(sampleObject)}
-                `,
+                `
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
@@ -99,7 +99,7 @@ describe('commonjs module system', () => {
     it('allows requiring other modules', () => {
         const fs = createMemoryFs({
             'index.js': `module.exports = require('./numeric')`,
-            'numeric.js': `module.exports = ${sampleNumber}`,
+            'numeric.js': `module.exports = ${sampleNumber}`
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
@@ -109,7 +109,7 @@ describe('commonjs module system', () => {
     it('allows resolving modules using require.resolve', () => {
         const fs = createMemoryFs({
             'index.js': `module.exports = require.resolve('./target')`,
-            'target.js': ``,
+            'target.js': ``
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
@@ -131,7 +131,7 @@ describe('commonjs module system', () => {
                     afterFromA: a.after
                 }
                 exports.a = a
-            `,
+            `
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
@@ -139,7 +139,7 @@ describe('commonjs module system', () => {
             before: sampleNumber,
             bAtEval: {
                 beforeFromA: sampleNumber,
-                afterFromA: undefined,
+                afterFromA: undefined
             },
             after: sampleString
         })
@@ -156,6 +156,22 @@ describe('commonjs module system', () => {
         const { requireModule } = createCjsModuleSystem({ fs })
 
         expect(requireModule(sampleFilePath)).to.equal('object')
+    })
+
+    it('allows resolving modules using a custom resolver', () => {
+        const fs = createMemoryFs({
+            src: {
+                'a.js': `module.exports = require('some-package')`,
+                'package.js': `module.exports = 'custom package'`
+            }
+        })
+
+        const resolver = (_contextPath: string, request: string) =>
+            request === 'some-package' ? { resolvedFile: '/src/package.js' } : null
+
+        const { requireModule } = createCjsModuleSystem({ fs, resolver })
+
+        expect(requireModule('/src/a.js')).to.eql('custom package')
     })
 
     it('throws when file does not exist', () => {
