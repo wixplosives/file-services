@@ -17,6 +17,8 @@ Various file system packages.
 
 - **[@file-services/typescript](https://github.com/wixplosives/file-services/tree/master/packages/typescript)** - Methods for creation of TypeScript hosts.
 
+- **[@file-services/resolve](https://github.com/wixplosives/file-services/tree/master/packages/resolve)** - Isomorphic, fs-agnostic implementation of the Node resolution algorithm.
+
 ### License
 
 MIT
