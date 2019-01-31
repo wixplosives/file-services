@@ -19,6 +19,8 @@ Various file system packages.
 
 - **[@file-services/resolve](https://github.com/wixplosives/file-services/tree/master/packages/resolve)** - Isomorphic, fs-agnostic implementation of the Node resolution algorithm.
 
+- **[@file-services/commonjs](https://github.com/wixplosives/file-services/tree/master/packages/commonjs)** - Isomorphic, fs-agnostic implementation of the Node commonjs module system.
+
 ### License
 
 MIT
