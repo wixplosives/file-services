@@ -17,10 +17,10 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     const loadedModules = new Map<string, IModule>()
     const globalProcess = { env: processEnv }
 
-    const resolveFrom = (contextPath: string, request: string): string => {
+    const resolveFrom = (contextPath: string, request: string, origin?: string): string => {
         const resolvedRequest = resolver(contextPath, request)
         if (!resolvedRequest) {
-            throw new Error(`Cannot resolve "${request}" in ${contextPath}`)
+            throw new Error(`Cannot resolve "${request}" in ${origin || contextPath}`)
         }
         return resolvedRequest.resolvedFile
     }
@@ -32,8 +32,8 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
         loadedModules
     }
 
-    function requireFrom(contextPath: string, request: string): unknown {
-        return requireModule(resolveFrom(contextPath, request))
+    function requireFrom(contextPath: string, request: string, origin?: string): unknown {
+        return requireModule(resolveFrom(contextPath, request, origin))
     }
 
     function requireModule(filePath: string): unknown {
@@ -53,8 +53,8 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
             `(function (module, exports, __filename, __dirname, process, require, global){${moduleCode}\n})`
         )
 
-        const requireFromContext = (request: string) => requireFrom(contextPath, request)
-        requireFromContext.resolve = (request: string) => resolveFrom(contextPath, request)
+        const requireFromContext = (request: string) => requireFrom(contextPath, request, filePath)
+        requireFromContext.resolve = (request: string) => resolveFrom(contextPath, request, filePath)
 
         moduleFn(newModule, newModule.exports, filePath, contextPath, globalProcess, requireFromContext, globalThis)
 

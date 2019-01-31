@@ -187,6 +187,15 @@ describe('commonjs module system', () => {
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
-        expect(() => requireModule(sampleFilePath)).to.throw('Cannot resolve "missing"')
+        expect(() => requireModule(sampleFilePath)).to.throw(`Cannot resolve "missing" in ${sampleFilePath}`)
+    })
+
+    it('throws evaluation-time errors', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `throw new Error('Thanos is coming!')`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(() => requireModule(sampleFilePath)).to.throw(`Thanos is coming!`)
     })
 })
