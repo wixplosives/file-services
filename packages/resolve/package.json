@@ -1,7 +1,7 @@
 {
   "name": "@file-services/resolve",
   "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -17,7 +17,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^0.4.7"
+    "@file-services/types": "^0.4.8"
   },
   "files": [
     "cjs",
