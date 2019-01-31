@@ -15,7 +15,7 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     const { resolver = createRequestResolver({ fs }) } = options
 
     const loadedModules = new Map<string, IModule>()
-    const processShim = { env: processEnv }
+    const globalProcess = { env: processEnv }
 
     const resolveFrom = (contextPath: string, request: string): string => {
         const resolvedRequest = resolver(contextPath, request)
@@ -56,7 +56,7 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
         const requireFromContext = (request: string) => requireFrom(contextPath, request)
         requireFromContext.resolve = (request: string) => resolveFrom(contextPath, request)
 
-        moduleFn(newModule, newModule.exports, filePath, contextPath, processShim, requireFromContext, globalThis)
+        moduleFn(newModule, newModule.exports, filePath, contextPath, globalProcess, requireFromContext, globalThis)
 
         return newModule.exports
     }
