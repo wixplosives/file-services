@@ -1,7 +1,18 @@
 import { IFileSystemSync } from '@file-services/types'
 
 export interface IModuleSystemOptions {
+    /**
+     * Sync file system to use when reading files
+     * or resolving requests.
+     */
     fs: IFileSystemSync
+
+    /**
+     * Exposed to modules as `process.env`.
+     *
+     * @default { NODE_ENV: 'development' }
+     */
+    processEnv?: Record<string, string | undefined>
 }
 
 export interface ICommonJsModuleSystem {

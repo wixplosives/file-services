@@ -3,10 +3,14 @@ import { IModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } fr
 import { globalThis } from './global-this'
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
-    const { fs, fs: { readFileSync, path: { dirname } } } = options
+    const {
+        fs,
+        fs: { readFileSync, path: { dirname } },
+        processEnv = { NODE_ENV: 'development' }
+    } = options
 
     const loadedModules = new Map<string, IModule>()
-    const processShim = { env: { NODE_ENV: 'development' } }
+    const processShim = { env: processEnv }
 
     const requestResolver = createRequestResolver({ fs })
 

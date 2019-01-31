@@ -73,13 +73,27 @@ describe('commonjs module system', () => {
         expect(requireModule(sampleFilePath)).to.eql(fs.path.dirname(sampleFilePath))
     })
 
-    it('sets and provides process.env.NODE_ENV === "development"', () => {
+    it('exposes process.env with NODE_ENV === "development"', () => {
         const fs = createMemoryFs({
             [sampleFilePath]: `module.exports = process.env.NODE_ENV`
         })
         const { requireModule } = createCjsModuleSystem({ fs })
 
         expect(requireModule(sampleFilePath)).to.eql('development')
+    })
+
+    it('allows specifying a custom process.env record', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `module.exports = {...process.env }`
+        })
+        const processEnv = {
+            NODE_ENV: 'production',
+            ENV_FLAG: 'some-value'
+        }
+
+        const { requireModule } = createCjsModuleSystem({ fs, processEnv })
+
+        expect(requireModule(sampleFilePath)).to.eql(processEnv)
     })
 
     it('allows requiring other modules', () => {
@@ -159,5 +173,4 @@ describe('commonjs module system', () => {
 
         expect(() => requireModule(sampleFilePath)).to.throw('Cannot resolve "missing"')
     })
-
 })
