@@ -1,0 +1,15 @@
+environment:
+  nodejs_version: "10"
+
+install:
+  - yarn
+
+test_script:
+  # Output useful info for debugging.
+  - node --version
+  - yarn --version
+  # run tests
+  - yarn test
+
+# Don't actually build.
+build: off
