@@ -7,9 +7,9 @@
     "clean": "lerna run clean --stream --parallel",
     "prebuild": "yarn clean",
     "build": "lerna run build --stream",
-    "lint": "lerna run lint --stream --concurrency=1",
+    "lint": "lerna run lint --stream --parallel",
     "pretest": "yarn lint",
-    "test": "lerna run test --stream --concurrency=1"
+    "test": "lerna run test --stream --parallel"
   },
   "devDependencies": {
     "@ts-tools/build": "^0.1.8",
