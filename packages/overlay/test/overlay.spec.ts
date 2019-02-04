@@ -25,7 +25,7 @@ describe('overlay', () => {
     const testOriginContent = `module.exports = 'Hi!'`
     const testOverlayContent = `module.exports = 'Bye!'`
 
-    it('exposes file content from overlay based on a path that exists in both file systems', async () => {
+    it('exposes file content from origin based on a path that exist in overlay', async () => {
         const originFs = createMemoryFs({
             src: {
                 'a.js': testOriginContent
@@ -34,13 +34,13 @@ describe('overlay', () => {
 
         const overlayFs = createMemoryFs({
             src: {
-                'a.js': testOverlayContent
+                'b.js': testOverlayContent
             }
         })
 
         const overlay = createOverlayFs(originFs, overlayFs)
 
-        expect(await overlay.readFile('/src/a.js')).to.eql(testOverlayContent)
+        expect(await overlay.readFile('/src/b.js')).to.eql(testOverlayContent)
     })
 
     it('exposes file content from origin based on a path that does not exist in overlay', async () => {
@@ -61,7 +61,25 @@ describe('overlay', () => {
         expect(await overlay.readFile('/src/a.js')).to.eql(testOriginContent)
     })
 
-    it('deletes file based on file path of overlay', async () => {
+    it('exposes file content from overlay based on a path that exists in both file systems', async () => {
+        const originFs = createMemoryFs({
+            src: {
+                'a.js': testOriginContent
+            }
+        })
+
+        const overlayFs = createMemoryFs({
+            src: {
+                'b.js': testOverlayContent
+            }
+        })
+
+        const overlay = createOverlayFs(originFs, overlayFs)
+
+        expect(await overlay.readFile('/src/b.js')).to.eql(testOverlayContent)
+    })
+
+    it('removes file based on file path of overlay', async () => {
         const originFs = createMemoryFs({
             src: {
                 'a.js': testOriginContent
@@ -77,10 +95,10 @@ describe('overlay', () => {
         const overlay = createOverlayFs(originFs, overlayFs)
         await overlay.remove('/src/b.js')
 
-        expect(await overlay.fileExists('/src/a.js')).to.eql(false)
+        expect(await overlay.fileExists('/src/b.js')).to.eql(false)
     })
 
-    it('throws ENOENT when deleting a file that does not exists in overlay but exists in origin', async () => {
+    it('removes file based on file path of origin', async () => {
         const originFs = createMemoryFs({
             src: {
                 'a.js': testOriginContent
@@ -95,14 +113,34 @@ describe('overlay', () => {
 
         const overlay = createOverlayFs(originFs, overlayFs)
 
-        let errorThrown: string = ''
+        await overlay.remove('/src/a.js')
+
+        expect(await overlay.fileExists('/src/a.js')).to.eql(false)
+    })
+
+    it('throws ENOENT when deleting a file that does not exists in both file systems', async () => {
+        const originFs = createMemoryFs({
+            src: {
+                'a.js': testOriginContent
+            }
+        })
+
+        const overlayFs = createMemoryFs({
+            src: {
+                'b.js': testOverlayContent
+            }
+        })
+
+        const overlay = createOverlayFs(originFs, overlayFs)
+
+        let removeOverlayFileErrorMessage: string = ''
 
         try {
-            await overlay.remove('/src/a.js')
+            await overlay.remove('/src/c.js')
         } catch (e) {
-            errorThrown = e.message
+            removeOverlayFileErrorMessage = e.message
         }
 
-        expect(errorThrown).to.eql(`/src/a.js ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        expect(removeOverlayFileErrorMessage).to.eql(`/src/c.js ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
     })
 })

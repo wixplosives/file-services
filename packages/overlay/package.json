@@ -1,6 +1,6 @@
 {
   "name": "@file-services/overlay",
-  "description": "Overlayed file system",
+  "description": "an in-memory layered file-system that bridges between two file systems",
   "version": "0.1.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
@@ -16,7 +16,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^0.4.8"
+    "@file-services/memory": "^0.4.8",
+    "@file-services/types": "^0.4.8",
+    "@file-services/utils": "^0.4.8"
   },
   "files": [
     "cjs",
@@ -25,7 +27,7 @@
     "!src/tsconfig.json"
   ],
   "license": "MIT",
-  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/commonjs",
+  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/overlay",
   "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"
