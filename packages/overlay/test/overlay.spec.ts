@@ -5,6 +5,10 @@ import { asyncBaseFsContract, asyncFsContract, syncBaseFsContract, syncFsContrac
 
 import { createOverlayFs } from '../src/overlay'
 
+const testOriginContent = `module.exports = 'Tik'`
+const testOverlayContent = `module.exports = 'Tak'`
+const testCustomContent = `module.exports = 'Tok'`
+
 describe('async overlay', () => {
     const testProvider = async () => {
         const originFs = createMemoryFs({})
@@ -20,10 +24,6 @@ describe('async overlay', () => {
 
     asyncBaseFsContract(testProvider)
     asyncFsContract(testProvider)
-
-    const testOriginContent = `module.exports = 'Tik'`
-    const testOverlayContent = `module.exports = 'Tak'`
-    const testCustomContent = `module.exports = 'Tok'`
 
     it('writes file to overlay based on file path that exists only in origin', async () => {
         const testFilePath = '/src/components/menu.js'
@@ -141,10 +141,6 @@ describe('sync overlay', () => {
 
     syncBaseFsContract(testProvider)
     syncFsContract(testProvider)
-
-    const testOriginContent = `module.exports = 'Tik'`
-    const testOverlayContent = `module.exports = 'Tak'`
-    const testCustomContent = `module.exports = 'Tok'`
 
     it('writes file to overlay based on file path that exists only in origin', () => {
         const testFilePath = '/src/components/menu.js'
