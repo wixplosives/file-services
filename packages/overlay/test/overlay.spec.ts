@@ -22,8 +22,9 @@ describe('overlay', () => {
     asyncBaseFsContract(testProvider)
     asyncFsContract(testProvider)
 
-    const testOriginContent = `module.exports = 'Hi!'`
-    const testOverlayContent = `module.exports = 'Bye!'`
+    const testOriginContent = `module.exports = 'Tik'`
+    const testOverlayContent = `module.exports = 'Tak'`
+    const testCustomContent = `module.exports = 'Tok'`
 
     it('exposes file content from origin based on a path that exist in overlay', async () => {
         const originFs = createMemoryFs({
@@ -43,7 +44,7 @@ describe('overlay', () => {
         expect(await overlay.readFile('/src/b.js')).to.eql(testOverlayContent)
     })
 
-    it('exposes file content from origin based on a path that does not exist in overlay', async () => {
+    it('exposes file content from origin based on a path that exists in origin', async () => {
         const originFs = createMemoryFs({
             src: {
                 'a.js': testOriginContent
@@ -70,16 +71,16 @@ describe('overlay', () => {
 
         const overlayFs = createMemoryFs({
             src: {
-                'b.js': testOverlayContent
+                'a.js': testOverlayContent
             }
         })
 
         const overlay = createOverlayFs(originFs, overlayFs)
 
-        expect(await overlay.readFile('/src/b.js')).to.eql(testOverlayContent)
+        expect(await overlay.readFile('/src/a.js')).to.eql(testOverlayContent)
     })
 
-    it('removes file based on file path of overlay', async () => {
+    it('writes file to overlay based on file path', async () => {
         const originFs = createMemoryFs({
             src: {
                 'a.js': testOriginContent
@@ -88,17 +89,40 @@ describe('overlay', () => {
 
         const overlayFs = createMemoryFs({
             src: {
-                'b.js': testOverlayContent
+                'a.js': testOverlayContent
             }
         })
 
         const overlay = createOverlayFs(originFs, overlayFs)
-        await overlay.remove('/src/b.js')
 
         expect(await overlay.fileExists('/src/b.js')).to.eql(false)
+
+        await overlay.writeFile('/src/b.js', testCustomContent)
+
+        expect(await overlay.fileExists('/src/b.js')).to.eql(true)
     })
 
-    it('removes file based on file path of origin', async () => {
+    it('ensures and writes file to overlay based on file path that exists only in origin', async () => {
+        const originFs = createMemoryFs({
+            src: {
+                components: {
+                    'button.js': testOriginContent
+                }
+            }
+        })
+
+        const overlayFs = createMemoryFs({})
+
+        const overlay = createOverlayFs(originFs, overlayFs)
+
+        expect(await overlay.fileExists('/src/components/menu.js')).to.eql(false)
+
+        await overlay.writeFile('/src/components/menu.js', testCustomContent)
+
+        expect(await overlay.fileExists('/src/components/menu.js')).to.eql(true)
+    })
+
+    it('throws ENOENT when unlinking a file that does not exists in overlay', async () => {
         const originFs = createMemoryFs({
             src: {
                 'a.js': testOriginContent
@@ -113,34 +137,8 @@ describe('overlay', () => {
 
         const overlay = createOverlayFs(originFs, overlayFs)
 
-        await overlay.remove('/src/a.js')
-
-        expect(await overlay.fileExists('/src/a.js')).to.eql(false)
-    })
-
-    it('throws ENOENT when deleting a file that does not exists in both file systems', async () => {
-        const originFs = createMemoryFs({
-            src: {
-                'a.js': testOriginContent
-            }
-        })
-
-        const overlayFs = createMemoryFs({
-            src: {
-                'b.js': testOverlayContent
-            }
-        })
-
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        let removeOverlayFileErrorMessage: string = ''
-
-        try {
-            await overlay.remove('/src/c.js')
-        } catch (e) {
-            removeOverlayFileErrorMessage = e.message
-        }
-
-        expect(removeOverlayFileErrorMessage).to.eql(`/src/c.js ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+        await expect(overlay.remove('/src/c.js')).to.be.rejectedWith(
+            `/src/c.js ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`
+        )
     })
 })

@@ -56,7 +56,15 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 return await overlayFs.copyFile(path, destinationPath, flags)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.copyFile(path, destinationPath, flags)
+                    const containingDirectory = overlayFs.path.dirname(path)
+                    const isDirectoryExistsInOrigin = await originFs.directoryExists(containingDirectory)
+
+                    if (isDirectoryExistsInOrigin) {
+                        await overlayFs.ensureDirectory(containingDirectory)
+                        return overlayFs.copyFile(path, destinationPath, flags)
+                    } else {
+                        throw e
+                    }
                 } else {
                     throw e
                 }
@@ -67,7 +75,15 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 return overlayFs.copyFileSync(path, destinationPath, flags)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.copyFileSync(path, destinationPath, flags)
+                    const containingDirectory = overlayFs.path.dirname(path)
+                    const isDirectoryExistsInOrigin = originFs.directoryExistsSync(containingDirectory)
+
+                    if (isDirectoryExistsInOrigin) {
+                        overlayFs.ensureDirectorySync(containingDirectory)
+                        return overlayFs.copyFileSync(path, destinationPath, flags)
+                    } else {
+                        throw e
+                    }
                 } else {
                     throw e
                 }
@@ -75,10 +91,18 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
         },
         async mkdir(path: string): Promise<void> {
             try {
-                return overlayFs.mkdir(path)
+                return await overlayFs.mkdir(path)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.mkdir(path)
+                    const containingDirectory = overlayFs.path.dirname(path)
+                    const isDirectoryExistsInOrigin = await originFs.directoryExists(containingDirectory)
+
+                    if (isDirectoryExistsInOrigin) {
+                        await overlayFs.ensureDirectory(containingDirectory)
+                        return overlayFs.mkdir(path)
+                    } else {
+                        throw e
+                    }
                 } else {
                     throw e
                 }
@@ -89,7 +113,15 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 return overlayFs.mkdirSync(path)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.mkdirSync(path)
+                    const containingDirectory = overlayFs.path.dirname(path)
+                    const isDirectoryExistsInOrigin = originFs.directoryExistsSync(containingDirectory)
+
+                    if (isDirectoryExistsInOrigin) {
+                        overlayFs.ensureDirectorySync(containingDirectory)
+                        return overlayFs.mkdirSync(path)
+                    } else {
+                        throw e
+                    }
                 } else {
                     throw e
                 }
@@ -140,48 +172,16 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
             }
         },
         async rename(path: string, destination: string): Promise<void> {
-            try {
-                return await overlayFs.rename(path, destination)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.rename(path, destination)
-                } else {
-                    throw e
-                }
-            }
+            return overlayFs.rename(path, destination)
         },
         renameSync(path: string, destination: string): void {
-            try {
-                return overlayFs.renameSync(path, destination)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.renameSync(path, destination)
-                } else {
-                    throw e
-                }
-            }
+            return overlayFs.renameSync(path, destination)
         },
         async rmdir(path: string): Promise<void> {
-            try {
-                return await overlayFs.rmdir(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.rmdir(path)
-                } else {
-                    throw e
-                }
-            }
+            return overlayFs.rmdir(path)
         },
         rmdirSync(path: string): void {
-            try {
-                return overlayFs.rmdirSync(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.rmdirSync(path)
-                } else {
-                    throw e
-                }
-            }
+            return overlayFs.rmdirSync(path)
         },
         async stat(path: string): Promise<IFileSystemStats> {
             try {
@@ -206,33 +206,25 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
             }
         },
         async unlink(path: string): Promise<void> {
-            try {
-                return await overlayFs.unlink(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.unlink(path)
-                } else {
-                    throw e
-                }
-            }
+            return overlayFs.unlink(path)
         },
         unlinkSync(path: string): void {
-            try {
-                return overlayFs.unlinkSync(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.unlinkSync(path)
-                } else {
-                    throw e
-                }
-            }
+            return overlayFs.unlinkSync(path)
         },
         async writeFile(filePath: string, content: string, encoding?: string): Promise<void> {
             try {
                 return await overlayFs.writeFile(filePath, content, encoding)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.writeFile(filePath, content, encoding)
+                    const containingDirectory = overlayFs.path.dirname(filePath)
+                    const isDirectoryExistsInOrigin = await originFs.directoryExists(containingDirectory)
+
+                    if (isDirectoryExistsInOrigin) {
+                        await overlayFs.ensureDirectory(containingDirectory)
+                        return overlayFs.writeFile(filePath, content, encoding)
+                    } else {
+                        throw e
+                    }
                 } else {
                     throw e
                 }
@@ -243,7 +235,15 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 return overlayFs.writeFileSync(filePath, content, encoding)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.writeFileSync(filePath, content, encoding)
+                    const containingDirectory = overlayFs.path.dirname(filePath)
+                    const isDirectoryExistsInOrigin = originFs.directoryExistsSync(containingDirectory)
+
+                    if (isDirectoryExistsInOrigin) {
+                        overlayFs.ensureDirectorySync(containingDirectory)
+                        return originFs.writeFileSync(filePath, content, encoding)
+                    } else {
+                        throw e
+                    }
                 } else {
                     throw e
                 }
@@ -281,9 +281,7 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
 }
 
 function isFileOrDirectoryMissingError(error: Error): boolean {
-    const isFileOrDirectoryMissing = error.message.includes(FsErrorCodes.NO_FILE_OR_DIRECTORY)
-    const isFileMissing = error.message.includes(FsErrorCodes.NO_FILE)
-    const isDirectoryMissing = error.message.includes(FsErrorCodes.NO_DIRECTORY)
-
-    return isFileMissing || isDirectoryMissing || isFileOrDirectoryMissing
+    return !!Object.values(FsErrorCodes).find(value => {
+        return error.message.includes(value)
+    })
 }
