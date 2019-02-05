@@ -7,45 +7,25 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
         path: overlayFs.path,
         caseSensitive: overlayFs.caseSensitive,
         watchService: overlayFs.watchService,
-        async readFile(path: string, encoding?: string): Promise<string> {
+        async writeFile(filePath: string, content: string, encoding?: string): Promise<void> {
             try {
-                return await overlayFs.readFile(path, encoding)
+                return await overlayFs.writeFile(filePath, content, encoding)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return await originFs.readFile(path, encoding)
+                    await validateAndEnsureDirectoryInOverlay(originFs, overlayFs, filePath, e)
+                    return overlayFs.writeFile(filePath, content, encoding)
                 } else {
                     throw e
                 }
             }
         },
-        readFileSync(path: string, encoding?: string): string {
+        writeFileSync(filePath: string, content: string, encoding?: string): void {
             try {
-                return overlayFs.readFileSync(path, encoding)
+                return overlayFs.writeFileSync(filePath, content, encoding)
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.readFileSync(path, encoding)
-                } else {
-                    throw e
-                }
-            }
-        },
-        async readFileRaw(path: string): Promise<Buffer> {
-            try {
-                return await overlayFs.readFileRaw(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.readFileRaw(path)
-                } else {
-                    throw e
-                }
-            }
-        },
-        readFileRawSync(path: string): Buffer {
-            try {
-                return overlayFs.readFileRawSync(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.readFileRawSync(path)
+                    validateAndEnsureDirectoryInOverlaySync(originFs, overlayFs, filePath, e)
+                    return originFs.writeFileSync(filePath, content, encoding)
                 } else {
                     throw e
                 }
@@ -99,6 +79,69 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 }
             }
         },
+        async unlink(path: string): Promise<void> {
+            return overlayFs.unlink(path)
+        },
+        unlinkSync(path: string): void {
+            return overlayFs.unlinkSync(path)
+        },
+        async rename(path: string, destination: string): Promise<void> {
+            return overlayFs.rename(path, destination)
+        },
+        renameSync(path: string, destination: string): void {
+            return overlayFs.renameSync(path, destination)
+        },
+        async rmdir(path: string): Promise<void> {
+            return overlayFs.rmdir(path)
+        },
+        rmdirSync(path: string): void {
+            return overlayFs.rmdirSync(path)
+        },
+        async readFile(path: string, encoding?: string): Promise<string> {
+            try {
+                return await overlayFs.readFile(path, encoding)
+            } catch (e) {
+                if (isFileOrDirectoryMissingError(e)) {
+                    return await originFs.readFile(path, encoding)
+                } else {
+                    throw e
+                }
+            }
+        },
+        readFileSync(path: string, encoding?: string): string {
+            try {
+                return overlayFs.readFileSync(path, encoding)
+            } catch (e) {
+                if (isFileOrDirectoryMissingError(e)) {
+                    return originFs.readFileSync(path, encoding)
+                } else {
+                    throw e
+                }
+            }
+        },
+        async readFileRaw(path: string): Promise<Buffer> {
+            try {
+                return await overlayFs.readFileRaw(path)
+            } catch (e) {
+                if (isFileOrDirectoryMissingError(e)) {
+                    return originFs.readFileRaw(path)
+                } else {
+                    throw e
+                }
+            }
+        },
+        readFileRawSync(path: string): Buffer {
+            try {
+                return overlayFs.readFileRawSync(path)
+            } catch (e) {
+                if (isFileOrDirectoryMissingError(e)) {
+                    return originFs.readFileRawSync(path)
+                } else {
+                    throw e
+                }
+            }
+        },
+
         async readdir(path: string): Promise<string[]> {
             try {
                 return await overlayFs.readdir(path)
@@ -143,18 +186,6 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 }
             }
         },
-        async rename(path: string, destination: string): Promise<void> {
-            return overlayFs.rename(path, destination)
-        },
-        renameSync(path: string, destination: string): void {
-            return overlayFs.renameSync(path, destination)
-        },
-        async rmdir(path: string): Promise<void> {
-            return overlayFs.rmdir(path)
-        },
-        rmdirSync(path: string): void {
-            return overlayFs.rmdirSync(path)
-        },
         async stat(path: string): Promise<IFileSystemStats> {
             try {
                 return await overlayFs.stat(path)
@@ -172,36 +203,6 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
                     return originFs.statSync(path)
-                } else {
-                    throw e
-                }
-            }
-        },
-        async unlink(path: string): Promise<void> {
-            return overlayFs.unlink(path)
-        },
-        unlinkSync(path: string): void {
-            return overlayFs.unlinkSync(path)
-        },
-        async writeFile(filePath: string, content: string, encoding?: string): Promise<void> {
-            try {
-                return await overlayFs.writeFile(filePath, content, encoding)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    await validateAndEnsureDirectoryInOverlay(originFs, overlayFs, filePath, e)
-                    return overlayFs.writeFile(filePath, content, encoding)
-                } else {
-                    throw e
-                }
-            }
-        },
-        writeFileSync(filePath: string, content: string, encoding?: string): void {
-            try {
-                return overlayFs.writeFileSync(filePath, content, encoding)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    validateAndEnsureDirectoryInOverlaySync(originFs, overlayFs, filePath, e)
-                    return originFs.writeFileSync(filePath, content, encoding)
                 } else {
                     throw e
                 }
@@ -239,9 +240,10 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
 }
 
 function isFileOrDirectoryMissingError(error: Error): boolean {
-    return !!Object.values(FsErrorCodes).find(value => {
-        return error.message.includes(value)
-    })
+    const { CONTAINING_NOT_EXISTS, NO_DIRECTORY, NO_FILE, NO_FILE_OR_DIRECTORY } = FsErrorCodes
+    const relatedErrors = [CONTAINING_NOT_EXISTS, NO_DIRECTORY, NO_FILE, NO_FILE_OR_DIRECTORY]
+
+    return !!relatedErrors.find(value => error.message.includes(value))
 }
 
 async function validateAndEnsureDirectoryInOverlay(
@@ -250,11 +252,11 @@ async function validateAndEnsureDirectoryInOverlay(
     path: string,
     error?: Error
 ): Promise<void> {
-    const containingDirectory = overlayFs.path.dirname(path)
-    const isDirectoryExistsInOrigin = await originFs.directoryExists(containingDirectory)
+    const containingDirectoryPath = overlayFs.path.dirname(path)
+    const isDirectoryExistsInOrigin = await originFs.directoryExists(containingDirectoryPath)
 
     if (isDirectoryExistsInOrigin) {
-        await overlayFs.ensureDirectory(containingDirectory)
+        await overlayFs.ensureDirectory(containingDirectoryPath)
     } else {
         throw error || FsErrorCodes.CONTAINING_NOT_EXISTS
     }
@@ -266,11 +268,11 @@ function validateAndEnsureDirectoryInOverlaySync(
     path: string,
     error?: Error
 ): void {
-    const containingDirectory = overlayFs.path.dirname(path)
-    const isDirectoryExistsInOrigin = originFs.directoryExistsSync(containingDirectory)
+    const containingDirectoryPath = overlayFs.path.dirname(path)
+    const isDirectoryExistsInOrigin = originFs.directoryExistsSync(containingDirectoryPath)
 
     if (isDirectoryExistsInOrigin) {
-        overlayFs.ensureDirectorySync(containingDirectory)
+        overlayFs.ensureDirectorySync(containingDirectoryPath)
     } else {
         throw error || FsErrorCodes.CONTAINING_NOT_EXISTS
     }
