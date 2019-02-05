@@ -1,9 +1,10 @@
 # @file-services/overlay
 
-An in-memory `memoryFs` based layered file-system that bridges between two file systems
+An in-memory based layered file-system that bridges between two file systems
 
 ## Motivation
-Using a layered file system allows users to manipulate files without mutating the original file system. Overlay can be used as a virtual layer and provide a solution for storing and manipulating temporary data.
+Using a layered file system allows users to manipulate files without mutating the original file system. 
+Overlay can be used as a virtual layer and provide a solution for storing and manipulating temporary data.
 
 ## Getting started
 
@@ -17,7 +18,7 @@ Then, use the programmatic API:
 import { createMemoryFs } from '@file-services/memory'
 import { createOverlay } from '@file-services/overlay'
 
-const fs = createMemoryFs({
+const myFs = createMemoryFs({
     src: {
         'a.js': `module.exports = 'a'`,
         'b.js': `module.exports = 'b'`
@@ -34,9 +35,9 @@ const overlayingFs = createMemoryFs({
 const overlay = createOverlay(fs, overlayedFs)
 ```
 
-`createOverlay` returns a new combined file system that includes the overlaying and the origin file systems.
-
-When calling a method on the created overlay file system, overlay will try to execute it on the overlaying file system first (`overlayingFs`). If the requested file/directory is missing, overlay will try to execute this method on the origin file system (`fs`).
+`createOverlay` returns a new combined file system that includes an overlaying and origin file systems.
+The origin file system (`myFs` in the example above) acts as a `readonly` file system in the combined one while the overlaying 
+file system (`overlayingFs` in the example above) is dynamic.
 
 ## License
 
