@@ -42,7 +42,7 @@ describe('async overlay', () => {
         await overlay.writeFile(testFilePath, testCustomContent)
 
         expect(await overlay.fileExists(testFilePath)).to.eql(true)
-        expect(await originFs.fileExists(testFilePath), 'ensure that file was not created origin').to.eql(false)
+        expect(await originFs.fileExists(testFilePath), 'ensure that file was not created in origin').to.eql(false)
     })
 
     it('throws when writing file to directory that does not exist in origin', async () => {
@@ -163,7 +163,7 @@ describe('sync overlay', () => {
         overlay.writeFileSync(testFilePath, testCustomContent)
 
         expect(overlay.fileExistsSync(testFilePath)).to.eql(true)
-        expect(originFs.fileExistsSync(testFilePath), 'ensure that file was not created origin').to.eql(false)
+        expect(originFs.fileExistsSync(testFilePath), 'ensure that file was not created in origin').to.eql(false)
     })
 
     it('throws when writing file to directory that does not exist in origin', () => {

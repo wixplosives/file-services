@@ -25,7 +25,7 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
                     validateAndEnsureDirectoryInOverlaySync(originFs, overlayFs, filePath, e)
-                    return originFs.writeFileSync(filePath, content, encoding)
+                    return overlayFs.writeFileSync(filePath, content, encoding)
                 } else {
                     throw e
                 }
