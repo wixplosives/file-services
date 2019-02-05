@@ -1,5 +1,5 @@
 import { join } from 'path'
-import { writeFileSync, stat, mkdir, rmdir } from 'proper-fs'
+import { writeFile, stat, mkdir, rmdir } from 'proper-fs'
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory'
 import { IWatchService } from '@file-services/types'
 import { sleep } from 'promise-assist'
@@ -33,27 +33,27 @@ describe('Node Watch Service', function() {
             tempDir = await createTempDirectory()
             testFilePath = join(tempDir.path, 'test-file')
 
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
             await watchService.watchPath(testFilePath)
         })
 
         it('debounces several consecutive watch events as a single watch event', async () => {
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
 
             await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
             await validator.noMoreEvents()
         })
 
         it(`emits two different watch events when changes are >${debounceWait}ms appart`, async () => {
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
 
             await sleep(debounceWait)
 
             const firstWriteStats = await stat(testFilePath)
 
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
 
             const secondWriteStats = await stat(testFilePath)
 
@@ -102,14 +102,14 @@ describe('Node Watch Service', function() {
             testDirectoryPath = join(tempDir.path, 'test-directory')
             await mkdir(testDirectoryPath)
             testFilePath = join(testDirectoryPath, 'test-file')
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
         })
 
         it('allows watching a file and its containing directory', async () => {
             await watchService.watchPath(testFilePath)
             await watchService.watchPath(testDirectoryPath)
 
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
 
             await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
             await validator.noMoreEvents()
@@ -119,7 +119,7 @@ describe('Node Watch Service', function() {
             await watchService.watchPath(testDirectoryPath)
             await watchService.watchPath(testFilePath)
 
-            writeFileSync(testFilePath, SAMPLE_CONTENT)
+            await writeFile(testFilePath, SAMPLE_CONTENT)
 
             await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
             await validator.noMoreEvents()
