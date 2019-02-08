@@ -25,7 +25,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^1.0.1",
-    "lerna": "^3.10.8",
+    "lerna": "^3.11.0",
     "mocha": "^5.2.0",
     "mocha-pup": "^0.1.8",
     "npm-run-all": "^4.1.5",
@@ -34,8 +34,8 @@
     "react-dom": "^16.8.1",
     "rimraf": "^2.6.3",
     "tslint": "^5.12.1",
-    "typescript": "~3.3.1",
-    "webpack": "^4.29.2"
+    "typescript": "~3.3.3",
+    "webpack": "^4.29.3"
   },
   "license": "MIT",
   "private": true
