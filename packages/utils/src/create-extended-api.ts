@@ -69,13 +69,31 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
+    function searchParentChainSync(initialDirectoryPath: string, fileName: string): string[] {
+        const filePaths: string[] = []
+        let currentPath = initialDirectoryPath
+        let lastPath: string | undefined
+
+        while (currentPath !== lastPath) {
+            const filePath = path.join(currentPath, fileName)
+            if (fileExistsSync(filePath)) {
+                filePaths.push(filePath)
+            }
+            lastPath = currentPath
+            currentPath = path.dirname(currentPath)
+        }
+
+        return filePaths
+    }
+
     return {
         ...baseFs,
         fileExistsSync,
         directoryExistsSync,
         ensureDirectorySync,
         populateDirectorySync,
-        removeSync
+        removeSync,
+        searchParentChainSync
     }
 }
 
@@ -140,12 +158,30 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
+    async function searchParentChain(initialDirectoryPath: string, fileName: string): Promise<string[]> {
+        const filePaths: string[] = []
+        let currentPath = initialDirectoryPath
+        let lastPath: string | undefined
+
+        while (currentPath !== lastPath) {
+            const filePath = path.join(currentPath, fileName)
+            if (await fileExists(filePath)) {
+                filePaths.push(filePath)
+            }
+            lastPath = currentPath
+            currentPath = path.dirname(currentPath)
+        }
+
+        return filePaths
+    }
+
     return {
         ...baseFs,
         fileExists,
         directoryExists,
         ensureDirectory,
         populateDirectory,
-        remove
+        remove,
+        searchParentChain
     }
 }
