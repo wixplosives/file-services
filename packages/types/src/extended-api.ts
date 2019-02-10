@@ -14,16 +14,16 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     /**
      * Check if a path points to an existing file.
      *
-     * @param filePath possible file path
-     * @param statFn optional custom stat function (e.g. lstat to detect links)
+     * @param filePath possible file path.
+     * @param statFn optional custom stat function (e.g. lstat to detect links).
      */
     fileExistsSync(filePath: string, statFn?: IBaseFileSystemSync['statSync']): boolean
 
     /**
      * Check if a path points to an existing directory.
      *
-     * @param directoryPath possible directory path
-     * @param statFn optional custom stat function (e.g. lstatSync to detect links)
+     * @param directoryPath possible directory path.
+     * @param statFn optional custom stat function (e.g. lstatSync to detect links).
      */
     directoryExistsSync(directoryPath: string, statFn?: IBaseFileSystemSync['statSync']): boolean
 
@@ -40,8 +40,10 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
 
     /**
      * Populates the provided directory with given contents.
+     *
+     * @returns absolute paths of written files.
      */
-    populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void
+    populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[]
 
     /**
      * Recursively remove a path.
@@ -49,7 +51,7 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     removeSync(path: string): void
 
     /**
-     * Recursively walk over a directory and its contents
+     * Recursively walk over a directory and its contents.
      */
     // walkSync(rootDirectory: string, options?: IWalkOptions): IFileSystemDescriptor[]
 }
@@ -88,8 +90,10 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
 
     /**
      * Populates the provided directory with given contents.
+     *
+     * @returns absolute paths of written files.
      */
-    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void>
+    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>
 
     /**
      * Recursively remove a path.
@@ -97,7 +101,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
     remove(path: string): Promise<void>
 
     /**
-     * Recursively walk over a directory and its contents
+     * Recursively walk over a directory and its contents.
      */
     // walk(rootDirectory: string, options?: IWalkOptions): Promise<IFileSystemDescriptor[]>
 }

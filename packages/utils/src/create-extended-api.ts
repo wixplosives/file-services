@@ -41,17 +41,20 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
-    function populateDirectorySync(directoryPath: string, contents: IDirectoryContents): void {
+    function populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[] {
+        const filePaths: string[] = []
         ensureDirectorySync(directoryPath)
         for (const [nodeName, nodeValue] of Object.entries(contents)) {
             const nodePath = path.join(directoryPath, nodeName)
             if (typeof nodeValue === 'string') {
                 ensureDirectorySync(path.dirname(nodePath))
                 writeFileSync(nodePath, nodeValue)
+                filePaths.push(nodePath)
             } else {
                 populateDirectorySync(nodePath, nodeValue)
             }
         }
+        return filePaths
     }
 
     function removeSync(entryPath: string) {
@@ -114,17 +117,20 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
-    async function populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<void> {
+    async function populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]> {
+        const filePaths: string[] = []
         await ensureDirectory(directoryPath)
         for (const [nodeName, nodeValue] of Object.entries(contents)) {
             const nodePath = path.join(directoryPath, nodeName)
             if (typeof nodeValue === 'string') {
                 await ensureDirectory(path.dirname(nodePath))
                 await writeFile(nodePath, nodeValue)
+                filePaths.push(nodePath)
             } else {
                 await populateDirectory(nodePath, nodeValue)
             }
         }
+        return filePaths
     }
 
     async function remove(entryPath: string) {
