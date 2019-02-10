@@ -33,10 +33,12 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     ensureDirectorySync(directoryPath: string): void
 
     /**
-     * Search for a specific file name in parent chain.
-     * Useful for finding configuration files.
+     * Search for a specific file name in parent directory chain.
+     * Useful for finding configuration or manifest files.
+     *
+     * @returns absolute paths to found files (ordered from inner most directory and up).
      */
-    // searchParentDirectoriesSync(startDirectory: string, fileName: string): string[]
+    searchParentChainSync(initialDirectory: string, fileName: string): string[]
 
     /**
      * Populates the provided directory with given contents.
@@ -84,9 +86,11 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
 
     /**
      * Search for a specific file name in parent chain.
-     * Useful for finding configuration files.
+     * Useful for finding configuration or manifest files.
+     *
+     * @returns absolute paths to found files (ordered from inner most directory and up).
      */
-    // searchParentDirectories(startDirectory: string, fileName: string): Promise<string[]>
+    searchParentChain(initialDirectory: string, fileName: string): Promise<string[]>
 
     /**
      * Populates the provided directory with given contents.

@@ -71,7 +71,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
             })
         })
 
-        describe('remove', () => {
+        describe('removeSync', () => {
             it('should delete directory recursively', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
@@ -118,6 +118,35 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
                 const thrower = () => fs.removeSync(filePath)
                 expect(thrower).to.throw(/ENOENT/)
+            })
+        })
+
+        describe('searchParentChainSync', () => {
+            it('finds files in parent directory chain', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const directoryPath = join(tempDirectoryPath, 'dir')
+                const fileName = 'superman.json'
+                const anotherFileName = 'spiderman.json'
+
+                fs.populateDirectorySync(directoryPath, {
+                    [fileName]: '',
+                    folder1: {
+                        [fileName]: '',
+                    },
+                    folder2: {
+                        [anotherFileName]: ''
+                    }
+                })
+
+                expect(fs.searchParentChainSync(join(directoryPath, 'folder1'), fileName)).to.eql([
+                    join(directoryPath, 'folder1', fileName),
+                    join(directoryPath, fileName)
+                ])
+
+                expect(fs.searchParentChainSync(join(directoryPath, 'folder2'), anotherFileName)).to.eql([
+                    join(directoryPath, 'folder2', anotherFileName)
+                ])
             })
         })
     })

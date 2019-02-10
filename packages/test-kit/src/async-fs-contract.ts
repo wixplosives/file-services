@@ -96,26 +96,56 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
 
                 expect(await fs.directoryExists(directoryPath)).to.equal(false)
             })
+
+            it('should delete a file', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file')
+
+                await fs.writeFile(filePath, '')
+
+                await fs.remove(filePath)
+
+                expect(await fs.fileExists(tempDirectoryPath)).to.equal(false)
+            })
+
+            it('should fail on nonexistant', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = await join(tempDirectoryPath, 'file')
+
+                return expect(fs.remove(filePath)).to.eventually.rejectedWith(/ENOENT/)
+            })
         })
 
-        it('should delete a file', async () => {
-            const { fs, tempDirectoryPath } = testInput
-            const { join } = fs.path
-            const filePath = join(tempDirectoryPath, 'file')
+        describe('searchParentChain', () => {
+            it('finds files in parent directory chain', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const directoryPath = join(tempDirectoryPath, 'dir')
+                const fileName = 'superman.json'
+                const anotherFileName = 'spiderman.json'
 
-            await fs.writeFile(filePath, '')
+                await fs.populateDirectory(directoryPath, {
+                    [fileName]: '',
+                    folder1: {
+                        [fileName]: '',
+                    },
+                    folder2: {
+                        [anotherFileName]: ''
+                    }
+                })
 
-            await fs.remove(filePath)
+                expect(await fs.searchParentChain(join(directoryPath, 'folder1'), fileName)).to.eql([
+                    join(directoryPath, 'folder1', fileName),
+                    join(directoryPath, fileName)
+                ])
 
-            expect(await fs.fileExists(tempDirectoryPath)).to.equal(false)
+                expect(await fs.searchParentChain(join(directoryPath, 'folder2'), anotherFileName)).to.eql([
+                    join(directoryPath, 'folder2', anotherFileName)
+                ])
+            })
         })
 
-        it('should fail on nonexistant', async () => {
-            const { fs, tempDirectoryPath } = testInput
-            const { join } = fs.path
-            const filePath = await join(tempDirectoryPath, 'file')
-
-            return expect(fs.remove(filePath)).to.eventually.rejectedWith(/ENOENT/)
-        })
     })
 }
