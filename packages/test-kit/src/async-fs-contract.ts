@@ -118,6 +118,40 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
             })
         })
 
+        describe('searchClosestFile', () => {
+            it('finds closest file in parent directory chain', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const directoryPath = join(tempDirectoryPath, 'dir')
+                const fileName = 'superman.json'
+                const anotherFileName = 'spiderman.json'
+
+                await fs.populateDirectory(directoryPath, {
+                    [fileName]: '',
+                    folder1: {
+                        [fileName]: '',
+                    },
+                    folder2: {
+                        [anotherFileName]: ''
+                    }
+                })
+
+                expect(await fs.searchClosestFile(join(directoryPath, 'folder1'), fileName)).to.equal(
+                    join(directoryPath, 'folder1', fileName)
+                )
+
+                expect(await fs.searchClosestFile(directoryPath, fileName)).to.equal(
+                    join(directoryPath, fileName)
+                )
+
+                expect(await fs.searchClosestFile(join(directoryPath, 'folder2'), anotherFileName)).to.equal(
+                    join(directoryPath, 'folder2', anotherFileName),
+                )
+
+                expect(await fs.searchClosestFile(directoryPath, anotherFileName)).to.equal(null)
+            })
+        })
+
         describe('searchParentChain', () => {
             it('finds files in parent directory chain', async () => {
                 const { fs, tempDirectoryPath } = testInput
