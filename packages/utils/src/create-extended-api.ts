@@ -72,7 +72,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
-    function searchClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
+    function findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
         let currentPath = initialDirectoryPath
         let lastPath: string | undefined
 
@@ -88,7 +88,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         return null
     }
 
-    function searchParentChainSync(initialDirectoryPath: string, fileName: string): string[] {
+    function findFilesInAncestorsSync(initialDirectoryPath: string, fileName: string): string[] {
         const filePaths: string[] = []
         let currentPath = initialDirectoryPath
         let lastPath: string | undefined
@@ -112,8 +112,8 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         ensureDirectorySync,
         populateDirectorySync,
         removeSync,
-        searchClosestFileSync,
-        searchParentChainSync
+        findClosestFileSync,
+        findFilesInAncestorsSync
     }
 }
 
@@ -181,7 +181,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
-    async function searchClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
+    async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
         let currentPath = initialDirectoryPath
         let lastPath: string | undefined
 
@@ -197,7 +197,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         return null
     }
 
-    async function searchParentChain(initialDirectoryPath: string, fileName: string): Promise<string[]> {
+    async function findFilesInAncestors(initialDirectoryPath: string, fileName: string): Promise<string[]> {
         const filePaths: string[] = []
         let currentPath = initialDirectoryPath
         let lastPath: string | undefined
@@ -221,7 +221,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         ensureDirectory,
         populateDirectory,
         remove,
-        searchClosestFile,
-        searchParentChain
+        findClosestFile,
+        findFilesInAncestors
     }
 }

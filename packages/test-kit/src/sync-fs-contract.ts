@@ -121,7 +121,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
             })
         })
 
-        describe('searchClosestFileSync', () => {
+        describe('findClosestFileSync', () => {
             it('finds closest file in parent directory chain', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
@@ -139,23 +139,23 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                     }
                 })
 
-                expect(fs.searchClosestFileSync(join(directoryPath, 'folder1'), fileName)).to.equal(
+                expect(fs.findClosestFileSync(join(directoryPath, 'folder1'), fileName)).to.equal(
                     join(directoryPath, 'folder1', fileName)
                 )
 
-                expect(fs.searchClosestFileSync(directoryPath, fileName)).to.equal(
+                expect(fs.findClosestFileSync(directoryPath, fileName)).to.equal(
                     join(directoryPath, fileName)
                 )
 
-                expect(fs.searchClosestFileSync(join(directoryPath, 'folder2'), anotherFileName)).to.equal(
+                expect(fs.findClosestFileSync(join(directoryPath, 'folder2'), anotherFileName)).to.equal(
                     join(directoryPath, 'folder2', anotherFileName),
                 )
 
-                expect(fs.searchClosestFileSync(directoryPath, anotherFileName)).to.equal(null)
+                expect(fs.findClosestFileSync(directoryPath, anotherFileName)).to.equal(null)
             })
         })
 
-        describe('searchParentChainSync', () => {
+        describe('findFilesInAncestorsSync', () => {
             it('finds files in parent directory chain', () => {
                 const { fs, tempDirectoryPath } = testInput
                 const { join } = fs.path
@@ -173,12 +173,12 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                     }
                 })
 
-                expect(fs.searchParentChainSync(join(directoryPath, 'folder1'), fileName)).to.eql([
+                expect(fs.findFilesInAncestorsSync(join(directoryPath, 'folder1'), fileName)).to.eql([
                     join(directoryPath, 'folder1', fileName),
                     join(directoryPath, fileName)
                 ])
 
-                expect(fs.searchParentChainSync(join(directoryPath, 'folder2'), anotherFileName)).to.eql([
+                expect(fs.findFilesInAncestorsSync(join(directoryPath, 'folder2'), anotherFileName)).to.eql([
                     join(directoryPath, 'folder2', anotherFileName)
                 ])
             })

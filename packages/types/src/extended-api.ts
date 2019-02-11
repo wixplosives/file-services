@@ -38,7 +38,7 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
      *
      * @returns absolute path of first found file, or `null` if none found.
      */
-    searchClosestFileSync(initialDirectoryPath: string, fileName: string): string | null
+    findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null
 
     /**
      * Search for a specific file name in parent directory chain.
@@ -46,7 +46,7 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
      *
      * @returns absolute paths of all found files (ordered from inner most directory and up).
      */
-    searchParentChainSync(initialDirectory: string, fileName: string): string[]
+    findFilesInAncestorsSync(initialDirectory: string, fileName: string): string[]
 
     /**
      * Populates the provided directory with given contents.
@@ -98,7 +98,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
      *
      * @returns absolute path of first found file, or `null` if none found.
      */
-    searchClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>
+    findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>
 
     /**
      * Search for a specific file name in parent chain.
@@ -106,7 +106,7 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
      *
      * @returns absolute paths of all found files (ordered from inner most directory and up).
      */
-    searchParentChain(initialDirectory: string, fileName: string): Promise<string[]>
+    findFilesInAncestors(initialDirectory: string, fileName: string): Promise<string[]>
 
     /**
      * Populates the provided directory with given contents.
