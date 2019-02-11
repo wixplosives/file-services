@@ -57,7 +57,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         return filePaths
     }
 
-    function removeSync(entryPath: string) {
+    function removeSync(entryPath: string): void {
         const stats = lstatSync(entryPath)
         if (stats.isDirectory()) {
             const directoryItems = readdirSync(entryPath)
@@ -70,6 +70,22 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         } else {
             throw new Error(`unknown node type, cannot delete ${entryPath}`)
         }
+    }
+
+    function searchClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
+        let currentPath = initialDirectoryPath
+        let lastPath: string | undefined
+
+        while (currentPath !== lastPath) {
+            const filePath = path.join(currentPath, fileName)
+            if (fileExistsSync(filePath)) {
+                return filePath
+            }
+            lastPath = currentPath
+            currentPath = path.dirname(currentPath)
+        }
+
+        return null
     }
 
     function searchParentChainSync(initialDirectoryPath: string, fileName: string): string[] {
@@ -96,6 +112,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         ensureDirectorySync,
         populateDirectorySync,
         removeSync,
+        searchClosestFileSync,
         searchParentChainSync
     }
 }
@@ -151,7 +168,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         return filePaths
     }
 
-    async function remove(entryPath: string) {
+    async function remove(entryPath: string): Promise<void> {
         const stats = await lstat(entryPath)
         if (stats.isDirectory()) {
             const directoryItems = await readdir(entryPath)
@@ -162,6 +179,22 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         } else {
             throw new Error(`unknown node type, cannot delete ${entryPath}`)
         }
+    }
+
+    async function searchClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
+        let currentPath = initialDirectoryPath
+        let lastPath: string | undefined
+
+        while (currentPath !== lastPath) {
+            const filePath = path.join(currentPath, fileName)
+            if (await fileExists(filePath)) {
+                return filePath
+            }
+            lastPath = currentPath
+            currentPath = path.dirname(currentPath)
+        }
+
+        return null
     }
 
     async function searchParentChain(initialDirectoryPath: string, fileName: string): Promise<string[]> {
@@ -188,6 +221,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         ensureDirectory,
         populateDirectory,
         remove,
+        searchClosestFile,
         searchParentChain
     }
 }
