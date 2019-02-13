@@ -33,6 +33,13 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
     ensureDirectorySync(directoryPath: string): void
 
     /**
+     * Search for files inside `rootDirectory`.
+     *
+     * @returns absolute paths of all found files.
+     */
+    findFilesSync(rootDirectory: string, options?: IWalkOptions): string[]
+
+    /**
      * Search for a specific file name in parent directory chain.
      * Useful for finding configuration or manifest files.
      *
@@ -93,6 +100,13 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
     ensureDirectory(directoryPath: string): Promise<void>
 
     /**
+     * Search for files inside `rootDirectory`.
+     *
+     * @returns absolute paths of all found files.
+     */
+    findFiles(rootDirectory: string, options?: IWalkOptions): Promise<string[]>
+
+    /**
      * Search for a specific file name in parent directory chain.
      * Useful for finding configuration or manifest files.
      *
@@ -150,17 +164,22 @@ export interface IFileSystemDescriptor {
     stats: IFileSystemStats
 }
 
-/**
- * Walk method options
- */
 export interface IWalkOptions {
     /**
-     * Optional filter function that receives a descriptor and returns
+     * Optional file filtering function that receives a file descriptor and returns
      * whether it should be included in the result.
      *
-     * Returning `false` for directories causes the walker to not read their children.
+     * @default true returned for all files.
      */
-    filter?(pathDesc: IFileSystemDescriptor): boolean
+    filterFile?(pathDesc: IFileSystemDescriptor): boolean
+
+    /**
+     * Optional directory filtering function that receives a directory descriptor and returns
+     * whether it should be walked into.
+     *
+     * @default true returned for all directories.
+     */
+    filterDirectory?(pathDesc: IFileSystemDescriptor): boolean
 }
 
 export interface IDirectoryContents {

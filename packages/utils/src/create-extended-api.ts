@@ -3,8 +3,12 @@ import {
     IBaseFileSystemSync,
     IFileSystemAsync,
     IFileSystemSync,
-    IDirectoryContents
+    IDirectoryContents,
+    IWalkOptions,
+    IFileSystemDescriptor
 } from '@file-services/types'
+
+const returnsTrue = () => true
 
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
     const { statSync, path, mkdirSync, writeFileSync, unlinkSync, rmdirSync, lstatSync, readdirSync } = baseFs
@@ -72,6 +76,23 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         }
     }
 
+    function findFilesSync(rootDirectory: string, options: IWalkOptions = {}, filePaths: string[] = []): string[] {
+        const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options
+
+        for (const nodeName of readdirSync(rootDirectory)) {
+            const nodePath = path.join(rootDirectory, nodeName)
+            const nodeStats = statSync(nodePath)
+            const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats }
+            if (nodeStats.isFile() && filterFile(nodeDesc)) {
+                filePaths.push(nodePath)
+            } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+                findFilesSync(nodePath, options, filePaths)
+            }
+        }
+
+        return filePaths
+    }
+
     function findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
         let currentPath = initialDirectoryPath
         let lastPath: string | undefined
@@ -112,6 +133,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         ensureDirectorySync,
         populateDirectorySync,
         removeSync,
+        findFilesSync,
         findClosestFileSync,
         findFilesInAncestorsSync
     }
@@ -181,6 +203,26 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         }
     }
 
+    async function findFiles(
+        rootDirectory: string,
+        options: IWalkOptions = {},
+        filePaths: string[] = []
+    ): Promise<string[]> {
+        const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options
+
+        for (const nodeName of await readdir(rootDirectory)) {
+            const nodePath = path.join(rootDirectory, nodeName)
+            const nodeStats = await stat(nodePath)
+            const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats }
+            if (nodeStats.isFile() && filterFile(nodeDesc)) {
+                filePaths.push(nodePath)
+            } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+                await findFiles(nodePath, options, filePaths)
+            }
+        }
+
+        return filePaths
+    }
     async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
         let currentPath = initialDirectoryPath
         let lastPath: string | undefined
@@ -221,6 +263,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         ensureDirectory,
         populateDirectory,
         remove,
+        findFiles,
         findClosestFile,
         findFilesInAncestors
     }
