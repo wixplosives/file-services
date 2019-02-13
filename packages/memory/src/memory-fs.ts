@@ -75,6 +75,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             clearGlobalListeners() { globalListeners.clear() }
         },
         caseSensitive: false,
+        copyFileSync,
+        existsSync,
         lstatSync: statSync, // TODO: implement links
         mkdirSync,
         readdirSync,
@@ -86,7 +88,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         statSync,
         unlinkSync,
         writeFileSync,
-        copyFileSync
     }
 
     function readFileSync(filePath: string, encoding?: string): string {
@@ -218,6 +219,10 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
         parentNode.contents.delete(lowerCaseDirectoryName)
         emitWatchEvent({ path: directoryPath, stats: null })
+    }
+
+    function existsSync(nodePath: string): boolean {
+        return !!getNode(nodePath)
     }
 
     function statSync(nodePath: string): IFileSystemStats {

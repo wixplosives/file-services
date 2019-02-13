@@ -128,6 +128,12 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         rmdirSync(path) {
             return fs.rmdirSync(joinPath(path))
         },
+        async exists(path) {
+            return fs.exists(joinPath(path))
+        },
+        existsSync(path) {
+            return fs.existsSync(joinPath(path))
+        },
         async stat(path) {
             return fs.stat(joinPath(path))
         },

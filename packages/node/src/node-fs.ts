@@ -2,7 +2,7 @@ import path from 'path'
 import {
     lstat, lstatSync, mkdir, mkdirSync, readdir, readdirSync, readFile, readFileSync, realpath, realpathSync,
     rename, renameSync, rmdir, rmdirSync, stat, statSync, unlink, unlinkSync, writeFile, writeFileSync, isCaseSensitive,
-    copyFile, copyFileSync
+    copyFile, copyFileSync, exists, existsSync
 } from 'proper-fs'
 import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
@@ -28,6 +28,8 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         caseSensitive: isCaseSensitive,
         copyFile,
         copyFileSync,
+        exists,
+        existsSync,
         lstat,
         lstatSync,
         mkdir,

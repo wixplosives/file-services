@@ -62,6 +62,14 @@ export interface IBaseFileSystemSync {
     rmdirSync(directoryPath: string): void
 
     /**
+     * Check if a path points to an existing file/directory/link.
+     *
+     * @param path possible file path.
+     * @param statFn optional custom stat function (e.g. lstat to detect links).
+     */
+    existsSync(path: string): boolean
+
+    /**
      * Get path's `IFileSystemStats`.
      */
     statSync(path: string): IFileSystemStats
@@ -136,6 +144,14 @@ export interface IBaseFileSystemAsync {
      * Delete a directory.
      */
     rmdir(directoryPath: string): Promise<void>
+
+    /**
+     * Check if a path points to an existing file/directory/link.
+     *
+     * @param path possible file path.
+     * @param statFn optional custom stat function (e.g. lstat to detect links).
+     */
+    exists(path: string): Promise<boolean>
 
     /**
      * Get path's `IFileSystemStats`.

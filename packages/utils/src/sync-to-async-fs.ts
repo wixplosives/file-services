@@ -34,6 +34,10 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
             return syncFs.rmdirSync(directoryPath)
         },
 
+        async exists(nodePath) {
+            return syncFs.existsSync(nodePath)
+        },
+
         async stat(nodePath) {
             return syncFs.statSync(nodePath)
         },

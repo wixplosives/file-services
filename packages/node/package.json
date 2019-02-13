@@ -16,7 +16,7 @@
   "dependencies": {
     "@file-services/types": "^0.4.10",
     "@file-services/utils": "^0.4.10",
-    "proper-fs": "^1.1.1"
+    "proper-fs": "^1.1.2"
   },
   "files": [
     "cjs",
