@@ -121,8 +121,8 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
             })
         })
 
-        const fileName = 'superman.json'
-        const anotherFileName = 'spiderman.json'
+        const fileName = 'a.json'
+        const anotherFileName = 'b.json'
 
         describe('findFilesSync', () => {
             it('finds all files recursively inside a directory', () => {
