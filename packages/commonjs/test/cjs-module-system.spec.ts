@@ -96,7 +96,7 @@ describe('commonjs module system', () => {
         expect(requireModule(sampleFilePath)).to.eql(processEnv)
     })
 
-    it('allows requiring other modules', () => {
+    it('allows requiring other js modules', () => {
         const fs = createMemoryFs({
             'index.js': `module.exports = require('./numeric')`,
             'numeric.js': `module.exports = ${sampleNumber}`
@@ -104,6 +104,16 @@ describe('commonjs module system', () => {
         const { requireModule } = createCjsModuleSystem({ fs })
 
         expect(requireModule('/index.js')).to.eql(sampleNumber)
+    })
+
+    it('allows requiring json modules', () => {
+        const fs = createMemoryFs({
+            'index.js': `module.exports = require('./package.json')`,
+            'package.json': `{ "name": "test" }`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(requireModule('/index.js')).to.eql({ name: 'test' })
     })
 
     it('allows resolving modules using require.resolve', () => {
