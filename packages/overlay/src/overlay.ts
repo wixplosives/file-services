@@ -164,27 +164,11 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
                 }
             }
         },
-        async lstat(path: string): Promise<IFileSystemStats> {
-            try {
-                return await overlayFs.lstat(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.lstat(path)
-                } else {
-                    throw e
-                }
-            }
+        async exists(path: string): Promise<boolean> {
+            return await overlayFs.exists(path) || await (originFs.exists(path))
         },
-        lstatSync(path: string): IFileSystemStats {
-            try {
-                return overlayFs.lstatSync(path)
-            } catch (e) {
-                if (isFileOrDirectoryMissingError(e)) {
-                    return originFs.lstatSync(path)
-                } else {
-                    throw e
-                }
-            }
+        existsSync(path: string): boolean {
+            return overlayFs.existsSync(path) || originFs.existsSync(path)
         },
         async stat(path: string): Promise<IFileSystemStats> {
             try {
@@ -203,6 +187,28 @@ export function createOverlayFs(originFs: IFileSystem, overlayFs: IFileSystem): 
             } catch (e) {
                 if (isFileOrDirectoryMissingError(e)) {
                     return originFs.statSync(path)
+                } else {
+                    throw e
+                }
+            }
+        },
+        async lstat(path: string): Promise<IFileSystemStats> {
+            try {
+                return await overlayFs.lstat(path)
+            } catch (e) {
+                if (isFileOrDirectoryMissingError(e)) {
+                    return originFs.lstat(path)
+                } else {
+                    throw e
+                }
+            }
+        },
+        lstatSync(path: string): IFileSystemStats {
+            try {
+                return overlayFs.lstatSync(path)
+            } catch (e) {
+                if (isFileOrDirectoryMissingError(e)) {
+                    return originFs.lstatSync(path)
                 } else {
                     throw e
                 }
