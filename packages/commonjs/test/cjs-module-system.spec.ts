@@ -208,4 +208,44 @@ describe('commonjs module system', () => {
 
         expect(() => requireModule(sampleFilePath)).to.throw(`Thanos is coming!`)
     })
+
+    it('does not cache module if code parsing failed', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `module.exports = #1#`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(() => requireModule(sampleFilePath)).to.throw()
+
+        fs.writeFileSync(sampleFilePath, `module.exports = 1`)
+
+        expect(requireModule(sampleFilePath)).to.equal(1)
+    })
+
+    it('does not cache module if code evaluation failed', () => {
+        const fs = createMemoryFs({
+            [sampleFilePath]: `throw new Error('Thanos is coming!')`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(() => requireModule(sampleFilePath)).to.throw('Thanos is coming!')
+
+        fs.writeFileSync(sampleFilePath, `module.exports = 1`)
+
+        expect(requireModule(sampleFilePath)).to.equal(1)
+    })
+
+    it('does not cache module if json parsing failed', () => {
+        const sampleJsonPath = '/package.json'
+        const fs = createMemoryFs({
+            [sampleJsonPath]: `{ "name": #"test"# }`
+        })
+        const { requireModule } = createCjsModuleSystem({ fs })
+
+        expect(() => requireModule(sampleJsonPath)).to.throw()
+
+        fs.writeFileSync(sampleJsonPath, `{ "name": "test" }`)
+
+        expect(requireModule(sampleJsonPath)).to.eql({ name: 'test' })
+    })
 })

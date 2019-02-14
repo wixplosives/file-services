@@ -43,13 +43,13 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
         }
 
         const newModule: IModule = { exports: {}, filename: filePath }
-        loadedModules.set(filePath, newModule)
 
         const fileContents = readFileSync(filePath, 'utf8')
         const contextPath = dirname(filePath)
 
         if (filePath.endsWith('.json')) {
             newModule.exports = JSON.parse(fileContents)
+            loadedModules.set(filePath, newModule)
             return newModule.exports
         }
 
@@ -58,10 +58,16 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
             `(function (module, exports, __filename, __dirname, process, require, global){${fileContents}\n})`
         )
 
+        loadedModules.set(filePath, newModule)
         const requireFromContext = (request: string) => requireFrom(contextPath, request, filePath)
         requireFromContext.resolve = (request: string) => resolveFrom(contextPath, request, filePath)
 
-        moduleFn(newModule, newModule.exports, filePath, contextPath, globalProcess, requireFromContext, globalThis)
+        try {
+            moduleFn(newModule, newModule.exports, filePath, contextPath, globalProcess, requireFromContext, globalThis)
+        } catch (e) {
+            loadedModules.delete(filePath)
+            throw e
+        }
 
         return newModule.exports
     }
