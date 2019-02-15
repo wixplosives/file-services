@@ -1,4 +1,12 @@
-import { IBaseFileSystemSync } from '@file-services/types'
+import { IBaseFileSystemSync, IBaseFileSystemAsync, IFileSystemAsync, IFileSystemSync } from '@file-services/types'
+
+export interface IMemFileSystem extends IFileSystemSync, IFileSystemAsync {
+    root: IFsMemDirectoryNode
+}
+
+export interface IBaseMemFileSystem extends IBaseFileSystemSync, IBaseFileSystemAsync {
+    root: IFsMemDirectoryNode
+}
 
 export interface IBaseMemFileSystemSync extends IBaseFileSystemSync {
     root: IFsMemDirectoryNode
