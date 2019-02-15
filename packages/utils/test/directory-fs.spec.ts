@@ -5,13 +5,12 @@ import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 
 chai.use(chaiAsPromised)
-const directoryName = 'test-directory'
-const basePath = `/${directoryName}`
-const SAMPLE_CONTENT = 'content'
 
 describe('createDirectoryFs', () => {
+    const scopedDirectoryPath = '/test-directory'
+    const SAMPLE_CONTENT = 'content'
     const createPreloadedMemFs = () => createMemoryFs({
-        [directoryName]: {
+        [scopedDirectoryPath]: {
             src: {
                 'index.ts': SAMPLE_CONTENT
             }
@@ -20,7 +19,7 @@ describe('createDirectoryFs', () => {
     })
 
     it('can access a file using an absolute path relative to scoped directory', async () => {
-        const fs = createDirectoryFs(createPreloadedMemFs(), basePath)
+        const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)
         const filePath = '/src/index.ts'
 
         expect((await fs.stat(filePath)).isFile()).to.equal(true)
@@ -28,30 +27,32 @@ describe('createDirectoryFs', () => {
     })
 
     it('cannot use a relative path to access a file outside of the scoped directory path', async () => {
-        const fs = createDirectoryFs(createPreloadedMemFs(), basePath)
+        const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)
         const filePath = '../outside-scope-file.ts'
 
-        await expect(fs.readFile(filePath)).to.be.rejectedWith(`path ${filePath} is outside of scoped directory`)
+        await expect(fs.readFile(filePath)).to.be.rejectedWith(
+            `/test-directory/outside-scope-file.ts ENOENT: no such file`
+        )
     })
 
     it('cannot access a file outside of scoped directory using original absolute path', async () => {
-        const fs = createDirectoryFs(createPreloadedMemFs(), basePath)
+        const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)
         const filePath = '/outside-scope-file.ts'
 
         await expect(fs.readFile(filePath)).to.be.rejectedWith(`ENOENT`)
     })
 
     const testProvider = async () => {
-        const testFs = createDirectoryFs(
-            createMemoryFs({
-                [directoryName]: {}
-            }),
-            basePath
-        )
+        const memFs = createMemoryFs({
+            [scopedDirectoryPath]: {},
+            'file-outside.js': ''
+        })
+        const scopedFs = createDirectoryFs(memFs, scopedDirectoryPath)
+
         return {
-            fs: testFs,
+            fs: scopedFs,
             dispose: async () => undefined,
-            tempDirectoryPath: '/'
+            tempDirectoryPath: '/' // for the scoped fs user, root is empty folder
         }
     }
 

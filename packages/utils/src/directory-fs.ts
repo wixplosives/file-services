@@ -4,6 +4,7 @@ import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-a
 
 // ugly workaround for webpack's polyfilled path not implementing posix
 const posixPath = pathMain.posix as typeof pathMain || pathMain
+const POSIX_ROOT = '/'
 
 /**
  * Creates a wrapped `IFileSystem` which scopes the provided `fs`
@@ -16,13 +17,14 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     const { watchService } = fs
     const { join, relative, sep } = fs.path
 
-    function joinPath(path: string) {
-        const joinedPath = join(directoryPath, path)
-        const relativePath = relative(directoryPath, joinedPath)
-        if (relativePath.startsWith(`..${sep}`)) {
-            throw new Error(`path ${path} is outside of scoped directory`)
-        }
-        return joinedPath
+    let workingDirectoryPath: string = POSIX_ROOT
+
+    function resolveScopedPath(...pathSegments: string[]): string {
+        return posixPath.resolve(workingDirectoryPath, ...pathSegments)
+    }
+
+    function resolveFullPath(path: string): string {
+        return join(directoryPath, resolveScopedPath(path))
     }
 
     const scopedListeners: WeakMap<WatchEventListener, WatchEventListener> = new WeakMap()
@@ -35,7 +37,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
                 listener({
                     stats: e.stats,
                     // use posixPath to ensure we give posix-style paths back
-                    path: posixPath.join('/', relativeEventPath)
+                    path: posixPath.join(POSIX_ROOT, relativeEventPath)
                 })
             }
         }
@@ -48,13 +50,13 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             if (listener) {
                 listener = scopedListeners.get(listener) || createScopedListener(listener)
             }
-            return watchService.watchPath(joinPath(path), listener)
+            return watchService.watchPath(resolveFullPath(path), listener)
         },
         async unwatchPath(path, listener) {
             if (listener) {
                 listener = scopedListeners.get(listener) || listener
             }
-            return watchService.unwatchPath(joinPath(path), listener)
+            return watchService.unwatchPath(resolveFullPath(path), listener)
         },
         async unwatchAllPaths() {
             return watchService.unwatchAllPaths()
@@ -71,86 +73,95 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     }
 
     const scopedBaseFs: IBaseFileSystem = {
-        path: fs.path,
+        path: {
+            ...fs.path,
+            resolve: resolveScopedPath
+        },
         caseSensitive: fs.caseSensitive,
         watchService: scopedWatchService,
+        cwd() {
+            return workingDirectoryPath
+        },
+        chdir(path) {
+            workingDirectoryPath = resolveScopedPath(path)
+        },
         async copyFile(src, dest, flags) {
-            return fs.copyFile(joinPath(src), joinPath(dest), flags)
+            return fs.copyFile(resolveFullPath(src), resolveFullPath(dest), flags)
         },
         copyFileSync(src, dest, flags) {
-            return fs.copyFileSync(joinPath(src), joinPath(dest), flags)
+            return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), flags)
         },
         async lstat(path) {
-            return fs.lstat(joinPath(path))
+            return fs.lstat(resolveFullPath(path))
         },
         lstatSync(path) {
-            return fs.lstatSync(joinPath(path))
+            return fs.lstatSync(resolveFullPath(path))
         },
         async mkdir(path) {
-            return fs.mkdir(joinPath(path))
+            return fs.mkdir(resolveFullPath(path))
         },
         mkdirSync(path) {
-            return fs.mkdirSync(joinPath(path))
+            return fs.mkdirSync(resolveFullPath(path))
         },
         async readdir(path) {
-            return fs.readdir(joinPath(path))
+            return fs.readdir(resolveFullPath(path))
         },
         readdirSync(path) {
-            return fs.readdirSync(joinPath(path))
+            return fs.readdirSync(resolveFullPath(path))
         },
         async readFile(path, encoding) {
-            return fs.readFile(joinPath(path), encoding)
+            return fs.readFile(resolveFullPath(path), encoding)
         },
         readFileSync(path, encoding) {
-            return fs.readFileSync(joinPath(path), encoding)
+            return fs.readFileSync(resolveFullPath(path), encoding)
         },
         async readFileRaw(path) {
-            return fs.readFileRaw(joinPath(path))
+            return fs.readFileRaw(resolveFullPath(path))
         },
         readFileRawSync(path) {
-            return fs.readFileRawSync(joinPath(path))
+            return fs.readFileRawSync(resolveFullPath(path))
         },
         async realpath(path) {
-            return fs.realpath(joinPath(path))
+            return fs.realpath(resolveFullPath(path))
         },
         realpathSync(path) {
-            return fs.realpathSync(joinPath(path))
+            return fs.realpathSync(resolveFullPath(path))
         },
         async rename(path, newPath) {
-            return fs.rename(joinPath(path), joinPath(newPath))
+            return fs.rename(resolveFullPath(path), resolveFullPath(newPath))
         },
         renameSync(path, newPath) {
-            return fs.renameSync(joinPath(path), joinPath(newPath))
+            return fs.renameSync(resolveFullPath(path), resolveFullPath(newPath))
         },
         async rmdir(path) {
-            return fs.rmdir(joinPath(path))
+            return fs.rmdir(resolveFullPath(path))
         },
         rmdirSync(path) {
-            return fs.rmdirSync(joinPath(path))
+            return fs.rmdirSync(resolveFullPath(path))
         },
         async exists(path) {
-            return fs.exists(joinPath(path))
+            return fs.exists(resolveFullPath(path))
         },
         existsSync(path) {
-            return fs.existsSync(joinPath(path))
+            return fs.existsSync(resolveFullPath(path))
         },
         async stat(path) {
-            return fs.stat(joinPath(path))
+            return fs.stat(resolveFullPath(path))
         },
         statSync(path) {
-            return fs.statSync(joinPath(path))
+            return fs.statSync(resolveFullPath(path))
         },
         async unlink(path) {
-            return fs.unlink(joinPath(path))
+            return fs.unlink(resolveFullPath(path))
         },
         unlinkSync(path) {
-            return fs.unlinkSync(joinPath(path))
+            return fs.unlinkSync(resolveFullPath(path))
         },
         async writeFile(path, content, encoding) {
-            return fs.writeFile(joinPath(path), content, encoding)
+            return fs.writeFile(resolveFullPath(path), content, encoding)
         },
         writeFileSync(path, content, encoding) {
-            return fs.writeFileSync(joinPath(path), content, encoding)
+            return fs.writeFileSync(resolveFullPath(path), content, encoding)
         }
     }
 
