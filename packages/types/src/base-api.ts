@@ -17,6 +17,21 @@ export interface IBaseFileSystemSync {
     caseSensitive: boolean
 
     /**
+     * Get the current working directory.
+     * Non-absolute calls to any file system method are resolved using this path.
+     *
+     * @returns absolute path to the current working directory.
+     */
+    cwd(): string
+
+    /**
+     * Change the working directory.
+     *
+     * @directoryPath path to the new working directory.
+     */
+    chdir(directoryPath: string): void
+
+    /**
      * Copy `sourcePath` to `destinationPath`.
      * By default, if destination already exists, it will be overwritten.
      *
