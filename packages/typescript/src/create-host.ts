@@ -1,27 +1,26 @@
 import ts from 'typescript'
-import { IFileSystemSync } from '@file-services/types'
+import { IFileSystemSync, IFileSystemPath } from '@file-services/types'
 
+const UNIX_NEW_LINE = '\n'
 const identity = (val: string) => val
 const toLowerCase = (val: string) => val.toLowerCase()
-
+const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE
 /**
  * Combines all required functionality for parsing config files,
  * formatting diagnostics, and resolving modules using TypeScript.
  */
 export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost, ts.ModuleResolutionHost {
-    readDirectory(
-        path: string,
-        extensions?: ReadonlyArray<string>,
-        exclude?: ReadonlyArray<string>,
-        include?: ReadonlyArray<string>,
-        depth?: number
-    ): string[]
-    getCurrentDirectory(): string
-    directoryExists(directoryPath: string): boolean
-    getDirectories(path: string): string[]
+    getCurrentDirectory: IFileSystemSync['cwd']
+    directoryExists: IFileSystemSync['directoryExistsSync']
 
-    dirname(path: string): string
-    normalize(path: string): string
+    readDirectory: NonNullable<ts.LanguageServiceHost['readDirectory']>
+    getDirectories: NonNullable<ts.ModuleResolutionHost['getDirectories']>
+
+    getScriptVersion: ts.LanguageServiceHost['getScriptVersion']
+
+    dirname: IFileSystemPath['dirname']
+    normalize: IFileSystemPath['normalize']
+    join: IFileSystemPath['join']
 }
 
 /**
@@ -33,9 +32,9 @@ export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost,
  * @param fs the file system to use as host backend
  * @param cwd current working directory to use
  */
-export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost {
+export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     const {
-        caseSensitive, statSync, readFileSync, readdirSync, fileExistsSync, directoryExistsSync,
+        caseSensitive, statSync, readFileSync, readdirSync, fileExistsSync, directoryExistsSync, cwd, realpathSync,
         path: { join, dirname, normalize }
     } = fs
 
@@ -43,18 +42,21 @@ export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost {
         const files: string[] = []
         const directories: string[] = []
 
-        const dirEntries = readdirSync(path)
-        for (const entryName of dirEntries) {
-            const entryStats = statSync(join(path, entryName))
-            if (!entryStats) {
-                continue
+        try {
+            const dirEntries = readdirSync(path)
+            for (const entryName of dirEntries) {
+                const entryStats = statSync(join(path, entryName))
+                if (!entryStats) {
+                    continue
+                }
+                if (entryStats.isFile()) {
+                    files.push(entryName)
+                } else if (entryStats.isDirectory()) {
+                    directories.push(entryName)
+                }
             }
-            if (entryStats.isFile()) {
-                files.push(entryName)
-            } else if (entryStats.isDirectory()) {
-                directories.push(entryName)
-            }
-        }
+        } catch { /* */ }
+
         return { files, directories }
     }
 
@@ -76,61 +78,55 @@ export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost {
                 return undefined
             }
         },
-        useCaseSensitiveFileNames: caseSensitive,
-        getCanonicalFileName: caseSensitive ? identity : toLowerCase,
-        getCurrentDirectory: () => cwd,
-        getNewLine: () => ts.sys ? ts.sys.newLine : '\n',
-        dirname,
-        normalize
-    }
-}
-
-/**
- * Create a TypeScript `LanguageServiceHost` using provided file system.
- *
- * @param fs the file system used as host backend
- * @param baseHost created using `createBaseHost()`
- * @param fileNames list of absolute paths to `.ts/tsx` files included in this transpilation
- * @param compilerOptions compilerOptions to use when transpiling or type checking
- * @param defaultLibsDirectory absolute path to the directory that contains TypeScript's built-in `.d.ts` files
- *                             `path.dirname(ts.getDefaultLibFilePath({}))` in node,
- *                             or custom directory with `@file-services/memory`
- * @param customTransformers optional custom transformers to apply during transpilation
- */
-export function createLanguageServiceHost(
-    fs: IFileSystemSync,
-    baseHost: IBaseHost,
-    fileNames: string[],
-    compilerOptions: ts.CompilerOptions,
-    defaultLibsDirectory: string,
-    customTransformers?: ts.CustomTransformers,
-): ts.LanguageServiceHost {
-    const { statSync, readFileSync, path: { join }, caseSensitive } = fs
-    const targetNewLine = ts.getNewLineCharacter(compilerOptions, baseHost.getNewLine)
-
-    return {
-        ...baseHost,
-        getCompilationSettings: () => compilerOptions,
-        getScriptFileNames: () => fileNames,
         getScriptVersion(filePath) {
             try {
-                const stats = statSync(filePath)
-                return `${stats.mtime.getTime()}`
+                return `${statSync(filePath).mtime.getTime()}`
             } catch {
                 return `${Date.now()}`
             }
         },
+        useCaseSensitiveFileNames: caseSensitive,
+        getCanonicalFileName: caseSensitive ? identity : toLowerCase,
+        getCurrentDirectory: cwd,
+        getNewLine: defaultGetNewLine,
+        realpath: realpathSync,
+        dirname,
+        normalize,
+        join
+    }
+}
+
+/**
+ * Create a TypeScript `LanguageServiceHost` using provided base host, list of files, and compiler options.
+ *
+ * @param baseHost created using `createBaseHost()`
+ * @param getScriptFileNames return a list of absolute paths to `.ts/tsx` files included in this transpilation.
+ * @param getCompilationSettings returns `ts.CompilerOptions` to use when transpiling or type checking.
+ * @param defaultLibsDirectory absolute path to the directory that contains TypeScript's built-in `.d.ts` files
+ *                             `path.dirname(ts.getDefaultLibFilePath({}))` in node,
+ *                             or custom directory with `@file-services/memory`
+ * @param getCustomTransformers optional transformers to apply during transpilation
+ */
+export function createLanguageServiceHost(
+    baseHost: IBaseHost,
+    getScriptFileNames: () => string[],
+    getCompilationSettings: () => ts.CompilerOptions,
+    defaultLibsDirectory: string,
+    getCustomTransformers?: () => ts.CustomTransformers | undefined,
+): ts.LanguageServiceHost {
+    const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost
+
+    return {
+        ...baseHost,
+        getCompilationSettings,
+        getScriptFileNames,
+        getCustomTransformers,
         getScriptSnapshot(filePath) {
-            try {
-                const fileContents = readFileSync(filePath)
-                return ts.ScriptSnapshot.fromString(fileContents)
-            } catch {
-                return undefined
-            }
+            const fileContents = readFile(filePath)
+            return fileContents !== undefined ? ts.ScriptSnapshot.fromString(fileContents) : undefined
         },
+        getNewLine: () => ts.getNewLineCharacter(getCompilationSettings(), getNewLine),
         getDefaultLibFileName: options => join(defaultLibsDirectory, ts.getDefaultLibFileName(options)),
-        useCaseSensitiveFileNames: () => caseSensitive,
-        getCustomTransformers: customTransformers ? () => customTransformers : undefined,
-        getNewLine: () => targetNewLine // override baseHost's method
+        useCaseSensitiveFileNames: () => useCaseSensitiveFileNames
     }
 }
