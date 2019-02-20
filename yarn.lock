@@ -772,10 +772,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.8.3":
-  version "16.8.3"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.3.tgz#7b67956f682bea30a5a09b3242c0784ff196c848"
-  integrity sha512-PjPocAxL9SNLjYMP4dfOShW/rj9FDBJGu3JFRt0zEYf77xfihB6fq8zfDpMrV6s82KnAi7F1OEe5OsQX25Ybdw==
+"@types/react@*", "@types/react@^16.8.4":
+  version "16.8.4"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.4.tgz#134307f5266e866d5e7c25e47f31f9abd5b2ea34"
+  integrity sha512-Mpz1NNMJvrjf0GcDqiK8+YeOydXfD8Mgag3UtqQ5lXYTsMnOiHcKmO48LiSWMb1rSHB9MV/jlgyNzeAVxWMZRQ==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
@@ -4343,10 +4343,10 @@ mkdirp@0.5.1, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0:
   dependencies:
     minimist "0.0.8"
 
-mocha-pup@^0.1.10:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/mocha-pup/-/mocha-pup-0.1.10.tgz#fca8e4ada4c180e528e9e2be529e6a799477c3d9"
-  integrity sha512-KGPBRUfGjECniZSlF4Krd9q+Hl/FPmyimEQKiD+hfNgbr1vDTpitwF2m6JJIhcZ/clMzfCrIUKzHOjrysV9Nug==
+mocha-pup@^0.1.11:
+  version "0.1.11"
+  resolved "https://registry.yarnpkg.com/mocha-pup/-/mocha-pup-0.1.11.tgz#086fc5b4152446d161d42a0003d425a67fa2f6c8"
+  integrity sha512-nKuSvlGoE3C1JuCnHq2HRrJGT8UwSKWjYCjG0zXNNl1pzPQE6jQNBhuhtIhwnBpZaS0sPQEyqezCTOBFIcVByg==
   dependencies:
     chalk "^2.4.2"
     commander "^2.19.0"
