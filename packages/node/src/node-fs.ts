@@ -1,9 +1,31 @@
 import path from 'path'
 import { chdir, cwd } from 'process'
 import {
-    lstat, lstatSync, mkdir, mkdirSync, readdir, readdirSync, readFile, readFileSync, realpath, realpathSync,
-    rename, renameSync, rmdir, rmdirSync, stat, statSync, unlink, unlinkSync, writeFile, writeFileSync, isCaseSensitive,
-    copyFile, copyFileSync, exists, existsSync
+    lstat,
+    lstatSync,
+    mkdir,
+    mkdirSync,
+    readdir,
+    readdirSync,
+    readFile,
+    readFileSync,
+    realpath,
+    realpathSync,
+    rename,
+    renameSync,
+    rmdir,
+    rmdirSync,
+    stat,
+    statSync,
+    unlink,
+    unlinkSync,
+    writeFile,
+    writeFileSync,
+    isCaseSensitive,
+    copyFile,
+    copyFileSync,
+    exists,
+    existsSync
 } from 'proper-fs'
 import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
@@ -18,7 +40,7 @@ export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
 
     return {
         ...createSyncFileSystem(baseFs),
-        ...createAsyncFileSystem(baseFs),
+        ...createAsyncFileSystem(baseFs)
     }
 }
 
@@ -39,10 +61,18 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         mkdirSync,
         readdir,
         readdirSync,
-        readFile(filePath, encoding = 'utf8') { return readFile(filePath, encoding) },
-        readFileRaw(filePath) { return readFile(filePath) },
-        readFileSync(filePath, encoding = 'utf8') { return readFileSync(filePath, encoding) },
-        readFileRawSync(filePath) { return readFileSync(filePath) },
+        readFile(filePath, encoding = 'utf8') {
+            return readFile(filePath, encoding)
+        },
+        readFileRaw(filePath) {
+            return readFile(filePath)
+        },
+        readFileSync(filePath, encoding = 'utf8') {
+            return readFileSync(filePath, encoding)
+        },
+        readFileRawSync(filePath) {
+            return readFileSync(filePath)
+        },
         realpath,
         realpathSync,
         rename,

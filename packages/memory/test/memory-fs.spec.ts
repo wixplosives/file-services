@@ -34,10 +34,11 @@ describe('In-memory File System Implementation', () => {
         const sourceFilePath = '/file.txt'
         const emptyDirectoryPath = '/empty_dir'
 
-        const createPopulatedFs = () => createMemoryFs({
-            [sourceFilePath]: 'test content',
-            [emptyDirectoryPath]: {}
-        })
+        const createPopulatedFs = () =>
+            createMemoryFs({
+                [sourceFilePath]: 'test content',
+                [emptyDirectoryPath]: {}
+            })
 
         it('preserves birthtime and updates mtime', async () => {
             const fs = createPopulatedFs()

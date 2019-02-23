@@ -4,7 +4,11 @@ const isRelative = (request: string) => request.startsWith('./') || request.star
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
     const {
-        fs: { fileExistsSync, readFileSync, path: { dirname, join, resolve, isAbsolute, basename } },
+        fs: {
+            fileExistsSync,
+            readFileSync,
+            path: { dirname, join, resolve, isAbsolute, basename }
+        },
         packageRoots = ['node_modules'],
         extensions = ['.js', '.json'],
         target = 'browser'
@@ -12,7 +16,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     return resolveRequest
 
-    function resolveRequest(contextPath: string, request: string, ): IResolutionOutput | null {
+    function resolveRequest(contextPath: string, request: string): IResolutionOutput | null {
         if (isRelative(request) || isAbsolute(request)) {
             const requestPath = resolve(contextPath, request)
             return resolveAsFile(requestPath) || resolveAsDirectory(requestPath)
@@ -49,7 +53,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                     const targetPath = join(requestPath, mainField)
                     return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'))
                 }
-            } catch {/* we don't reject, just return null */ }
+            } catch {
+                /* we don't reject, just return null */
+            }
         }
         return resolveAsFile(join(requestPath, 'index'))
     }

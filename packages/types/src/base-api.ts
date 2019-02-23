@@ -5,7 +5,7 @@ import { IFileSystemPath } from './path'
  * SYNC and ASYNC base file system.
  * Contains a subset of `fs`, watch service, and path methods.
  */
-export interface IBaseFileSystem extends IBaseFileSystemAsync, IBaseFileSystemSync { }
+export interface IBaseFileSystem extends IBaseFileSystemAsync, IBaseFileSystemSync {}
 
 /**
  * SYNC-only base file system.

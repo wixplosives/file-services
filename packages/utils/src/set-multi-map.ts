@@ -2,7 +2,9 @@ export class SetMultiMap<K, V> implements Iterable<[K, V]> {
     private map: Map<K, Set<V>> = new Map()
 
     public get size(): number {
-        return Array.from(this.map.values()).map(({ size }) => size).reduce((sum, size) => sum + size, 0)
+        return Array.from(this.map.values())
+            .map(({ size }) => size)
+            .reduce((sum, size) => sum + size, 0)
     }
 
     public get(key: K): ReadonlySet<V> | undefined {

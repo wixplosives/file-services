@@ -31,5 +31,4 @@ describe('Node File System Implementation', () => {
 
     asyncFsContract(testProvider)
     syncFsContract(testProvider)
-
 })

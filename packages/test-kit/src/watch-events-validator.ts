@@ -39,10 +39,13 @@ export class WatchEventsValidator {
         const { capturedEvents } = this
         const expected = expectedEvents.map(simplifyEvent)
 
-        await waitFor(() => {
-            const actual = capturedEvents.slice(-1 * expectedEvents.length).map(simplifyEvent)
-            expect(actual).to.eql(expected)
-        }, { timeout: this.options.validateTimeout, delay: 100 })
+        await waitFor(
+            () => {
+                const actual = capturedEvents.slice(-1 * expectedEvents.length).map(simplifyEvent)
+                expect(actual).to.eql(expected)
+            },
+            { timeout: this.options.validateTimeout, delay: 100 }
+        )
 
         this.capturedEvents.length = 0
     }

@@ -8,7 +8,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
     describe('ASYNC file system contract', () => {
         let testInput: ITestInput<IFileSystemAsync>
 
-        beforeEach(async () => testInput = await testProvider())
+        beforeEach(async () => (testInput = await testProvider()))
         afterEach(async () => await testInput.dispose())
 
         describe('fileExists', () => {
@@ -80,12 +80,12 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.populateDirectory(directoryPath, {
                     'file1.ts': '',
                     'file2.ts': '',
-                    'folder1': {
+                    folder1: {
                         'file1.ts': '',
                         'file2.ts': '',
                         'file3.ts': ''
                     },
-                    'folder2': {
+                    folder2: {
                         'file1.ts': '',
                         'file2.ts': '',
                         'file3.ts': ''
@@ -123,13 +123,17 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
 
         describe('findFiles', () => {
             it('finds all files recursively inside a directory', async () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 await fs.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -143,18 +147,22 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 ])
 
                 expect(await fs.findFiles(path.join(directoryPath, 'folder1'))).to.eql([
-                    path.join(directoryPath, 'folder1', fileName),
+                    path.join(directoryPath, 'folder1', fileName)
                 ])
             })
 
             it('allows specifying a file filtering callback', async () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 await fs.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -163,55 +171,55 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
 
                 expect(await fs.findFiles(directoryPath, { filterFile: ({ name }) => name === fileName })).to.eql([
                     path.join(directoryPath, fileName),
-                    path.join(directoryPath, 'folder1', fileName),
+                    path.join(directoryPath, 'folder1', fileName)
                 ])
 
                 expect(
                     await fs.findFiles(directoryPath, { filterFile: ({ name }) => name === anotherFileName })
-                ).to.eql([
-                    path.join(directoryPath, 'folder2', anotherFileName),
-                ])
+                ).to.eql([path.join(directoryPath, 'folder2', anotherFileName)])
             })
 
             it('allows specifying a directory filtering callback', async () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 await fs.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
                     }
                 })
 
-                expect(
-                    await fs.findFiles(directoryPath, { filterDirectory: ({ name }) => name === 'folder1' })
-                ).to.eql([
-                    path.join(directoryPath, fileName),
-                    path.join(directoryPath, 'folder1', fileName),
-                ])
+                expect(await fs.findFiles(directoryPath, { filterDirectory: ({ name }) => name === 'folder1' })).to.eql(
+                    [path.join(directoryPath, fileName), path.join(directoryPath, 'folder1', fileName)]
+                )
 
-                expect(
-                    await fs.findFiles(directoryPath, { filterDirectory: ({ name }) => name === 'folder2' })
-                ).to.eql([
-                    path.join(directoryPath, fileName),
-                    path.join(directoryPath, 'folder2', anotherFileName),
-                ])
+                expect(await fs.findFiles(directoryPath, { filterDirectory: ({ name }) => name === 'folder2' })).to.eql(
+                    [path.join(directoryPath, fileName), path.join(directoryPath, 'folder2', anotherFileName)]
+                )
             })
         })
 
         describe('findClosestFile', () => {
             it('finds closest file in parent directory chain', async () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 await fs.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -222,12 +230,10 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                     path.join(directoryPath, 'folder1', fileName)
                 )
 
-                expect(await fs.findClosestFile(directoryPath, fileName)).to.equal(
-                    path.join(directoryPath, fileName)
-                )
+                expect(await fs.findClosestFile(directoryPath, fileName)).to.equal(path.join(directoryPath, fileName))
 
                 expect(await fs.findClosestFile(path.join(directoryPath, 'folder2'), anotherFileName)).to.equal(
-                    path.join(directoryPath, 'folder2', anotherFileName),
+                    path.join(directoryPath, 'folder2', anotherFileName)
                 )
 
                 expect(await fs.findClosestFile(directoryPath, anotherFileName)).to.equal(null)
@@ -236,13 +242,17 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
 
         describe('findFilesInAncestors', () => {
             it('finds files in parent directory chain', async () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 await fs.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -259,6 +269,5 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 ])
             })
         })
-
     })
 }

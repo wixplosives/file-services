@@ -10,7 +10,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
     describe('SYNC file system contract', () => {
         let testInput: ITestInput<IBaseFileSystemSync>
 
-        beforeEach(async () => testInput = await testProvider())
+        beforeEach(async () => (testInput = await testProvider()))
         afterEach(async () => await testInput.dispose())
 
         describe('writing files', () => {
@@ -89,7 +89,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
                 expect(expectedToFail).to.throw('EISDIR')
             })
-
         })
 
         describe('removing files', () => {
@@ -498,7 +497,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                     expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
                 })
 
-                it(`allows copying a directory over a non-existing directory`, () => { //tslint:disable-line
+                it(`allows copying a directory over a non-existing directory`, () => {
+                    //tslint:disable-line
                     const { fs, tempDirectoryPath } = testInput
                     const { join } = fs.path
                     const sourcePath = join(tempDirectoryPath, 'sourceDir')
@@ -509,7 +509,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                     expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'destDir'))).not.to.throw('EEXIST')
                 })
 
-                it(`allows copying copying a directory over an empty directory`, () => { //tslint:disable-line
+                it(`allows copying copying a directory over an empty directory`, () => {
+                    //tslint:disable-line
                     const { fs, tempDirectoryPath } = testInput
                     const { join } = fs.path
                     const sourcePath = join(tempDirectoryPath, 'sourceDir')
@@ -585,8 +586,9 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const { fs } = testInput
                 const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
                 fs.writeFileSync(targetPath, 'content to be overwritten')
-                expect(() => fs.copyFileSync(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL))
-                    .to.throw('EEXIST')
+                expect(() => fs.copyFileSync(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL)).to.throw(
+                    'EEXIST'
+                )
             })
         })
     })

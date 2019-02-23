@@ -11,7 +11,7 @@ describe('request resolver', () => {
     describe('files', () => {
         it('resolves requests to any file if extension is specified', () => {
             const fs = createMemoryFs({
-                'src': {
+                src: {
                     'typed.ts': EMPTY,
                     'file.js': EMPTY,
                     'data.json': EMPTY
@@ -31,7 +31,7 @@ describe('request resolver', () => {
 
         it('resolves requests to js and json files without specified extension', () => {
             const fs = createMemoryFs({
-                'src': {
+                src: {
                     'file.js': EMPTY,
                     'style.css.js': EMPTY
                 },
@@ -47,7 +47,7 @@ describe('request resolver', () => {
 
         it('allows specifying custom extensions for resolution', () => {
             const fs = createMemoryFs({
-                'src': {
+                src: {
                     'same_name.tsx': EMPTY,
                     'same_name.ts': EMPTY
                 },
@@ -88,7 +88,7 @@ describe('request resolver', () => {
 
         it('resolves requests to files across folders', () => {
             const fs = createMemoryFs({
-                'src': {
+                src: {
                     'file.js': EMPTY
                 },
                 'another.js': EMPTY
@@ -145,11 +145,11 @@ describe('request resolver', () => {
                     'main_file.js': EMPTY
                 },
                 to_inner_folder: {
-                    'inner': { 'index.js': EMPTY },
+                    inner: { 'index.js': EMPTY },
                     'package.json': '{"main": "inner"}'
                 },
                 to_file_in_folder: {
-                    'inner': { 'file.js': EMPTY },
+                    inner: { 'file.js': EMPTY },
                     'package.json': '{"main": "inner/file.js"}'
                 },
                 preferred: {
@@ -196,12 +196,12 @@ describe('request resolver', () => {
         it('resolves requests to packages in node_modules', () => {
             const fs = createMemoryFs({
                 node_modules: {
-                    'express': {
+                    express: {
                         'package.json': '{"main": "main.js"}',
                         'main.js': EMPTY,
                         'another_entry.js': EMPTY
                     },
-                    'lodash': {
+                    lodash: {
                         'package.json': '{"main": "some-index"}',
                         'some-index.js': EMPTY,
                         'test-utils': {
@@ -214,34 +214,34 @@ describe('request resolver', () => {
             })
             const resolveRequest = createRequestResolver({ fs })
 
-            expect(resolveRequest('/', 'express'))
-                .to.be.resolvedTo('/node_modules/express/main.js')
+            expect(resolveRequest('/', 'express')).to.be.resolvedTo('/node_modules/express/main.js')
 
             // alternative entry point
-            expect(resolveRequest('/', 'express/another_entry'))
-                .to.be.resolvedTo('/node_modules/express/another_entry.js')
+            expect(resolveRequest('/', 'express/another_entry')).to.be.resolvedTo(
+                '/node_modules/express/another_entry.js'
+            )
 
-            expect(resolveRequest('/', 'lodash'))
-                .to.be.resolvedTo('/node_modules/lodash/some-index.js')
+            expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/some-index.js')
 
             // sub-folder of a package
-            expect(resolveRequest('/', 'lodash/test-utils'))
-                .to.be.resolvedTo('/node_modules/lodash/test-utils/index.js')
+            expect(resolveRequest('/', 'lodash/test-utils')).to.be.resolvedTo(
+                '/node_modules/lodash/test-utils/index.js'
+            )
 
             // file in a sub-folder of a package
-            expect(resolveRequest('/', 'lodash/test-utils/util1'))
-                .to.be.resolvedTo('/node_modules/lodash/test-utils/util1.js')
+            expect(resolveRequest('/', 'lodash/test-utils/util1')).to.be.resolvedTo(
+                '/node_modules/lodash/test-utils/util1.js'
+            )
 
             // should also be resolved to match node behavior
-            expect(resolveRequest('/', 'just-a-file'))
-                .to.be.resolvedTo('/node_modules/just-a-file.js')
+            expect(resolveRequest('/', 'just-a-file')).to.be.resolvedTo('/node_modules/just-a-file.js')
         })
 
         it('resolves requests correctly when two versions of same package exist in tree', () => {
             const fs = createMemoryFs({
                 node_modules: {
                     express: {
-                        'node_modules': {
+                        node_modules: {
                             lodash: {
                                 'package.json': '{"main": "v1.js"}',
                                 'v1.js': EMPTY
@@ -261,16 +261,17 @@ describe('request resolver', () => {
             const resolveRequest = createRequestResolver({ fs })
 
             // local node_modules package overshadows the top level one
-            expect(resolveRequest('/node_modules/express', 'lodash'))
-                .to.be.resolvedTo('/node_modules/express/node_modules/lodash/v1.js')
+            expect(resolveRequest('/node_modules/express', 'lodash')).to.be.resolvedTo(
+                '/node_modules/express/node_modules/lodash/v1.js'
+            )
 
             // root still gets v2
-            expect(resolveRequest('/', 'lodash'))
-                .to.be.resolvedTo('/node_modules/lodash/v2.js')
+            expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/v2.js')
 
             // file only exists in top level package (ugly, but matches node's behavior)
-            expect(resolveRequest('/node_modules/express', 'lodash/v2-specific-file'))
-                .to.be.resolvedTo('/node_modules/lodash/v2-specific-file.js')
+            expect(resolveRequest('/node_modules/express', 'lodash/v2-specific-file')).to.be.resolvedTo(
+                '/node_modules/lodash/v2-specific-file.js'
+            )
         })
 
         it('resolves requests to scoped packages', () => {
@@ -286,11 +287,11 @@ describe('request resolver', () => {
             })
             const resolveRequest = createRequestResolver({ fs })
 
-            expect(resolveRequest('/', '@stylable/cli'))
-                .to.be.resolvedTo('/node_modules/@stylable/cli/index.js')
+            expect(resolveRequest('/', '@stylable/cli')).to.be.resolvedTo('/node_modules/@stylable/cli/index.js')
 
-            expect(resolveRequest('/', '@stylable/cli/test-utils'))
-                .to.be.resolvedTo('/node_modules/@stylable/cli/test-utils.js')
+            expect(resolveRequest('/', '@stylable/cli/test-utils')).to.be.resolvedTo(
+                '/node_modules/@stylable/cli/test-utils.js'
+            )
         })
 
         it('allows specifying custom packages roots', () => {
@@ -311,11 +312,9 @@ describe('request resolver', () => {
             })
             const resolveRequest = createRequestResolver({ fs, packageRoots: ['third_party', '/root_libs'] })
 
-            expect(resolveRequest('/project', 'koa'))
-                .to.be.resolvedTo('/project/third_party/koa/main-index.js')
+            expect(resolveRequest('/project', 'koa')).to.be.resolvedTo('/project/third_party/koa/main-index.js')
 
-            expect(resolveRequest('/project', 'react'))
-                .to.be.resolvedTo('/root_libs/react/index.js')
+            expect(resolveRequest('/project', 'react')).to.be.resolvedTo('/root_libs/react/index.js')
         })
     })
 

@@ -3,7 +3,7 @@ import pathMain from 'path'
 import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-api'
 
 // ugly workaround for webpack's polyfilled path not implementing posix
-const posixPath = pathMain.posix as typeof pathMain || pathMain
+const posixPath = (pathMain.posix as typeof pathMain) || pathMain
 const POSIX_ROOT = '/'
 
 /**

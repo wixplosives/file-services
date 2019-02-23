@@ -13,12 +13,12 @@ import {
     IBaseMemFileSystem,
     IBaseMemFileSystemSync,
     IFsMemFileNode,
-    IFsMemDirectoryNode,
+    IFsMemDirectoryNode
 } from './types'
 
 // ugly workaround for webpack's polyfilled path not implementing `.posix` field
 // TODO: inline path-posix implementation taked from latest node's source (faster!)
-const posixPath = pathMain.posix as typeof pathMain || pathMain
+const posixPath = (pathMain.posix as typeof pathMain) || pathMain
 const POSIX_ROOT = '/'
 
 /**
@@ -79,10 +79,18 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
                     pathListeners.deleteKey(resolvedPath)
                 }
             },
-            async unwatchAllPaths() { pathListeners.clear() },
-            addGlobalListener(listener) { globalListeners.add(listener) },
-            removeGlobalListener(listener) { globalListeners.delete(listener) },
-            clearGlobalListeners() { globalListeners.clear() }
+            async unwatchAllPaths() {
+                pathListeners.clear()
+            },
+            addGlobalListener(listener) {
+                globalListeners.add(listener)
+            },
+            removeGlobalListener(listener) {
+                globalListeners.delete(listener)
+            },
+            clearGlobalListeners() {
+                globalListeners.clear()
+            }
         },
         caseSensitive: false,
         cwd,
@@ -99,7 +107,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         rmdirSync,
         statSync,
         unlinkSync,
-        writeFileSync,
+        writeFileSync
     }
 
     function resolvePath(...pathSegments: string[]): string {
@@ -364,9 +372,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const splitPath = resolvedPath.split(posixPath.sep)
 
         return splitPath.reduce((fsNode: IFsMemDirectoryNode | IFsMemFileNode | null, depthName: string) => {
-            return depthName === '' ?
-                fsNode :
-                (fsNode && fsNode.type === 'dir' && fsNode.contents.get(depthName.toLowerCase())) || null
+            return depthName === ''
+                ? fsNode
+                : (fsNode && fsNode.type === 'dir' && fsNode.contents.get(depthName.toLowerCase())) || null
         }, root)
     }
 
@@ -404,9 +412,9 @@ function createMemFile(name: string, content: string | Buffer, encoding?: string
         mtime: currentDate
     }
 
-    return typeof content === 'string' ?
-        { ...partialNode, contents: content, rawContents: Buffer.from(content, encoding) } :
-        { ...partialNode, rawContents: content }
+    return typeof content === 'string'
+        ? { ...partialNode, contents: content, rawContents: Buffer.from(content, encoding) }
+        : { ...partialNode, rawContents: content }
 }
 
 function updateMemFile(fileNode: IFsMemFileNode, content: string | Buffer, encoding?: string): void {

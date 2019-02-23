@@ -8,7 +8,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
     describe('SYNC file system contract', () => {
         let testInput: ITestInput<IFileSystemSync>
 
-        beforeEach(async () => testInput = await testProvider())
+        beforeEach(async () => (testInput = await testProvider()))
         afterEach(async () => await testInput.dispose())
 
         describe('fileExistsSync', () => {
@@ -80,12 +80,12 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(directoryPath, {
                     'file1.ts': '',
                     'file2.ts': '',
-                    'folder1': {
+                    folder1: {
                         'file1.ts': '',
                         'file2.ts': '',
                         'file3.ts': ''
                     },
-                    'folder2': {
+                    folder2: {
                         'file1.ts': '',
                         'file2.ts': '',
                         'file3.ts': ''
@@ -126,13 +126,17 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
         describe('findFilesSync', () => {
             it('finds all files recursively inside a directory', () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -146,18 +150,22 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 ])
 
                 expect(fs.findFilesSync(path.join(directoryPath, 'folder1'))).to.eql([
-                    path.join(directoryPath, 'folder1', fileName),
+                    path.join(directoryPath, 'folder1', fileName)
                 ])
             })
 
             it('allows specifying a file filtering callback', () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -166,22 +174,26 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
                 expect(fs.findFilesSync(directoryPath, { filterFile: ({ name }) => name === fileName })).to.eql([
                     path.join(directoryPath, fileName),
-                    path.join(directoryPath, 'folder1', fileName),
+                    path.join(directoryPath, 'folder1', fileName)
                 ])
 
                 expect(fs.findFilesSync(directoryPath, { filterFile: ({ name }) => name === anotherFileName })).to.eql([
-                    path.join(directoryPath, 'folder2', anotherFileName),
+                    path.join(directoryPath, 'folder2', anotherFileName)
                 ])
             })
 
             it('allows specifying a directory filtering callback', () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -190,25 +202,29 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
                 expect(fs.findFilesSync(directoryPath, { filterDirectory: ({ name }) => name === 'folder1' })).to.eql([
                     path.join(directoryPath, fileName),
-                    path.join(directoryPath, 'folder1', fileName),
+                    path.join(directoryPath, 'folder1', fileName)
                 ])
 
                 expect(fs.findFilesSync(directoryPath, { filterDirectory: ({ name }) => name === 'folder2' })).to.eql([
                     path.join(directoryPath, fileName),
-                    path.join(directoryPath, 'folder2', anotherFileName),
+                    path.join(directoryPath, 'folder2', anotherFileName)
                 ])
             })
         })
 
         describe('findClosestFileSync', () => {
             it('finds closest file in parent directory chain', () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''
@@ -219,12 +235,10 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                     path.join(directoryPath, 'folder1', fileName)
                 )
 
-                expect(fs.findClosestFileSync(directoryPath, fileName)).to.equal(
-                    path.join(directoryPath, fileName)
-                )
+                expect(fs.findClosestFileSync(directoryPath, fileName)).to.equal(path.join(directoryPath, fileName))
 
                 expect(fs.findClosestFileSync(path.join(directoryPath, 'folder2'), anotherFileName)).to.equal(
-                    path.join(directoryPath, 'folder2', anotherFileName),
+                    path.join(directoryPath, 'folder2', anotherFileName)
                 )
 
                 expect(fs.findClosestFileSync(directoryPath, anotherFileName)).to.equal(null)
@@ -233,13 +247,17 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
         describe('findFilesInAncestorsSync', () => {
             it('finds files in parent directory chain', () => {
-                const { fs, fs: { path }, tempDirectoryPath } = testInput
+                const {
+                    fs,
+                    fs: { path },
+                    tempDirectoryPath
+                } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: '',
+                        [fileName]: ''
                     },
                     folder2: {
                         [anotherFileName]: ''

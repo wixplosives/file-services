@@ -9,14 +9,15 @@ chai.use(chaiAsPromised)
 describe('createDirectoryFs', () => {
     const scopedDirectoryPath = '/test-directory'
     const SAMPLE_CONTENT = 'content'
-    const createPreloadedMemFs = () => createMemoryFs({
-        [scopedDirectoryPath]: {
-            src: {
-                'index.ts': SAMPLE_CONTENT
-            }
-        },
-        'outside-scope-file.ts': SAMPLE_CONTENT
-    })
+    const createPreloadedMemFs = () =>
+        createMemoryFs({
+            [scopedDirectoryPath]: {
+                src: {
+                    'index.ts': SAMPLE_CONTENT
+                }
+            },
+            'outside-scope-file.ts': SAMPLE_CONTENT
+        })
 
     it('can access a file using an absolute path relative to scoped directory', async () => {
         const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)

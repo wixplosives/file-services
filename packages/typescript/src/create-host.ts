@@ -34,11 +34,18 @@ export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost,
  */
 export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     const {
-        caseSensitive, statSync, readFileSync, readdirSync, fileExistsSync, directoryExistsSync, cwd, realpathSync,
+        caseSensitive,
+        statSync,
+        readFileSync,
+        readdirSync,
+        fileExistsSync,
+        directoryExistsSync,
+        cwd,
+        realpathSync,
         path: { join, dirname, normalize }
     } = fs
 
-    function getFileSystemEntries(path: string): { files: string[], directories: string[] } {
+    function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {
         const files: string[] = []
         const directories: string[] = []
 
@@ -55,7 +62,9 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
                     directories.push(entryName)
                 }
             }
-        } catch { /* */ }
+        } catch {
+            /* */
+        }
 
         return { files, directories }
     }
@@ -63,7 +72,14 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     return {
         readDirectory(rootDir, extensions, excludes, includes, depth) {
             return ts.matchFiles(
-                rootDir, extensions, excludes, includes, caseSensitive, rootDir, depth, getFileSystemEntries
+                rootDir,
+                extensions,
+                excludes,
+                includes,
+                caseSensitive,
+                rootDir,
+                depth,
+                getFileSystemEntries
             )
         },
         getDirectories(path) {
@@ -112,7 +128,7 @@ export function createLanguageServiceHost(
     getScriptFileNames: () => string[],
     getCompilationSettings: () => ts.CompilerOptions,
     defaultLibsDirectory: string,
-    getCustomTransformers?: () => ts.CustomTransformers | undefined,
+    getCustomTransformers?: () => ts.CustomTransformers | undefined
 ): ts.LanguageServiceHost {
     const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost
 

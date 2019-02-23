@@ -4,7 +4,7 @@ import { IBaseFileSystemAsync, IBaseFileSystemSync, IFileSystemStats } from './b
  * SYNC and ASYNC file system.
  * Exposes all base fs APIs plus several higher level methods.
  */
-export interface IFileSystem extends IFileSystemAsync, IFileSystemSync { }
+export interface IFileSystem extends IFileSystemAsync, IFileSystemSync {}
 
 /**
  * SYNC-only file system.

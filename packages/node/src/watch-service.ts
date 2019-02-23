@@ -158,7 +158,7 @@ export class NodeWatchService implements IWatchService {
         }
 
         // accepting the optional stats saves us getting the stats ourselves
-        const pathStats = stats || await this.statSafe(path)
+        const pathStats = stats || (await this.statSafe(path))
         if (!pathStats) {
             throw new Error(`cannot watch non-existing path: ${path}`)
         }
@@ -166,10 +166,7 @@ export class NodeWatchService implements IWatchService {
         // open fsWatcher
         const watchOptions = { persistent: this.options.persistent }
         if (pathStats.isFile()) {
-            this.fsWatchers.set(
-                path,
-                watch(path, watchOptions, type => this.onPathEvent(type, path))
-            )
+            this.fsWatchers.set(path, watch(path, watchOptions, type => this.onPathEvent(type, path)))
         } else if (pathStats.isDirectory()) {
             this.fsWatchers.set(
                 path,
