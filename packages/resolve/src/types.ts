@@ -32,8 +32,7 @@ export interface IResolutionOutput {
 }
 
 /**
- * Resolves requests across modules, using the node
- * resolution algorithm.
+ * Resolves requests across modules, using the node resolution algorithm.
  *
  * @param contextPath directory in which the request is being made
  * @param request actual request, relative or absolute
