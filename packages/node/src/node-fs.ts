@@ -6,7 +6,7 @@ import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/util
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service'
 
-const {promises, existsSync} = fs
+const { promises, existsSync } = fs
 
 const caseSensitive = !existsSync(__filename.toUpperCase())
 
