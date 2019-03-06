@@ -1,4 +1,4 @@
-import { IFileSystemStats } from './base-api'
+import { IFileSystemStats } from './common-fs-types'
 
 /**
  * File watching service.
