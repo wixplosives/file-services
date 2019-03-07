@@ -22,7 +22,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.writeFileSync(filePath, SAMPLE_CONTENT)
 
                 expect(fs.statSync(filePath).isFile()).to.equal(true)
-                expect(fs.readFileSync(filePath)).to.eql(SAMPLE_CONTENT)
+                expect(fs.readFileSync(filePath, 'utf8')).to.eql(SAMPLE_CONTENT)
             })
 
             it('can overwrite an existing file', () => {
@@ -34,7 +34,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.writeFileSync(filePath, DIFFERENT_CONTENT)
 
                 expect(fs.statSync(filePath).isFile()).to.equal(true)
-                expect(fs.readFileSync(filePath)).to.eql(DIFFERENT_CONTENT)
+                expect(fs.readFileSync(filePath, 'utf8')).to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if writing a file to a non-existing directory', () => {
@@ -69,8 +69,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.writeFileSync(firstFilePath, SAMPLE_CONTENT)
                 fs.writeFileSync(secondFilePath, DIFFERENT_CONTENT)
 
-                expect(fs.readFileSync(firstFilePath), 'contents of first-file').to.eql(SAMPLE_CONTENT)
-                expect(fs.readFileSync(secondFilePath), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
+                expect(fs.readFileSync(firstFilePath, 'utf8'), 'contents of first-file').to.eql(SAMPLE_CONTENT)
+                expect(fs.readFileSync(secondFilePath, 'utf8'), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if reading a non-existing file', () => {
@@ -78,14 +78,14 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'missing-file')
 
-                const expectedToFail = () => fs.readFileSync(filePath)
+                const expectedToFail = () => fs.readFileSync(filePath, 'utf8')
 
                 expect(expectedToFail).to.throw('ENOENT')
             })
 
             it('fails if reading a directory as a file', () => {
                 const { fs, tempDirectoryPath } = testInput
-                const expectedToFail = () => fs.readFileSync(tempDirectoryPath)
+                const expectedToFail = () => fs.readFileSync(tempDirectoryPath, 'utf8')
 
                 expect(expectedToFail).to.throw('EISDIR')
             })
@@ -422,7 +422,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 fs.renameSync(sourcePath, destinationPath)
 
                 expect(fs.statSync(destinationPath).isFile()).to.equal(true)
-                expect(fs.readFileSync(destinationPath)).to.eql(SAMPLE_CONTENT)
+                expect(fs.readFileSync(destinationPath, 'utf8')).to.eql(SAMPLE_CONTENT)
                 expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
             })
 
@@ -493,7 +493,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                     fs.renameSync(sourcePath, destinationPath)
 
                     expect(fs.statSync(destinationPath).isDirectory()).to.equal(true)
-                    expect(fs.readFileSync(join(destinationPath, 'file'))).to.eql(SAMPLE_CONTENT)
+                    expect(fs.readFileSync(join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT)
                     expect(() => fs.statSync(sourcePath)).to.throw('ENOENT')
                 })
 
@@ -558,7 +558,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const { fs } = testInput
                 const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
                 fs.copyFileSync(sourceFilePath, targetPath)
-                expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
+                expect(fs.readFileSync(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
             })
 
             it('fails if source does not exist', () => {
@@ -579,7 +579,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME)
                 fs.writeFileSync(targetPath, 'content to be overwritten')
                 fs.copyFileSync(sourceFilePath, targetPath)
-                expect(fs.readFileSync(targetPath)).to.be.eql(SAMPLE_CONTENT)
+                expect(fs.readFileSync(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
             })
 
             it('fails if destination exists and flag COPYFILE_EXCL passed', () => {

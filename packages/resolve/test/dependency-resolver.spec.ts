@@ -32,7 +32,7 @@ describe('dependency resolver', () => {
     const resolveDependencies = createDependencyResolver({
         extractRequests(filePath) {
             // the requests were saved as the stringified content
-            return JSON.parse(fs.readFileSync(filePath))
+            return JSON.parse(fs.readFileSync(filePath, 'utf8'))
         },
         resolveRequest(filePath, request) {
             // the node resolver requires directory path, not the origin file path

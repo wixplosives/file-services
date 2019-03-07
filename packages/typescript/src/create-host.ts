@@ -87,9 +87,9 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         },
         fileExists: fileExistsSync,
         directoryExists: directoryExistsSync,
-        readFile(filePath) {
+        readFile(filePath, encoding = 'utf8') {
             try {
-                return readFileSync(filePath)
+                return readFileSync(filePath, encoding)
             } catch {
                 return undefined
             }

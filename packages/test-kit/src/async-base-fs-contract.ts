@@ -28,7 +28,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect((await fs.stat(filePath)).isFile()).to.equal(true)
-                expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
+                expect(await fs.readFile(filePath, 'utf8')).to.eql(SAMPLE_CONTENT)
             })
 
             it('can overwrite an existing file', async () => {
@@ -43,7 +43,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(filePath, DIFFERENT_CONTENT)
 
                 expect((await fs.stat(filePath)).isFile()).to.equal(true)
-                expect(await fs.readFile(filePath)).to.eql(DIFFERENT_CONTENT)
+                expect(await fs.readFile(filePath, 'utf8')).to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if writing a file to a non-existing directory', async () => {
@@ -84,8 +84,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(firstFilePath, SAMPLE_CONTENT)
                 await fs.writeFile(secondFilePath, DIFFERENT_CONTENT)
 
-                expect(await fs.readFile(firstFilePath), 'contents of first-file').to.eql(SAMPLE_CONTENT)
-                expect(await fs.readFile(secondFilePath), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
+                expect(await fs.readFile(firstFilePath, 'utf8'), 'contents of first-file').to.eql(SAMPLE_CONTENT)
+                expect(await fs.readFile(secondFilePath, 'utf8'), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if reading a non-existing file', async () => {
@@ -96,13 +96,13 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'missing-file')
 
-                await expect(fs.readFile(filePath)).to.be.rejectedWith('ENOENT')
+                await expect(fs.readFile(filePath, 'utf8')).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if reading a directory as a file', async () => {
                 const { fs, tempDirectoryPath } = testInput
 
-                await expect(fs.readFile(tempDirectoryPath)).to.be.rejectedWith('EISDIR')
+                await expect(fs.readFile(tempDirectoryPath, 'utf8')).to.be.rejectedWith('EISDIR')
             })
         })
 
@@ -492,7 +492,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const destStats = await fs.stat(destinationPath)
                 expect(destStats.isFile()).to.equal(true)
                 expect(destStats.mtime).not.to.equal(sourceStats.mtime)
-                expect(await fs.readFile(destinationPath)).to.eql(SAMPLE_CONTENT)
+                expect(await fs.readFile(destinationPath, 'utf8')).to.eql(SAMPLE_CONTENT)
                 await expect(fs.stat(sourcePath)).to.be.rejectedWith('ENOENT')
             })
 
@@ -562,7 +562,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     await fs.rename(sourcePath, destinationPath)
 
                     expect((await fs.stat(destinationPath)).isDirectory()).to.equal(true)
-                    expect(await fs.readFile(join(destinationPath, 'file'))).to.eql(SAMPLE_CONTENT)
+                    expect(await fs.readFile(join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT)
                     await expect(fs.stat(sourcePath)).to.be.rejectedWith('ENOENT')
                 })
 
@@ -638,7 +638,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
                 await fs.copyFile(sourceFilePath, targetPath)
 
-                expect(await fs.readFile(targetPath)).to.be.eql(SAMPLE_CONTENT)
+                expect(await fs.readFile(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
             })
 
             it('fails if source does not exist', async () => {
@@ -673,7 +673,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 await fs.writeFile(targetPath, 'content to be overwritten')
                 await fs.copyFile(sourceFilePath, targetPath)
 
-                expect(await fs.readFile(targetPath)).to.be.eql(SAMPLE_CONTENT)
+                expect(await fs.readFile(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
             })
 
             it('fails if destination exists and flag COPYFILE_EXCL passed', async () => {
