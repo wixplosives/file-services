@@ -6,12 +6,8 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         watchService: syncFs.watchService,
         caseSensitive: syncFs.caseSensitive,
 
-        async readFile(filePath, encoding) {
-            return syncFs.readFileSync(filePath, encoding)
-        },
-
-        async readFileRaw(filePath) {
-            return syncFs.readFileRawSync(filePath)
+        async readFile(filePath: string, encoding?: string) {
+            return syncFs.readFileSync(filePath, encoding!)
         },
 
         async writeFile(filePath, content, encoding) {

@@ -1,10 +1,12 @@
-import { IBaseFileSystem, IFileSystem, WatchEventListener, IWatchService } from '@file-services/types'
-import pathMain from 'path'
+import {
+    IBaseFileSystem,
+    IFileSystem,
+    WatchEventListener,
+    IWatchService,
+    IFileSystemPath,
+    POSIX_ROOT
+} from '@file-services/types'
 import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-api'
-
-// ugly workaround for webpack's polyfilled path not implementing posix
-const posixPath = (pathMain.posix as typeof pathMain) || pathMain
-const POSIX_ROOT = '/'
 
 /**
  * Creates a wrapped `IFileSystem` which scopes the provided `fs`
@@ -16,6 +18,7 @@ const POSIX_ROOT = '/'
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
     const { watchService } = fs
     const { join, relative, sep } = fs.path
+    const posixPath = ((fs.path as any).posix as IFileSystemPath) || fs.path
 
     let workingDirectoryPath: string = POSIX_ROOT
 
@@ -109,17 +112,11 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdirSync(path) {
             return fs.readdirSync(resolveFullPath(path))
         },
-        async readFile(path, encoding) {
-            return fs.readFile(resolveFullPath(path), encoding)
+        async readFile(path: string, encoding?: string) {
+            return fs.readFile(resolveFullPath(path), encoding!)
         },
-        readFileSync(path, encoding) {
-            return fs.readFileSync(resolveFullPath(path), encoding)
-        },
-        async readFileRaw(path) {
-            return fs.readFileRaw(resolveFullPath(path))
-        },
-        readFileRawSync(path) {
-            return fs.readFileRawSync(resolveFullPath(path))
+        readFileSync(path: string, encoding?: string) {
+            return fs.readFileSync(resolveFullPath(path), encoding!)
         },
         async realpath(path) {
             return fs.realpath(resolveFullPath(path))
