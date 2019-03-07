@@ -61,18 +61,8 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         mkdirSync,
         readdir,
         readdirSync,
-        readFile(filePath, encoding = 'utf8') {
-            return readFile(filePath, encoding)
-        },
-        readFileRaw(filePath) {
-            return readFile(filePath)
-        },
-        readFileSync(filePath, encoding = 'utf8') {
-            return readFileSync(filePath, encoding)
-        },
-        readFileRawSync(filePath) {
-            return readFileSync(filePath)
-        },
+        readFile,
+        readFileSync,
         realpath,
         realpathSync,
         rename,
