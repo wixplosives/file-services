@@ -5,7 +5,8 @@ import {
     IFileSystemStats,
     IWatchEvent,
     WatchEventListener,
-    FileSystemConstants
+    FileSystemConstants,
+    POSIX_ROOT
 } from '@file-services/types'
 import { FsErrorCodes } from './error-codes'
 import {
@@ -19,7 +20,6 @@ import {
 // ugly workaround for webpack's polyfilled path not implementing `.posix` field
 // TODO: inline path-posix implementation taked from latest node's source (faster!)
 const posixPath = (pathMain.posix as typeof pathMain) || pathMain
-const POSIX_ROOT = '/'
 
 /**
  * This is the main function to use, returning a sync/async
@@ -101,7 +101,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         mkdirSync,
         readdirSync,
         readFileSync,
-        readFileRawSync,
         realpathSync: p => p, // links are not implemented yet
         renameSync,
         rmdirSync,
@@ -122,7 +121,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         workingDirectoryPath = resolvePath(directoryPath)
     }
 
-    function readFileSync(filePath: string, encoding?: string): string {
+    function readFileSync(filePath: string): string {
         const resolvedPath = resolvePath(filePath)
         const fileNode = getNode(resolvedPath)
 
@@ -132,28 +131,10 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
         }
 
-        const { contents, rawContents } = fileNode
-        if (!encoding && contents) {
-            return contents
-        } else {
-            return rawContents.toString(encoding)
-        }
+        return fileNode.contents
     }
 
-    function readFileRawSync(filePath: string): Buffer {
-        const resolvedPath = resolvePath(filePath)
-        const fileNode = getNode(resolvedPath)
-
-        if (!fileNode) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`)
-        } else if (fileNode.type === 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
-        }
-
-        return fileNode.rawContents
-    }
-
-    function writeFileSync(filePath: string, fileContent: string | Buffer, encoding?: string): void {
+    function writeFileSync(filePath: string, fileContent: string): void {
         const resolvedPath = resolvePath(filePath)
         const parentPath = posixPath.dirname(resolvedPath)
         const parentNode = getNode(parentPath)
@@ -167,11 +148,19 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const fileNode = parentNode.contents.get(lowerCaseFileName)
 
         if (!fileNode) {
-            const newFileNode = createMemFile(fileName, fileContent, encoding)
+            const currentDate = new Date()
+            const newFileNode: IFsMemFileNode = {
+                type: 'file',
+                name: fileName,
+                birthtime: currentDate,
+                mtime: currentDate,
+                contents: fileContent
+            }
             parentNode.contents.set(lowerCaseFileName, newFileNode)
             emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newFileNode) })
         } else if (fileNode.type === 'file') {
-            updateMemFile(fileNode, fileContent, encoding)
+            fileNode.mtime = new Date()
+            fileNode.contents = fileContent
             emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(fileNode) })
         } else {
             throw new Error(`${resolvedPath} EISDIR ${FsErrorCodes.PATH_IS_DIRECTORY}`)
@@ -399,33 +388,6 @@ function createMemDirectory(name: string): IFsMemDirectoryNode {
         contents: new Map(),
         birthtime: currentDate,
         mtime: currentDate
-    }
-}
-
-function createMemFile(name: string, content: string | Buffer, encoding?: string): IFsMemFileNode {
-    const currentDate = new Date()
-
-    const partialNode = {
-        type: 'file' as 'file',
-        name,
-        birthtime: currentDate,
-        mtime: currentDate
-    }
-
-    return typeof content === 'string'
-        ? { ...partialNode, contents: content, rawContents: Buffer.from(content, encoding) }
-        : { ...partialNode, rawContents: content }
-}
-
-function updateMemFile(fileNode: IFsMemFileNode, content: string | Buffer, encoding?: string): void {
-    fileNode.mtime = new Date()
-
-    if (typeof content === 'string') {
-        fileNode.contents = content
-        fileNode.rawContents = Buffer.from(content, encoding)
-    } else {
-        delete fileNode.contents
-        fileNode.rawContents = content
     }
 }
 
