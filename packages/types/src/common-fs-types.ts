@@ -1,3 +1,5 @@
+export const POSIX_ROOT = '/'
+
 export enum FileSystemConstants {
     /**
      * When passed as a flag to `copyFile` or `copyFileSync`,

@@ -2,6 +2,8 @@ import { IFileSystemStats } from './common-fs-types'
 import { IFileSystemPath } from './path'
 import { IWatchService } from './watch-api'
 
+declare interface Buffer {} // tslint:disable-line
+
 /**
  * ASYNC-only base file system.
  * Contains a subset of `fs`, watch service, and path methods.
@@ -20,15 +22,10 @@ export interface IBaseFileSystemAsync {
     copyFile(sourcePath: string, destinationPath: string, flags?: number): Promise<void>
 
     /**
-     * Read the entire contents of a file as a string.
-     * If `encoding` isn't specified, 'utf8' is assumed.
+     * Read the entire contents of a file.
      */
-    readFile(filePath: string, encoding?: string): Promise<string>
-
-    /**
-     * Read the entire contents of a file as a Buffer.
-     */
-    readFileRaw(filePath: string): Promise<Buffer>
+    readFile(filePath: string): Promise<Buffer>
+    readFile(filePath: string, encoding: string): Promise<string>
 
     /**
      * Write data to a file, replacing the file if already exists.

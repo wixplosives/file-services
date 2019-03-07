@@ -2,6 +2,8 @@ import { IFileSystemStats } from './common-fs-types'
 import { IFileSystemPath } from './path'
 import { IWatchService } from './watch-api'
 
+declare interface Buffer {} // tslint:disable-line
+
 /**
  * SYNC-only base file system.
  * Contains a subset of `fs`, watch service, and path methods.
@@ -35,15 +37,10 @@ export interface IBaseFileSystemSync {
     copyFileSync(sourcePath: string, destinationPath: string, flags?: number): void
 
     /**
-     * Read the entire contents of a file as a string.
-     * If `encoding` isn't specified, 'utf8' is assumed.
+     * Read the entire contents of a file.
      */
-    readFileSync(filePath: string, encoding?: string): string
-
-    /**
-     * Read the entire contents of a file as a Buffer.
-     */
-    readFileRawSync(filePath: string): Buffer
+    readFileSync(filePath: string): Buffer
+    readFileSync(filePath: string, encoding: string): string
 
     /**
      * Write data to a file, replacing the file if already exists.
