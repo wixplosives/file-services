@@ -7,7 +7,7 @@ import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/util
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service'
 
-const { promises, existsSync } = fs
+const { promises, existsSync, exists } = fs
 
 const caseSensitive = !existsSync(__filename.toUpperCase())
 
@@ -33,7 +33,7 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         caseSensitive,
         ...fs,
         ...promises,
-        exists: promisify(fs.exists)
+        exists: promisify(exists)
     }
 }
 
