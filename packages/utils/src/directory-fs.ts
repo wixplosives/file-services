@@ -4,7 +4,8 @@ import {
     WatchEventListener,
     IWatchService,
     IFileSystemPath,
-    POSIX_ROOT
+    POSIX_ROOT,
+    BufferEncoding
 } from '@file-services/types'
 import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-api'
 
@@ -112,10 +113,10 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdirSync(path) {
             return fs.readdirSync(resolveFullPath(path))
         },
-        async readFile(path: string, encoding?: string) {
+        async readFile(path: string, encoding?: BufferEncoding) {
             return fs.readFile(resolveFullPath(path), encoding!)
         },
-        readFileSync(path: string, encoding?: string) {
+        readFileSync(path: string, encoding?: BufferEncoding) {
             return fs.readFileSync(resolveFullPath(path), encoding!)
         },
         async realpath(path) {

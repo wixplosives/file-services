@@ -1,4 +1,4 @@
-import { IBaseFileSystemSync, IBaseFileSystemAsync } from '@file-services/types'
+import { IBaseFileSystemSync, IBaseFileSystemAsync, BufferEncoding } from '@file-services/types'
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
     return {
@@ -6,7 +6,7 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         watchService: syncFs.watchService,
         caseSensitive: syncFs.caseSensitive,
 
-        async readFile(filePath: string, encoding?: string) {
+        async readFile(filePath: string, encoding?: BufferEncoding) {
             return syncFs.readFileSync(filePath, encoding!)
         },
 
