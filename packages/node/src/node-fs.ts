@@ -1,6 +1,7 @@
 import path from 'path'
-import { chdir, cwd } from 'process'
 import fs from 'fs'
+import { promisify } from 'util'
+import { chdir, cwd } from 'process'
 
 import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
@@ -31,7 +32,8 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         cwd,
         caseSensitive,
         ...fs,
-        ...promises
+        ...promises,
+        exists: promisify(fs.exists)
     }
 }
 
