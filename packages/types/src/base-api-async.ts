@@ -1,8 +1,11 @@
-import { IFileSystemStats } from './common-fs-types'
+import { IFileSystemStats, BufferEncoding } from './common-fs-types'
 import { IFileSystemPath } from './path'
 import { IWatchService } from './watch-api'
 
-declare interface Buffer {} // tslint:disable-line
+// tslint:disable-next-line: interface-name
+declare interface Buffer {
+    toString(ecoding?: BufferEncoding): string
+}
 
 /**
  * ASYNC-only base file system.
@@ -25,13 +28,13 @@ export interface IBaseFileSystemAsync {
      * Read the entire contents of a file.
      */
     readFile(filePath: string): Promise<Buffer>
-    readFile(filePath: string, encoding: string): Promise<string>
+    readFile(filePath: string, encoding: BufferEncoding): Promise<string>
 
     /**
      * Write data to a file, replacing the file if already exists.
      * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
      */
-    writeFile(filePath: string, content: string | Buffer, encoding?: string): Promise<void>
+    writeFile(filePath: string, content: string | Buffer, encoding?: BufferEncoding): Promise<void>
 
     /**
      * Delete a name and possibly the file it refers to.
