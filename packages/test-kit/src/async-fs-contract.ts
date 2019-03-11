@@ -17,7 +17,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await fs.promises.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect(await fs.fileExists(filePath)).to.equal(true)
             })
@@ -35,7 +35,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
+                await fs.promises.mkdir(directoryPath)
 
                 expect(await fs.fileExists(directoryPath)).to.equal(false)
             })
@@ -47,7 +47,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 const { join } = fs.path
                 const directoryPath = join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
+                await fs.promises.mkdir(directoryPath)
 
                 expect(await fs.directoryExists(directoryPath)).to.equal(true)
             })
@@ -65,7 +65,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await fs.promises.writeFile(filePath, SAMPLE_CONTENT)
 
                 expect(await fs.directoryExists(filePath)).to.equal(false)
             })
@@ -102,7 +102,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 const { join } = fs.path
                 const filePath = join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, '')
+                await fs.promises.writeFile(filePath, '')
 
                 await fs.remove(filePath)
 
