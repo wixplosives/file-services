@@ -1,11 +1,6 @@
-import { IFileSystemStats, BufferEncoding } from './common-fs-types'
+import { IFileSystemStats, BufferEncoding, IBuffer, CallbackFnVoid, CallbackFn } from './common-fs-types'
 import { IFileSystemPath } from './path'
 import { IWatchService } from './watch-api'
-
-// tslint:disable-next-line: interface-name
-declare interface Buffer {
-    toString(ecoding?: BufferEncoding): string
-}
 
 /**
  * ASYNC-only base file system.
@@ -16,45 +11,124 @@ export interface IBaseFileSystemAsync {
     watchService: IWatchService
     caseSensitive: boolean
 
+    promises: {
+        /**
+         * Copy `sourcePath` to `destinationPath`.
+         * By default, if destination already exists, it will be overwritten.
+         *
+         * @param flags passing `FileSystemConstants.COPYFILE_EXCL` will cause operation to fail if destination exists.
+         */
+        copyFile(sourcePath: string, destinationPath: string, flags?: number): Promise<void>
+
+        /**
+         * Read the entire contents of a file.
+         */
+        readFile(filePath: string): Promise<IBuffer>
+        readFile(filePath: string, encoding: BufferEncoding): Promise<string>
+
+        /**
+         * Write data to a file, replacing the file if already exists.
+         * `encoding` is used when a string `content` (not `IBuffer`) was provided (with default 'utf8').
+         */
+        writeFile(filePath: string, content: string | IBuffer, encoding?: BufferEncoding): Promise<void>
+
+        /**
+         * Delete a name and possibly the file it refers to.
+         */
+        unlink(filePath: string): Promise<void>
+
+        /**
+         * Read the names of items in a directory.
+         */
+        readdir(directoryPath: string): Promise<string[]>
+
+        /**
+         * Create a directory.
+         */
+        mkdir(directoryPath: string): Promise<void>
+
+        /**
+         * Delete a directory.
+         */
+        rmdir(directoryPath: string): Promise<void>
+
+        /**
+         * Check if a path points to an existing file/directory/link.
+         *
+         * @param path possible file path.
+         * @param statFn optional custom stat function (e.g. lstat to detect links).
+         */
+        exists(path: string): Promise<boolean>
+
+        /**
+         * Get path's `IFileSystemStats`.
+         */
+        stat(path: string): Promise<IFileSystemStats>
+
+        /**
+         * Get path's `IFileSystemStats`. Does not dereference symbolic links.
+         */
+        lstat(path: string): Promise<IFileSystemStats>
+
+        /**
+         * Gets the canonicalized absolute pathname.
+         * If path is linked, returns the actual target path.
+         */
+        realpath(path: string): Promise<string>
+
+        /**
+         * Rename (move) a file or a directory
+         */
+        rename(sourcePath: string, destinationPath: string): Promise<void>
+
+        /**
+         * Read value of a symbolic link.
+         */
+        readlink(path: string): Promise<IBuffer>
+        readlink(path: string, encoding: BufferEncoding): Promise<string>
+    }
+
     /**
      * Copy `sourcePath` to `destinationPath`.
      * By default, if destination already exists, it will be overwritten.
      *
      * @param flags passing `FileSystemConstants.COPYFILE_EXCL` will cause operation to fail if destination exists.
      */
-    copyFile(sourcePath: string, destinationPath: string, flags?: number): Promise<void>
+    copyFile(sourcePath: string, destinationPath: string, callback: CallbackFnVoid): void
+    copyFile(sourcePath: string, destinationPath: string, flags: number, callback: CallbackFnVoid): void
 
     /**
      * Read the entire contents of a file.
      */
-    readFile(filePath: string): Promise<Buffer>
-    readFile(filePath: string, encoding: BufferEncoding): Promise<string>
+    readFile(filePath: string, callback: CallbackFn<IBuffer>): void
+    readFile(filePath: string, encoding: BufferEncoding, callback: CallbackFn<string>): void
 
     /**
      * Write data to a file, replacing the file if already exists.
-     * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
+     * `encoding` is used when a string `content` (not `IBuffer`) was provided (with default 'utf8').
      */
-    writeFile(filePath: string, content: string | Buffer, encoding?: BufferEncoding): Promise<void>
+    writeFile(filePath: string, content: string | IBuffer, callback: CallbackFnVoid): void
+    writeFile(filePath: string, content: string | IBuffer, encoding: BufferEncoding, callback: CallbackFnVoid): void
 
     /**
      * Delete a name and possibly the file it refers to.
      */
-    unlink(filePath: string): Promise<void>
+    unlink(filePath: string, callback: CallbackFnVoid): void
 
     /**
      * Read the names of items in a directory.
      */
-    readdir(directoryPath: string): Promise<string[]>
+    readdir(directoryPath: string, callback: CallbackFn<string[]>): void
 
     /**
      * Create a directory.
      */
-    mkdir(directoryPath: string): Promise<void>
+    mkdir(filePath: string, callback: CallbackFnVoid): void
 
     /**
      * Delete a directory.
      */
-    rmdir(directoryPath: string): Promise<void>
+    rmdir(filePath: string, callback: CallbackFnVoid): void
 
     /**
      * Check if a path points to an existing file/directory/link.
@@ -62,26 +136,32 @@ export interface IBaseFileSystemAsync {
      * @param path possible file path.
      * @param statFn optional custom stat function (e.g. lstat to detect links).
      */
-    exists(path: string): Promise<boolean>
+    exists(path: string, callback: (exists: boolean) => void): void
 
     /**
      * Get path's `IFileSystemStats`.
      */
-    stat(path: string): Promise<IFileSystemStats>
+    stat(path: string, callback: CallbackFn<IFileSystemStats>): void
 
     /**
      * Get path's `IFileSystemStats`. Does not dereference symbolic links.
      */
-    lstat(path: string): Promise<IFileSystemStats>
+    lstat(path: string, callback: CallbackFn<IFileSystemStats>): void
 
     /**
      * Gets the canonicalized absolute pathname.
      * If path is linked, returns the actual target path.
      */
-    realpath(path: string): Promise<string>
+    realpath(path: string, callback: CallbackFn<string>): void
 
     /**
      * Rename (move) a file or a directory
      */
-    rename(sourcePath: string, destinationPath: string): Promise<void>
+    rename(sourcePath: string, destinationPath: string, callback: CallbackFnVoid): void
+
+    /**
+     * Read value of a symbolic link.
+     */
+    readlink(path: string, callback: CallbackFn<IBuffer>): void
+    readlink(path: string, encoding: BufferEncoding, callback: CallbackFn<string>): void
 }
