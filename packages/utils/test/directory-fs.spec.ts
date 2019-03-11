@@ -23,15 +23,15 @@ describe('createDirectoryFs', () => {
         const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)
         const filePath = '/src/index.ts'
 
-        expect((await fs.stat(filePath)).isFile()).to.equal(true)
-        expect(await fs.readFile(filePath)).to.eql(SAMPLE_CONTENT)
+        expect((await fs.promises.stat(filePath)).isFile()).to.equal(true)
+        expect(await fs.promises.readFile(filePath)).to.eql(SAMPLE_CONTENT)
     })
 
     it('cannot use a relative path to access a file outside of the scoped directory path', async () => {
         const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)
         const filePath = '../outside-scope-file.ts'
 
-        await expect(fs.readFile(filePath)).to.be.rejectedWith(
+        await expect(fs.promises.readFile(filePath)).to.be.rejectedWith(
             `/test-directory/outside-scope-file.ts ENOENT: no such file`
         )
     })
@@ -40,7 +40,7 @@ describe('createDirectoryFs', () => {
         const fs = createDirectoryFs(createPreloadedMemFs(), scopedDirectoryPath)
         const filePath = '/outside-scope-file.ts'
 
-        await expect(fs.readFile(filePath)).to.be.rejectedWith(`ENOENT`)
+        await expect(fs.promises.readFile(filePath)).to.be.rejectedWith(`ENOENT`)
     })
 
     const testProvider = async () => {
