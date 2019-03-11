@@ -27,13 +27,15 @@ export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {
     return {
         path,
-        watchService: new NodeWatchService(options && options.watchOptions),
         chdir,
         cwd,
+        watchService: new NodeWatchService(options && options.watchOptions),
         caseSensitive,
         ...fs,
-        ...promises,
-        exists: promisify(exists)
+        promises: {
+            ...promises,
+            exists: promisify(exists)
+        }
     }
 }
 
