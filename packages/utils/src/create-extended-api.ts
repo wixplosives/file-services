@@ -94,7 +94,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
     }
 
     function findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
-        let currentPath = initialDirectoryPath
+        let currentPath = path.resolve(initialDirectoryPath)
         let lastPath: string | undefined
 
         while (currentPath !== lastPath) {
@@ -111,7 +111,7 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 
     function findFilesInAncestorsSync(initialDirectoryPath: string, fileName: string): string[] {
         const filePaths: string[] = []
-        let currentPath = initialDirectoryPath
+        let currentPath = path.resolve(initialDirectoryPath)
         let lastPath: string | undefined
 
         while (currentPath !== lastPath) {
@@ -130,10 +130,12 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         ...baseFs,
         fileExistsSync,
         directoryExistsSync,
-        ensureDirectorySync,
-        populateDirectorySync,
-        removeSync,
-        findFilesSync,
+        // resolve path once for recursive functions
+        ensureDirectorySync: directoryPath => ensureDirectorySync(path.resolve(directoryPath)),
+        populateDirectorySync: (directoryPath, contents) =>
+            populateDirectorySync(path.resolve(directoryPath), contents),
+        removeSync: entryPath => removeSync(path.resolve(entryPath)),
+        findFilesSync: (rootDirectory, options) => findFilesSync(path.resolve(rootDirectory), options),
         findClosestFileSync,
         findFilesInAncestorsSync
     }
@@ -227,7 +229,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         return filePaths
     }
     async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
-        let currentPath = initialDirectoryPath
+        let currentPath = path.resolve(initialDirectoryPath)
         let lastPath: string | undefined
 
         while (currentPath !== lastPath) {
@@ -244,7 +246,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
 
     async function findFilesInAncestors(initialDirectoryPath: string, fileName: string): Promise<string[]> {
         const filePaths: string[] = []
-        let currentPath = initialDirectoryPath
+        let currentPath = path.resolve(initialDirectoryPath)
         let lastPath: string | undefined
 
         while (currentPath !== lastPath) {
@@ -265,10 +267,10 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
             ...baseFs.promises,
             fileExists,
             directoryExists,
-            ensureDirectory,
-            populateDirectory,
-            remove,
-            findFiles,
+            ensureDirectory: directoryPath => ensureDirectory(path.resolve(directoryPath)),
+            populateDirectory: (directoryPath, contents) => populateDirectory(path.resolve(directoryPath), contents),
+            remove: entryPath => remove(path.resolve(entryPath)),
+            findFiles: (rootDirectory, options) => findFiles(path.resolve(rootDirectory), options),
             findClosestFile,
             findFilesInAncestors
         }
