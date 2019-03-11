@@ -1,4 +1,4 @@
-import { IWalkOptions, IDirectoryContents } from './common-fs-types'
+import { IWalkOptions, IDirectoryContents, BufferEncoding } from './common-fs-types'
 import { IBaseFileSystemSync } from './base-api-sync'
 
 /**
@@ -61,6 +61,15 @@ export interface IFileSystemSync extends IBaseFileSystemSync {
      * Recursively remove a path.
      */
     removeSync(path: string): void
+
+    /**
+     * Read a file and parse it using `JSON.parse`.
+     *
+     * @param filePath path pointing to a `json` file.
+     * @param encoding text encoding to decode file with (defaults to `utf8`).
+     * @throws if there is a reading or parsing error.
+     */
+    readJsonFileSync(filePath: string, encoding?: BufferEncoding): unknown
 
     /**
      * Recursively walk over a directory and its contents.

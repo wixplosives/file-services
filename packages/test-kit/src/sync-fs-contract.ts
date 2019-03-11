@@ -71,6 +71,37 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
             })
         })
 
+        describe('readJsonFileSync', () => {
+            it('parses contents of a json file and returns it', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file.json')
+                const jsonValue = { name: 'test', age: 99 }
+
+                fs.writeFileSync(filePath, JSON.stringify(jsonValue))
+
+                expect(fs.readJsonFileSync(filePath)).to.eql(jsonValue)
+            })
+
+            it('throws on file reading errors', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file.json')
+
+                expect(() => fs.readJsonFileSync(filePath)).to.throw(/ENOENT/)
+            })
+
+            it('throws on JSON parse errors', () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file.json')
+
+                fs.writeFileSync(filePath, `#NON-JSON#`)
+
+                expect(() => fs.readJsonFileSync(filePath)).to.throw(`Unexpected token # in JSON at position 0`)
+            })
+        })
+
         describe('removeSync', () => {
             it('should delete directory recursively', () => {
                 const { fs, tempDirectoryPath } = testInput

@@ -5,13 +5,24 @@ import {
     IFileSystemSync,
     IDirectoryContents,
     IWalkOptions,
-    IFileSystemDescriptor
+    IFileSystemDescriptor,
+    BufferEncoding
 } from '@file-services/types'
 
 const returnsTrue = () => true
 
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
-    const { statSync, path, mkdirSync, writeFileSync, unlinkSync, rmdirSync, lstatSync, readdirSync } = baseFs
+    const {
+        statSync,
+        path,
+        mkdirSync,
+        writeFileSync,
+        unlinkSync,
+        rmdirSync,
+        lstatSync,
+        readdirSync,
+        readFileSync
+    } = baseFs
 
     function fileExistsSync(filePath: string, statFn = statSync): boolean {
         try {
@@ -19,6 +30,10 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         } catch {
             return false
         }
+    }
+
+    function readJsonFileSync(filePath: string, encoding: BufferEncoding = 'utf8'): unknown {
+        return JSON.parse(readFileSync(filePath, encoding))
     }
 
     function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
@@ -137,14 +152,15 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
         removeSync: entryPath => removeSync(path.resolve(entryPath)),
         findFilesSync: (rootDirectory, options) => findFilesSync(path.resolve(rootDirectory), options),
         findClosestFileSync,
-        findFilesInAncestorsSync
+        findFilesInAncestorsSync,
+        readJsonFileSync
     }
 }
 
 export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystemAsync {
     const {
         path,
-        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir }
+        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile }
     } = baseFs
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
@@ -161,6 +177,10 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         } catch {
             return false
         }
+    }
+
+    async function readJsonFile(filePath: string, encoding: BufferEncoding = 'utf8'): Promise<unknown> {
+        return JSON.parse(await readFile(filePath, encoding))
     }
 
     async function ensureDirectory(directoryPath: string): Promise<void> {
@@ -272,7 +292,8 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
             remove: entryPath => remove(path.resolve(entryPath)),
             findFiles: (rootDirectory, options) => findFiles(path.resolve(rootDirectory), options),
             findClosestFile,
-            findFilesInAncestors
+            findFilesInAncestors,
+            readJsonFile
         }
     }
 }

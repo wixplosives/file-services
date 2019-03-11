@@ -71,6 +71,39 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
             })
         })
 
+        describe('readJsonFile', () => {
+            it('parses contents of a json file and returns it', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file.json')
+                const jsonValue = { name: 'test', age: 99 }
+
+                await fs.promises.writeFile(filePath, JSON.stringify(jsonValue))
+
+                expect(await fs.promises.readJsonFile(filePath)).to.eql(jsonValue)
+            })
+
+            it('throws on file reading errors', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file.json')
+
+                await expect(fs.promises.readJsonFile(filePath)).to.eventually.be.rejectedWith(/ENOENT/)
+            })
+
+            it('throws on JSON parse errors', async () => {
+                const { fs, tempDirectoryPath } = testInput
+                const { join } = fs.path
+                const filePath = join(tempDirectoryPath, 'file.json')
+
+                await fs.promises.writeFile(filePath, `#NON-JSON#`)
+
+                await expect(fs.promises.readJsonFile(filePath)).to.eventually.be.rejectedWith(
+                    `Unexpected token # in JSON at position 0`
+                )
+            })
+        })
+
         describe('remove', () => {
             it('should delete directory recursively', async () => {
                 const { fs, tempDirectoryPath } = testInput

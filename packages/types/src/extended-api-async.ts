@@ -1,4 +1,4 @@
-import { IDirectoryContents, IWalkOptions } from './common-fs-types'
+import { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types'
 import { IBaseFileSystemAsync } from './base-api-async'
 
 /**
@@ -62,6 +62,15 @@ export interface IFileSystemAsync extends IBaseFileSystemAsync {
          * Recursively remove a path.
          */
         remove(path: string): Promise<void>
+
+        /**
+         * Read a file and parse it using `JSON.parse`.
+         *
+         * @param filePath path pointing to a `json` file.
+         * @param encoding text encoding to decode file with (defaults to `utf8`).
+         * @rejects if there is a reading or parsing error.
+         */
+        readJsonFile(filePath: string, encoding?: BufferEncoding): Promise<unknown>
 
         /**
          * Recursively walk over a directory and its contents.
