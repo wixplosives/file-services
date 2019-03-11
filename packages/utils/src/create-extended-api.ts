@@ -140,7 +140,10 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 }
 
 export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystemAsync {
-    const { stat, path, mkdir, writeFile, lstat, rmdir, unlink, readdir } = baseFs
+    const {
+        path,
+        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir }
+    } = baseFs
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
         try {
@@ -258,13 +261,16 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
 
     return {
         ...baseFs,
-        fileExists,
-        directoryExists,
-        ensureDirectory,
-        populateDirectory,
-        remove,
-        findFiles,
-        findClosestFile,
-        findFilesInAncestors
+        promises: {
+            ...baseFs.promises,
+            fileExists,
+            directoryExists,
+            ensureDirectory,
+            populateDirectory,
+            remove,
+            findFiles,
+            findClosestFile,
+            findFilesInAncestors
+        }
     }
 }

@@ -102,6 +102,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         readdirSync,
         readFileSync,
         realpathSync: p => p, // links are not implemented yet
+        readlinkSync: () => {
+            throw new Error('links are not implemented yet')
+        },
         renameSync,
         rmdirSync,
         statSync,

@@ -19,130 +19,153 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         describe('writing files', async () => {
             it('can write a new file into an existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { stat, readFile, writeFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await writeFile(filePath, SAMPLE_CONTENT)
 
-                expect((await fs.stat(filePath)).isFile()).to.equal(true)
-                expect(await fs.readFile(filePath, 'utf8')).to.eql(SAMPLE_CONTENT)
+                expect((await stat(filePath)).isFile()).to.equal(true)
+                expect(await readFile(filePath, 'utf8')).to.eql(SAMPLE_CONTENT)
             })
 
             it('can overwrite an existing file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { stat, readFile, writeFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
-                await fs.writeFile(filePath, DIFFERENT_CONTENT)
+                await writeFile(filePath, SAMPLE_CONTENT)
+                await writeFile(filePath, DIFFERENT_CONTENT)
 
-                expect((await fs.stat(filePath)).isFile()).to.equal(true)
-                expect(await fs.readFile(filePath, 'utf8')).to.eql(DIFFERENT_CONTENT)
+                expect((await stat(filePath)).isFile()).to.equal(true)
+                expect(await readFile(filePath, 'utf8')).to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if writing a file to a non-existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { writeFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'missing-dir', 'file')
 
-                await expect(fs.writeFile(filePath, SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT')
+                await expect(writeFile(filePath, SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if writing a file to a path already pointing to a directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { writeFile, mkdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
+                await mkdir(directoryPath)
 
-                await expect(fs.writeFile(directoryPath, SAMPLE_CONTENT)).to.be.rejectedWith('EISDIR')
+                await expect(writeFile(directoryPath, SAMPLE_CONTENT)).to.be.rejectedWith('EISDIR')
             })
         })
 
         describe('reading files', async () => {
             it('can read the contents of a file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { readFile, writeFile }
+                    }
                 } = testInput
                 const firstFilePath = path.join(tempDirectoryPath, 'first-file')
                 const secondFilePath = path.join(tempDirectoryPath, 'second-file')
 
-                await fs.writeFile(firstFilePath, SAMPLE_CONTENT)
-                await fs.writeFile(secondFilePath, DIFFERENT_CONTENT)
+                await writeFile(firstFilePath, SAMPLE_CONTENT)
+                await writeFile(secondFilePath, DIFFERENT_CONTENT)
 
-                expect(await fs.readFile(firstFilePath, 'utf8'), 'contents of first-file').to.eql(SAMPLE_CONTENT)
-                expect(await fs.readFile(secondFilePath, 'utf8'), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
+                expect(await readFile(firstFilePath, 'utf8'), 'contents of first-file').to.eql(SAMPLE_CONTENT)
+                expect(await readFile(secondFilePath, 'utf8'), 'contents of second-file').to.eql(DIFFERENT_CONTENT)
             })
 
             it('fails if reading a non-existing file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { readFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'missing-file')
 
-                await expect(fs.readFile(filePath, 'utf8')).to.be.rejectedWith('ENOENT')
+                await expect(readFile(filePath, 'utf8')).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if reading a directory as a file', async () => {
-                const { fs, tempDirectoryPath } = testInput
+                const {
+                    fs: {
+                        promises: { readFile }
+                    },
+                    tempDirectoryPath
+                } = testInput
 
-                await expect(fs.readFile(tempDirectoryPath, 'utf8')).to.be.rejectedWith('EISDIR')
+                await expect(readFile(tempDirectoryPath, 'utf8')).to.be.rejectedWith('EISDIR')
             })
         })
 
         describe('removing files', async () => {
             it('can remove files', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { stat, unlink, writeFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
-                await fs.unlink(filePath)
+                await writeFile(filePath, SAMPLE_CONTENT)
+                await unlink(filePath)
 
-                await expect(fs.stat(filePath)).to.be.rejectedWith('ENOENT')
+                await expect(stat(filePath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if trying to remove a non-existing file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { unlink }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'missing-file')
 
-                await expect(fs.unlink(filePath)).to.be.rejectedWith('ENOENT')
+                await expect(unlink(filePath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if trying to remove a directory as a file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir, unlink }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
+                await mkdir(directoryPath)
 
-                await expect(fs.unlink(directoryPath)).to.be.rejectedWith() // linux throws `EISDIR`, mac throws `EPERM`
+                await expect(unlink(directoryPath)).to.be.rejectedWith() // linux throws `EISDIR`, mac throws `EPERM`
             })
         })
 
@@ -154,48 +177,63 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
             beforeEach('create temp fixture file and intialize validator', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path, watchService }
+                    fs: {
+                        path,
+                        promises: { writeFile },
+                        watchService
+                    }
                 } = testInput
                 validator = new WatchEventsValidator(watchService)
 
                 testFilePath = path.join(tempDirectoryPath, 'test-file')
 
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
                 await watchService.watchPath(testFilePath)
             })
 
             it('emits watch event when a watched file changes', async () => {
-                const { fs } = testInput
+                const {
+                    fs: {
+                        promises: { writeFile, stat }
+                    }
+                } = testInput
 
-                await fs.writeFile(testFilePath, DIFFERENT_CONTENT)
+                await writeFile(testFilePath, DIFFERENT_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
                 await validator.noMoreEvents()
             })
 
             it('emits watch event when a watched file is removed', async () => {
-                const { fs } = testInput
+                const {
+                    fs: {
+                        promises: { unlink }
+                    }
+                } = testInput
 
-                await fs.unlink(testFilePath)
+                await unlink(testFilePath)
 
                 await validator.validateEvents([{ path: testFilePath, stats: null }])
                 await validator.noMoreEvents()
             })
 
             it('keeps watching if file is deleted and recreated immediately', async () => {
-                const { fs } = testInput
+                const {
+                    fs: {
+                        promises: { unlink, writeFile, stat }
+                    }
+                } = testInput
 
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
-                await fs.unlink(testFilePath)
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
+                await unlink(testFilePath)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
 
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
                 await validator.noMoreEvents()
             })
         })
@@ -203,71 +241,81 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         describe('creating directories', async () => {
             it('can create an empty directory inside an existing one', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir, stat, readdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'new-dir')
 
-                await fs.mkdir(directoryPath)
+                await mkdir(directoryPath)
 
-                expect((await fs.stat(directoryPath)).isDirectory()).to.equal(true)
-                expect(await fs.readdir(directoryPath)).to.eql([])
+                expect((await stat(directoryPath)).isDirectory()).to.equal(true)
+                expect(await readdir(directoryPath)).to.eql([])
             })
 
             it('fails if creating in a path pointing to an existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
+                await mkdir(directoryPath)
 
-                await expect(fs.mkdir(directoryPath)).to.be.rejectedWith('EEXIST')
+                await expect(mkdir(directoryPath)).to.be.rejectedWith('EEXIST')
             })
 
             it('fails if creating in a path pointing to an existing file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir, writeFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await writeFile(filePath, SAMPLE_CONTENT)
 
-                await expect(fs.mkdir(filePath)).to.be.rejectedWith('EEXIST')
+                await expect(mkdir(filePath)).to.be.rejectedWith('EEXIST')
             })
 
             it('fails if creating a directory inside a non-existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'outer', 'inner')
 
-                await expect(fs.mkdir(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(mkdir(directoryPath)).to.be.rejectedWith('ENOENT')
             })
         })
 
         describe('listing directories', async () => {
             it('can list an existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir, writeFile, readdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
-                await fs.writeFile(path.join(directoryPath, 'file1'), SAMPLE_CONTENT)
-                await fs.writeFile(path.join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT)
+                await mkdir(directoryPath)
+                await writeFile(path.join(directoryPath, 'file1'), SAMPLE_CONTENT)
+                await writeFile(path.join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT)
 
-                expect(await fs.readdir(tempDirectoryPath)).to.eql(['dir'])
-                const directoryContents = await fs.readdir(directoryPath)
+                expect(await readdir(tempDirectoryPath)).to.eql(['dir'])
+                const directoryContents = await readdir(directoryPath)
                 expect(directoryContents).to.have.lengthOf(2)
                 expect(directoryContents).to.contain('file1')
                 expect(directoryContents).to.contain('camelCasedName')
@@ -275,81 +323,92 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
             it('fails if listing a non-existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { readdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'missing-dir')
 
-                await expect(fs.readdir(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(readdir(directoryPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if listing a path pointing to a file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { writeFile, readdir }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await writeFile(filePath, SAMPLE_CONTENT)
 
-                await expect(fs.readdir(filePath)).to.be.rejectedWith('ENOTDIR')
+                await expect(readdir(filePath)).to.be.rejectedWith('ENOTDIR')
             })
         })
 
         describe('removing directories', async () => {
             it('can remove an existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir, rmdir, stat }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
-                await fs.rmdir(directoryPath)
+                await mkdir(directoryPath)
+                await rmdir(directoryPath)
 
-                await expect(fs.stat(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(stat(directoryPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if removing a non-empty directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { mkdir, writeFile, rmdir }
+                    }
                 } = testInput
-                const { join } = fs.path
                 const directoryPath = path.join(tempDirectoryPath, 'dir')
 
-                await fs.mkdir(directoryPath)
-                await fs.writeFile(join(directoryPath, 'file'), SAMPLE_CONTENT)
+                await mkdir(directoryPath)
+                await writeFile(path.join(directoryPath, 'file'), SAMPLE_CONTENT)
 
-                await expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOTEMPTY')
+                await expect(rmdir(directoryPath)).to.be.rejectedWith('ENOTEMPTY')
             })
 
             it('fails if removing a non-existing directory', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { rmdir }
+                    }
                 } = testInput
                 const directoryPath = path.join(tempDirectoryPath, 'missing-dir')
 
-                await expect(fs.rmdir(directoryPath)).to.be.rejectedWith('ENOENT')
+                await expect(rmdir(directoryPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if removing a path pointing to a file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { rmdir, writeFile }
+                    }
                 } = testInput
                 const filePath = path.join(tempDirectoryPath, 'file')
 
-                await fs.writeFile(filePath, SAMPLE_CONTENT)
+                await writeFile(filePath, SAMPLE_CONTENT)
 
-                await expect(fs.rmdir(filePath)).to.be.rejectedWith()
+                await expect(rmdir(filePath)).to.be.rejectedWith()
             })
         })
 
@@ -361,58 +420,70 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
             beforeEach('create temp fixture directory and intialize validator', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path, watchService }
+                    fs: {
+                        promises: { mkdir },
+                        path,
+                        watchService
+                    }
                 } = testInput
                 validator = new WatchEventsValidator(watchService)
 
                 testDirectoryPath = path.join(tempDirectoryPath, 'test-directory')
-                await fs.mkdir(testDirectoryPath)
+                await mkdir(testDirectoryPath)
             })
 
             it('fires a watch event when a file is added inside a watched directory', async () => {
                 const {
-                    fs,
-                    fs: { path, watchService }
+                    fs: {
+                        promises: { writeFile, stat },
+                        path,
+                        watchService
+                    }
                 } = testInput
 
                 await watchService.watchPath(testDirectoryPath)
 
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
                 await validator.noMoreEvents()
             })
 
             it('fires a watch event when a file is changed inside a watched directory', async () => {
                 const {
-                    fs,
-                    fs: { path, watchService }
+                    fs: {
+                        promises: { writeFile, stat },
+                        path,
+                        watchService
+                    }
                 } = testInput
 
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
                 await watchService.watchPath(testDirectoryPath)
 
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
                 await validator.noMoreEvents()
             })
 
             it('fires a watch event when a file is removed inside a watched directory', async () => {
                 const {
-                    fs,
-                    fs: { path, watchService }
+                    fs: {
+                        promises: { writeFile, unlink },
+                        path,
+                        watchService
+                    }
                 } = testInput
 
                 const testFilePath = path.join(testDirectoryPath, 'test-file')
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
                 await watchService.watchPath(testDirectoryPath)
 
-                await fs.unlink(testFilePath)
+                await unlink(testFilePath)
 
                 await validator.validateEvents([{ path: testFilePath, stats: null }])
                 await validator.noMoreEvents()
@@ -428,45 +499,52 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
             beforeEach('create temp fixture directory and intialize watch service', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path, watchService }
+                    fs: {
+                        promises: { writeFile, mkdir },
+                        path,
+                        watchService
+                    }
                 } = testInput
                 validator = new WatchEventsValidator(watchService)
 
                 testDirectoryPath = path.join(tempDirectoryPath, 'test-directory')
-                await fs.mkdir(testDirectoryPath)
+                await mkdir(testDirectoryPath)
                 testFilePath = path.join(testDirectoryPath, 'test-file')
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
             })
 
             it('allows watching a file and its containing directory', async () => {
                 const {
-                    fs,
-                    fs: { watchService }
+                    fs: {
+                        promises: { writeFile, stat },
+                        watchService
+                    }
                 } = testInput
 
                 await watchService.watchPath(testFilePath)
                 await watchService.watchPath(testDirectoryPath)
 
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
                 await validator.noMoreEvents()
             })
 
             it('allows watching in any order', async () => {
                 const {
-                    fs,
-                    fs: { watchService }
+                    fs: {
+                        promises: { writeFile, stat },
+                        watchService
+                    }
                 } = testInput
 
                 await watchService.watchPath(testDirectoryPath)
                 await watchService.watchPath(testFilePath)
 
-                await fs.writeFile(testFilePath, SAMPLE_CONTENT)
+                await writeFile(testFilePath, SAMPLE_CONTENT)
 
-                await validator.validateEvents([{ path: testFilePath, stats: await fs.stat(testFilePath) }])
+                await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }])
                 await validator.noMoreEvents()
             })
         })
@@ -474,141 +552,172 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         describe('renaming directories and files', () => {
             it('moves a file', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { writeFile, stat, mkdir, rename, readFile }
+                    }
                 } = testInput
                 const sourcePath = path.join(tempDirectoryPath, 'file')
                 const destinationPath = path.join(tempDirectoryPath, 'dir', 'subdir', 'movedFile')
 
-                await fs.writeFile(sourcePath, SAMPLE_CONTENT)
-                await fs.mkdir(path.join(tempDirectoryPath, 'dir'))
-                await fs.mkdir(path.join(tempDirectoryPath, 'dir', 'subdir'))
+                await writeFile(sourcePath, SAMPLE_CONTENT)
+                await mkdir(path.join(tempDirectoryPath, 'dir'))
+                await mkdir(path.join(tempDirectoryPath, 'dir', 'subdir'))
 
-                const sourceStats = await fs.stat(sourcePath)
+                const sourceStats = await stat(sourcePath)
 
-                await fs.rename(sourcePath, destinationPath)
+                await rename(sourcePath, destinationPath)
 
-                const destStats = await fs.stat(destinationPath)
+                const destStats = await stat(destinationPath)
                 expect(destStats.isFile()).to.equal(true)
                 expect(destStats.mtime).not.to.equal(sourceStats.mtime)
-                expect(await fs.readFile(destinationPath, 'utf8')).to.eql(SAMPLE_CONTENT)
-                await expect(fs.stat(sourcePath)).to.be.rejectedWith('ENOENT')
+                expect(await readFile(destinationPath, 'utf8')).to.eql(SAMPLE_CONTENT)
+                await expect(stat(sourcePath)).to.be.rejectedWith('ENOENT')
             })
 
             it(`throws if source path doesn't exist`, async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { rename }
+                    }
                 } = testInput
                 const sourcePath = path.join(tempDirectoryPath, 'file')
                 const destPath = path.join(tempDirectoryPath, 'file2')
 
-                await expect(fs.rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
+                await expect(rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
             })
 
             it(`throws if the containing directory of the source path doesn't exist`, async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { rename }
+                    }
                 } = testInput
                 const sourcePath = path.join(tempDirectoryPath, 'unicorn', 'file')
                 const destPath = path.join(tempDirectoryPath, 'file2')
 
-                await expect(fs.rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
+                await expect(rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
             })
 
             it(`throws if destination containing path doesn't exist`, async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { rename, writeFile }
+                    }
                 } = testInput
                 const sourcePath = path.join(tempDirectoryPath, 'file')
                 const destPath = path.join(tempDirectoryPath, 'dir', 'file2')
 
-                await fs.writeFile(sourcePath, SAMPLE_CONTENT)
+                await writeFile(sourcePath, SAMPLE_CONTENT)
 
-                await expect(fs.rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
+                await expect(rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('updates the parent directory of a renamed entry', async () => {
-                const { fs, tempDirectoryPath } = testInput
-                const { join } = fs.path
-                const sourcePath = join(tempDirectoryPath, 'sourceDir')
-                const destPath = join(tempDirectoryPath, 'destDir')
+                const {
+                    tempDirectoryPath,
+                    fs: {
+                        path,
+                        promises: { rename, mkdir, readdir, writeFile }
+                    }
+                } = testInput
+                const sourcePath = path.join(tempDirectoryPath, 'sourceDir')
+                const destPath = path.join(tempDirectoryPath, 'destDir')
 
-                await fs.mkdir(sourcePath)
-                await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+                await mkdir(sourcePath)
+                await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT)
 
-                await fs.rename(sourcePath, destPath)
+                await rename(sourcePath, destPath)
 
-                expect(await fs.readdir(tempDirectoryPath)).to.include('destDir')
+                expect(await readdir(tempDirectoryPath)).to.include('destDir')
             })
 
             describe('renaming directories', () => {
                 it('moves a directory', async () => {
-                    const { fs, tempDirectoryPath } = testInput
-                    const { join } = fs.path
-                    const sourcePath = join(tempDirectoryPath, 'dir')
-                    const destinationPath = join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir')
-                    await fs.mkdir(join(tempDirectoryPath, 'dir'))
-                    await fs.mkdir(join(tempDirectoryPath, 'anotherDir'))
-                    await fs.mkdir(join(tempDirectoryPath, 'anotherDir', 'subdir'))
-                    await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+                    const {
+                        tempDirectoryPath,
+                        fs: {
+                            path,
+                            promises: { rename, mkdir, writeFile, stat, readFile }
+                        }
+                    } = testInput
+                    const sourcePath = path.join(tempDirectoryPath, 'dir')
+                    const destinationPath = path.join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir')
+                    await mkdir(path.join(tempDirectoryPath, 'dir'))
+                    await mkdir(path.join(tempDirectoryPath, 'anotherDir'))
+                    await mkdir(path.join(tempDirectoryPath, 'anotherDir', 'subdir'))
+                    await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT)
 
-                    await fs.rename(sourcePath, destinationPath)
+                    await rename(sourcePath, destinationPath)
 
-                    expect((await fs.stat(destinationPath)).isDirectory()).to.equal(true)
-                    expect(await fs.readFile(join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT)
-                    await expect(fs.stat(sourcePath)).to.be.rejectedWith('ENOENT')
+                    expect((await stat(destinationPath)).isDirectory()).to.equal(true)
+                    expect(await readFile(path.join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT)
+                    await expect(stat(sourcePath)).to.be.rejectedWith('ENOENT')
                 })
 
                 it(`allows copying a directory over a non-existing directory`, async () => {
-                    const { fs, tempDirectoryPath } = testInput
-                    const { join } = fs.path
-                    const sourcePath = join(tempDirectoryPath, 'sourceDir')
+                    const {
+                        tempDirectoryPath,
+                        fs: {
+                            path,
+                            promises: { rename, mkdir, writeFile }
+                        }
+                    } = testInput
+                    const sourcePath = path.join(tempDirectoryPath, 'sourceDir')
 
-                    await fs.mkdir(sourcePath)
-                    await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+                    await mkdir(sourcePath)
+                    await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT)
 
-                    await expect(fs.rename(sourcePath, join(tempDirectoryPath, 'destDir'))).to.not.be.rejectedWith(
+                    await expect(rename(sourcePath, path.join(tempDirectoryPath, 'destDir'))).to.not.be.rejectedWith(
                         'EEXIST'
                     )
                 })
 
                 it(`allows copying copying a directory over an empty directory`, async () => {
-                    const { fs, tempDirectoryPath } = testInput
-                    const { join } = fs.path
-                    const sourcePath = join(tempDirectoryPath, 'sourceDir')
-                    const destPath = join(tempDirectoryPath, 'destDir')
+                    const {
+                        tempDirectoryPath,
+                        fs: {
+                            path,
+                            promises: { rename, mkdir, writeFile }
+                        }
+                    } = testInput
+                    const sourcePath = path.join(tempDirectoryPath, 'sourceDir')
+                    const destPath = path.join(tempDirectoryPath, 'destDir')
 
-                    await fs.mkdir(sourcePath)
-                    await fs.mkdir(destPath)
-                    await fs.writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT)
+                    await mkdir(sourcePath)
+                    await mkdir(destPath)
+                    await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT)
 
-                    await expect(fs.rename(sourcePath, destPath)).to.not.be.rejectedWith('EEXIST')
+                    await expect(rename(sourcePath, destPath)).to.not.be.rejectedWith('EEXIST')
                 })
             })
         })
 
         it('correctly exposes whether it is case sensitive', async () => {
             const {
-                fs,
                 tempDirectoryPath,
-                fs: { path }
+                fs: {
+                    path,
+                    caseSensitive,
+                    promises: { writeFile, stat }
+                }
             } = testInput
             const filePath = path.join(tempDirectoryPath, 'file')
             const upperCaseFilePath = filePath.toUpperCase()
 
-            await fs.writeFile(filePath, SAMPLE_CONTENT)
+            await writeFile(filePath, SAMPLE_CONTENT)
 
-            if (fs.caseSensitive) {
-                await expect(fs.stat(upperCaseFilePath)).to.be.rejectedWith('ENOENT')
+            if (caseSensitive) {
+                await expect(stat(upperCaseFilePath)).to.be.rejectedWith('ENOENT')
             } else {
-                await expect((await fs.stat(upperCaseFilePath)).isFile()).to.equal(true)
+                await expect((await stat(upperCaseFilePath)).isFile()).to.equal(true)
             }
         })
 
@@ -619,74 +728,87 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
             beforeEach(async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { writeFile, mkdir }
+                    }
                 } = testInput
                 targetDirectoryPath = path.join(tempDirectoryPath, 'dir')
-                await fs.mkdir(targetDirectoryPath)
+
+                await mkdir(targetDirectoryPath)
                 sourceFilePath = path.join(tempDirectoryPath, SOURCE_FILE_NAME)
-                await fs.writeFile(sourceFilePath, SAMPLE_CONTENT)
+                await writeFile(sourceFilePath, SAMPLE_CONTENT)
             })
 
             it('can copy file', async () => {
                 const {
-                    fs,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { copyFile, readFile }
+                    }
                 } = testInput
                 const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME)
 
-                await fs.copyFile(sourceFilePath, targetPath)
+                await copyFile(sourceFilePath, targetPath)
 
-                expect(await fs.readFile(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
+                expect(await readFile(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
             })
 
             it('fails if source does not exist', async () => {
                 const {
-                    fs,
                     tempDirectoryPath,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { copyFile }
+                    }
                 } = testInput
                 const sourcePath = path.join(tempDirectoryPath, 'nonExistingFileName.txt')
                 const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME)
 
-                await expect(fs.copyFile(sourcePath, targetPath)).to.be.rejectedWith('ENOENT')
+                await expect(copyFile(sourcePath, targetPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('fails if target containing directory does not exist', async () => {
                 const {
-                    fs,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { copyFile }
+                    }
                 } = testInput
                 const targetPath = path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME)
 
-                await expect(fs.copyFile(sourceFilePath, targetPath)).to.be.rejectedWith('ENOENT')
+                await expect(copyFile(sourceFilePath, targetPath)).to.be.rejectedWith('ENOENT')
             })
 
             it('overwrites destination file by default', async () => {
                 const {
-                    fs,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { copyFile, readFile, writeFile }
+                    }
                 } = testInput
                 const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME)
 
-                await fs.writeFile(targetPath, 'content to be overwritten')
-                await fs.copyFile(sourceFilePath, targetPath)
+                await writeFile(targetPath, 'content to be overwritten')
+                await copyFile(sourceFilePath, targetPath)
 
-                expect(await fs.readFile(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
+                expect(await readFile(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT)
             })
 
             it('fails if destination exists and flag COPYFILE_EXCL passed', async () => {
                 const {
-                    fs,
-                    fs: { path }
+                    fs: {
+                        path,
+                        promises: { copyFile, writeFile }
+                    }
                 } = testInput
                 const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME)
 
-                await fs.writeFile(targetPath, 'content to be overwritten')
+                await writeFile(targetPath, 'content to be overwritten')
 
                 await expect(
-                    fs.copyFile(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL)
+                    copyFile(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL)
                 ).to.be.rejectedWith('EEXIST')
             })
         })

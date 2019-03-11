@@ -1,5 +1,6 @@
 import { join } from 'path'
-import { writeFile, stat, mkdir, rmdir } from 'proper-fs'
+import { promises } from 'fs'
+const { writeFile, stat, mkdir, rmdir } = promises
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory'
 import { IWatchService } from '@file-services/types'
 import { sleep } from 'promise-assist'
