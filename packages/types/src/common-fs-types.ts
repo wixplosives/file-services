@@ -11,7 +11,7 @@ declare global {
 }
 
 export type CallbackFn<T> = (error: Error | null | undefined, value: T) => void
-export type CallbackFnVoid = (error: Error | null | undefined) => void
+export type CallbackFnVoid = (error?: Error | null) => void
 export type ErrorCallbackFn = (error: Error) => void
 
 export enum FileSystemConstants {
