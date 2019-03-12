@@ -1,0 +1,30 @@
+{
+  "name": "@file-services/webpack",
+  "description": "Helpers for creation of webpack-compatible file systems.",
+  "version": "0.5.0",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./cjs ./esm",
+    "build": "ts-build ./src --cjs --esm",
+    "lint": "tslint -p src",
+    "prepack": "yarn build"
+  },
+  "dependencies": {
+    "@file-services/types": "^0.4.11"
+  },
+  "files": [
+    "cjs",
+    "esm",
+    "src",
+    "!src/tsconfig.json"
+  ],
+  "license": "MIT",
+  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/webpack",
+  "homepage": "https://github.com/wixplosives/file-services",
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false
+}
