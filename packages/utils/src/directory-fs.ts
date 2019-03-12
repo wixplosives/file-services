@@ -7,7 +7,6 @@ import {
     POSIX_ROOT,
     BufferEncoding,
     CallbackFn,
-    IBuffer,
     CallbackFnVoid
 } from '@file-services/types'
 import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-api'
@@ -131,8 +130,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             async writeFile(path, content, encoding) {
                 return promises.writeFile(resolveFullPath(path), content, encoding)
             },
-            async readlink(path: string, encoding?: BufferEncoding) {
-                return promises.readlink(resolveFullPath(path), encoding!)
+            async readlink(path) {
+                return promises.readlink(resolveFullPath(path))
             }
         },
         copyFileSync(src, dest, flags) {
@@ -153,8 +152,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         realpathSync(path) {
             return fs.realpathSync(resolveFullPath(path))
         },
-        readlinkSync(path: string, encoding?: BufferEncoding) {
-            return fs.readlinkSync(resolveFullPath(path), encoding!)
+        readlinkSync(path) {
+            return fs.readlinkSync(resolveFullPath(path))
         },
         renameSync(path, newPath) {
             return fs.renameSync(resolveFullPath(path), resolveFullPath(newPath))
@@ -186,8 +185,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdir(path, callback) {
             return fs.readdir(resolveFullPath(path), callback)
         },
-        readFile(path: string, ...restArgs: CbParams<BufferEncoding, CallbackFn<string>, CallbackFn<IBuffer>>) {
-            return fs.readFile(resolveFullPath(path), ...(restArgs as [CallbackFn<IBuffer>]))
+        readFile(path: string, ...restArgs: CbParams<BufferEncoding, CallbackFn<string>, CallbackFn<Buffer>>) {
+            return fs.readFile(resolveFullPath(path), ...(restArgs as [CallbackFn<Buffer>]))
         },
         realpath(path, callback) {
             return fs.realpath(resolveFullPath(path), callback)
@@ -207,11 +206,11 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         unlink(path, callback) {
             return fs.unlink(resolveFullPath(path), callback)
         },
-        writeFile(path: string, contents: string | IBuffer, ...restArgs: CbParams<BufferEncoding, CallbackFnVoid>) {
+        writeFile(path: string, contents: string | Buffer, ...restArgs: CbParams<BufferEncoding, CallbackFnVoid>) {
             return fs.writeFile(resolveFullPath(path), contents, ...(restArgs as [CallbackFnVoid]))
         },
-        readlink(path: string, ...restArgs: CbParams<BufferEncoding, CallbackFn<string>, CallbackFn<IBuffer>>) {
-            return fs.readlink(resolveFullPath(path), ...(restArgs as [CallbackFn<IBuffer>]))
+        readlink(path, callback) {
+            return fs.readlink(resolveFullPath(path), callback)
         }
     }
 

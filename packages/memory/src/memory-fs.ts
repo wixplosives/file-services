@@ -124,7 +124,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         workingDirectoryPath = resolvePath(directoryPath)
     }
 
-    function readFileSync(filePath: string): string {
+    function readFileSync(filePath: string): Buffer
+    function readFileSync(filePath: string, _encoding: BufferEncoding): string
+    function readFileSync(filePath: string, _encoding?: BufferEncoding): string | Buffer {
         const resolvedPath = resolvePath(filePath)
         const fileNode = getNode(resolvedPath)
 

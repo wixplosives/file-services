@@ -1,4 +1,4 @@
-import { IFileSystemStats, BufferEncoding, IBuffer } from './common-fs-types'
+import { IFileSystemStats, BufferEncoding } from './common-fs-types'
 import { IFileSystemPath } from './path'
 import { IWatchService } from './watch-api'
 
@@ -37,14 +37,14 @@ export interface IBaseFileSystemSync {
     /**
      * Read the entire contents of a file.
      */
-    readFileSync(filePath: string): IBuffer
+    readFileSync(filePath: string): Buffer
     readFileSync(filePath: string, encoding: BufferEncoding): string
 
     /**
      * Write data to a file, replacing the file if already exists.
-     * `encoding` is used when a string `content` (not `IBuffer`) was provided (with default 'utf8').
+     * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
      */
-    writeFileSync(filePath: string, content: string | IBuffer, encoding?: BufferEncoding): void
+    writeFileSync(filePath: string, content: string | Buffer, encoding?: BufferEncoding): void
 
     /**
      * Delete a name and possibly the file it refers to.
@@ -98,6 +98,5 @@ export interface IBaseFileSystemSync {
     /**
      * Read value of a symbolic link.
      */
-    readlinkSync(path: string): IBuffer
-    readlinkSync(path: string, encoding: BufferEncoding): string
+    readlinkSync(path: string): string
 }

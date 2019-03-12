@@ -2,8 +2,12 @@ export const POSIX_ROOT = '/'
 
 export type BufferEncoding = 'ascii' | 'utf8' | 'utf16le' | 'ucs2' | 'base64' | 'latin1' | 'binary' | 'hex'
 
-export interface IBuffer {
-    toString(ecoding?: BufferEncoding): string
+// use global augmentation so that users without @types/node will have a partial Buffer interface
+declare global {
+    // tslint:disable-next-line
+    interface Buffer {
+        toString(ecoding?: BufferEncoding): string
+    }
 }
 
 export type CallbackFn<T> = (error: Error | null | undefined, value: T) => void

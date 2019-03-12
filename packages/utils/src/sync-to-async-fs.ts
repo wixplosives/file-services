@@ -56,8 +56,8 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
                 return syncFs.copyFileSync(src, dest, flags)
             },
 
-            async readlink(path: string, encoding?: BufferEncoding) {
-                return syncFs.readlinkSync(path, encoding!)
+            async readlink(path) {
+                return syncFs.readlinkSync(path)
             }
         },
 
@@ -75,6 +75,6 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         realpath: callbackify(syncFs.realpathSync),
         rename: callbackify(syncFs.renameSync),
         copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync['copyFile'],
-        readlink: callbackify(syncFs.readlinkSync) as IBaseFileSystemAsync['readlink']
+        readlink: callbackify(syncFs.readlinkSync)
     }
 }

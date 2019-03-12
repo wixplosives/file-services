@@ -1,4 +1,4 @@
-import { IFileSystemStats, BufferEncoding, IBuffer, CallbackFnVoid, CallbackFn } from './common-fs-types'
+import { IFileSystemStats, BufferEncoding, CallbackFnVoid, CallbackFn } from './common-fs-types'
 import { IFileSystemPath } from './path'
 import { IWatchService } from './watch-api'
 
@@ -23,14 +23,14 @@ export interface IBaseFileSystemAsync {
         /**
          * Read the entire contents of a file.
          */
-        readFile(filePath: string): Promise<IBuffer>
+        readFile(filePath: string): Promise<Buffer>
         readFile(filePath: string, encoding: BufferEncoding): Promise<string>
 
         /**
          * Write data to a file, replacing the file if already exists.
-         * `encoding` is used when a string `content` (not `IBuffer`) was provided (with default 'utf8').
+         * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
          */
-        writeFile(filePath: string, content: string | IBuffer, encoding?: BufferEncoding): Promise<void>
+        writeFile(filePath: string, content: string | Buffer, encoding?: BufferEncoding): Promise<void>
 
         /**
          * Delete a name and possibly the file it refers to.
@@ -84,8 +84,7 @@ export interface IBaseFileSystemAsync {
         /**
          * Read value of a symbolic link.
          */
-        readlink(path: string): Promise<IBuffer>
-        readlink(path: string, encoding: BufferEncoding): Promise<string>
+        readlink(path: string): Promise<string>
     }
 
     /**
@@ -100,15 +99,15 @@ export interface IBaseFileSystemAsync {
     /**
      * Read the entire contents of a file.
      */
-    readFile(filePath: string, callback: CallbackFn<IBuffer>): void
+    readFile(filePath: string, callback: CallbackFn<Buffer>): void
     readFile(filePath: string, encoding: BufferEncoding, callback: CallbackFn<string>): void
 
     /**
      * Write data to a file, replacing the file if already exists.
-     * `encoding` is used when a string `content` (not `IBuffer`) was provided (with default 'utf8').
+     * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
      */
-    writeFile(filePath: string, content: string | IBuffer, callback: CallbackFnVoid): void
-    writeFile(filePath: string, content: string | IBuffer, encoding: BufferEncoding, callback: CallbackFnVoid): void
+    writeFile(filePath: string, content: string | Buffer, callback: CallbackFnVoid): void
+    writeFile(filePath: string, content: string | Buffer, encoding: BufferEncoding, callback: CallbackFnVoid): void
 
     /**
      * Delete a name and possibly the file it refers to.
@@ -162,6 +161,5 @@ export interface IBaseFileSystemAsync {
     /**
      * Read value of a symbolic link.
      */
-    readlink(path: string, callback: CallbackFn<IBuffer>): void
-    readlink(path: string, encoding: BufferEncoding, callback: CallbackFn<string>): void
+    readlink(path: string, callback: CallbackFn<string>): void
 }
