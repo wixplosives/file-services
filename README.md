@@ -22,6 +22,8 @@ Various file system packages.
 
 - **[@file-services/commonjs](https://github.com/wixplosives/file-services/tree/master/packages/commonjs)** - Isomorphic, fs-agnostic implementation of the Node commonjs module system.
 
+- **[@file-services/webpack](https://github.com/wixplosives/file-services/tree/master/packages/webpack)** - Helpers for creation of webpack-compatible file systems.
+
 ### License
 
 MIT
