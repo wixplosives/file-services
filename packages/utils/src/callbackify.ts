@@ -24,7 +24,7 @@ export function callbackify<F extends (...args: unknown[]) => unknown>(fn: F): u
     return ((...args: unknown[]): void => {
         const callback = args.pop() as CallbackFn<unknown>
         if (typeof callback !== 'function') {
-            return // no callback was passed, so do nothing
+            throw new Error('callback is not a function')
         }
         try {
             const result = fn(...args)
