@@ -3,7 +3,7 @@ import fs from 'fs'
 import { promisify } from 'util'
 import { chdir, cwd } from 'process'
 
-import { createAsyncFileSystem, createSyncFileSystem } from '@file-services/utils'
+import { createFileSystem } from '@file-services/utils'
 import { IBaseFileSystem, IFileSystem } from '@file-services/types'
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service'
 
@@ -16,12 +16,7 @@ export interface ICreateNodeFsOptions {
 }
 
 export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
-    const baseFs = createBaseNodeFs(options)
-
-    return {
-        ...createSyncFileSystem(baseFs),
-        ...createAsyncFileSystem(baseFs)
-    }
+    return createFileSystem(createBaseNodeFs(options))
 }
 
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {

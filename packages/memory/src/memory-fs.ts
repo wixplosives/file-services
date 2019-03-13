@@ -1,5 +1,5 @@
 import pathMain from 'path'
-import { syncToAsyncFs, createSyncFileSystem, createAsyncFileSystem, SetMultiMap } from '@file-services/utils'
+import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils'
 import {
     IDirectoryContents,
     IFileSystemStats,
@@ -31,9 +31,8 @@ export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSyste
     const baseFs = createBaseMemoryFs()
 
     const fs: IMemFileSystem = {
-        root: baseFs.root,
-        ...createSyncFileSystem(baseFs),
-        ...createAsyncFileSystem(baseFs)
+        ...createFileSystem(baseFs),
+        root: baseFs.root
     }
 
     if (rootContents) {
