@@ -6,12 +6,34 @@ import {
     IDirectoryContents,
     IWalkOptions,
     IFileSystemDescriptor,
-    BufferEncoding
+    BufferEncoding,
+    IBaseFileSystem,
+    IFileSystem,
+    IFileSystemExtendedSyncActions,
+    IFileSystemExtendedPromiseActions
 } from '@file-services/types'
 
 const returnsTrue = () => true
 
+export function createFileSystem(baseFs: IBaseFileSystem): IFileSystem {
+    return {
+        ...baseFs,
+        ...createExtendedSyncActions(baseFs),
+        promises: {
+            ...baseFs.promises,
+            ...createExtendedFileSystemPromiseActions(baseFs)
+        }
+    }
+}
+
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
+    return {
+        ...baseFs,
+        ...createExtendedSyncActions(baseFs)
+    }
+}
+
+export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSystemExtendedSyncActions {
     const {
         statSync,
         path,
@@ -142,7 +164,6 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
     }
 
     return {
-        ...baseFs,
         fileExistsSync,
         directoryExistsSync,
         // resolve path once for recursive functions
@@ -158,6 +179,18 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 }
 
 export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystemAsync {
+    return {
+        ...baseFs,
+        promises: {
+            ...baseFs.promises,
+            ...createExtendedFileSystemPromiseActions(baseFs)
+        }
+    }
+}
+
+export function createExtendedFileSystemPromiseActions(
+    baseFs: IBaseFileSystemAsync
+): IFileSystemExtendedPromiseActions {
     const {
         path,
         promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile }
@@ -282,18 +315,14 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
     }
 
     return {
-        ...baseFs,
-        promises: {
-            ...baseFs.promises,
-            fileExists,
-            directoryExists,
-            ensureDirectory: directoryPath => ensureDirectory(path.resolve(directoryPath)),
-            populateDirectory: (directoryPath, contents) => populateDirectory(path.resolve(directoryPath), contents),
-            remove: entryPath => remove(path.resolve(entryPath)),
-            findFiles: (rootDirectory, options) => findFiles(path.resolve(rootDirectory), options),
-            findClosestFile,
-            findFilesInAncestors,
-            readJsonFile
-        }
+        fileExists,
+        directoryExists,
+        ensureDirectory: directoryPath => ensureDirectory(path.resolve(directoryPath)),
+        populateDirectory: (directoryPath, contents) => populateDirectory(path.resolve(directoryPath), contents),
+        remove: entryPath => remove(path.resolve(entryPath)),
+        findFiles: (rootDirectory, options) => findFiles(path.resolve(rootDirectory), options),
+        findClosestFile,
+        findFilesInAncestors,
+        readJsonFile
     }
 }

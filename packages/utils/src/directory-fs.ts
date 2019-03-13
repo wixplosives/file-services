@@ -9,7 +9,7 @@ import {
     CallbackFn,
     CallbackFnVoid
 } from '@file-services/types'
-import { createAsyncFileSystem, createSyncFileSystem } from './create-extended-api'
+import { createFileSystem } from './create-extended-api'
 
 type CbParams<T1, T2, T3 = T2> = [T1, T2] | [T3]
 
@@ -214,9 +214,5 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         }
     }
 
-    return {
-        ...scopedBaseFs,
-        ...createAsyncFileSystem(scopedBaseFs),
-        ...createSyncFileSystem(scopedBaseFs)
-    }
+    return createFileSystem(scopedBaseFs)
 }
