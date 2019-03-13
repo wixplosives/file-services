@@ -6,11 +6,13 @@ import { IWatchService } from './watch-api'
  * SYNC-only base file system.
  * Contains a subset of `fs`, watch service, and path methods.
  */
-export interface IBaseFileSystemSync {
+export interface IBaseFileSystemSync extends IBaseFileSystemSyncActions {
     path: IFileSystemPath
     watchService: IWatchService
     caseSensitive: boolean
+}
 
+export interface IBaseFileSystemSyncActions {
     /**
      * Get the current working directory.
      * Non-absolute calls to any file system method are resolved using this path.

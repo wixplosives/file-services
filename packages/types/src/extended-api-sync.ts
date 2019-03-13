@@ -5,7 +5,9 @@ import { IBaseFileSystemSync } from './base-api-sync'
  * SYNC-only file system.
  * Exposes all base fs APIs plus several higher level methods.
  */
-export interface IFileSystemSync extends IBaseFileSystemSync {
+export interface IFileSystemSync extends IBaseFileSystemSync, IFileSystemExtendedSyncActions {}
+
+export interface IFileSystemExtendedSyncActions {
     /**
      * Check if a path points to an existing file.
      *

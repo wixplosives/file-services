@@ -1,80 +1,84 @@
 import { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types'
-import { IBaseFileSystemAsync } from './base-api-async'
+import { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async'
 
 /**
  * ASYNC-only file system.
  * Exposes all base fs APIs plus several higher level methods.
  */
 export interface IFileSystemAsync extends IBaseFileSystemAsync {
-    promises: IBaseFileSystemAsync['promises'] & {
-        /**
-         * Check if a path points to an existing file.
-         *
-         * @param filePath possible file path
-         * @param statFn optional custom stat function (e.g. lstat to detect links)
-         */
-        fileExists(filePath: string, statFn?: IBaseFileSystemAsync['promises']['stat']): Promise<boolean>
+    promises: IFileSystemPromiseActions
+}
 
-        /**
-         * Check if a path points to an existing directory.
-         *
-         * @param directoryPath possible directory path
-         * @param statFn optional custom stat function (e.g. lstatSync to detect links)
-         */
-        directoryExists(directoryPath: string, statFn?: IBaseFileSystemAsync['promises']['stat']): Promise<boolean>
+export interface IFileSystemPromiseActions extends IBaseFileSystemPromiseActions, IFileSystemExtendedPromiseActions {}
 
-        /**
-         * Ensure that a directory and all its parent directories exist
-         */
-        ensureDirectory(directoryPath: string): Promise<void>
+export interface IFileSystemExtendedPromiseActions {
+    /**
+     * Check if a path points to an existing file.
+     *
+     * @param filePath possible file path
+     * @param statFn optional custom stat function (e.g. lstat to detect links)
+     */
+    fileExists(filePath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>
 
-        /**
-         * Search for files inside `rootDirectory`.
-         *
-         * @returns absolute paths of all found files.
-         */
-        findFiles(rootDirectory: string, options?: IWalkOptions): Promise<string[]>
+    /**
+     * Check if a path points to an existing directory.
+     *
+     * @param directoryPath possible directory path
+     * @param statFn optional custom stat function (e.g. lstatSync to detect links)
+     */
+    directoryExists(directoryPath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>
 
-        /**
-         * Search for a specific file name in parent directory chain.
-         * Useful for finding configuration or manifest files.
-         *
-         * @returns absolute path of first found file, or `null` if none found.
-         */
-        findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>
+    /**
+     * Ensure that a directory and all its parent directories exist
+     */
+    ensureDirectory(directoryPath: string): Promise<void>
 
-        /**
-         * Search for a specific file name in parent chain.
-         * Useful for finding configuration or manifest files.
-         *
-         * @returns absolute paths of all found files (ordered from inner most directory and up).
-         */
-        findFilesInAncestors(initialDirectory: string, fileName: string): Promise<string[]>
+    /**
+     * Search for files inside `rootDirectory`.
+     *
+     * @returns absolute paths of all found files.
+     */
+    findFiles(rootDirectory: string, options?: IWalkOptions): Promise<string[]>
 
-        /**
-         * Populates the provided directory with given contents.
-         *
-         * @returns absolute paths of written files.
-         */
-        populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>
+    /**
+     * Search for a specific file name in parent directory chain.
+     * Useful for finding configuration or manifest files.
+     *
+     * @returns absolute path of first found file, or `null` if none found.
+     */
+    findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>
 
-        /**
-         * Recursively remove a path.
-         */
-        remove(path: string): Promise<void>
+    /**
+     * Search for a specific file name in parent chain.
+     * Useful for finding configuration or manifest files.
+     *
+     * @returns absolute paths of all found files (ordered from inner most directory and up).
+     */
+    findFilesInAncestors(initialDirectory: string, fileName: string): Promise<string[]>
 
-        /**
-         * Read a file and parse it using `JSON.parse`.
-         *
-         * @param filePath path pointing to a `json` file.
-         * @param encoding text encoding to decode file with (defaults to `utf8`).
-         * @rejects if there is a reading or parsing error.
-         */
-        readJsonFile(filePath: string, encoding?: BufferEncoding): Promise<unknown>
+    /**
+     * Populates the provided directory with given contents.
+     *
+     * @returns absolute paths of written files.
+     */
+    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>
 
-        /**
-         * Recursively walk over a directory and its contents.
-         */
-        // walk(rootDirectory: string, options?: IWalkOptions): Promise<IFileSystemDescriptor[]>
-    }
+    /**
+     * Recursively remove a path.
+     */
+    remove(path: string): Promise<void>
+
+    /**
+     * Read a file and parse it using `JSON.parse`.
+     *
+     * @param filePath path pointing to a `json` file.
+     * @param encoding text encoding to decode file with (defaults to `utf8`).
+     * @rejects if there is a reading or parsing error.
+     */
+    readJsonFile(filePath: string, encoding?: BufferEncoding): Promise<unknown>
+
+    /**
+     * Recursively walk over a directory and its contents.
+     */
+    // walk(rootDirectory: string, options?: IWalkOptions): Promise<IFileSystemDescriptor[]>
 }
