@@ -100,7 +100,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         mkdirSync,
         readdirSync,
         readFileSync,
-        realpathSync: p => p, // links are not implemented yet
+        realpathSync,
         readlinkSync: () => {
             throw new Error('links are not implemented yet');
         },
@@ -269,6 +269,15 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const isSymbolicLink = returnsFalse;
 
         return { isFile, isDirectory, isSymbolicLink, birthtime, mtime };
+    }
+
+    function realpathSync(nodePath: string): string {
+        const resolvedPath = resolvePath(nodePath);
+        const node = getNode(resolvedPath);
+        if (!node) {
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`);
+        }
+        return resolvedPath;
     }
 
     function renameSync(sourcePath: string, destinationPath: string): void {
