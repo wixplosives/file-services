@@ -1,4 +1,4 @@
-import ts from 'typescript'
+import ts from 'typescript';
 
 declare module 'typescript' {
     // needed for custom readDirectory
@@ -11,17 +11,17 @@ declare module 'typescript' {
         currentDirectory: string,
         depth: number | undefined,
         getFileSystemEntries: (path: string) => FileSystemEntries
-    ): string[]
+    ): string[];
 
     // used by matchFiles above
     export interface FileSystemEntries {
-        readonly files: ReadonlyArray<string>
-        readonly directories: ReadonlyArray<string>
+        readonly files: ReadonlyArray<string>;
+        readonly directories: ReadonlyArray<string>;
     }
 
     // needed to resolve newLine, while taking compilerOptions into consideration, for each `LanguageServiceHost`
     export function getNewLineCharacter(
         options: ts.CompilerOptions | ts.PrinterOptions,
         getNewLine?: () => string
-    ): string
+    ): string;
 }

@@ -1,2 +1,2 @@
-export * from './node-fs'
-export * from './watch-service'
+export * from './node-fs';
+export * from './watch-service';

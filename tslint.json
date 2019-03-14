@@ -18,10 +18,6 @@
             "single",
             "jsx-double"
         ],
-        "semicolon": [
-            true,
-            "never"
-        ],
         "trailing-comma": false,
         "variable-name": [
             true,

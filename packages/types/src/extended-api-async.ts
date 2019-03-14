@@ -1,12 +1,12 @@
-import { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types'
-import { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async'
+import { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types';
+import { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async';
 
 /**
  * ASYNC-only file system.
  * Exposes all base fs APIs plus several higher level methods.
  */
 export interface IFileSystemAsync extends IBaseFileSystemAsync {
-    promises: IFileSystemPromiseActions
+    promises: IFileSystemPromiseActions;
 }
 
 export interface IFileSystemPromiseActions extends IBaseFileSystemPromiseActions, IFileSystemExtendedPromiseActions {}
@@ -18,7 +18,7 @@ export interface IFileSystemExtendedPromiseActions {
      * @param filePath possible file path
      * @param statFn optional custom stat function (e.g. lstat to detect links)
      */
-    fileExists(filePath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>
+    fileExists(filePath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>;
 
     /**
      * Check if a path points to an existing directory.
@@ -26,19 +26,19 @@ export interface IFileSystemExtendedPromiseActions {
      * @param directoryPath possible directory path
      * @param statFn optional custom stat function (e.g. lstatSync to detect links)
      */
-    directoryExists(directoryPath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>
+    directoryExists(directoryPath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>;
 
     /**
      * Ensure that a directory and all its parent directories exist
      */
-    ensureDirectory(directoryPath: string): Promise<void>
+    ensureDirectory(directoryPath: string): Promise<void>;
 
     /**
      * Search for files inside `rootDirectory`.
      *
      * @returns absolute paths of all found files.
      */
-    findFiles(rootDirectory: string, options?: IWalkOptions): Promise<string[]>
+    findFiles(rootDirectory: string, options?: IWalkOptions): Promise<string[]>;
 
     /**
      * Search for a specific file name in parent directory chain.
@@ -46,7 +46,7 @@ export interface IFileSystemExtendedPromiseActions {
      *
      * @returns absolute path of first found file, or `null` if none found.
      */
-    findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>
+    findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>;
 
     /**
      * Search for a specific file name in parent chain.
@@ -54,19 +54,19 @@ export interface IFileSystemExtendedPromiseActions {
      *
      * @returns absolute paths of all found files (ordered from inner most directory and up).
      */
-    findFilesInAncestors(initialDirectory: string, fileName: string): Promise<string[]>
+    findFilesInAncestors(initialDirectory: string, fileName: string): Promise<string[]>;
 
     /**
      * Populates the provided directory with given contents.
      *
      * @returns absolute paths of written files.
      */
-    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>
+    populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>;
 
     /**
      * Recursively remove a path.
      */
-    remove(path: string): Promise<void>
+    remove(path: string): Promise<void>;
 
     /**
      * Read a file and parse it using `JSON.parse`.
@@ -75,7 +75,7 @@ export interface IFileSystemExtendedPromiseActions {
      * @param encoding text encoding to decode file with (defaults to `utf8`).
      * @rejects if there is a reading or parsing error.
      */
-    readJsonFile(filePath: string, encoding?: BufferEncoding): Promise<unknown>
+    readJsonFile(filePath: string, encoding?: BufferEncoding): Promise<unknown>;
 
     /**
      * Recursively walk over a directory and its contents.

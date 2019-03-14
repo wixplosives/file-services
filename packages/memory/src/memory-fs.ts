@@ -1,5 +1,5 @@
-import pathMain from 'path'
-import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils'
+import pathMain from 'path';
+import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils';
 import {
     IDirectoryContents,
     IFileSystemStats,
@@ -7,19 +7,19 @@ import {
     WatchEventListener,
     FileSystemConstants,
     POSIX_ROOT
-} from '@file-services/types'
-import { FsErrorCodes } from './error-codes'
+} from '@file-services/types';
+import { FsErrorCodes } from './error-codes';
 import {
     IMemFileSystem,
     IBaseMemFileSystem,
     IBaseMemFileSystemSync,
     IFsMemFileNode,
     IFsMemDirectoryNode
-} from './types'
+} from './types';
 
 // ugly workaround for webpack's polyfilled path not implementing `.posix` field
 // TODO: inline path-posix implementation taked from latest node's source (faster!)
-const posixPath = (pathMain.posix as typeof pathMain) || pathMain
+const posixPath = (pathMain.posix as typeof pathMain) || pathMain;
 
 /**
  * This is the main function to use, returning a sync/async
@@ -28,18 +28,18 @@ const posixPath = (pathMain.posix as typeof pathMain) || pathMain
  * @param rootContents optional data to populate / with
  */
 export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSystem {
-    const baseFs = createBaseMemoryFs()
+    const baseFs = createBaseMemoryFs();
 
     const fs: IMemFileSystem = {
         ...createFileSystem(baseFs),
         root: baseFs.root
-    }
+    };
 
     if (rootContents) {
-        fs.populateDirectorySync(POSIX_ROOT, rootContents)
+        fs.populateDirectorySync(POSIX_ROOT, rootContents);
     }
 
-    return fs
+    return fs;
 }
 
 /**
@@ -47,8 +47,8 @@ export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSyste
  * in-memory file system (without the extended API).
  */
 export function createBaseMemoryFs(): IBaseMemFileSystem {
-    const syncMemFs = createBaseMemoryFsSync()
-    return { ...syncMemFs, ...syncToAsyncFs(syncMemFs) }
+    const syncMemFs = createBaseMemoryFsSync();
+    return { ...syncMemFs, ...syncToAsyncFs(syncMemFs) };
 }
 
 /**
@@ -56,39 +56,39 @@ export function createBaseMemoryFs(): IBaseMemFileSystem {
  * in-memory file system (without the extended API).
  */
 export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
-    const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root')
-    const pathListeners = new SetMultiMap<string, WatchEventListener>()
-    const globalListeners = new Set<WatchEventListener>()
-    let workingDirectoryPath: string = POSIX_ROOT
+    const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root');
+    const pathListeners = new SetMultiMap<string, WatchEventListener>();
+    const globalListeners = new Set<WatchEventListener>();
+    let workingDirectoryPath: string = POSIX_ROOT;
     return {
         root,
         path: { ...posixPath, resolve: resolvePath },
         watchService: {
             async watchPath(path, listener) {
-                const resolvedPath = resolvePath(path)
+                const resolvedPath = resolvePath(path);
                 if (listener) {
-                    pathListeners.add(resolvedPath, listener)
+                    pathListeners.add(resolvedPath, listener);
                 }
             },
             async unwatchPath(path, listener) {
-                const resolvedPath = resolvePath(path)
+                const resolvedPath = resolvePath(path);
                 if (listener) {
-                    pathListeners.delete(resolvedPath, listener)
+                    pathListeners.delete(resolvedPath, listener);
                 } else {
-                    pathListeners.deleteKey(resolvedPath)
+                    pathListeners.deleteKey(resolvedPath);
                 }
             },
             async unwatchAllPaths() {
-                pathListeners.clear()
+                pathListeners.clear();
             },
             addGlobalListener(listener) {
-                globalListeners.add(listener)
+                globalListeners.add(listener);
             },
             removeGlobalListener(listener) {
-                globalListeners.delete(listener)
+                globalListeners.delete(listener);
             },
             clearGlobalListeners() {
-                globalListeners.clear()
+                globalListeners.clear();
             }
         },
         caseSensitive: false,
@@ -102,301 +102,301 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         readFileSync,
         realpathSync: p => p, // links are not implemented yet
         readlinkSync: () => {
-            throw new Error('links are not implemented yet')
+            throw new Error('links are not implemented yet');
         },
         renameSync,
         rmdirSync,
         statSync,
         unlinkSync,
         writeFileSync
-    }
+    };
 
     function resolvePath(...pathSegments: string[]): string {
-        return posixPath.resolve(workingDirectoryPath, ...pathSegments)
+        return posixPath.resolve(workingDirectoryPath, ...pathSegments);
     }
 
     function cwd(): string {
-        return workingDirectoryPath
+        return workingDirectoryPath;
     }
 
     function chdir(directoryPath: string): void {
-        workingDirectoryPath = resolvePath(directoryPath)
+        workingDirectoryPath = resolvePath(directoryPath);
     }
 
-    function readFileSync(filePath: string): Buffer
-    function readFileSync(filePath: string, _encoding: BufferEncoding): string
+    function readFileSync(filePath: string): Buffer;
+    function readFileSync(filePath: string, _encoding: BufferEncoding): string;
     function readFileSync(filePath: string, _encoding?: BufferEncoding): string | Buffer {
-        const resolvedPath = resolvePath(filePath)
-        const fileNode = getNode(resolvedPath)
+        const resolvedPath = resolvePath(filePath);
+        const fileNode = getNode(resolvedPath);
 
         if (!fileNode) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`);
         } else if (fileNode.type === 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`);
         }
 
-        return fileNode.contents
+        return fileNode.contents;
     }
 
     function writeFileSync(filePath: string, fileContent: string): void {
-        const resolvedPath = resolvePath(filePath)
-        const parentPath = posixPath.dirname(resolvedPath)
-        const parentNode = getNode(parentPath)
+        const resolvedPath = resolvePath(filePath);
+        const parentPath = posixPath.dirname(resolvedPath);
+        const parentNode = getNode(parentPath);
 
         if (!parentNode || parentNode.type !== 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`);
         }
 
-        const fileName = posixPath.basename(resolvedPath)
-        const lowerCaseFileName = fileName.toLowerCase()
-        const fileNode = parentNode.contents.get(lowerCaseFileName)
+        const fileName = posixPath.basename(resolvedPath);
+        const lowerCaseFileName = fileName.toLowerCase();
+        const fileNode = parentNode.contents.get(lowerCaseFileName);
 
         if (!fileNode) {
-            const currentDate = new Date()
+            const currentDate = new Date();
             const newFileNode: IFsMemFileNode = {
                 type: 'file',
                 name: fileName,
                 birthtime: currentDate,
                 mtime: currentDate,
                 contents: fileContent
-            }
-            parentNode.contents.set(lowerCaseFileName, newFileNode)
-            emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newFileNode) })
+            };
+            parentNode.contents.set(lowerCaseFileName, newFileNode);
+            emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newFileNode) });
         } else if (fileNode.type === 'file') {
-            fileNode.mtime = new Date()
-            fileNode.contents = fileContent
-            emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(fileNode) })
+            fileNode.mtime = new Date();
+            fileNode.contents = fileContent;
+            emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(fileNode) });
         } else {
-            throw new Error(`${resolvedPath} EISDIR ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+            throw new Error(`${resolvedPath} EISDIR ${FsErrorCodes.PATH_IS_DIRECTORY}`);
         }
     }
 
     function unlinkSync(filePath: string): void {
-        const resolvedPath = resolvePath(filePath)
-        const parentPath = posixPath.dirname(resolvedPath)
-        const parentNode = getNode(parentPath)
+        const resolvedPath = resolvePath(filePath);
+        const parentPath = posixPath.dirname(resolvedPath);
+        const parentNode = getNode(parentPath);
 
         if (!parentNode || parentNode.type !== 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`);
         }
 
-        const fileName = posixPath.basename(resolvedPath)
-        const lowerCaseFileName = fileName.toLowerCase()
-        const fileNode = parentNode.contents.get(lowerCaseFileName)
+        const fileName = posixPath.basename(resolvedPath);
+        const lowerCaseFileName = fileName.toLowerCase();
+        const fileNode = parentNode.contents.get(lowerCaseFileName);
 
         if (!fileNode) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE}`);
         } else if (fileNode.type === 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`);
         }
 
-        parentNode.contents.delete(lowerCaseFileName)
-        emitWatchEvent({ path: resolvedPath, stats: null })
+        parentNode.contents.delete(lowerCaseFileName);
+        emitWatchEvent({ path: resolvedPath, stats: null });
     }
 
     function readdirSync(directoryPath: string): string[] {
-        const resolvedPath = resolvePath(directoryPath)
-        const directoryNode = getNode(resolvedPath)
+        const resolvedPath = resolvePath(directoryPath);
+        const directoryNode = getNode(resolvedPath);
 
         if (!directoryNode) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`);
         } else if (directoryNode.type === 'file') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_FILE}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_FILE}`);
         }
 
-        return Array.from(directoryNode.contents.values()).map(({ name }) => name)
+        return Array.from(directoryNode.contents.values()).map(({ name }) => name);
     }
 
     function mkdirSync(directoryPath: string): void {
-        const resolvedPath = resolvePath(directoryPath)
-        const parentPath = posixPath.dirname(resolvedPath)
-        const parentNode = getNode(parentPath)
+        const resolvedPath = resolvePath(directoryPath);
+        const parentPath = posixPath.dirname(resolvedPath);
+        const parentNode = getNode(parentPath);
 
         if (!parentNode || parentNode.type !== 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`);
         }
 
-        const directoryName = posixPath.basename(resolvedPath)
-        const lowerCaseDirectoryName = directoryName.toLowerCase()
-        const currentNode = parentNode.contents.get(lowerCaseDirectoryName)
+        const directoryName = posixPath.basename(resolvedPath);
+        const lowerCaseDirectoryName = directoryName.toLowerCase();
+        const currentNode = parentNode.contents.get(lowerCaseDirectoryName);
 
         if (currentNode) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`);
         }
 
-        const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName)
-        parentNode.contents.set(lowerCaseDirectoryName, newDirNode)
+        const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName);
+        parentNode.contents.set(lowerCaseDirectoryName, newDirNode);
 
-        emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newDirNode) })
+        emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newDirNode) });
     }
 
     function rmdirSync(directoryPath: string): void {
-        const resolvedPath = resolvePath(directoryPath)
-        const parentPath = posixPath.dirname(resolvedPath)
-        const parentNode = getNode(parentPath)
+        const resolvedPath = resolvePath(directoryPath);
+        const parentPath = posixPath.dirname(resolvedPath);
+        const parentNode = getNode(parentPath);
 
         if (!parentNode || parentNode.type !== 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`);
         }
 
-        const directoryName = posixPath.basename(resolvedPath)
-        const lowerCaseDirectoryName = directoryName.toLowerCase()
-        const directoryNode = parentNode.contents.get(lowerCaseDirectoryName)
+        const directoryName = posixPath.basename(resolvedPath);
+        const lowerCaseDirectoryName = directoryName.toLowerCase();
+        const directoryNode = parentNode.contents.get(lowerCaseDirectoryName);
 
         if (!directoryNode || directoryNode.type !== 'dir') {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`);
         } else if (directoryNode.contents.size > 0) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`);
         }
 
-        parentNode.contents.delete(lowerCaseDirectoryName)
-        emitWatchEvent({ path: resolvedPath, stats: null })
+        parentNode.contents.delete(lowerCaseDirectoryName);
+        emitWatchEvent({ path: resolvedPath, stats: null });
     }
 
     function existsSync(nodePath: string): boolean {
-        return !!getNode(resolvePath(nodePath))
+        return !!getNode(resolvePath(nodePath));
     }
 
     function statSync(nodePath: string): IFileSystemStats {
-        const resolvedPath = resolvePath(nodePath)
-        const node = getNode(resolvedPath)
+        const resolvedPath = resolvePath(nodePath);
+        const node = getNode(resolvedPath);
         if (!node) {
-            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+            throw new Error(`${resolvedPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`);
         }
-        const { birthtime, mtime } = node
-        const isFile = node.type === 'file' ? returnsTrue : returnsFalse
-        const isDirectory = node.type === 'dir' ? returnsTrue : returnsFalse
-        const isSymbolicLink = returnsFalse
+        const { birthtime, mtime } = node;
+        const isFile = node.type === 'file' ? returnsTrue : returnsFalse;
+        const isDirectory = node.type === 'dir' ? returnsTrue : returnsFalse;
+        const isSymbolicLink = returnsFalse;
 
-        return { isFile, isDirectory, isSymbolicLink, birthtime, mtime }
+        return { isFile, isDirectory, isSymbolicLink, birthtime, mtime };
     }
 
     function renameSync(sourcePath: string, destinationPath: string): void {
-        const resolvedSourcePath = resolvePath(sourcePath)
-        const resolvedDestinationPath = resolvePath(destinationPath)
-        const sourceParentPath = posixPath.dirname(resolvedSourcePath)
-        const sourceParentNode = getNode(sourceParentPath)
+        const resolvedSourcePath = resolvePath(sourcePath);
+        const resolvedDestinationPath = resolvePath(destinationPath);
+        const sourceParentPath = posixPath.dirname(resolvedSourcePath);
+        const sourceParentNode = getNode(sourceParentPath);
 
         if (!sourceParentNode || sourceParentNode.type !== 'dir') {
-            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`);
         }
 
-        const sourceName = posixPath.basename(resolvedSourcePath)
-        const lowerCaseSourceName = sourceName.toLowerCase()
-        const sourceNode = sourceParentNode.contents.get(lowerCaseSourceName)
+        const sourceName = posixPath.basename(resolvedSourcePath);
+        const lowerCaseSourceName = sourceName.toLowerCase();
+        const sourceNode = sourceParentNode.contents.get(lowerCaseSourceName);
 
         if (!sourceNode) {
-            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`);
         }
 
-        const destinationParentPath = posixPath.dirname(resolvedDestinationPath)
-        const destinationParentNode = getNode(destinationParentPath)
+        const destinationParentPath = posixPath.dirname(resolvedDestinationPath);
+        const destinationParentNode = getNode(destinationParentPath);
 
         if (!destinationParentNode || destinationParentNode.type !== 'dir') {
-            throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`);
         }
 
-        const destinationName = posixPath.basename(resolvedDestinationPath)
-        const lowerCaseDestinationName = destinationName.toLowerCase()
-        const destinationNode = destinationParentNode.contents.get(lowerCaseDestinationName)
+        const destinationName = posixPath.basename(resolvedDestinationPath);
+        const lowerCaseDestinationName = destinationName.toLowerCase();
+        const destinationNode = destinationParentNode.contents.get(lowerCaseDestinationName);
 
         if (destinationNode) {
             if (destinationNode.type === 'dir') {
                 if (destinationNode.contents.size > 0) {
-                    throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`)
+                    throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`);
                 }
             } else {
-                throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+                throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`);
             }
         }
 
-        sourceParentNode.contents.delete(lowerCaseSourceName)
-        sourceNode.name = destinationName
-        sourceNode.mtime = new Date()
-        destinationParentNode.contents.set(lowerCaseDestinationName, sourceNode)
+        sourceParentNode.contents.delete(lowerCaseSourceName);
+        sourceNode.name = destinationName;
+        sourceNode.mtime = new Date();
+        destinationParentNode.contents.set(lowerCaseDestinationName, sourceNode);
 
-        emitWatchEvent({ path: resolvedSourcePath, stats: null })
-        emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(sourceNode) })
+        emitWatchEvent({ path: resolvedSourcePath, stats: null });
+        emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(sourceNode) });
     }
 
     function copyFileSync(sourcePath: string, destinationPath: string, flags: number = 0): void {
-        const resolvedSourcePath = resolvePath(sourcePath)
-        const resolvedDestinationPath = resolvePath(destinationPath)
-        const sourceFileNode = getNode(resolvedSourcePath)
+        const resolvedSourcePath = resolvePath(sourcePath);
+        const resolvedDestinationPath = resolvePath(destinationPath);
+        const sourceFileNode = getNode(resolvedSourcePath);
 
         if (!sourceFileNode) {
-            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`)
+            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`);
         }
 
         if (sourceFileNode.type !== 'file') {
-            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+            throw new Error(`${resolvedSourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`);
         }
 
-        const destParentPath = posixPath.dirname(resolvedDestinationPath)
-        const destParentNode = getNode(destParentPath)
+        const destParentPath = posixPath.dirname(resolvedDestinationPath);
+        const destParentNode = getNode(destParentPath);
 
         if (!destParentNode || destParentNode.type !== 'dir') {
-            throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`)
+            throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`);
         }
 
-        const targetName = posixPath.basename(resolvedDestinationPath)
-        const lowerCaseTargetName = targetName.toLowerCase()
-        const destinationFileNode = destParentNode.contents.get(lowerCaseTargetName)
+        const targetName = posixPath.basename(resolvedDestinationPath);
+        const lowerCaseTargetName = targetName.toLowerCase();
+        const destinationFileNode = destParentNode.contents.get(lowerCaseTargetName);
 
         if (destinationFileNode) {
-            const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL) // tslint:disable-line no-bitwise
+            const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL); // tslint:disable-line no-bitwise
 
             if (!shouldOverride) {
-                throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`)
+                throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`);
             }
 
             if (destinationFileNode.type !== 'file') {
-                throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`)
+                throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`);
             }
         }
 
-        const newFileNode: IFsMemFileNode = { ...sourceFileNode, name: targetName, mtime: new Date() }
-        destParentNode.contents.set(lowerCaseTargetName, newFileNode)
+        const newFileNode: IFsMemFileNode = { ...sourceFileNode, name: targetName, mtime: new Date() };
+        destParentNode.contents.set(lowerCaseTargetName, newFileNode);
 
-        emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(newFileNode) })
+        emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(newFileNode) });
     }
 
     function getNode(resolvedPath: string): IFsMemFileNode | IFsMemDirectoryNode | null {
-        const splitPath = resolvedPath.split(posixPath.sep)
+        const splitPath = resolvedPath.split(posixPath.sep);
 
         return splitPath.reduce((fsNode: IFsMemDirectoryNode | IFsMemFileNode | null, depthName: string) => {
             return depthName === ''
                 ? fsNode
-                : (fsNode && fsNode.type === 'dir' && fsNode.contents.get(depthName.toLowerCase())) || null
-        }, root)
+                : (fsNode && fsNode.type === 'dir' && fsNode.contents.get(depthName.toLowerCase())) || null;
+        }, root);
     }
 
     function emitWatchEvent(watchEvent: IWatchEvent): void {
         for (const listener of globalListeners) {
-            listener(watchEvent)
+            listener(watchEvent);
         }
-        const listeners = pathListeners.get(watchEvent.path)
+        const listeners = pathListeners.get(watchEvent.path);
         if (listeners) {
             for (const listener of listeners) {
-                listener(watchEvent)
+                listener(watchEvent);
             }
         }
     }
 }
 
 function createMemDirectory(name: string): IFsMemDirectoryNode {
-    const currentDate = new Date()
+    const currentDate = new Date();
     return {
         type: 'dir',
         name,
         contents: new Map(),
         birthtime: currentDate,
         mtime: currentDate
-    }
+    };
 }
 
-const returnsTrue = () => true
-const returnsFalse = () => false
+const returnsTrue = () => true;
+const returnsFalse = () => false;
 
 function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode): IFileSystemStats {
     return {
@@ -405,5 +405,5 @@ function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode): IFileS
         isFile: node.type === 'file' ? returnsTrue : returnsFalse,
         isDirectory: node.type === 'dir' ? returnsTrue : returnsFalse,
         isSymbolicLink: returnsFalse
-    }
+    };
 }

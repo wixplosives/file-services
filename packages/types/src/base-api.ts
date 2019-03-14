@@ -1,8 +1,8 @@
-import { IBaseFileSystemSync } from './base-api-sync'
-import { IBaseFileSystemAsync } from './base-api-async'
+import { IBaseFileSystemSync } from './base-api-sync';
+import { IBaseFileSystemAsync } from './base-api-async';
 
-export * from './base-api-sync'
-export * from './base-api-async'
+export * from './base-api-sync';
+export * from './base-api-async';
 
 /**
  * SYNC and ASYNC base file system.

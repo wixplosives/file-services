@@ -1,1 +1,1 @@
-export * from './webpack-fs'
+export * from './webpack-fs';

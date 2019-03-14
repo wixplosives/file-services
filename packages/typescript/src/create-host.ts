@@ -1,26 +1,26 @@
-import ts from 'typescript'
-import { IFileSystemSync, IFileSystemPath } from '@file-services/types'
+import ts from 'typescript';
+import { IFileSystemSync, IFileSystemPath } from '@file-services/types';
 
-const UNIX_NEW_LINE = '\n'
-const identity = (val: string) => val
-const toLowerCase = (val: string) => val.toLowerCase()
-const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE
+const UNIX_NEW_LINE = '\n';
+const identity = (val: string) => val;
+const toLowerCase = (val: string) => val.toLowerCase();
+const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE;
 /**
  * Combines all required functionality for parsing config files,
  * formatting diagnostics, and resolving modules using TypeScript.
  */
 export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost, ts.ModuleResolutionHost {
-    getCurrentDirectory: IFileSystemSync['cwd']
-    directoryExists: IFileSystemSync['directoryExistsSync']
+    getCurrentDirectory: IFileSystemSync['cwd'];
+    directoryExists: IFileSystemSync['directoryExistsSync'];
 
-    readDirectory: NonNullable<ts.LanguageServiceHost['readDirectory']>
-    getDirectories: NonNullable<ts.ModuleResolutionHost['getDirectories']>
+    readDirectory: NonNullable<ts.LanguageServiceHost['readDirectory']>;
+    getDirectories: NonNullable<ts.ModuleResolutionHost['getDirectories']>;
 
-    getScriptVersion: ts.LanguageServiceHost['getScriptVersion']
+    getScriptVersion: ts.LanguageServiceHost['getScriptVersion'];
 
-    dirname: IFileSystemPath['dirname']
-    normalize: IFileSystemPath['normalize']
-    join: IFileSystemPath['join']
+    dirname: IFileSystemPath['dirname'];
+    normalize: IFileSystemPath['normalize'];
+    join: IFileSystemPath['join'];
 }
 
 /**
@@ -43,30 +43,30 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         cwd,
         realpathSync,
         path: { join, dirname, normalize }
-    } = fs
+    } = fs;
 
     function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {
-        const files: string[] = []
-        const directories: string[] = []
+        const files: string[] = [];
+        const directories: string[] = [];
 
         try {
-            const dirEntries = readdirSync(path)
+            const dirEntries = readdirSync(path);
             for (const entryName of dirEntries) {
-                const entryStats = statSync(join(path, entryName))
+                const entryStats = statSync(join(path, entryName));
                 if (!entryStats) {
-                    continue
+                    continue;
                 }
                 if (entryStats.isFile()) {
-                    files.push(entryName)
+                    files.push(entryName);
                 } else if (entryStats.isDirectory()) {
-                    directories.push(entryName)
+                    directories.push(entryName);
                 }
             }
         } catch {
             /* */
         }
 
-        return { files, directories }
+        return { files, directories };
     }
 
     return {
@@ -80,25 +80,25 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
                 rootDir,
                 depth,
                 getFileSystemEntries
-            )
+            );
         },
         getDirectories(path) {
-            return getFileSystemEntries(path).directories
+            return getFileSystemEntries(path).directories;
         },
         fileExists: fileExistsSync,
         directoryExists: directoryExistsSync,
         readFile(filePath, encoding = 'utf8') {
             try {
-                return readFileSync(filePath, encoding)
+                return readFileSync(filePath, encoding);
             } catch {
-                return undefined
+                return undefined;
             }
         },
         getScriptVersion(filePath) {
             try {
-                return `${statSync(filePath).mtime.getTime()}`
+                return `${statSync(filePath).mtime.getTime()}`;
             } catch {
-                return `${Date.now()}`
+                return `${Date.now()}`;
             }
         },
         useCaseSensitiveFileNames: caseSensitive,
@@ -109,7 +109,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         dirname,
         normalize,
         join
-    }
+    };
 }
 
 /**
@@ -130,7 +130,7 @@ export function createLanguageServiceHost(
     defaultLibsDirectory: string,
     getCustomTransformers?: () => ts.CustomTransformers | undefined
 ): ts.LanguageServiceHost {
-    const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost
+    const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost;
 
     return {
         ...baseHost,
@@ -138,11 +138,11 @@ export function createLanguageServiceHost(
         getScriptFileNames,
         getCustomTransformers,
         getScriptSnapshot(filePath) {
-            const fileContents = readFile(filePath)
-            return fileContents !== undefined ? ts.ScriptSnapshot.fromString(fileContents) : undefined
+            const fileContents = readFile(filePath);
+            return fileContents !== undefined ? ts.ScriptSnapshot.fromString(fileContents) : undefined;
         },
         getNewLine: () => ts.getNewLineCharacter(getCompilationSettings(), getNewLine),
         getDefaultLibFileName: options => join(defaultLibsDirectory, ts.getDefaultLibFileName(options)),
         useCaseSensitiveFileNames: () => useCaseSensitiveFileNames
-    }
+    };
 }

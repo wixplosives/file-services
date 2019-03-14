@@ -1,22 +1,22 @@
-import path from 'path'
-import fs from 'fs'
-import { promisify } from 'util'
-import { chdir, cwd } from 'process'
+import path from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
+import { chdir, cwd } from 'process';
 
-import { createFileSystem } from '@file-services/utils'
-import { IBaseFileSystem, IFileSystem } from '@file-services/types'
-import { NodeWatchService, INodeWatchServiceOptions } from './watch-service'
+import { createFileSystem } from '@file-services/utils';
+import { IBaseFileSystem, IFileSystem } from '@file-services/types';
+import { NodeWatchService, INodeWatchServiceOptions } from './watch-service';
 
-const { promises, existsSync, exists } = fs
+const { promises, existsSync, exists } = fs;
 
-const caseSensitive = !existsSync(__filename.toUpperCase())
+const caseSensitive = !existsSync(__filename.toUpperCase());
 
 export interface ICreateNodeFsOptions {
-    watchOptions?: INodeWatchServiceOptions
+    watchOptions?: INodeWatchServiceOptions;
 }
 
 export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
-    return createFileSystem(createBaseNodeFs(options))
+    return createFileSystem(createBaseNodeFs(options));
 }
 
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {
@@ -31,7 +31,7 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
             ...promises,
             exists: promisify(exists)
         }
-    }
+    };
 }
 
-export const nodeFs: IFileSystem = createNodeFs()
+export const nodeFs: IFileSystem = createNodeFs();

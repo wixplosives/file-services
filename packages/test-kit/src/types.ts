@@ -5,15 +5,15 @@ export interface ITestInput<T> {
     /**
      * file system to be tested
      */
-    fs: T
+    fs: T;
 
     /**
      * Absolute path to an empty directory
      */
-    tempDirectoryPath: string
+    tempDirectoryPath: string;
 
     /**
      * Post-test cleanup
      */
-    dispose(): Promise<void>
+    dispose(): Promise<void>;
 }

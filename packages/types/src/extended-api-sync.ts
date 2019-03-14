@@ -1,5 +1,5 @@
-import { IWalkOptions, IDirectoryContents, BufferEncoding } from './common-fs-types'
-import { IBaseFileSystemSync } from './base-api-sync'
+import { IWalkOptions, IDirectoryContents, BufferEncoding } from './common-fs-types';
+import { IBaseFileSystemSync } from './base-api-sync';
 
 /**
  * SYNC-only file system.
@@ -14,7 +14,7 @@ export interface IFileSystemExtendedSyncActions {
      * @param filePath possible file path.
      * @param statFn optional custom stat function (e.g. lstat to detect links).
      */
-    fileExistsSync(filePath: string, statFn?: IBaseFileSystemSync['statSync']): boolean
+    fileExistsSync(filePath: string, statFn?: IBaseFileSystemSync['statSync']): boolean;
 
     /**
      * Check if a path points to an existing directory.
@@ -22,19 +22,19 @@ export interface IFileSystemExtendedSyncActions {
      * @param directoryPath possible directory path.
      * @param statFn optional custom stat function (e.g. lstatSync to detect links).
      */
-    directoryExistsSync(directoryPath: string, statFn?: IBaseFileSystemSync['statSync']): boolean
+    directoryExistsSync(directoryPath: string, statFn?: IBaseFileSystemSync['statSync']): boolean;
 
     /**
      * Ensure that a directory and all its parent directories exist
      */
-    ensureDirectorySync(directoryPath: string): void
+    ensureDirectorySync(directoryPath: string): void;
 
     /**
      * Search for files inside `rootDirectory`.
      *
      * @returns absolute paths of all found files.
      */
-    findFilesSync(rootDirectory: string, options?: IWalkOptions): string[]
+    findFilesSync(rootDirectory: string, options?: IWalkOptions): string[];
 
     /**
      * Search for a specific file name in parent directory chain.
@@ -42,7 +42,7 @@ export interface IFileSystemExtendedSyncActions {
      *
      * @returns absolute path of first found file, or `null` if none found.
      */
-    findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null
+    findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null;
 
     /**
      * Search for a specific file name in parent directory chain.
@@ -50,19 +50,19 @@ export interface IFileSystemExtendedSyncActions {
      *
      * @returns absolute paths of all found files (ordered from inner most directory and up).
      */
-    findFilesInAncestorsSync(initialDirectory: string, fileName: string): string[]
+    findFilesInAncestorsSync(initialDirectory: string, fileName: string): string[];
 
     /**
      * Populates the provided directory with given contents.
      *
      * @returns absolute paths of written files.
      */
-    populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[]
+    populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[];
 
     /**
      * Recursively remove a path.
      */
-    removeSync(path: string): void
+    removeSync(path: string): void;
 
     /**
      * Read a file and parse it using `JSON.parse`.
@@ -71,7 +71,7 @@ export interface IFileSystemExtendedSyncActions {
      * @param encoding text encoding to decode file with (defaults to `utf8`).
      * @throws if there is a reading or parsing error.
      */
-    readJsonFileSync(filePath: string, encoding?: BufferEncoding): unknown
+    readJsonFileSync(filePath: string, encoding?: BufferEncoding): unknown;
 
     /**
      * Recursively walk over a directory and its contents.

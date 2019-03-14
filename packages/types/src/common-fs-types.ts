@@ -1,18 +1,18 @@
-export const POSIX_ROOT = '/'
+export const POSIX_ROOT = '/';
 
-export type BufferEncoding = 'ascii' | 'utf8' | 'utf16le' | 'ucs2' | 'base64' | 'latin1' | 'binary' | 'hex'
+export type BufferEncoding = 'ascii' | 'utf8' | 'utf16le' | 'ucs2' | 'base64' | 'latin1' | 'binary' | 'hex';
 
 // use global augmentation so that users without @types/node will have a partial Buffer interface
 declare global {
     // tslint:disable-next-line
     interface Buffer {
-        toString(ecoding?: BufferEncoding): string
+        toString(ecoding?: BufferEncoding): string;
     }
 }
 
-export type CallbackFn<T> = (error: Error | null | undefined, value: T) => void
-export type CallbackFnVoid = (error?: Error | null) => void
-export type ErrorCallbackFn = (error: Error) => void
+export type CallbackFn<T> = (error: Error | null | undefined, value: T) => void;
+export type CallbackFnVoid = (error?: Error | null) => void;
+export type ErrorCallbackFn = (error: Error) => void;
 
 export enum FileSystemConstants {
     /**
@@ -23,7 +23,7 @@ export enum FileSystemConstants {
 }
 
 export interface IDirectoryContents {
-    [nodeName: string]: string | IDirectoryContents
+    [nodeName: string]: string | IDirectoryContents;
 }
 
 /**
@@ -33,27 +33,27 @@ export interface IFileSystemStats {
     /**
      * Creation time
      */
-    birthtime: Date
+    birthtime: Date;
 
     /**
      * Modification time
      */
-    mtime: Date
+    mtime: Date;
 
     /**
      * is the path pointing to a file
      */
-    isFile(): boolean
+    isFile(): boolean;
 
     /**
      * is the path pointing to a directory
      */
-    isDirectory(): boolean
+    isDirectory(): boolean;
 
     /**
      * is the path pointing to a symbolic link
      */
-    isSymbolicLink(): boolean
+    isSymbolicLink(): boolean;
 }
 
 /**
@@ -65,19 +65,19 @@ export interface IFileSystemDescriptor {
      *
      * @example 'package.json'
      */
-    name: string
+    name: string;
 
     /**
      * Absolute path to the file system node.
      *
      * @example '/path/to/package.json'
      */
-    path: string
+    path: string;
 
     /**
      * Stats for the path
      */
-    stats: IFileSystemStats
+    stats: IFileSystemStats;
 }
 
 export interface IWalkOptions {
@@ -87,7 +87,7 @@ export interface IWalkOptions {
      *
      * @default true returned for all files.
      */
-    filterFile?(pathDesc: IFileSystemDescriptor): boolean
+    filterFile?(pathDesc: IFileSystemDescriptor): boolean;
 
     /**
      * Optional directory filtering function that receives a directory descriptor and returns
@@ -95,5 +95,5 @@ export interface IWalkOptions {
      *
      * @default true returned for all directories.
      */
-    filterDirectory?(pathDesc: IFileSystemDescriptor): boolean
+    filterDirectory?(pathDesc: IFileSystemDescriptor): boolean;
 }

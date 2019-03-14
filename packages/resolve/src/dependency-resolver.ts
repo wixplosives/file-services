@@ -5,13 +5,13 @@
  * @param deep should process follow resolved requests, and resolve these assets as well (defaults to `false`).
  * @returns record containing asset keys as fields, and their resolved dependecy requests as values.
  */
-export type DependencyResolver = (assetKey: string | string[], deep?: boolean) => Record<string, ResolvedRequests>
+export type DependencyResolver = (assetKey: string | string[], deep?: boolean) => Record<string, ResolvedRequests>;
 
 /**
  * Record containing requests as fields, and their resolutions (asset keys) as values.
  * `null` is used when a request couldn't be resolved.
  */
-export type ResolvedRequests = Record<string, string | null>
+export type ResolvedRequests = Record<string, string | null>;
 
 export interface IDependencyResolverOptions {
     /**
@@ -20,7 +20,7 @@ export interface IDependencyResolverOptions {
      * @param assetKey unique identifier for an asset to extract from.
      * @returns list of dependency requests by the asset.
      */
-    extractRequests(assetKey: string): string[]
+    extractRequests(assetKey: string): string[];
 
     /**
      * Resolve a dependency request by an asset.
@@ -28,10 +28,10 @@ export interface IDependencyResolverOptions {
      * @param assetKey unique identifier of the requesting asset.
      * @returns unique key for the asset the request resolves to, or `null` if cannot resolve.
      */
-    resolveRequest(assetKey: string, request: string): string | null
+    resolveRequest(assetKey: string, request: string): string | null;
 }
 
-const { hasOwnProperty } = Object.prototype
+const { hasOwnProperty } = Object.prototype;
 
 /**
  * Create a dependency resolver by providing a callback to extract requests,
@@ -42,34 +42,34 @@ export function createDependencyResolver({
     resolveRequest
 }: IDependencyResolverOptions): DependencyResolver {
     return (assetKey, deep) => {
-        const resolvedAssets: Record<string, ResolvedRequests> = {}
-        const assetsToResolve: string[] = Array.isArray(assetKey) ? [...assetKey] : [assetKey]
+        const resolvedAssets: Record<string, ResolvedRequests> = {};
+        const assetsToResolve: string[] = Array.isArray(assetKey) ? [...assetKey] : [assetKey];
 
         while (assetsToResolve.length > 0) {
-            const currentAsset = assetsToResolve.shift()!
+            const currentAsset = assetsToResolve.shift()!;
 
             if (resolvedAssets[currentAsset]) {
-                continue
+                continue;
             }
 
-            const resolvedRequests: ResolvedRequests = {}
-            resolvedAssets[currentAsset] = resolvedRequests
+            const resolvedRequests: ResolvedRequests = {};
+            resolvedAssets[currentAsset] = resolvedRequests;
 
-            const assetRequests = extractRequests(currentAsset)
+            const assetRequests = extractRequests(currentAsset);
 
             for (const request of assetRequests) {
                 if (hasOwnProperty.call(resolvedRequests, request)) {
-                    continue // already resolved this request
+                    continue; // already resolved this request
                 }
 
-                const resolvedRequest = resolveRequest(currentAsset, request)
-                resolvedRequests[request] = resolvedRequest
+                const resolvedRequest = resolveRequest(currentAsset, request);
+                resolvedRequests[request] = resolvedRequest;
                 if (deep && resolvedRequest !== null) {
-                    assetsToResolve.push(resolvedRequest)
+                    assetsToResolve.push(resolvedRequest);
                 }
             }
         }
 
-        return resolvedAssets
-    }
+        return resolvedAssets;
+    };
 }

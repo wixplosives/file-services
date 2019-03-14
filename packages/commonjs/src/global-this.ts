@@ -1,7 +1,7 @@
 // to appease typescript without having to add types of all js environments
-declare const window: object
-declare const global: object
-declare const self: object
+declare const window: object;
+declare const global: object;
+declare const self: object;
 
 export const globalThis =
     typeof self !== 'undefined'
@@ -10,4 +10,4 @@ export const globalThis =
         ? window // browser main/iframe
         : typeof global !== 'undefined'
         ? global // nodejs
-        : undefined
+        : undefined;
