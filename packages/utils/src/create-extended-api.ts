@@ -54,8 +54,11 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         }
     }
 
-    function readJsonFileSync(filePath: string, encoding: BufferEncoding = 'utf8'): unknown {
-        return JSON.parse(readFileSync(filePath, encoding));
+    function readJsonFileSync(
+        filePath: string,
+        encoding: BufferEncoding | { encoding: BufferEncoding } | null
+    ): unknown {
+        return JSON.parse(readFileSync(filePath, encoding || 'utf8'));
     }
 
     function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
@@ -212,8 +215,11 @@ export function createExtendedFileSystemPromiseActions(
         }
     }
 
-    async function readJsonFile(filePath: string, encoding: BufferEncoding = 'utf8'): Promise<unknown> {
-        return JSON.parse(await readFile(filePath, encoding));
+    async function readJsonFile(
+        filePath: string,
+        encoding: BufferEncoding | { encoding: BufferEncoding } | null
+    ): Promise<unknown> {
+        return JSON.parse(await readFile(filePath, encoding || 'utf8'));
     }
 
     async function ensureDirectory(directoryPath: string): Promise<void> {

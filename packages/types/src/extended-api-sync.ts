@@ -68,10 +68,10 @@ export interface IFileSystemExtendedSyncActions {
      * Read a file and parse it using `JSON.parse`.
      *
      * @param filePath path pointing to a `json` file.
-     * @param encoding text encoding to decode file with (defaults to `utf8`).
+     * @param options text encoding to decode file with (defaults to `utf8`).
      * @throws if there is a reading or parsing error.
      */
-    readJsonFileSync(filePath: string, encoding?: BufferEncoding): unknown;
+    readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown;
 
     /**
      * Recursively walk over a directory and its contents.

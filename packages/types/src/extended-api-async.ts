@@ -72,10 +72,10 @@ export interface IFileSystemExtendedPromiseActions {
      * Read a file and parse it using `JSON.parse`.
      *
      * @param filePath path pointing to a `json` file.
-     * @param encoding text encoding to decode file with (defaults to `utf8`).
+     * @param options text encoding to decode file with (defaults to `utf8`).
      * @rejects if there is a reading or parsing error.
      */
-    readJsonFile(filePath: string, encoding?: BufferEncoding): Promise<unknown>;
+    readJsonFile(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): Promise<unknown>;
 
     /**
      * Recursively walk over a directory and its contents.
