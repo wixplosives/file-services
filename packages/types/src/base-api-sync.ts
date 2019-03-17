@@ -1,4 +1,4 @@
-import { IFileSystemStats, BufferEncoding } from './common-fs-types';
+import { IFileSystemStats, BufferEncoding, WriteFileOptions } from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';
 
@@ -39,14 +39,15 @@ export interface IBaseFileSystemSyncActions {
     /**
      * Read the entire contents of a file.
      */
-    readFileSync(filePath: string): Buffer;
-    readFileSync(filePath: string, encoding: BufferEncoding): string;
+    readFileSync(path: string, options?: { encoding?: null; flag?: string } | null): Buffer;
+    readFileSync(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): string;
+    readFileSync(path: string, options?: { encoding?: string | null; flag?: string } | string | null): string | Buffer;
 
     /**
      * Write data to a file, replacing the file if already exists.
      * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
      */
-    writeFileSync(filePath: string, content: string | Buffer, encoding?: BufferEncoding): void;
+    writeFileSync(path: string, data: string | Buffer, options?: WriteFileOptions): void;
 
     /**
      * Delete a name and possibly the file it refers to.

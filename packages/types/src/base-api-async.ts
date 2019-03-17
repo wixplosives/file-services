@@ -1,4 +1,4 @@
-import { IFileSystemStats, BufferEncoding, CallbackFnVoid, CallbackFn } from './common-fs-types';
+import { IFileSystemStats, BufferEncoding, CallbackFnVoid, CallbackFn, WriteFileOptions } from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';
 
@@ -27,15 +27,29 @@ export interface IBaseFileSystemCallbackActions {
     /**
      * Read the entire contents of a file.
      */
-    readFile(filePath: string, callback: CallbackFn<Buffer>): void;
-    readFile(filePath: string, encoding: BufferEncoding, callback: CallbackFn<string>): void;
+    readFile(
+        path: string,
+        options: { encoding?: null; flag?: string } | undefined | null,
+        callback: CallbackFn<Buffer>
+    ): void;
+    readFile(
+        path: string,
+        options: { encoding: BufferEncoding; flag?: string } | BufferEncoding,
+        callback: CallbackFn<string>
+    ): void;
+    readFile(
+        path: string,
+        options: { encoding?: string | null; flag?: string } | string | undefined | null,
+        callback: CallbackFn<string | Buffer>
+    ): void;
+    readFile(path: string, callback: CallbackFn<Buffer>): void;
 
     /**
      * Write data to a file, replacing the file if already exists.
      * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
      */
-    writeFile(filePath: string, content: string | Buffer, callback: CallbackFnVoid): void;
-    writeFile(filePath: string, content: string | Buffer, encoding: BufferEncoding, callback: CallbackFnVoid): void;
+    writeFile(path: string, data: string | Buffer, options: WriteFileOptions, callback: CallbackFnVoid): void;
+    writeFile(path: string, data: string | Buffer, callback: CallbackFnVoid): void;
 
     /**
      * Delete a name and possibly the file it refers to.
@@ -104,14 +118,18 @@ export interface IBaseFileSystemPromiseActions {
     /**
      * Read the entire contents of a file.
      */
-    readFile(filePath: string): Promise<Buffer>;
-    readFile(filePath: string, encoding: BufferEncoding): Promise<string>;
+    readFile(path: string, options?: { encoding?: null; flag?: string } | null): Promise<Buffer>;
+    readFile(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): Promise<string>;
+    readFile(
+        path: string,
+        options?: { encoding?: string | null; flag?: string } | string | null
+    ): Promise<string | Buffer>;
 
     /**
      * Write data to a file, replacing the file if already exists.
      * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
      */
-    writeFile(filePath: string, content: string | Buffer, encoding?: BufferEncoding): Promise<void>;
+    writeFile(path: string, data: string | Buffer, options?: WriteFileOptions): Promise<void>;
 
     /**
      * Delete a name and possibly the file it refers to.

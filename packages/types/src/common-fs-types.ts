@@ -14,6 +14,11 @@ export type CallbackFn<T> = (error: Error | null | undefined, value: T) => void;
 export type CallbackFnVoid = (error?: Error | null) => void;
 export type ErrorCallbackFn = (error: Error) => void;
 
+export type WriteFileOptions =
+    | { encoding?: BufferEncoding | null; mode?: number | string; flag?: string }
+    | BufferEncoding
+    | null;
+
 export enum FileSystemConstants {
     /**
      * When passed as a flag to `copyFile` or `copyFileSync`,
