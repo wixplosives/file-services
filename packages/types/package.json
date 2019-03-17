@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rimraf ./cjs",
     "build": "ts-build ./src --cjs",
-    "lint": "tslint --project src",
+    "lint": "tslint -p src",
     "prepack": "yarn build"
   },
   "files": [
