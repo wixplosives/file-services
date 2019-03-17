@@ -8,8 +8,8 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         caseSensitive: syncFs.caseSensitive,
 
         promises: {
-            async readFile(filePath: string, encoding?: BufferEncoding) {
-                return syncFs.readFileSync(filePath, encoding!);
+            async readFile(filePath: string, ...restArgs: unknown[]) {
+                return syncFs.readFileSync(filePath, ...(restArgs as [BufferEncoding]));
             },
 
             async writeFile(filePath, content, encoding) {

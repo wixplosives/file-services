@@ -11,8 +11,6 @@ import {
 } from '@file-services/types';
 import { createFileSystem } from './create-extended-api';
 
-type CbParams<T1, T2, T3 = T2> = [T1, T2] | [T3];
-
 /**
  * Creates a wrapped `IFileSystem` which scopes the provided `fs`
  * to the provided `directoryPath`.
@@ -94,43 +92,43 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             workingDirectoryPath = resolveScopedPath(path);
         },
         promises: {
-            async copyFile(src, dest, flags) {
+            copyFile(src, dest, flags) {
                 return promises.copyFile(resolveFullPath(src), resolveFullPath(dest), flags);
             },
-            async lstat(path) {
+            lstat(path) {
                 return promises.lstat(resolveFullPath(path));
             },
-            async mkdir(path) {
+            mkdir(path) {
                 return promises.mkdir(resolveFullPath(path));
             },
-            async readdir(path) {
+            readdir(path) {
                 return promises.readdir(resolveFullPath(path));
             },
-            async readFile(path: string, encoding?: BufferEncoding) {
-                return promises.readFile(resolveFullPath(path), encoding!);
+            readFile(path: string, ...restArgs: unknown[]) {
+                return promises.readFile(resolveFullPath(path), ...(restArgs as [BufferEncoding]));
             },
-            async realpath(path) {
+            realpath(path) {
                 return promises.realpath(resolveFullPath(path));
             },
-            async rename(path, newPath) {
+            rename(path, newPath) {
                 return promises.rename(resolveFullPath(path), resolveFullPath(newPath));
             },
-            async rmdir(path) {
+            rmdir(path) {
                 return promises.rmdir(resolveFullPath(path));
             },
-            async exists(path) {
+            exists(path) {
                 return promises.exists(resolveFullPath(path));
             },
-            async stat(path) {
+            stat(path) {
                 return promises.stat(resolveFullPath(path));
             },
-            async unlink(path) {
+            unlink(path) {
                 return promises.unlink(resolveFullPath(path));
             },
-            async writeFile(path, content, encoding) {
+            writeFile(path, content, encoding) {
                 return promises.writeFile(resolveFullPath(path), content, encoding);
             },
-            async readlink(path) {
+            readlink(path) {
                 return promises.readlink(resolveFullPath(path));
             }
         },
@@ -146,8 +144,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdirSync(path) {
             return fs.readdirSync(resolveFullPath(path));
         },
-        readFileSync(path: string, encoding?: BufferEncoding) {
-            return fs.readFileSync(resolveFullPath(path), encoding!);
+        readFileSync(path: string, ...restArgs: unknown[]) {
+            return fs.readFileSync(resolveFullPath(path), ...(restArgs as [BufferEncoding]));
         },
         realpathSync(path) {
             return fs.realpathSync(resolveFullPath(path));
@@ -173,7 +171,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         writeFileSync(path, content, encoding) {
             return fs.writeFileSync(resolveFullPath(path), content, encoding);
         },
-        copyFile(src: string, dest: string, ...restArgs: CbParams<number, CallbackFnVoid>) {
+        copyFile(src: string, dest: string, ...restArgs: unknown[]) {
             fs.copyFile(resolveFullPath(src), resolveFullPath(dest), ...(restArgs as [CallbackFnVoid]));
         },
         lstat(path, callback) {
@@ -185,7 +183,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdir(path, callback) {
             return fs.readdir(resolveFullPath(path), callback);
         },
-        readFile(path: string, ...restArgs: CbParams<BufferEncoding, CallbackFn<string>, CallbackFn<Buffer>>) {
+        readFile(path: string, ...restArgs: unknown[]) {
             return fs.readFile(resolveFullPath(path), ...(restArgs as [CallbackFn<Buffer>]));
         },
         realpath(path, callback) {
@@ -206,8 +204,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         unlink(path, callback) {
             return fs.unlink(resolveFullPath(path), callback);
         },
-        writeFile(path: string, contents: string | Buffer, ...restArgs: CbParams<BufferEncoding, CallbackFnVoid>) {
-            return fs.writeFile(resolveFullPath(path), contents, ...(restArgs as [CallbackFnVoid]));
+        writeFile(path: string, ...restArgs: unknown[]) {
+            return fs.writeFile(resolveFullPath(path), ...(restArgs as [string, CallbackFnVoid]));
         },
         readlink(path, callback) {
             return fs.readlink(resolveFullPath(path), callback);
