@@ -6,7 +6,8 @@ import {
     IWatchEvent,
     WatchEventListener,
     FileSystemConstants,
-    POSIX_ROOT
+    POSIX_ROOT,
+    IBaseFileSystemSyncActions
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes';
 import {
@@ -99,7 +100,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         lstatSync: statSync, // links are not implemented yet
         mkdirSync,
         readdirSync,
-        readFileSync,
+        readFileSync: readFileSync as IBaseFileSystemSyncActions['readFileSync'],
         realpathSync,
         readlinkSync: () => {
             throw new Error('links are not implemented yet');
@@ -123,9 +124,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         workingDirectoryPath = resolvePath(directoryPath);
     }
 
-    function readFileSync(filePath: string): Buffer;
-    function readFileSync(filePath: string, _encoding: BufferEncoding): string;
-    function readFileSync(filePath: string, _encoding?: BufferEncoding): string | Buffer {
+    function readFileSync(filePath: string): string | Buffer {
         const resolvedPath = resolvePath(filePath);
         const fileNode = getNode(resolvedPath);
 
