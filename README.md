@@ -24,6 +24,8 @@ Various file system packages.
 
 - **[@file-services/webpack](https://github.com/wixplosives/file-services/tree/master/packages/webpack)** - Helpers for creation of webpack-compatible file systems.
 
+- **[@file-services/overlay](https://github.com/wixplosives/file-services/tree/master/packages/overlay)** - Overlay files and directories from one file system on top of another.
+
 ### License
 
 MIT
