@@ -15,9 +15,12 @@ export type CallbackFnVoid = (error?: Error | null) => void;
 export type ErrorCallbackFn = (error: Error) => void;
 
 export type WriteFileOptions =
-    | { encoding?: BufferEncoding | null; mode?: number | string; flag?: string }
-    | BufferEncoding
-    | null;
+    | { encoding?: string | null; mode?: number | string; flag?: string }
+    | string
+    | null
+    | undefined;
+
+export type ReadFileOptions = { encoding?: string | null; flag?: string } | string | null | undefined;
 
 export enum FileSystemConstants {
     /**

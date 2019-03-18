@@ -1,4 +1,11 @@
-import { IFileSystemStats, BufferEncoding, CallbackFnVoid, CallbackFn, WriteFileOptions } from './common-fs-types';
+import {
+    IFileSystemStats,
+    BufferEncoding,
+    CallbackFnVoid,
+    CallbackFn,
+    WriteFileOptions,
+    ReadFileOptions
+} from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';
 
@@ -37,11 +44,7 @@ export interface IBaseFileSystemCallbackActions {
         options: { encoding: BufferEncoding; flag?: string } | BufferEncoding,
         callback: CallbackFn<string>
     ): void;
-    readFile(
-        path: string,
-        options: { encoding?: string | null; flag?: string } | string | undefined | null,
-        callback: CallbackFn<string | Buffer>
-    ): void;
+    readFile(path: string, options: ReadFileOptions, callback: CallbackFn<string | Buffer>): void;
     readFile(path: string, callback: CallbackFn<Buffer>): void;
 
     /**
@@ -120,10 +123,7 @@ export interface IBaseFileSystemPromiseActions {
      */
     readFile(path: string, options?: { encoding?: null; flag?: string } | null): Promise<Buffer>;
     readFile(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): Promise<string>;
-    readFile(
-        path: string,
-        options?: { encoding?: string | null; flag?: string } | string | null
-    ): Promise<string | Buffer>;
+    readFile(path: string, options: ReadFileOptions): Promise<string | Buffer>;
 
     /**
      * Write data to a file, replacing the file if already exists.

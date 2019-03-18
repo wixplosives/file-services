@@ -1,4 +1,4 @@
-import { IFileSystemStats, BufferEncoding, WriteFileOptions } from './common-fs-types';
+import { IFileSystemStats, BufferEncoding, WriteFileOptions, ReadFileOptions } from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';
 
@@ -41,7 +41,7 @@ export interface IBaseFileSystemSyncActions {
      */
     readFileSync(path: string, options?: { encoding?: null; flag?: string } | null): Buffer;
     readFileSync(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): string;
-    readFileSync(path: string, options?: { encoding?: string | null; flag?: string } | string | null): string | Buffer;
+    readFileSync(path: string, options: ReadFileOptions): string | Buffer;
 
     /**
      * Write data to a file, replacing the file if already exists.
