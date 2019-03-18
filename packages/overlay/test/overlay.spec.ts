@@ -1,244 +1,95 @@
-import { expect } from 'chai'
-import { createMemoryFs } from '@file-services/memory'
-import { FsErrorCodes } from '@file-services/memory'
-import { asyncBaseFsContract, asyncFsContract, syncBaseFsContract, syncFsContract } from '@file-services/test-kit'
+import { expect } from 'chai';
+import { createMemoryFs } from '@file-services/memory';
+import { asyncBaseFsContract, asyncFsContract, syncBaseFsContract, syncFsContract } from '@file-services/test-kit';
 
-import { createOverlayFs } from '../src/overlay'
+import { createOverlayFs } from '../src/overlay';
 
-const testOriginContent = `module.exports = 'Tik'`
-const testOverlayContent = `module.exports = 'Tak'`
-const testCustomContent = `module.exports = 'Tok'`
+const sampleContent1 = `111`;
+const sampleContent2 = `222`;
+const sampleContent3 = `333`;
 
-describe('async overlay', () => {
+describe('overlay fs', () => {
     const testProvider = async () => {
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({})
-
-        const overlay = createOverlayFs(originFs, overlayFs)
         return {
-            fs: overlay,
+            fs: createOverlayFs(createMemoryFs(), createMemoryFs()),
             dispose: async () => undefined,
             tempDirectoryPath: '/'
-        }
-    }
+        };
+    };
 
-    asyncBaseFsContract(testProvider)
-    asyncFsContract(testProvider)
+    syncBaseFsContract(testProvider);
+    asyncBaseFsContract(testProvider);
+    syncFsContract(testProvider);
+    asyncFsContract(testProvider);
 
-    it('writes file to overlay based on file path that exists only in origin', async () => {
-        const testFilePath = '/src/components/menu.js'
-        const originFs = createMemoryFs({
-            src: {
-                components: {
-                    'button.js': testOriginContent
-                }
-            }
-        })
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
+    it('overlays higher fs files and folders over lower fs', async () => {
+        const srcFile1Path = '/src/file1.js';
+        const srcFile2Path = '/src/file2.js';
+        const rootFile1Path = '/src/file2.js';
+        const folderPath = '/empty-folder';
 
-        expect(await overlay.fileExists(testFilePath)).to.eql(false)
+        const lower = createMemoryFs({
+            [srcFile1Path]: sampleContent1,
+            [srcFile2Path]: sampleContent2
+        });
+        const higher = createMemoryFs({
+            [rootFile1Path]: sampleContent3,
+            [srcFile2Path]: sampleContent3,
+            [folderPath]: {}
+        });
 
-        await overlay.writeFile(testFilePath, testCustomContent)
+        const {
+            readFileSync,
+            fileExistsSync,
+            directoryExistsSync,
+            existsSync,
+            promises: { readFile, fileExists, directoryExists, exists }
+        } = createOverlayFs(lower, higher);
 
-        expect(await overlay.fileExists(testFilePath)).to.eql(true)
-        expect(await originFs.fileExists(testFilePath), 'ensure that file was not created in origin').to.eql(false)
-    })
+        expect(readFileSync(srcFile1Path, 'utf8')).to.equal(sampleContent1);
+        expect(readFileSync(srcFile2Path, 'utf8')).to.equal(sampleContent3);
+        expect(readFileSync(rootFile1Path, 'utf8')).to.equal(sampleContent3);
 
-    it('throws when writing file to directory that does not exist in origin', async () => {
-        const testFilePath = '/src/components/menu.js'
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
+        expect(await readFile(srcFile1Path, 'utf8')).to.equal(sampleContent1);
+        expect(await readFile(srcFile2Path, 'utf8')).to.equal(sampleContent3);
+        expect(await readFile(rootFile1Path, 'utf8')).to.equal(sampleContent3);
 
-        expect(await overlay.fileExists(testFilePath)).to.eql(false)
+        expect(fileExistsSync(srcFile1Path)).to.equal(true);
+        expect(fileExistsSync(srcFile2Path)).to.equal(true);
+        expect(fileExistsSync(rootFile1Path)).to.equal(true);
+        expect(directoryExistsSync(folderPath)).to.equal(true);
+        expect(existsSync(folderPath)).to.equal(true);
 
-        await expect(overlay.writeFile(testFilePath, testCustomContent)).to.be.rejectedWith(
-            `${testFilePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`
-        )
-    })
+        expect(await fileExists(srcFile1Path)).to.equal(true);
+        expect(await fileExists(srcFile2Path)).to.equal(true);
+        expect(await fileExists(rootFile1Path)).to.equal(true);
+        expect(await directoryExists(folderPath)).to.equal(true);
+        expect(await exists(folderPath)).to.equal(true);
+    });
 
-    it('copies file to a directory in overlay based on path that exists only in origin', async () => {
-        const testFilePath = '/utils/index.js'
-        const originFs = createMemoryFs({
-            utils: {}
-        })
-        const overlayFs = createMemoryFs({
-            src: {
-                'index.js': testOverlayContent
-            }
-        })
-        const overlay = createOverlayFs(originFs, overlayFs)
+    it('combines child nodes from both higher and lower file systems', async () => {
+        const commonFolder = '/src';
+        const fileInLower = '/src/file1.js';
+        const fileInHigher = '/src/file2.js';
+        const folderInLower = '/src/folder-1';
+        const folderInHigher = '/src/folder-2';
 
-        expect(await overlay.fileExists(testFilePath)).to.eql(false)
+        const lower = createMemoryFs({
+            [fileInLower]: sampleContent1,
+            [folderInLower]: {}
+        });
 
-        await overlay.copyFile('/src/index.js', '/utils/index.js')
+        const higher = createMemoryFs({
+            [fileInHigher]: sampleContent1,
+            [folderInHigher]: {}
+        });
 
-        expect(await overlay.fileExists(testFilePath)).to.eql(true)
-        expect(await originFs.fileExists(testFilePath), 'ensure that file was not copied to origin').to.eql(false)
-    })
+        const {
+            readdirSync,
+            promises: { readdir }
+        } = createOverlayFs(lower, higher);
 
-    it('throws when copying file to directory that does not exist in both file systems', async () => {
-        const testFilePath = '/utils/index.js'
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({
-            src: {
-                'index.js': testOverlayContent
-            }
-        })
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(await overlay.fileExists(testFilePath)).to.eql(false)
-
-        await expect(overlay.copyFile('/src/index.js', '/utils/index.js')).to.be.rejectedWith(
-            FsErrorCodes.CONTAINING_NOT_EXISTS
-        )
-    })
-
-    it('creates a directory in overlay based on path that exists only in origin', async () => {
-        const testFilePath = '/src/components'
-        const originFs = createMemoryFs({
-            src: {}
-        })
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(await overlay.directoryExists(testFilePath)).to.eql(false)
-
-        await overlay.mkdir(testFilePath)
-
-        expect(await overlay.directoryExists(testFilePath)).to.eql(true)
-        expect(await originFs.directoryExists(testFilePath)).to.eql(
-            false,
-            'ensure that directory was not created in origin'
-        )
-    })
-
-    it('throws when creating a directory in a directory that does not exist in both file systems', async () => {
-        const testFilePath = '/src/components'
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(await overlay.directoryExists(testFilePath)).to.eql(false)
-
-        await expect(overlay.mkdir(testFilePath)).to.be.rejectedWith(FsErrorCodes.CONTAINING_NOT_EXISTS)
-    })
-})
-
-describe('sync overlay', () => {
-    const testProvider = async () => {
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({})
-
-        const overlay = createOverlayFs(originFs, overlayFs)
-        return {
-            fs: overlay,
-            dispose: async () => undefined,
-            tempDirectoryPath: '/'
-        }
-    }
-
-    syncBaseFsContract(testProvider)
-    syncFsContract(testProvider)
-
-    it('writes file to overlay based on file path that exists only in origin', () => {
-        const testFilePath = '/src/components/menu.js'
-        const originFs = createMemoryFs({
-            src: {
-                components: {
-                    'button.js': testOriginContent
-                }
-            }
-        })
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(overlay.fileExistsSync(testFilePath)).to.eql(false)
-
-        overlay.writeFileSync(testFilePath, testCustomContent)
-
-        expect(overlay.fileExistsSync(testFilePath)).to.eql(true)
-        expect(originFs.fileExistsSync(testFilePath), 'ensure that file was not created in origin').to.eql(false)
-    })
-
-    it('throws when writing file to directory that does not exist in origin', () => {
-        const testFilePath = '/src/components/menu.js'
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(overlay.fileExistsSync(testFilePath)).to.eql(false)
-
-        expect(() => overlay.writeFileSync(testFilePath, testCustomContent)).to.throw(
-            `${testFilePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`
-        )
-    })
-
-    it('copies file to a directory in overlay based on path that exists only in origin', () => {
-        const testFilePath = '/utils/index.js'
-        const originFs = createMemoryFs({
-            utils: {}
-        })
-        const overlayFs = createMemoryFs({
-            src: {
-                'index.js': testOverlayContent
-            }
-        })
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(overlay.fileExistsSync(testFilePath)).to.eql(false)
-
-        overlay.copyFileSync('/src/index.js', '/utils/index.js')
-
-        expect(overlay.fileExistsSync(testFilePath)).to.eql(true)
-        expect(originFs.fileExistsSync(testFilePath), 'ensure that file was not copied to origin').to.eql(false)
-    })
-
-    it('throws when copying file to directory that does not exist in both file systems', () => {
-        const testFilePath = '/utils/index.js'
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({
-            src: {
-                'index.js': testOverlayContent
-            }
-        })
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(overlay.fileExistsSync(testFilePath)).to.eql(false)
-
-        expect(() => overlay.copyFileSync('/src/index.js', '/utils/index.js')).to.throw(
-            FsErrorCodes.CONTAINING_NOT_EXISTS
-        )
-    })
-
-    it('creates a directory in overlay based on path that exists only in origin', () => {
-        const testFilePath = '/src/components'
-        const originFs = createMemoryFs({
-            src: {}
-        })
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(overlay.directoryExistsSync(testFilePath)).to.eql(false)
-
-        overlay.mkdirSync(testFilePath)
-
-        expect(overlay.directoryExistsSync(testFilePath)).to.eql(true)
-        expect(originFs.directoryExistsSync(testFilePath)).to.eql(
-            false,
-            'ensure that directory was not created in origin'
-        )
-    })
-
-    it('throws when creating a directory in a directory that does not exist in both file systems', () => {
-        const testFilePath = '/src/components'
-        const originFs = createMemoryFs({})
-        const overlayFs = createMemoryFs({})
-        const overlay = createOverlayFs(originFs, overlayFs)
-
-        expect(overlay.directoryExistsSync(testFilePath)).to.eql(false)
-
-        expect(() => overlay.mkdirSync(testFilePath)).to.throw(FsErrorCodes.CONTAINING_NOT_EXISTS)
-    })
-})
+        expect(readdirSync(commonFolder)).to.eql(['file1.js', 'folder-1', 'file2.js', 'folder-2']);
+        expect(await readdir(commonFolder)).to.eql(['file1.js', 'folder-1', 'file2.js', 'folder-2']);
+    });
+});
