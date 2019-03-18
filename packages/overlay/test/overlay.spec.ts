@@ -1,8 +1,7 @@
 import { expect } from 'chai';
-import { createMemoryFs } from '@file-services/memory';
 import { asyncBaseFsContract, asyncFsContract, syncBaseFsContract, syncFsContract } from '@file-services/test-kit';
-
-import { createOverlayFs } from '../src/overlay';
+import { createMemoryFs } from '@file-services/memory';
+import { createOverlayFs } from '@file-services/overlay';
 
 const sampleContent1 = `111`;
 const sampleContent2 = `222`;
