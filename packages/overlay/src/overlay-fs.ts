@@ -124,17 +124,17 @@ export function createOverlayFs(
                 return lowerPromises.exists(resolvedLowerPath);
             }
         },
-        async readFile(path: string, ...restArgs: [ReadFileOptions]) {
+        readFile: async function readFile(path: string, ...restArgs: [ReadFileOptions]) {
             const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
             if (resolvedUpperPath !== undefined) {
                 try {
-                    return (await upperPromises.readFile(resolvedUpperPath, ...restArgs)) as string;
+                    return await upperPromises.readFile(resolvedUpperPath, ...restArgs);
                 } catch {
                     /**/
                 }
             }
-            return lowerPromises.readFile(resolvedLowerPath, ...restArgs) as Promise<string>;
-        },
+            return lowerPromises.readFile(resolvedLowerPath, ...restArgs);
+        } as IBaseFileSystemPromiseActions['readFile'],
         async stat(path) {
             const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
             if (resolvedUpperPath !== undefined) {
