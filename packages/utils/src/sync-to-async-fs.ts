@@ -1,4 +1,4 @@
-import { IBaseFileSystemSync, IBaseFileSystemAsync, BufferEncoding } from '@file-services/types';
+import { IBaseFileSystemSync, IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from '@file-services/types';
 import { callbackify } from './callbackify';
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
@@ -8,12 +8,12 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         caseSensitive: syncFs.caseSensitive,
 
         promises: {
-            async readFile(filePath: string, ...restArgs: unknown[]) {
-                return syncFs.readFileSync(filePath, ...(restArgs as [BufferEncoding]));
-            },
+            readFile: async function readFile(...args: [string]) {
+                return syncFs.readFileSync(...args);
+            } as IBaseFileSystemPromiseActions['readFile'],
 
-            async writeFile(filePath, content, encoding) {
-                return syncFs.writeFileSync(filePath, content, encoding);
+            async writeFile(...args) {
+                return syncFs.writeFileSync(...args);
             },
 
             async unlink(filePath) {
@@ -48,24 +48,24 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
                 return syncFs.realpathSync(nodePath);
             },
 
-            async rename(path, newPath) {
-                return syncFs.renameSync(path, newPath);
+            async rename(srcPath, destPath) {
+                return syncFs.renameSync(srcPath, destPath);
             },
 
-            async copyFile(src, dest, flags) {
-                return syncFs.copyFileSync(src, dest, flags);
+            async copyFile(...args) {
+                return syncFs.copyFileSync(...args);
             },
 
             async readlink(path) {
                 return syncFs.readlinkSync(path);
             }
         },
-
         exists(nodePath, callback) {
             callback(syncFs.existsSync(nodePath));
         },
         readFile: callbackify(syncFs.readFileSync) as IBaseFileSystemAsync['readFile'],
         writeFile: callbackify(syncFs.writeFileSync) as IBaseFileSystemAsync['writeFile'],
+        copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync['copyFile'],
         unlink: callbackify(syncFs.unlinkSync),
         readdir: callbackify(syncFs.readdirSync),
         mkdir: callbackify(syncFs.mkdirSync),
@@ -74,7 +74,6 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         lstat: callbackify(syncFs.lstatSync),
         realpath: callbackify(syncFs.realpathSync),
         rename: callbackify(syncFs.renameSync),
-        copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync['copyFile'],
         readlink: callbackify(syncFs.readlinkSync)
     };
 }

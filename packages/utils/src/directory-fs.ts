@@ -5,9 +5,13 @@ import {
     IWatchService,
     IFileSystemPath,
     POSIX_ROOT,
-    BufferEncoding,
     CallbackFn,
-    CallbackFnVoid
+    CallbackFnVoid,
+    IBaseFileSystemSyncActions,
+    IBaseFileSystemCallbackActions,
+    IBaseFileSystemPromiseActions,
+    ReadFileOptions,
+    WriteFileOptions
 } from '@file-services/types';
 import { createFileSystem } from './create-extended-api';
 
@@ -92,8 +96,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             workingDirectoryPath = resolveScopedPath(path);
         },
         promises: {
-            copyFile(src, dest, flags) {
-                return promises.copyFile(resolveFullPath(src), resolveFullPath(dest), flags);
+            copyFile(srcPath, destPath, ...restArgs) {
+                return promises.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...restArgs);
             },
             lstat(path) {
                 return promises.lstat(resolveFullPath(path));
@@ -104,14 +108,14 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             readdir(path) {
                 return promises.readdir(resolveFullPath(path));
             },
-            readFile(path: string, ...restArgs: unknown[]) {
-                return promises.readFile(resolveFullPath(path), ...(restArgs as [BufferEncoding]));
-            },
+            readFile: function readFile(path: string, ...restArgs: [ReadFileOptions]) {
+                return promises.readFile(resolveFullPath(path), ...restArgs);
+            } as IBaseFileSystemPromiseActions['readFile'],
             realpath(path) {
                 return promises.realpath(resolveFullPath(path));
             },
-            rename(path, newPath) {
-                return promises.rename(resolveFullPath(path), resolveFullPath(newPath));
+            rename(srcPath, destPath) {
+                return promises.rename(resolveFullPath(srcPath), resolveFullPath(destPath));
             },
             rmdir(path) {
                 return promises.rmdir(resolveFullPath(path));
@@ -125,15 +129,15 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             unlink(path) {
                 return promises.unlink(resolveFullPath(path));
             },
-            writeFile(path, content, encoding) {
-                return promises.writeFile(resolveFullPath(path), content, encoding);
+            writeFile(path, ...restArgs) {
+                return promises.writeFile(resolveFullPath(path), ...restArgs);
             },
             readlink(path) {
                 return promises.readlink(resolveFullPath(path));
             }
         },
-        copyFileSync(src, dest, flags) {
-            return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), flags);
+        copyFileSync(src, dest, ...restArgs) {
+            return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...restArgs);
         },
         lstatSync(path) {
             return fs.lstatSync(resolveFullPath(path));
@@ -144,17 +148,17 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdirSync(path) {
             return fs.readdirSync(resolveFullPath(path));
         },
-        readFileSync(path: string, ...restArgs: unknown[]) {
-            return fs.readFileSync(resolveFullPath(path), ...(restArgs as [BufferEncoding]));
-        },
+        readFileSync: function readFileSync(path: string, ...restArgs: [ReadFileOptions]) {
+            return fs.readFileSync(resolveFullPath(path), ...restArgs);
+        } as IBaseFileSystemSyncActions['readFileSync'],
         realpathSync(path) {
             return fs.realpathSync(resolveFullPath(path));
         },
         readlinkSync(path) {
             return fs.readlinkSync(resolveFullPath(path));
         },
-        renameSync(path, newPath) {
-            return fs.renameSync(resolveFullPath(path), resolveFullPath(newPath));
+        renameSync(srcPath, destPath) {
+            return fs.renameSync(resolveFullPath(srcPath), resolveFullPath(destPath));
         },
         rmdirSync(path) {
             return fs.rmdirSync(resolveFullPath(path));
@@ -168,12 +172,12 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         unlinkSync(path) {
             return fs.unlinkSync(resolveFullPath(path));
         },
-        writeFileSync(path, content, encoding) {
-            return fs.writeFileSync(resolveFullPath(path), content, encoding);
+        writeFileSync(path, ...restArgs: [string, WriteFileOptions]) {
+            return fs.writeFileSync(resolveFullPath(path), ...restArgs);
         },
-        copyFile(src: string, dest: string, ...restArgs: unknown[]) {
-            fs.copyFile(resolveFullPath(src), resolveFullPath(dest), ...(restArgs as [CallbackFnVoid]));
-        },
+        copyFile: function copyFile(srcPath: string, destPath: string, ...restArgs: [CallbackFnVoid]) {
+            fs.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...restArgs);
+        } as IBaseFileSystemCallbackActions['copyFile'],
         lstat(path, callback) {
             fs.lstat(resolveFullPath(path), callback);
         },
@@ -183,9 +187,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdir(path, callback) {
             return fs.readdir(resolveFullPath(path), callback);
         },
-        readFile(path: string, ...restArgs: unknown[]) {
-            return fs.readFile(resolveFullPath(path), ...(restArgs as [CallbackFn<Buffer>]));
-        },
+        readFile: function readFile(path: string, ...restArgs: [string, CallbackFn<string | Buffer>]) {
+            return fs.readFile(resolveFullPath(path), ...restArgs);
+        } as IBaseFileSystemCallbackActions['readFile'],
         realpath(path, callback) {
             return fs.realpath(resolveFullPath(path), callback);
         },
@@ -204,9 +208,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         unlink(path, callback) {
             return fs.unlink(resolveFullPath(path), callback);
         },
-        writeFile(path: string, ...restArgs: unknown[]) {
-            return fs.writeFile(resolveFullPath(path), ...(restArgs as [string, CallbackFnVoid]));
-        },
+        writeFile: function writeFile(path: string, ...restArgs: [string, CallbackFnVoid]) {
+            return fs.writeFile(resolveFullPath(path), ...restArgs);
+        } as IBaseFileSystemCallbackActions['writeFile'],
         readlink(path, callback) {
             return fs.readlink(resolveFullPath(path), callback);
         }
