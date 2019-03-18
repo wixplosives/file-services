@@ -8,125 +8,210 @@ import {
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
-export function createOverlayFs(lowerFs: IFileSystem, upperFs: IFileSystem): IFileSystem {
-    const { promises: lowerPromises } = lowerFs;
+export function createOverlayFs(
+    lowerFs: IFileSystem,
+    upperFs: IFileSystem,
+    baseDirectoryPath = lowerFs.cwd()
+): IFileSystem {
+    const { promises: lowerPromises, path: lowerPath } = lowerFs;
     const { promises: upperPromises } = upperFs;
+    const lowerFsRelativeUp = `..${lowerPath.sep}`;
+
+    // ensure base Directory is absolute
+    baseDirectoryPath = lowerPath.resolve(baseDirectoryPath);
+
+    function resolvePaths(path: string): { resolvedLowerPath: string; resolvedUpperPath?: string } {
+        const resolvedLowerPath = lowerPath.resolve(path);
+        const relativeToBase = lowerPath.relative(baseDirectoryPath, resolvedLowerPath);
+
+        if (!relativeToBase.startsWith(lowerFsRelativeUp) && !lowerPath.isAbsolute(lowerFsRelativeUp)) {
+            return { resolvedLowerPath, resolvedUpperPath: relativeToBase.replace(/\\/g, '/') };
+        } else {
+            return { resolvedLowerPath };
+        }
+    }
 
     const baseSyncActions: Partial<IBaseFileSystemSyncActions> = {
         existsSync(path) {
-            return upperFs.existsSync(path) || lowerFs.existsSync(path);
-        },
-        readFileSync: function readFileSync(filePath: string, options?: ReadFileOptions): string | Buffer {
-            try {
-                return upperFs.readFileSync(filePath, options!);
-            } catch (e) {
-                return lowerFs.readFileSync(filePath, options!);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                return upperFs.existsSync(resolvedUpperPath) || lowerFs.existsSync(resolvedLowerPath);
+            } else {
+                return lowerFs.existsSync(resolvedLowerPath);
             }
+        },
+        readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]): string | Buffer {
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return upperFs.readFileSync(resolvedUpperPath, ...args);
+                } catch {
+                    /**/
+                }
+            }
+            return lowerFs.readFileSync(resolvedLowerPath, ...args);
         } as IBaseFileSystemSyncActions['readFileSync'],
         statSync(path) {
-            try {
-                return upperFs.statSync(path);
-            } catch (e) {
-                return lowerFs.statSync(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return upperFs.statSync(resolvedUpperPath);
+                } catch {
+                    /**/
+                }
             }
+            return lowerFs.statSync(resolvedLowerPath);
         },
         lstatSync(path) {
-            try {
-                return upperFs.lstatSync(path);
-            } catch (e) {
-                return lowerFs.lstatSync(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return upperFs.lstatSync(resolvedUpperPath);
+                } catch {
+                    /**/
+                }
             }
+            return lowerFs.lstatSync(resolvedLowerPath);
         },
         realpathSync(path) {
-            try {
-                return upperFs.realpathSync(path);
-            } catch (e) {
-                return lowerFs.realpathSync(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return lowerPath.join(baseDirectoryPath, upperFs.realpathSync(resolvedUpperPath));
+                } catch {
+                    /**/
+                }
             }
+            return lowerFs.realpathSync(resolvedLowerPath);
         },
         readlinkSync(path) {
-            try {
-                return upperFs.readlinkSync(path);
-            } catch (e) {
-                return lowerFs.readlinkSync(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return upperFs.readlinkSync(resolvedUpperPath);
+                } catch {
+                    /**/
+                }
             }
+            return lowerFs.readlinkSync(resolvedLowerPath);
         },
         readdirSync(path) {
-            try {
-                const resInUpper = upperFs.readdirSync(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
                 try {
-                    return [...lowerFs.readdirSync(path), ...resInUpper];
+                    const resInUpper = upperFs.readdirSync(resolvedUpperPath);
+                    try {
+                        return [...lowerFs.readdirSync(resolvedLowerPath), ...resInUpper];
+                    } catch {
+                        return resInUpper;
+                    }
                 } catch {
-                    return resInUpper;
+                    /**/
                 }
-            } catch {
-                return lowerFs.readdirSync(path);
             }
+            return lowerFs.readdirSync(resolvedLowerPath);
         }
     };
 
     const basePromiseActions: Partial<IBaseFileSystemPromiseActions> = {
         async exists(path) {
-            return (await upperPromises.exists(path)) || (await lowerPromises.exists(path));
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                return (
+                    (await upperPromises.exists(resolvedUpperPath)) || (await lowerPromises.exists(resolvedLowerPath))
+                );
+            } else {
+                return lowerPromises.exists(resolvedLowerPath);
+            }
         },
         async readFile(path: string, ...restArgs: [ReadFileOptions]) {
-            try {
-                return (await upperPromises.readFile(path, ...restArgs)) as string;
-            } catch (e) {
-                return lowerPromises.readFile(path, ...restArgs) as Promise<string>;
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return (await upperPromises.readFile(resolvedUpperPath, ...restArgs)) as string;
+                } catch {
+                    /**/
+                }
             }
+            return lowerPromises.readFile(resolvedLowerPath, ...restArgs) as Promise<string>;
         },
         async stat(path) {
-            try {
-                return await upperPromises.stat(path);
-            } catch (e) {
-                return lowerPromises.stat(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return await upperPromises.stat(resolvedUpperPath);
+                } catch {
+                    /**/
+                }
             }
+            return lowerPromises.stat(resolvedLowerPath);
         },
         async lstat(path) {
-            try {
-                return await upperPromises.lstat(path);
-            } catch (e) {
-                return lowerPromises.lstat(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return await upperPromises.lstat(resolvedUpperPath);
+                } catch {
+                    /**/
+                }
             }
+            return lowerPromises.lstat(resolvedLowerPath);
         },
         async realpath(path) {
-            try {
-                return await upperPromises.realpath(path);
-            } catch (e) {
-                return lowerPromises.realpath(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return lowerPath.join(baseDirectoryPath, await upperPromises.realpath(resolvedUpperPath));
+                } catch {
+                    /**/
+                }
             }
+            return lowerPromises.realpath(resolvedLowerPath);
         },
         async readlink(path) {
-            try {
-                return await upperPromises.readlink(path);
-            } catch (e) {
-                return lowerPromises.readlink(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                try {
+                    return await upperPromises.readlink(resolvedUpperPath);
+                } catch {
+                    /**/
+                }
             }
+            return lowerPromises.readlink(resolvedLowerPath);
         },
         async readdir(path) {
-            try {
-                const resInUpper = await upperPromises.readdir(path);
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
                 try {
-                    return [...(await lowerPromises.readdir(path)), ...resInUpper];
-                } catch {
+                    const resInUpper = await upperPromises.readdir(resolvedUpperPath);
+                    try {
+                        return [...(await lowerPromises.readdir(resolvedLowerPath)), ...resInUpper];
+                    } catch {
+                        /**/
+                    }
                     return resInUpper;
+                } catch {
+                    /**/
                 }
-            } catch {
-                return lowerPromises.readdir(path);
             }
+            return lowerPromises.readdir(resolvedLowerPath);
         }
     };
 
     const baseCallbackActions: Partial<IBaseFileSystemCallbackActions> = {
         exists(path, callback) {
-            upperFs.exists(path, pathExists => {
-                if (pathExists) {
-                    callback(pathExists);
-                } else {
-                    lowerFs.exists(path, callback);
-                }
-            });
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.exists(resolvedUpperPath, pathExists => {
+                    if (pathExists) {
+                        callback(pathExists);
+                    } else {
+                        lowerFs.exists(resolvedLowerPath, callback);
+                    }
+                });
+            } else {
+                lowerFs.exists(resolvedLowerPath, callback);
+            }
         },
         readFile(
             path: string,
@@ -139,64 +224,94 @@ export function createOverlayFs(lowerFs: IFileSystem, upperFs: IFileSystem): IFi
             } else if (typeof callback !== 'function') {
                 throw new Error(`callback is not a function.`);
             }
-            upperFs.readFile(path, options, (upperError, upperValue) => {
-                if (upperError) {
-                    lowerFs.readFile(path, options as string, callback as CallbackFn<Buffer | string>);
-                } else {
-                    (callback as CallbackFn<Buffer | string>)(upperError, upperValue);
-                }
-            });
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.readFile(resolvedUpperPath, options, (upperError, upperValue) => {
+                    if (upperError) {
+                        lowerFs.readFile(resolvedLowerPath, options as string, callback as CallbackFn<Buffer | string>);
+                    } else {
+                        (callback as CallbackFn<Buffer | string>)(upperError, upperValue);
+                    }
+                });
+            } else {
+                lowerFs.readFile(resolvedLowerPath, options, callback as CallbackFn<Buffer | string>);
+            }
         },
         stat(path, callback) {
-            upperFs.stat(path, (e, stats) => {
-                if (e) {
-                    lowerFs.stat(path, callback);
-                } else {
-                    callback(e, stats);
-                }
-            });
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.stat(resolvedUpperPath, (e, stats) => {
+                    if (e) {
+                        lowerFs.stat(resolvedLowerPath, callback);
+                    } else {
+                        callback(e, stats);
+                    }
+                });
+            } else {
+                lowerFs.stat(resolvedLowerPath, callback);
+            }
         },
         lstat(path, callback) {
-            upperFs.lstat(path, (e, stats) => {
-                if (e) {
-                    lowerFs.lstat(path, callback);
-                } else {
-                    callback(e, stats);
-                }
-            });
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.lstat(resolvedUpperPath, (e, stats) => {
+                    if (e) {
+                        lowerFs.lstat(resolvedLowerPath, callback);
+                    } else {
+                        callback(e, stats);
+                    }
+                });
+            } else {
+                lowerFs.lstat(resolvedLowerPath, callback);
+            }
         },
         realpath(path, callback) {
-            upperFs.realpath(path, (e, realPath) => {
-                if (e) {
-                    lowerFs.realpath(path, callback);
-                } else {
-                    callback(e, realPath);
-                }
-            });
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.realpath(resolvedUpperPath, (e, realPath) => {
+                    if (e) {
+                        lowerFs.realpath(resolvedLowerPath, callback);
+                    } else {
+                        callback(e, lowerPath.join(baseDirectoryPath, realPath));
+                    }
+                });
+            } else {
+                lowerFs.realpath(resolvedLowerPath, callback);
+            }
         },
         readlink(path, callback) {
-            upperFs.readlink(path, (e, linkPath) => {
-                if (e) {
-                    lowerFs.readlink(path, callback);
-                } else {
-                    callback(e, linkPath);
-                }
-            });
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.readlink(resolvedUpperPath, (e, linkPath) => {
+                    if (e) {
+                        lowerFs.readlink(resolvedLowerPath, callback);
+                    } else {
+                        callback(e, linkPath);
+                    }
+                });
+            } else {
+                lowerFs.readlink(resolvedLowerPath, callback);
+            }
         },
-        readdir(directoryPath, callback) {
-            upperFs.readdir(directoryPath, (upperError, upperItems) => {
-                if (upperError) {
-                    lowerFs.readdir(directoryPath, callback);
-                } else {
-                    lowerFs.readdir(directoryPath, (lowerError, lowerItems) => {
-                        if (lowerError) {
-                            callback(upperError, upperItems);
-                        } else {
-                            callback(upperError, [...lowerItems, ...upperItems]);
-                        }
-                    });
-                }
-            });
+        readdir(path, callback) {
+            const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+            if (resolvedUpperPath !== undefined) {
+                upperFs.readdir(resolvedUpperPath, (upperError, upperItems) => {
+                    if (upperError) {
+                        lowerFs.readdir(resolvedLowerPath, callback);
+                    } else {
+                        lowerFs.readdir(resolvedLowerPath, (lowerError, lowerItems) => {
+                            if (lowerError) {
+                                callback(upperError, upperItems);
+                            } else {
+                                callback(upperError, [...lowerItems, ...upperItems]);
+                            }
+                        });
+                    }
+                });
+            } else {
+                lowerFs.readdir(resolvedLowerPath, callback);
+            }
         }
     };
 
