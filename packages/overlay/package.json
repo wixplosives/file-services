@@ -17,9 +17,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/memory": "^0.4.8",
-    "@file-services/types": "^0.4.8",
-    "@file-services/utils": "^0.4.8"
+    "@file-services/types": "^0.4.11",
+    "@file-services/utils": "^0.4.11"
   },
   "files": [
     "cjs",
