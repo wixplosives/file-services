@@ -1,7 +1,7 @@
 {
   "name": "@file-services/commonjs",
   "description": "Isomorphic, fs-agnostic implementation of the Node commonjs module system.",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -18,8 +18,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/resolve": "^0.1.4",
-    "@file-services/types": "^0.4.11"
+    "@file-services/resolve": "^1.0.0",
+    "@file-services/types": "^1.0.0"
   },
   "files": [
     "cjs",
