@@ -1,12 +1,11 @@
 import { join } from 'path';
-import { promises } from 'fs';
-const { writeFile, stat, mkdir, rmdir } = promises;
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import { IWatchService } from '@file-services/types';
 import { sleep } from 'promise-assist';
 import { WatchEventsValidator } from '@file-services/test-kit';
 
-import { NodeWatchService } from '../src';
+import { NodeWatchService, nodeFs } from '../src';
+const { writeFile, stat, mkdir, rmdir } = nodeFs.promises;
 
 const debounceWait = 500;
 const SAMPLE_CONTENT = `sample file content`;
