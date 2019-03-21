@@ -8,7 +8,6 @@
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
-    "lint": "tslint -p src",
     "prepack": "yarn build"
   },
   "peerDependencies": {
