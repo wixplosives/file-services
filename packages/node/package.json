@@ -23,7 +23,7 @@
     "!src/tsconfig.json"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=8"
   },
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/node",
