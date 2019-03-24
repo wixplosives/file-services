@@ -50,11 +50,11 @@ describe('dependency resolver', () => {
             }
         });
 
-        // file with a request resolving to null
+        // file with a request resolving to undefined
         expect(resolveDependencies(secondFilePath)).to.eql({
             [secondFilePath]: {
                 [requestThirdFile]: thirdFilePath,
-                [requestMissingFile]: null
+                [requestMissingFile]: undefined
             }
         });
 
@@ -66,7 +66,7 @@ describe('dependency resolver', () => {
             },
             [secondFilePath]: {
                 [requestThirdFile]: thirdFilePath,
-                [requestMissingFile]: null
+                [requestMissingFile]: undefined
             }
         });
     });
@@ -79,7 +79,7 @@ describe('dependency resolver', () => {
             },
             [secondFilePath]: {
                 [requestThirdFile]: thirdFilePath,
-                [requestMissingFile]: null
+                [requestMissingFile]: undefined
             },
             [thirdFilePath]: {
                 [requestFirstFile]: firstFilePath

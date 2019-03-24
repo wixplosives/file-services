@@ -16,7 +16,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     return resolveRequest;
 
-    function resolveRequest(contextPath: string, request: string): IResolutionOutput | null {
+    function resolveRequest(contextPath: string, request: string): IResolutionOutput | undefined {
         if (isRelative(request) || isAbsolute(request)) {
             const requestPath = resolve(contextPath, request);
             return resolveAsFile(requestPath) || resolveAsDirectory(requestPath);
@@ -25,7 +25,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         }
     }
 
-    function resolveAsFile(requestPath: string): IResolutionOutput | null {
+    function resolveAsFile(requestPath: string): IResolutionOutput | undefined {
         if (fileExistsSync(requestPath)) {
             return { resolvedFile: requestPath };
         } else {
@@ -36,10 +36,10 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                 }
             }
         }
-        return null;
+        return undefined;
     }
 
-    function resolveAsDirectory(requestPath: string): IResolutionOutput | null {
+    function resolveAsDirectory(requestPath: string): IResolutionOutput | undefined {
         const packageJsonPath = join(requestPath, 'package.json');
         if (fileExistsSync(packageJsonPath)) {
             try {
@@ -54,13 +54,13 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                     return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'));
                 }
             } catch {
-                /* we don't reject, just return null */
+                /* we don't reject, just return undefined */
             }
         }
         return resolveAsFile(join(requestPath, 'index'));
     }
 
-    function resolveAsPackage(initialPath: string, request: string): IResolutionOutput | null {
+    function resolveAsPackage(initialPath: string, request: string): IResolutionOutput | undefined {
         for (const packageRoot of packageRoots) {
             let currentPath = initialPath;
             let lastPath: string | undefined;
@@ -78,6 +78,6 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
                 currentPath = isPackagesRoot ? dirname(dirname(currentPath)) : dirname(currentPath);
             }
         }
-        return null;
+        return undefined;
     }
 }

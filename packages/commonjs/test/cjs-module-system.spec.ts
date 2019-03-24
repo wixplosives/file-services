@@ -177,7 +177,7 @@ describe('commonjs module system', () => {
         });
 
         const resolver = (_contextPath: string, request: string) =>
-            request === 'some-package' ? { resolvedFile: '/src/package.js' } : null;
+            request === 'some-package' ? { resolvedFile: '/src/package.js' } : undefined;
 
         const { requireModule } = createCjsModuleSystem({ fs, resolver });
 

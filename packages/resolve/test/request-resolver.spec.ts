@@ -26,7 +26,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/src', './typed.ts')).to.be.resolvedTo('/src/typed.ts');
             expect(resolveRequest('/', './style.css')).to.be.resolvedTo('/style.css');
             expect(resolveRequest('/', './image.jpg')).to.be.resolvedTo('/image.jpg');
-            expect(resolveRequest('/', './non-existing.svg')).to.be.resolvedTo(null);
+            expect(resolveRequest('/', './non-existing.svg')).to.be.resolvedTo(undefined);
         });
 
         it('resolves requests to js and json files without specified extension', () => {
@@ -61,7 +61,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.ts');
             expect(resolveRequest('/', './another')).to.be.resolvedTo('/another.tsx');
             expect(resolveRequest('/src', '../style.css')).to.be.resolvedTo('/style.css.ts');
-            expect(resolveRequest('/', './now_ignored')).to.be.resolvedTo(null);
+            expect(resolveRequest('/', './now_ignored')).to.be.resolvedTo(undefined);
 
             // picked due to order of provided extensions array
             expect(resolveRequest('/src', './same_name')).to.be.resolvedTo('/src/same_name.ts');
@@ -187,7 +187,7 @@ describe('request resolver', () => {
             expect(resolveRequest('/', './dot_main')).to.be.resolvedTo('/dot_main/index.js');
             expect(resolveRequest('/', './empty_main')).to.be.resolvedTo('/empty_main/index.js');
             expect(resolveRequest('/', './invalid_json')).to.be.resolvedTo('/invalid_json/index.js');
-            expect(resolveRequest('/', './invalid_json_no_index')).to.be.resolvedTo(null);
+            expect(resolveRequest('/', './invalid_json_no_index')).to.be.resolvedTo(undefined);
             expect(resolveRequest('/', './no_main')).to.be.resolvedTo('/no_main/index.js');
         });
     });

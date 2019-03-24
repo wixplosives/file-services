@@ -9,9 +9,9 @@ export type DependencyResolver = (assetKey: string | string[], deep?: boolean) =
 
 /**
  * Record containing requests as fields, and their resolutions (asset keys) as values.
- * `null` is used when a request couldn't be resolved.
+ * `undefined` is used when a request couldn't be resolved.
  */
-export type ResolvedRequests = Record<string, string | null>;
+export type ResolvedRequests = Record<string, string | undefined>;
 
 export interface IDependencyResolverOptions {
     /**
@@ -26,9 +26,9 @@ export interface IDependencyResolverOptions {
      * Resolve a dependency request by an asset.
      *
      * @param assetKey unique identifier of the requesting asset.
-     * @returns unique key for the asset the request resolves to, or `null` if cannot resolve.
+     * @returns unique key for the asset the request resolves to, or `undefined` if cannot resolve.
      */
-    resolveRequest(assetKey: string, request: string): string | null;
+    resolveRequest(assetKey: string, request: string): string | undefined;
 }
 
 const { hasOwnProperty } = Object.prototype;
@@ -64,7 +64,7 @@ export function createDependencyResolver({
 
                 const resolvedRequest = resolveRequest(currentAsset, request);
                 resolvedRequests[request] = resolvedRequest;
-                if (deep && resolvedRequest !== null) {
+                if (deep && resolvedRequest !== undefined) {
                     assetsToResolve.push(resolvedRequest);
                 }
             }
