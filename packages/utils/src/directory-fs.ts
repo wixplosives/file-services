@@ -11,7 +11,7 @@ import {
     ReadFileOptions,
     WriteFileOptions
 } from '@file-services/types';
-import { resolve as posixResolve, join as posixJoin, POSIX_ROOT } from '@file-services/posix-path';
+import * as posixPath from '@file-services/posix-path';
 import { createFileSystem } from './create-extended-api';
 
 /**
@@ -25,10 +25,10 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     const { watchService, promises } = fs;
     const { join, relative, sep } = fs.path;
 
-    let workingDirectoryPath: string = POSIX_ROOT;
+    let workingDirectoryPath: string = posixPath.POSIX_ROOT;
 
     function resolveScopedPath(...pathSegments: string[]): string {
-        return posixResolve(workingDirectoryPath, ...pathSegments);
+        return posixPath.resolve(workingDirectoryPath, ...pathSegments);
     }
 
     function resolveFullPath(path: string): string {
@@ -45,7 +45,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
                 listener({
                     stats: e.stats,
                     // use posixPath to ensure we give posix-style paths back
-                    path: posixJoin(POSIX_ROOT, relativeEventPath)
+                    path: posixPath.join(posixPath.POSIX_ROOT, relativeEventPath.replace(/\\/g, '/'))
                 });
             }
         };
@@ -82,7 +82,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
 
     const scopedBaseFs: IBaseFileSystem = {
         path: {
-            ...fs.path,
+            ...posixPath,
             resolve: resolveScopedPath
         },
         caseSensitive: fs.caseSensitive,
