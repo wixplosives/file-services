@@ -3,8 +3,6 @@ import {
     IFileSystem,
     WatchEventListener,
     IWatchService,
-    IFileSystemPath,
-    POSIX_ROOT,
     CallbackFn,
     CallbackFnVoid,
     IBaseFileSystemSyncActions,
@@ -13,6 +11,7 @@ import {
     ReadFileOptions,
     WriteFileOptions
 } from '@file-services/types';
+import { resolve as posixResolve, join as posixJoin, POSIX_ROOT } from '@file-services/posix-path';
 import { createFileSystem } from './create-extended-api';
 
 /**
@@ -25,12 +24,11 @@ import { createFileSystem } from './create-extended-api';
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
     const { watchService, promises } = fs;
     const { join, relative, sep } = fs.path;
-    const posixPath = ((fs.path as any).posix as IFileSystemPath) || fs.path;
 
     let workingDirectoryPath: string = POSIX_ROOT;
 
     function resolveScopedPath(...pathSegments: string[]): string {
-        return posixPath.resolve(workingDirectoryPath, ...pathSegments);
+        return posixResolve(workingDirectoryPath, ...pathSegments);
     }
 
     function resolveFullPath(path: string): string {
@@ -47,7 +45,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
                 listener({
                     stats: e.stats,
                     // use posixPath to ensure we give posix-style paths back
-                    path: posixPath.join(POSIX_ROOT, relativeEventPath)
+                    path: posixJoin(POSIX_ROOT, relativeEventPath)
                 });
             }
         };

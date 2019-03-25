@@ -1,12 +1,11 @@
-import pathMain from 'path';
 import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils';
+import * as posixPath from '@file-services/posix-path';
 import {
     IDirectoryContents,
     IFileSystemStats,
     IWatchEvent,
     WatchEventListener,
     FileSystemConstants,
-    POSIX_ROOT,
     IBaseFileSystemSyncActions
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes';
@@ -17,10 +16,6 @@ import {
     IFsMemFileNode,
     IFsMemDirectoryNode
 } from './types';
-
-// ugly workaround for webpack's polyfilled path not implementing `.posix` field
-// TODO: inline path-posix implementation taked from latest node's source (faster!)
-const posixPath = (pathMain.posix as typeof pathMain) || pathMain;
 
 /**
  * This is the main function to use, returning a sync/async
@@ -37,7 +32,7 @@ export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSyste
     };
 
     if (rootContents) {
-        fs.populateDirectorySync(POSIX_ROOT, rootContents);
+        fs.populateDirectorySync(posixPath.POSIX_ROOT, rootContents);
     }
 
     return fs;
@@ -60,7 +55,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root');
     const pathListeners = new SetMultiMap<string, WatchEventListener>();
     const globalListeners = new Set<WatchEventListener>();
-    let workingDirectoryPath: string = POSIX_ROOT;
+    let workingDirectoryPath: string = posixPath.POSIX_ROOT;
     return {
         root,
         path: { ...posixPath, resolve: resolvePath },

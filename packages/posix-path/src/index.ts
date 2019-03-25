@@ -1,5 +1,5 @@
 export { basename } from './basename';
-export { sep, delimiter, UNIX_ROOT } from './constants';
+export { sep, delimiter, POSIX_ROOT } from './constants';
 export { dirname } from './dirname';
 export { extname } from './extname';
 export { isAbsolute } from './is-absolute';
