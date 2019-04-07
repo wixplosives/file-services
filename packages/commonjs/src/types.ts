@@ -1,13 +1,7 @@
 import { IFileSystemSync } from '@file-services/types';
 import { RequestResolver } from '@file-services/resolve';
 
-export interface IModuleSystemOptions {
-    /**
-     * Sync file system to use when reading files
-     * or resolving requests.
-     */
-    fs: IFileSystemSync;
-
+export interface IBaseModuleSystemOptions {
     /**
      * Exposed to modules as `process.env`.
      *
@@ -16,14 +10,48 @@ export interface IModuleSystemOptions {
     processEnv?: Record<string, string | undefined>;
 
     /**
+     * @returns textual contents of `filePath`.
+     * @throws if file doesn't exist or other error.
+     */
+    readFileSync(filePath: string): string;
+
+    /**
+     * @returns parent directory of provided `path`.
+     */
+    dirname(path: string): string;
+
+    /**
+     * Resolve a module request from some context (directory path).
+     *
+     * @returns resolved path, or `undefined` if cannot resolve.
+     */
+    resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | undefined;
+}
+
+export interface IModuleSystemOptions {
+    /**
+     * Exposed to modules as `process.env`.
+     *
+     * @default { NODE_ENV: 'development' }
+     */
+    processEnv?: Record<string, string | undefined>;
+
+    /**
+     * Sync file system to use when reading files
+     * or resolving requests.
+     */
+    fs: IFileSystemSync;
+
+    /**
      * Resolver to use for `require(...)` calls.
      *
-     * @param contextPath absolute path to the context directory of the request
-     * @param request request to resolve
+     * @param contextPath absolute path to the context directory of the request.
+     * @param request request to resolve.
+     * @param requestOrigin original requesting file path.
      *
      * @default createRequestResolver of `@file-services/resolve`
      */
-    resolver?(contextPath: string, request: string): ReturnType<RequestResolver>;
+    resolver?(contextPath: string, request: string, requestOrigin?: string): ReturnType<RequestResolver>;
 }
 
 export interface ICommonJsModuleSystem {
@@ -44,8 +72,10 @@ export interface ICommonJsModuleSystem {
 
     /**
      * Resolve a module request from some context (directory path).
+     *
+     * @returns resolved path, or `undefined` if cannot resolve.
      */
-    resolveFrom(contextPath: string, request: string): string;
+    resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | undefined;
 }
 
 export interface IModule {

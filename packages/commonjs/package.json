@@ -8,10 +8,9 @@
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
-    "test": "run-p test:node test:browser test:ix",
-    "test:node": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors",
+    "test": "run-p test:node test:browser",
+    "test:node": "mocha -r @ts-tools/node/r \"test/**/*.{spec,ix}.ts?(x)\" --watch-extensions ts,tsx --colors",
     "test:browser": "mocha-pup \"test/**/*.spec.ts?(x)\" -c ../../webpack.config.js",
-    "test:ix": "mocha -r @ts-tools/node/r \"test/**/*.ix.ts?(x)\" --watch-extensions ts,tsx --colors --timeout 10000",
     "prepack": "yarn build"
   },
   "dependencies": {
