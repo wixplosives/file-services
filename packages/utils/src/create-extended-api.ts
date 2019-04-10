@@ -117,16 +117,23 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     }
 
     function findFilesSync(rootDirectory: string, options: IWalkOptions = {}, filePaths: string[] = []): string[] {
-        const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
+        const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
 
         for (const nodeName of readdirSync(rootDirectory)) {
             const nodePath = path.join(rootDirectory, nodeName);
-            const nodeStats = statSync(nodePath);
-            const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
-            if (nodeStats.isFile() && filterFile(nodeDesc)) {
-                filePaths.push(nodePath);
-            } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
-                findFilesSync(nodePath, options, filePaths);
+            try {
+                const nodeStats = statSync(nodePath);
+                const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
+                if (nodeStats.isFile() && filterFile(nodeDesc)) {
+                    filePaths.push(nodePath);
+                } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+                    findFilesSync(nodePath, options, filePaths);
+                }
+            } catch (e) {
+                if (printErrors) {
+                    // tslint:disable-next-line: no-console
+                    console.error(e);
+                }
             }
         }
 
@@ -272,16 +279,23 @@ export function createExtendedFileSystemPromiseActions(
         options: IWalkOptions = {},
         filePaths: string[] = []
     ): Promise<string[]> {
-        const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
+        const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
 
         for (const nodeName of await readdir(rootDirectory)) {
             const nodePath = path.join(rootDirectory, nodeName);
-            const nodeStats = await stat(nodePath);
-            const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
-            if (nodeStats.isFile() && filterFile(nodeDesc)) {
-                filePaths.push(nodePath);
-            } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
-                await findFiles(nodePath, options, filePaths);
+            try {
+                const nodeStats = await stat(nodePath);
+                const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
+                if (nodeStats.isFile() && filterFile(nodeDesc)) {
+                    filePaths.push(nodePath);
+                } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+                    await findFiles(nodePath, options, filePaths);
+                }
+            } catch (e) {
+                if (printErrors) {
+                    // tslint:disable-next-line: no-console
+                    console.error(e);
+                }
             }
         }
 
