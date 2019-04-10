@@ -1,7 +1,7 @@
 {
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@file-services/posix-path": "^1.0.1",
-    "@file-services/types": "^1.0.2"
+    "@file-services/types": "^1.0.3"
   },
   "files": [
     "cjs",
