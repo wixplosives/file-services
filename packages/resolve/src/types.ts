@@ -1,5 +1,3 @@
-import { IFileSystemPath, IFileSystemSync } from '@file-services/types';
-
 export interface IRequestResolverOptions {
     /**
      * File system to use when resolving requests.
@@ -44,7 +42,13 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
  * Currently a subset of the sync base file system API.
  */
 export interface IResolutionFileSystem {
-    path: IFileSystemPath;
-    fileExistsSync: IFileSystemSync['fileExistsSync'];
-    readFileSync: IFileSystemSync['readFileSync'];
+    path: {
+        dirname(path: string): string;
+        join(...paths: string[]): string;
+        resolve(...pathSegments: string[]): string;
+        isAbsolute(path: string): boolean;
+        basename(path: string): string;
+    };
+    fileExistsSync(path: string): boolean;
+    readFileSync(path: string, encoding: 'utf8'): string;
 }

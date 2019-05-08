@@ -13,9 +13,6 @@
     "test:browser": "mocha-pup \"test/**/*.spec.ts?(x)\"",
     "prepack": "yarn build"
   },
-  "dependencies": {
-    "@file-services/types": "^1.0.3"
-  },
   "files": [
     "cjs",
     "esm",
