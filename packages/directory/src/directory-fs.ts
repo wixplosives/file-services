@@ -12,7 +12,7 @@ import {
     WriteFileOptions
 } from '@file-services/types';
 import * as posixPath from '@file-services/posix-path';
-import { createFileSystem } from './create-extended-api';
+import { createFileSystem } from '@file-services/utils';
 
 /**
  * Creates a wrapped `IFileSystem` which scopes the provided `fs`
@@ -94,8 +94,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             workingDirectoryPath = resolveScopedPath(path);
         },
         promises: {
-            copyFile(srcPath, destPath, ...restArgs) {
-                return promises.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...restArgs);
+            copyFile(srcPath, destPath, ...args) {
+                return promises.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
             },
             lstat(path) {
                 return promises.lstat(resolveFullPath(path));
@@ -106,8 +106,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             readdir: function readdir(path: string, ...args: [{ withFileTypes: true }]) {
                 return promises.readdir(resolveFullPath(path), ...args);
             } as IBaseFileSystemPromiseActions['readdir'],
-            readFile: function readFile(path: string, ...restArgs: [ReadFileOptions]) {
-                return promises.readFile(resolveFullPath(path), ...restArgs);
+            readFile: function readFile(path: string, ...args: [ReadFileOptions]) {
+                return promises.readFile(resolveFullPath(path), ...args);
             } as IBaseFileSystemPromiseActions['readFile'],
             realpath(path) {
                 return promises.realpath(resolveFullPath(path));
@@ -127,15 +127,15 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             unlink(path) {
                 return promises.unlink(resolveFullPath(path));
             },
-            writeFile(path, ...restArgs) {
-                return promises.writeFile(resolveFullPath(path), ...restArgs);
+            writeFile(path, ...args) {
+                return promises.writeFile(resolveFullPath(path), ...args);
             },
             readlink(path) {
                 return promises.readlink(resolveFullPath(path));
             }
         },
-        copyFileSync(src, dest, ...restArgs) {
-            return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...restArgs);
+        copyFileSync(src, dest, ...args) {
+            return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...args);
         },
         lstatSync(path) {
             return fs.lstatSync(resolveFullPath(path));
@@ -146,8 +146,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdirSync: function readdirSync(path: string, ...args: []) {
             return fs.readdirSync(resolveFullPath(path), ...args);
         } as IBaseFileSystemSyncActions['readdirSync'],
-        readFileSync: function readFileSync(path: string, ...restArgs: [ReadFileOptions]) {
-            return fs.readFileSync(resolveFullPath(path), ...restArgs);
+        readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]) {
+            return fs.readFileSync(resolveFullPath(path), ...args);
         } as IBaseFileSystemSyncActions['readFileSync'],
         realpathSync(path) {
             return fs.realpathSync(resolveFullPath(path));
@@ -170,11 +170,11 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         unlinkSync(path) {
             return fs.unlinkSync(resolveFullPath(path));
         },
-        writeFileSync(path, ...restArgs: [string, WriteFileOptions]) {
-            return fs.writeFileSync(resolveFullPath(path), ...restArgs);
+        writeFileSync(path, ...args: [string, WriteFileOptions]) {
+            return fs.writeFileSync(resolveFullPath(path), ...args);
         },
-        copyFile: function copyFile(srcPath: string, destPath: string, ...restArgs: [CallbackFnVoid]) {
-            fs.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...restArgs);
+        copyFile: function copyFile(srcPath: string, destPath: string, ...args: [CallbackFnVoid]) {
+            fs.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
         } as IBaseFileSystemCallbackActions['copyFile'],
         lstat(path, callback) {
             fs.lstat(resolveFullPath(path), callback);
@@ -185,8 +185,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         readdir: function readdir(path: string, ...args: [CallbackFn<string[]>]) {
             return fs.readdir(resolveFullPath(path), ...args);
         } as IBaseFileSystemCallbackActions['readdir'],
-        readFile: function readFile(path: string, ...restArgs: [string, CallbackFn<string | Buffer>]) {
-            return fs.readFile(resolveFullPath(path), ...restArgs);
+        readFile: function readFile(path: string, ...args: [string, CallbackFn<string | Buffer>]) {
+            return fs.readFile(resolveFullPath(path), ...args);
         } as IBaseFileSystemCallbackActions['readFile'],
         realpath(path, callback) {
             return fs.realpath(resolveFullPath(path), callback);
@@ -206,8 +206,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         unlink(path, callback) {
             return fs.unlink(resolveFullPath(path), callback);
         },
-        writeFile: function writeFile(path: string, ...restArgs: [string, CallbackFnVoid]) {
-            return fs.writeFile(resolveFullPath(path), ...restArgs);
+        writeFile: function writeFile(path: string, ...args: [string, CallbackFnVoid]) {
+            return fs.writeFile(resolveFullPath(path), ...args);
         } as IBaseFileSystemCallbackActions['writeFile'],
         readlink(path, callback) {
             return fs.readlink(resolveFullPath(path), callback);

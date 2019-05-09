@@ -7,26 +7,7 @@ Common file system utility functions.
 # API
 
 - `syncToAsyncFs`: convert a sync-only file system implementation into an async one.
-- `createDirectoryFs`: A file system wrapper that adds directory scoping to any `IFileSystem` implementation.
 
-# Usage
+## License
 
-## Directory scoped file system
-Install library in project:
-```sh
-yarn add @file-services/utils
-```
-
-Then, use the programmatic API:
-```ts
-import { nodeFs } from '@file-services/node'
-import { createDirectoryFs } from '@file-services/utils'
-
-const directoryFs = createDirectoryFs(nodeFs, '/path/to/some/folder')
-
-// will be written to /path/to/some/folder/file.js
-directoryFs.writeFileSync('/file.js', 'SAMPLE')
-
-// returns 'SAMPLE'
-directoryFs.readFileSync('/file.js')
-```
+MIT

@@ -8,11 +8,9 @@
   "scripts": {
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
-    "test": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors",
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/posix-path": "^1.0.1",
     "@file-services/types": "^1.0.3"
   },
   "files": [

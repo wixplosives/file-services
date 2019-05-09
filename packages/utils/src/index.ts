@@ -1,4 +1,4 @@
-export * from './sync-to-async-fs';
+export * from './callbackify';
 export * from './create-extended-api';
-export * from './directory-fs';
 export * from './set-multi-map';
+export * from './sync-to-async-fs';
