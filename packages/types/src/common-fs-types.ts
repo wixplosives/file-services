@@ -33,6 +33,33 @@ export interface IDirectoryContents {
 }
 
 /**
+ * Subset of the original `fs.Dirent` class.
+ */
+export interface IDirectoryEntry {
+    /**
+     * Base name of the entry.
+     *
+     * @example `package.json`
+     */
+    name: string;
+
+    /**
+     * Whether the entry points to a file.
+     */
+    isFile(): boolean;
+
+    /**
+     * Whether the entry points to a directory.
+     */
+    isDirectory(): boolean;
+
+    /**
+     * Whether the entry is a symbolic link.
+     */
+    isSymbolicLink(): boolean;
+}
+
+/**
  * Subset of the original `fs.Stats` interface
  */
 export interface IFileSystemStats {

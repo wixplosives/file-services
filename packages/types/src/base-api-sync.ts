@@ -1,4 +1,10 @@
-import { IFileSystemStats, BufferEncoding, WriteFileOptions, ReadFileOptions } from './common-fs-types';
+import {
+    IFileSystemStats,
+    BufferEncoding,
+    WriteFileOptions,
+    ReadFileOptions,
+    IDirectoryEntry
+} from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';
 
@@ -57,7 +63,11 @@ export interface IBaseFileSystemSyncActions {
     /**
      * Read the names of items in a directory.
      */
-    readdirSync(directoryPath: string): string[];
+    readdirSync(
+        directoryPath: string,
+        options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    ): string[];
+    readdirSync(directoryPath: string, options: { withFileTypes: true }): IDirectoryEntry[];
 
     /**
      * Create a new directory.

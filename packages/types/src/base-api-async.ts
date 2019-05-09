@@ -4,7 +4,8 @@ import {
     CallbackFnVoid,
     CallbackFn,
     WriteFileOptions,
-    ReadFileOptions
+    ReadFileOptions,
+    IDirectoryEntry
 } from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';
@@ -63,6 +64,12 @@ export interface IBaseFileSystemCallbackActions {
      * Read the names of items in a directory.
      */
     readdir(directoryPath: string, callback: CallbackFn<string[]>): void;
+    readdir(
+        directoryPath: string,
+        options: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null | undefined,
+        callback: CallbackFn<string[]>
+    ): void;
+    readdir(directoryPath: string, options: { withFileTypes: true }, callback: CallbackFn<IDirectoryEntry[]>): void;
 
     /**
      * Create a directory.
@@ -139,7 +146,11 @@ export interface IBaseFileSystemPromiseActions {
     /**
      * Read the names of items in a directory.
      */
-    readdir(directoryPath: string): Promise<string[]>;
+    readdir(
+        directoryPath: string,
+        options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    ): Promise<string[]>;
+    readdir(directoryPath: string, options: { withFileTypes: true }): Promise<IDirectoryEntry[]>;
 
     /**
      * Create a directory.

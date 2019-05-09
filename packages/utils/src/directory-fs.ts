@@ -103,9 +103,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             mkdir(path) {
                 return promises.mkdir(resolveFullPath(path));
             },
-            readdir(path) {
-                return promises.readdir(resolveFullPath(path));
-            },
+            readdir: function readdir(path: string, ...args: [{ withFileTypes: true }]) {
+                return promises.readdir(resolveFullPath(path), ...args);
+            } as IBaseFileSystemPromiseActions['readdir'],
             readFile: function readFile(path: string, ...restArgs: [ReadFileOptions]) {
                 return promises.readFile(resolveFullPath(path), ...restArgs);
             } as IBaseFileSystemPromiseActions['readFile'],
@@ -143,9 +143,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         mkdirSync(path) {
             return fs.mkdirSync(resolveFullPath(path));
         },
-        readdirSync(path) {
-            return fs.readdirSync(resolveFullPath(path));
-        },
+        readdirSync: function readdirSync(path: string, ...args: []) {
+            return fs.readdirSync(resolveFullPath(path), ...args);
+        } as IBaseFileSystemSyncActions['readdirSync'],
         readFileSync: function readFileSync(path: string, ...restArgs: [ReadFileOptions]) {
             return fs.readFileSync(resolveFullPath(path), ...restArgs);
         } as IBaseFileSystemSyncActions['readFileSync'],
@@ -182,9 +182,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         mkdir(path, callback) {
             fs.mkdir(resolveFullPath(path), callback);
         },
-        readdir(path, callback) {
-            return fs.readdir(resolveFullPath(path), callback);
-        },
+        readdir: function readdir(path: string, ...args: [CallbackFn<string[]>]) {
+            return fs.readdir(resolveFullPath(path), ...args);
+        } as IBaseFileSystemCallbackActions['readdir'],
         readFile: function readFile(path: string, ...restArgs: [string, CallbackFn<string | Buffer>]) {
             return fs.readFile(resolveFullPath(path), ...restArgs);
         } as IBaseFileSystemCallbackActions['readFile'],

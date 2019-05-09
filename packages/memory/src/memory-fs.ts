@@ -6,6 +6,8 @@ import {
     IWatchEvent,
     WatchEventListener,
     FileSystemConstants,
+    BufferEncoding,
+    IDirectoryEntry,
     IBaseFileSystemSyncActions
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes';
@@ -119,7 +121,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         workingDirectoryPath = resolvePath(directoryPath);
     }
 
-    function readFileSync(filePath: string): string | Buffer {
+    function readFileSync(filePath: string, _options: { encoding: 'utf8' }): string {
         const resolvedPath = resolvePath(filePath);
         const fileNode = getNode(resolvedPath);
 
@@ -188,7 +190,18 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         emitWatchEvent({ path: resolvedPath, stats: null });
     }
 
-    function readdirSync(directoryPath: string): string[] {
+    function readdirSync(
+        directoryPath: string,
+        options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    ): string[];
+    function readdirSync(
+        directoryPath: string,
+        options?: { encoding?: BufferEncoding | null; withFileTypes?: true } | BufferEncoding | null
+    ): IDirectoryEntry[];
+    function readdirSync(
+        directoryPath: string,
+        options?: { encoding?: BufferEncoding | null; withFileTypes?: boolean } | BufferEncoding | null
+    ): string[] | IDirectoryEntry[] {
         const resolvedPath = resolvePath(directoryPath);
         const directoryNode = getNode(resolvedPath);
 
@@ -197,8 +210,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         } else if (directoryNode.type === 'file') {
             throw new Error(`${resolvedPath} ${FsErrorCodes.PATH_IS_FILE}`);
         }
+        const childNodes = Array.from(directoryNode.contents.values());
 
-        return Array.from(directoryNode.contents.values()).map(({ name }) => name);
+        return !!options && typeof options === 'object' && options.withFileTypes
+            ? childNodes.map(node => ({ name: node.name, ...createStatsFromNode(node) }))
+            : childNodes.map(({ name }) => name);
     }
 
     function mkdirSync(directoryPath: string): void {
