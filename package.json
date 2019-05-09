@@ -9,7 +9,7 @@
     "build": "lerna run build --stream",
     "lint": "tslint -p ./tsconfig.test.json",
     "pretest": "yarn lint",
-    "test": "lerna run test --stream --parallel",
+    "test": "lerna run test --stream --concurrency=1",
     "prettify": "prettier \"packages/**/*.ts\" --write"
   },
   "devDependencies": {
