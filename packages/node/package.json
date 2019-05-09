@@ -1,7 +1,7 @@
 {
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "cjs/index.js",
   "types": "cjs/index.d.ts",
   "scripts": {
