@@ -26,6 +26,8 @@ Various file system packages.
 
 - **[@file-services/overlay](https://github.com/wixplosives/file-services/tree/master/packages/overlay)** - Overlay files and directories from one file system on top of another.
 
+- **[@file-services/directory](https://github.com/wixplosives/file-services/tree/master/packages/directory)** - A file system wrapper that adds directory scoping to any `IFileSystem` implementation.
+
 - **[@file-services/posix-path](https://github.com/wixplosives/file-services/tree/master/packages/posix-path)** - Node's posix-`path` implementation converted to TypeScript and ready for the web.
 
 ### License
