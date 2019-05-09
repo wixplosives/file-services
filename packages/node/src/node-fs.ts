@@ -57,5 +57,3 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         }
     };
 }
-
-export const nodeFs: IFileSystem = createNodeFs();
