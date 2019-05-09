@@ -11,7 +11,7 @@ import {
     ReadFileOptions,
     WriteFileOptions
 } from '@file-services/types';
-import * as posixPath from '@file-services/posix-path';
+import posixPath from '@file-services/posix-path';
 import { createFileSystem } from '@file-services/utils';
 
 /**

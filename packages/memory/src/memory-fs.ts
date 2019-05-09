@@ -1,5 +1,5 @@
 import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils';
-import * as posixPath from '@file-services/posix-path';
+import posixPath from '@file-services/posix-path';
 import {
     IDirectoryContents,
     IFileSystemStats,
