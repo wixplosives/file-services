@@ -1,6 +1,5 @@
 # file-services
-[![Linux/Mac build Status](https://travis-ci.com/wixplosives/file-services.svg?token=JxepjChyzQB66ehAYhtG&branch=master)](https://travis-ci.com/wixplosives/file-services)
-[![Windows build status](https://ci.appveyor.com/api/projects/status/gjkq0qf47j44bp64/branch/master?svg=true)](https://ci.appveyor.com/project/AlexShemeshWix/file-services/branch/master)
+[![Build Status](https://travis-ci.com/wixplosives/file-services.svg?token=JxepjChyzQB66ehAYhtG&branch=master)](https://travis-ci.com/wixplosives/file-services)
 
 Various file system packages.
 
