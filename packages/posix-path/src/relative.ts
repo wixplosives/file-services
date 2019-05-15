@@ -5,25 +5,21 @@ export function relative(from: string, to: string) {
     if (from === to) {
         return '';
     }
+
+    // Trim leading forward slashes.
     from = resolve(from);
     to = resolve(to);
+
     if (from === to) {
         return '';
     }
-    // Trim any leading backslashes
-    let fromStart = 1;
-    while (fromStart < from.length && from.charCodeAt(fromStart) === CHAR_FORWARD_SLASH) {
-        fromStart++;
-    }
+
+    const fromStart = 1;
     const fromEnd = from.length;
     const fromLen = fromEnd - fromStart;
-    // Trim any leading backslashes
-    let toStart = 1;
-    while (toStart < to.length && to.charCodeAt(toStart) === CHAR_FORWARD_SLASH) {
-        toStart++;
-    }
-    const toEnd = to.length;
-    const toLen = toEnd - toStart;
+    const toStart = 1;
+    const toLen = to.length - toStart;
+
     // Compare paths to find the longest common path from root
     const length = fromLen < toLen ? fromLen : toLen;
     let lastCommonSep = -1;
@@ -48,34 +44,23 @@ export function relative(from: string, to: string) {
                 // For example: from='/'; to='/foo'
                 return to.slice(toStart + i);
             }
-        } else if (fromLen > length) {
-            if (from.charCodeAt(fromStart + i) === CHAR_FORWARD_SLASH) {
-                // We get here if `to` is the exact base path for `from`.
-                // For example: from='/foo/bar/baz'; to='/foo/bar'
-                lastCommonSep = i;
-            } else if (i === 0) {
-                // We get here if `to` is the root.
-                // For example: from='/foo'; to='/'
-                lastCommonSep = 0;
-            }
+        } else if (fromLen > length && from.charCodeAt(fromStart + i) === CHAR_FORWARD_SLASH) {
+            // We get here if `to` is the exact base path for `from`.
+            // For example: from='/foo/bar/baz'; to='/foo/bar'
+            lastCommonSep = i;
         }
     }
+
     let out = '';
     // Generate the relative path based on the path difference between `to`
-    // and `from`
+    // and `from`.
     for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
         if (i === fromEnd || from.charCodeAt(i) === CHAR_FORWARD_SLASH) {
             out += out.length === 0 ? '..' : '/..';
         }
     }
-    toStart += lastCommonSep;
+
     // Lastly, append the rest of the destination (`to`) path that comes after
-    // the common path parts
-    if (out.length > 0) {
-        return `${out}${to.slice(toStart)}`;
-    }
-    if (to.charCodeAt(toStart) === CHAR_FORWARD_SLASH) {
-        ++toStart;
-    }
-    return to.slice(toStart);
+    // the common path parts.
+    return `${out}${to.slice(toStart + lastCommonSep)}`;
 }

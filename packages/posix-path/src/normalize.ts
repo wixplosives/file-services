@@ -30,22 +30,20 @@ export function normalizeString(path: string, allowAboveRoot: boolean) {
     let lastSegmentLength = 0;
     let lastSlash = -1;
     let dots = 0;
-    let code: number | undefined;
+    let code = 0;
     for (let i = 0; i <= path.length; ++i) {
         if (i < path.length) {
             code = path.charCodeAt(i);
         } else if (code === CHAR_FORWARD_SLASH) {
-            // isPosixPathSeparator
             break;
         } else {
             code = CHAR_FORWARD_SLASH;
         }
 
         if (code === CHAR_FORWARD_SLASH) {
-            // isPosixPathSeparator
             if (lastSlash === i - 1 || dots === 1) {
                 // NOOP
-            } else if (lastSlash !== i - 1 && dots === 2) {
+            } else if (dots === 2) {
                 if (
                     res.length < 2 ||
                     lastSegmentLength !== 2 ||
@@ -64,7 +62,7 @@ export function normalizeString(path: string, allowAboveRoot: boolean) {
                         lastSlash = i;
                         dots = 0;
                         continue;
-                    } else if (res.length === 2 || res.length === 1) {
+                    } else if (res.length !== 0) {
                         res = '';
                         lastSegmentLength = 0;
                         lastSlash = i;
