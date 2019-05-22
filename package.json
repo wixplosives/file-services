@@ -20,10 +20,10 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^5.2.6",
     "@types/node": "10",
-    "@types/react": "^16.8.17",
+    "@types/react": "^16.8.18",
     "@types/react-dom": "^16.8.4",
     "@types/rimraf": "^2.0.2",
-    "@types/webpack": "^4.4.31",
+    "@types/webpack": "^4.4.32",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^1.0.2",
@@ -39,7 +39,7 @@
     "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "~3.4.5",
-    "webpack": "^4.31.0"
+    "webpack": "^4.32.1"
   },
   "license": "MIT",
   "private": true
