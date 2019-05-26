@@ -79,7 +79,8 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
                 caseSensitive,
                 rootDir,
                 depth,
-                getFileSystemEntries
+                getFileSystemEntries,
+                realpathSync
             );
         },
         getDirectories(path) {
