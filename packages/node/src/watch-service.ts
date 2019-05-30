@@ -131,11 +131,10 @@ export class NodeWatchService implements IWatchService {
             if (existingWatcher) {
                 existingWatcher.close();
                 this.fsWatchers.delete(path);
-            }
-
-            // rewatch if path points to a new inode
-            if (stats) {
-                await this.ensureFsWatcher(path, stats);
+                // rewatch if path points to a new inode
+                if (stats) {
+                    await this.ensureFsWatcher(path, stats);
+                }
             }
         }
 
