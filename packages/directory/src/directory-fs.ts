@@ -22,8 +22,7 @@ import { createFileSystem } from '@file-services/utils';
  * @param directoryPath the directory path to scope to
  */
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
-    const { watchService, promises } = fs;
-    const { join, relative, sep } = fs.path;
+    const { watchService, promises, join, relative, sep } = fs;
 
     let workingDirectoryPath: string = posixPath.POSIX_ROOT;
 
@@ -81,10 +80,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     };
 
     const scopedBaseFs: IBaseFileSystem = {
-        path: {
-            ...posixPath,
-            resolve: resolveScopedPath
-        },
+        ...posixPath,
+        resolve: resolveScopedPath,
         caseSensitive: fs.caseSensitive,
         watchService: scopedWatchService,
         cwd() {

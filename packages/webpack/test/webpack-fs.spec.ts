@@ -14,14 +14,13 @@ describe('createWebpackFs', () => {
                 'some-file.js': `export const a = 123`
             }
         });
-        const { path } = memFs;
 
         const webpackFs = createWebpackFs(memFs);
         const compiler = webpack({
             mode: 'development',
             context: memFs.cwd(),
             output: {
-                path: path.resolve('dist') // otherwise it defaults to join(process.cwd(), 'dist')
+                path: memFs.resolve('dist') // otherwise it defaults to join(process.cwd(), 'dist')
             }
         });
 
@@ -39,7 +38,7 @@ describe('createWebpackFs', () => {
         });
 
         expect(webpackStats.hasWarnings() || webpackStats.hasErrors(), webpackStats.toString()).to.equal(false);
-        expect(memFs.fileExistsSync(path.resolve('dist', 'main.js')), 'bundle exists').to.equal(true);
+        expect(memFs.fileExistsSync(memFs.resolve('dist', 'main.js')), 'bundle exists').to.equal(true);
     });
 
     it('allows bundling with memory fs over node fs', async () => {
@@ -52,11 +51,11 @@ describe('createWebpackFs', () => {
 
         const webpackFs = createWebpackFs(createOverlayFs(nodeFs, memFs, __dirname));
         const compiler = webpack({
-            entry: nodeFs.path.join(__dirname, 'fixture'),
+            entry: nodeFs.join(__dirname, 'fixture'),
             mode: 'development',
             context: __dirname,
             output: {
-                path: memFs.path.resolve('dist') // otherwise it defaults to join(process.cwd(), 'dist')
+                path: memFs.resolve('dist') // otherwise it defaults to join(process.cwd(), 'dist')
             }
         });
 
@@ -74,6 +73,6 @@ describe('createWebpackFs', () => {
         });
 
         expect(webpackStats.hasWarnings() || webpackStats.hasErrors(), webpackStats.toString()).to.equal(false);
-        expect(memFs.fileExistsSync(memFs.path.resolve('dist', 'main.js')), 'bundle exists').to.equal(true);
+        expect(memFs.fileExistsSync(memFs.resolve('dist', 'main.js')), 'bundle exists').to.equal(true);
     });
 });

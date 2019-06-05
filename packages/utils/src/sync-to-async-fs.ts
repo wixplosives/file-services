@@ -3,7 +3,7 @@ import { callbackify } from './callbackify';
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
     return {
-        path: syncFs.path,
+        ...syncFs,
         watchService: syncFs.watchService,
         caseSensitive: syncFs.caseSensitive,
 

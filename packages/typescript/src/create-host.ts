@@ -42,7 +42,9 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         directoryExistsSync,
         cwd,
         realpathSync,
-        path: { join, dirname, normalize }
+        join,
+        dirname,
+        normalize
     } = fs;
 
     function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {

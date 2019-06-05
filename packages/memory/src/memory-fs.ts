@@ -60,7 +60,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     let workingDirectoryPath: string = posixPath.POSIX_ROOT;
     return {
         root,
-        path: { ...posixPath, resolve: resolvePath },
+        ...posixPath,
+        resolve: resolvePath,
         watchService: {
             async watchPath(path, listener) {
                 const resolvedPath = resolvePath(path);

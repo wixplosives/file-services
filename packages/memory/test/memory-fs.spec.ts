@@ -23,8 +23,8 @@ describe('In-memory File System Implementation', () => {
         it('resolves non-absolute paths relative to root /', () => {
             const fs = createMemoryFs();
 
-            expect(fs.path.resolve('test')).to.equal('/test');
-            expect(fs.path.resolve('some/deep/path')).to.equal('/some/deep/path');
+            expect(fs.resolve('test')).to.equal('/test');
+            expect(fs.resolve('some/deep/path')).to.equal('/some/deep/path');
         });
     });
 
@@ -43,7 +43,7 @@ describe('In-memory File System Implementation', () => {
         it('preserves birthtime and updates mtime', async () => {
             const fs = createPopulatedFs();
             const sourceFileStats = fs.statSync(sourceFilePath);
-            const destFilePath = fs.path.join(emptyDirectoryPath, 'dest');
+            const destFilePath = fs.join(emptyDirectoryPath, 'dest');
 
             await sleep(100); // postpone copying to ensure timestamps are different
 

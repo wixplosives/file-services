@@ -12,8 +12,7 @@ import { IWatchService } from './watch-api';
  * SYNC-only base file system.
  * Contains a subset of `fs`, watch service, and path methods.
  */
-export interface IBaseFileSystemSync extends IBaseFileSystemSyncActions {
-    path: IFileSystemPath;
+export interface IBaseFileSystemSync extends IBaseFileSystemSyncActions, IFileSystemPath {
     watchService: IWatchService;
     caseSensitive: boolean;
 }

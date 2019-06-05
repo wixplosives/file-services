@@ -36,14 +36,16 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSystemExtendedSyncActions {
     const {
         statSync,
-        path,
         mkdirSync,
         writeFileSync,
         unlinkSync,
         rmdirSync,
         lstatSync,
         readdirSync,
-        readFileSync
+        readFileSync,
+        dirname,
+        join,
+        resolve
     } = baseFs;
 
     function fileExistsSync(filePath: string, statFn = statSync): boolean {
@@ -76,7 +78,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         try {
             mkdirSync(directoryPath);
         } catch (e) {
-            const parentPath = path.dirname(directoryPath);
+            const parentPath = dirname(directoryPath);
             if (parentPath === directoryPath) {
                 throw e;
             }
@@ -89,9 +91,9 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         const filePaths: string[] = [];
         ensureDirectorySync(directoryPath);
         for (const [nodeName, nodeValue] of Object.entries(contents)) {
-            const nodePath = path.join(directoryPath, nodeName);
+            const nodePath = join(directoryPath, nodeName);
             if (typeof nodeValue === 'string') {
-                ensureDirectorySync(path.dirname(nodePath));
+                ensureDirectorySync(dirname(nodePath));
                 writeFileSync(nodePath, nodeValue);
                 filePaths.push(nodePath);
             } else {
@@ -106,7 +108,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         if (stats.isDirectory()) {
             const directoryItems = readdirSync(entryPath);
             for (const entryName of directoryItems) {
-                removeSync(path.join(entryPath, entryName));
+                removeSync(join(entryPath, entryName));
             }
             rmdirSync(entryPath);
         } else if (stats.isFile() || stats.isSymbolicLink()) {
@@ -120,7 +122,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
 
         for (const nodeName of readdirSync(rootDirectory)) {
-            const nodePath = path.join(rootDirectory, nodeName);
+            const nodePath = join(rootDirectory, nodeName);
             try {
                 const nodeStats = statSync(nodePath);
                 const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
@@ -141,16 +143,16 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     }
 
     function findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
-        let currentPath = path.resolve(initialDirectoryPath);
+        let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;
 
         while (currentPath !== lastPath) {
-            const filePath = path.join(currentPath, fileName);
+            const filePath = join(currentPath, fileName);
             if (fileExistsSync(filePath)) {
                 return filePath;
             }
             lastPath = currentPath;
-            currentPath = path.dirname(currentPath);
+            currentPath = dirname(currentPath);
         }
 
         return null;
@@ -158,16 +160,16 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
 
     function findFilesInAncestorsSync(initialDirectoryPath: string, fileName: string): string[] {
         const filePaths: string[] = [];
-        let currentPath = path.resolve(initialDirectoryPath);
+        let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;
 
         while (currentPath !== lastPath) {
-            const filePath = path.join(currentPath, fileName);
+            const filePath = join(currentPath, fileName);
             if (fileExistsSync(filePath)) {
                 filePaths.push(filePath);
             }
             lastPath = currentPath;
-            currentPath = path.dirname(currentPath);
+            currentPath = dirname(currentPath);
         }
 
         return filePaths;
@@ -177,11 +179,10 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         fileExistsSync,
         directoryExistsSync,
         // resolve path once for recursive functions
-        ensureDirectorySync: directoryPath => ensureDirectorySync(path.resolve(directoryPath)),
-        populateDirectorySync: (directoryPath, contents) =>
-            populateDirectorySync(path.resolve(directoryPath), contents),
-        removeSync: entryPath => removeSync(path.resolve(entryPath)),
-        findFilesSync: (rootDirectory, options) => findFilesSync(path.resolve(rootDirectory), options),
+        ensureDirectorySync: directoryPath => ensureDirectorySync(resolve(directoryPath)),
+        populateDirectorySync: (directoryPath, contents) => populateDirectorySync(resolve(directoryPath), contents),
+        removeSync: entryPath => removeSync(resolve(entryPath)),
+        findFilesSync: (rootDirectory, options) => findFilesSync(resolve(rootDirectory), options),
         findClosestFileSync,
         findFilesInAncestorsSync,
         readJsonFileSync
@@ -202,7 +203,9 @@ export function createExtendedFileSystemPromiseActions(
     baseFs: IBaseFileSystemAsync
 ): IFileSystemExtendedPromiseActions {
     const {
-        path,
+        dirname,
+        resolve,
+        join,
         promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile }
     } = baseFs;
 
@@ -236,7 +239,7 @@ export function createExtendedFileSystemPromiseActions(
         try {
             await mkdir(directoryPath);
         } catch (e) {
-            const parentPath = path.dirname(directoryPath);
+            const parentPath = dirname(directoryPath);
             if (parentPath === directoryPath) {
                 throw e;
             }
@@ -249,9 +252,9 @@ export function createExtendedFileSystemPromiseActions(
         const filePaths: string[] = [];
         await ensureDirectory(directoryPath);
         for (const [nodeName, nodeValue] of Object.entries(contents)) {
-            const nodePath = path.join(directoryPath, nodeName);
+            const nodePath = join(directoryPath, nodeName);
             if (typeof nodeValue === 'string') {
-                await ensureDirectory(path.dirname(nodePath));
+                await ensureDirectory(dirname(nodePath));
                 await writeFile(nodePath, nodeValue);
                 filePaths.push(nodePath);
             } else {
@@ -265,7 +268,7 @@ export function createExtendedFileSystemPromiseActions(
         const stats = await lstat(entryPath);
         if (stats.isDirectory()) {
             const directoryItems = await readdir(entryPath);
-            await Promise.all(directoryItems.map(entryName => remove(path.join(entryPath, entryName))));
+            await Promise.all(directoryItems.map(entryName => remove(join(entryPath, entryName))));
             await rmdir(entryPath);
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             await unlink(entryPath);
@@ -282,7 +285,7 @@ export function createExtendedFileSystemPromiseActions(
         const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
 
         for (const nodeName of await readdir(rootDirectory)) {
-            const nodePath = path.join(rootDirectory, nodeName);
+            const nodePath = join(rootDirectory, nodeName);
             try {
                 const nodeStats = await stat(nodePath);
                 const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
@@ -302,16 +305,16 @@ export function createExtendedFileSystemPromiseActions(
         return filePaths;
     }
     async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
-        let currentPath = path.resolve(initialDirectoryPath);
+        let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;
 
         while (currentPath !== lastPath) {
-            const filePath = path.join(currentPath, fileName);
+            const filePath = join(currentPath, fileName);
             if (await fileExists(filePath)) {
                 return filePath;
             }
             lastPath = currentPath;
-            currentPath = path.dirname(currentPath);
+            currentPath = dirname(currentPath);
         }
 
         return null;
@@ -319,16 +322,16 @@ export function createExtendedFileSystemPromiseActions(
 
     async function findFilesInAncestors(initialDirectoryPath: string, fileName: string): Promise<string[]> {
         const filePaths: string[] = [];
-        let currentPath = path.resolve(initialDirectoryPath);
+        let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;
 
         while (currentPath !== lastPath) {
-            const filePath = path.join(currentPath, fileName);
+            const filePath = join(currentPath, fileName);
             if (await fileExists(filePath)) {
                 filePaths.push(filePath);
             }
             lastPath = currentPath;
-            currentPath = path.dirname(currentPath);
+            currentPath = dirname(currentPath);
         }
 
         return filePaths;
@@ -337,10 +340,10 @@ export function createExtendedFileSystemPromiseActions(
     return {
         fileExists,
         directoryExists,
-        ensureDirectory: directoryPath => ensureDirectory(path.resolve(directoryPath)),
-        populateDirectory: (directoryPath, contents) => populateDirectory(path.resolve(directoryPath), contents),
-        remove: entryPath => remove(path.resolve(entryPath)),
-        findFiles: (rootDirectory, options) => findFiles(path.resolve(rootDirectory), options),
+        ensureDirectory: directoryPath => ensureDirectory(resolve(directoryPath)),
+        populateDirectory: (directoryPath, contents) => populateDirectory(resolve(directoryPath), contents),
+        remove: entryPath => remove(resolve(entryPath)),
+        findFiles: (rootDirectory, options) => findFiles(resolve(rootDirectory), options),
         findClosestFile,
         findFilesInAncestors,
         readJsonFile

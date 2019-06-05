@@ -34,7 +34,7 @@ export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
 
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {
     return {
-        path,
+        ...path,
         chdir,
         cwd,
         watchService: new NodeWatchService(options && options.watchOptions),

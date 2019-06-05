@@ -4,11 +4,7 @@ const isRelative = (request: string) => request.startsWith('./') || request.star
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
     const {
-        fs: {
-            fileExistsSync,
-            readFileSync,
-            path: { dirname, join, resolve, isAbsolute, basename }
-        },
+        fs: { fileExistsSync, readFileSync, dirname, join, resolve, isAbsolute, basename },
         packageRoots = ['node_modules'],
         extensions = ['.js', '.json'],
         target = 'browser'

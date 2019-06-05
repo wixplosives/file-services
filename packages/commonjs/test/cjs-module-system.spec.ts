@@ -70,7 +70,7 @@ describe('commonjs module system', () => {
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
-        expect(requireModule(sampleFilePath)).to.eql(fs.path.dirname(sampleFilePath));
+        expect(requireModule(sampleFilePath)).to.eql(fs.dirname(sampleFilePath));
     });
 
     it('exposes process.env with NODE_ENV === "development"', () => {

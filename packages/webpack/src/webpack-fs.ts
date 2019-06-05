@@ -9,7 +9,6 @@ export function createWebpackFs(fs: IFileSystem): webpack.InputFileSystem & webp
 
     return {
         ...fs,
-        ...fs.path,
         mkdirp(directoryPath, callback) {
             ensureDirectory(directoryPath).then(() => callback(undefined), callback);
         },

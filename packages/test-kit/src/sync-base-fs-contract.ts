@@ -16,8 +16,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('writing files', () => {
             it('can write a new file into an existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(filePath, SAMPLE_CONTENT);
 
@@ -27,8 +27,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('can overwrite an existing file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(filePath, SAMPLE_CONTENT);
                 fs.writeFileSync(filePath, DIFFERENT_CONTENT);
@@ -39,8 +39,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if writing a file to a non-existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'missing-dir', 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'missing-dir', 'file');
 
                 const expectedToFail = () => fs.writeFileSync(filePath, SAMPLE_CONTENT);
 
@@ -49,8 +49,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if writing a file to a path already pointing to a directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'dir');
 
                 fs.mkdirSync(directoryPath);
                 const expectedToFail = () => fs.writeFileSync(directoryPath, SAMPLE_CONTENT);
@@ -62,9 +62,9 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('reading files', () => {
             it('can read the contents of a file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const firstFilePath = join(tempDirectoryPath, 'first-file');
-                const secondFilePath = join(tempDirectoryPath, 'second-file');
+
+                const firstFilePath = fs.join(tempDirectoryPath, 'first-file');
+                const secondFilePath = fs.join(tempDirectoryPath, 'second-file');
 
                 fs.writeFileSync(firstFilePath, SAMPLE_CONTENT);
                 fs.writeFileSync(secondFilePath, DIFFERENT_CONTENT);
@@ -75,8 +75,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if reading a non-existing file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'missing-file');
+
+                const filePath = fs.join(tempDirectoryPath, 'missing-file');
 
                 const expectedToFail = () => fs.readFileSync(filePath, 'utf8');
 
@@ -94,8 +94,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('removing files', () => {
             it('can remove files', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(filePath, SAMPLE_CONTENT);
                 fs.unlinkSync(filePath);
@@ -105,8 +105,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if trying to remove a non-existing file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'missing-file');
+
+                const filePath = fs.join(tempDirectoryPath, 'missing-file');
 
                 const expectedToFail = () => fs.unlinkSync(filePath);
 
@@ -115,8 +115,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if trying to remove a directory as a file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'dir');
 
                 fs.mkdirSync(directoryPath);
                 const expectedToFail = () => fs.unlinkSync(directoryPath);
@@ -133,10 +133,10 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             beforeEach('create temp fixture file and intialize validator', async () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { watchService, path } = fs;
+                const { watchService } = fs;
                 validator = new WatchEventsValidator(watchService);
 
-                testFilePath = path.join(tempDirectoryPath, 'test-file');
+                testFilePath = fs.join(tempDirectoryPath, 'test-file');
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
                 await watchService.watchPath(testFilePath);
@@ -179,8 +179,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('creating directories', () => {
             it('can create an empty directory inside an existing one', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'new-dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'new-dir');
 
                 fs.mkdirSync(directoryPath);
 
@@ -190,8 +190,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if creating in a path pointing to an existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'dir');
 
                 fs.mkdirSync(directoryPath);
                 const expectedToFail = () => fs.mkdirSync(directoryPath);
@@ -201,8 +201,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if creating in a path pointing to an existing file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(filePath, SAMPLE_CONTENT);
                 const expectedToFail = () => fs.mkdirSync(filePath);
@@ -212,8 +212,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if creating a directory inside a non-existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'outer', 'inner');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'outer', 'inner');
 
                 const expectedToFail = () => fs.mkdirSync(directoryPath);
 
@@ -224,12 +224,12 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('listing directories', () => {
             it('can list an existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'dir');
 
                 fs.mkdirSync(directoryPath);
-                fs.writeFileSync(join(directoryPath, 'file1'), SAMPLE_CONTENT);
-                fs.writeFileSync(join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT);
+                fs.writeFileSync(fs.join(directoryPath, 'file1'), SAMPLE_CONTENT);
+                fs.writeFileSync(fs.join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT);
 
                 expect(fs.readdirSync(tempDirectoryPath)).to.eql(['dir']);
                 const directoryContents = fs.readdirSync(directoryPath);
@@ -240,8 +240,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if listing a non-existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'missing-dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'missing-dir');
 
                 const expectedToFail = () => fs.readdirSync(directoryPath);
 
@@ -250,8 +250,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if listing a path pointing to a file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(filePath, SAMPLE_CONTENT);
                 const expectedToFail = () => fs.readdirSync(filePath);
@@ -263,8 +263,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('removing directories', () => {
             it('can remove an existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'dir');
 
                 fs.mkdirSync(directoryPath);
                 fs.rmdirSync(directoryPath);
@@ -274,11 +274,11 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if removing a non-empty directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'dir');
 
                 fs.mkdirSync(directoryPath);
-                fs.writeFileSync(join(directoryPath, 'file'), SAMPLE_CONTENT);
+                fs.writeFileSync(fs.join(directoryPath, 'file'), SAMPLE_CONTENT);
                 const expectedToFail = () => fs.rmdirSync(directoryPath);
 
                 expect(expectedToFail).to.throw('ENOTEMPTY');
@@ -286,8 +286,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if removing a non-existing directory', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const directoryPath = join(tempDirectoryPath, 'missing-dir');
+
+                const directoryPath = fs.join(tempDirectoryPath, 'missing-dir');
 
                 const expectedToFail = () => fs.rmdirSync(directoryPath);
 
@@ -296,8 +296,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if removing a path pointing to a file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const filePath = join(tempDirectoryPath, 'file');
+
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(filePath, SAMPLE_CONTENT);
                 const expectedToFail = () => fs.rmdirSync(filePath);
@@ -314,20 +314,18 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             beforeEach('create temp fixture directory and intialize validator', async () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { watchService, path } = fs;
-                validator = new WatchEventsValidator(watchService);
+                validator = new WatchEventsValidator(fs.watchService);
 
-                testDirectoryPath = path.join(tempDirectoryPath, 'test-directory');
+                testDirectoryPath = fs.join(tempDirectoryPath, 'test-directory');
                 fs.mkdirSync(testDirectoryPath);
             });
 
             it('fires a watch event when a file is added inside a watched directory', async () => {
                 const { fs } = testInput;
-                const { watchService, path } = fs;
 
-                await watchService.watchPath(testDirectoryPath);
+                await fs.watchService.watchPath(testDirectoryPath);
 
-                const testFilePath = path.join(testDirectoryPath, 'test-file');
+                const testFilePath = fs.join(testDirectoryPath, 'test-file');
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
 
                 await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
@@ -336,11 +334,10 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fires a watch event when a file is changed inside a watched directory', async () => {
                 const { fs } = testInput;
-                const { watchService, path } = fs;
 
-                const testFilePath = path.join(testDirectoryPath, 'test-file');
+                const testFilePath = fs.join(testDirectoryPath, 'test-file');
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-                await watchService.watchPath(testDirectoryPath);
+                await fs.watchService.watchPath(testDirectoryPath);
 
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
 
@@ -350,11 +347,10 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fires a watch event when a file is removed inside a watched directory', async () => {
                 const { fs } = testInput;
-                const { watchService, path } = fs;
 
-                const testFilePath = path.join(testDirectoryPath, 'test-file');
+                const testFilePath = fs.join(testDirectoryPath, 'test-file');
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-                await watchService.watchPath(testDirectoryPath);
+                await fs.watchService.watchPath(testDirectoryPath);
 
                 fs.unlinkSync(testFilePath);
 
@@ -372,12 +368,11 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             beforeEach('create temp fixture directory and intialize watchService', async () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { watchService, path } = fs;
-                validator = new WatchEventsValidator(watchService);
+                validator = new WatchEventsValidator(fs.watchService);
 
-                testDirectoryPath = path.join(tempDirectoryPath, 'test-directory');
+                testDirectoryPath = fs.join(tempDirectoryPath, 'test-directory');
                 fs.mkdirSync(testDirectoryPath);
-                testFilePath = path.join(testDirectoryPath, 'test-file');
+                testFilePath = fs.join(testDirectoryPath, 'test-file');
                 fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
             });
 
@@ -411,13 +406,13 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         describe('renaming directories and files', () => {
             it('moves a file', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const sourcePath = join(tempDirectoryPath, 'file');
-                const destinationPath = join(tempDirectoryPath, 'dir', 'subdir', 'movedFile');
+
+                const sourcePath = fs.join(tempDirectoryPath, 'file');
+                const destinationPath = fs.join(tempDirectoryPath, 'dir', 'subdir', 'movedFile');
 
                 fs.writeFileSync(sourcePath, SAMPLE_CONTENT);
-                fs.mkdirSync(join(tempDirectoryPath, 'dir'));
-                fs.mkdirSync(join(tempDirectoryPath, 'dir', 'subdir'));
+                fs.mkdirSync(fs.join(tempDirectoryPath, 'dir'));
+                fs.mkdirSync(fs.join(tempDirectoryPath, 'dir', 'subdir'));
 
                 fs.renameSync(sourcePath, destinationPath);
 
@@ -428,9 +423,9 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('updates mtime', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const sourcePath = join(tempDirectoryPath, 'file');
-                const destinationPath = join(tempDirectoryPath, 'file2');
+
+                const sourcePath = fs.join(tempDirectoryPath, 'file');
+                const destinationPath = fs.join(tempDirectoryPath, 'file2');
 
                 fs.writeFileSync(sourcePath, SAMPLE_CONTENT);
                 const sourceMtime = fs.statSync(sourcePath).mtime;
@@ -441,38 +436,38 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it(`throws if source path doesn't exist`, () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const sourcePath = join(tempDirectoryPath, 'file');
 
-                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('ENOENT');
+                const sourcePath = fs.join(tempDirectoryPath, 'file');
+
+                expect(() => fs.renameSync(sourcePath, fs.join(tempDirectoryPath, 'file2'))).to.throw('ENOENT');
             });
 
             it(`throws if the containing directory of the source path doesn't exist`, () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const sourcePath = join(tempDirectoryPath, 'unicorn', 'file');
 
-                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'file2'))).to.throw('ENOENT');
+                const sourcePath = fs.join(tempDirectoryPath, 'unicorn', 'file');
+
+                expect(() => fs.renameSync(sourcePath, fs.join(tempDirectoryPath, 'file2'))).to.throw('ENOENT');
             });
 
             it(`throws if destination containing path doesn't exist`, () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const sourcePath = join(tempDirectoryPath, 'file');
+
+                const sourcePath = fs.join(tempDirectoryPath, 'file');
 
                 fs.writeFileSync(sourcePath, SAMPLE_CONTENT);
 
-                expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'dir', 'file2'))).to.throw('ENOENT');
+                expect(() => fs.renameSync(sourcePath, fs.join(tempDirectoryPath, 'dir', 'file2'))).to.throw('ENOENT');
             });
 
             it('updates the parent directory of a renamed entry', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                const sourcePath = join(tempDirectoryPath, 'sourceDir');
-                const destPath = join(tempDirectoryPath, 'destDir');
+
+                const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');
+                const destPath = fs.join(tempDirectoryPath, 'destDir');
 
                 fs.mkdirSync(sourcePath);
-                fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT);
+                fs.writeFileSync(fs.join(sourcePath, 'file'), SAMPLE_CONTENT);
 
                 fs.renameSync(sourcePath, destPath);
 
@@ -482,43 +477,45 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             describe('renaming directories', () => {
                 it('moves a directory', () => {
                     const { fs, tempDirectoryPath } = testInput;
-                    const { join } = fs.path;
-                    const sourcePath = join(tempDirectoryPath, 'dir');
-                    const destinationPath = join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir');
-                    fs.mkdirSync(join(tempDirectoryPath, 'dir'));
-                    fs.mkdirSync(join(tempDirectoryPath, 'anotherDir'));
-                    fs.mkdirSync(join(tempDirectoryPath, 'anotherDir', 'subdir'));
-                    fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT);
+
+                    const sourcePath = fs.join(tempDirectoryPath, 'dir');
+                    const destinationPath = fs.join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir');
+                    fs.mkdirSync(fs.join(tempDirectoryPath, 'dir'));
+                    fs.mkdirSync(fs.join(tempDirectoryPath, 'anotherDir'));
+                    fs.mkdirSync(fs.join(tempDirectoryPath, 'anotherDir', 'subdir'));
+                    fs.writeFileSync(fs.join(sourcePath, 'file'), SAMPLE_CONTENT);
 
                     fs.renameSync(sourcePath, destinationPath);
 
                     expect(fs.statSync(destinationPath).isDirectory()).to.equal(true);
-                    expect(fs.readFileSync(join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT);
+                    expect(fs.readFileSync(fs.join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT);
                     expect(() => fs.statSync(sourcePath)).to.throw('ENOENT');
                 });
 
                 it(`allows copying a directory over a non-existing directory`, () => {
                     //tslint:disable-line
                     const { fs, tempDirectoryPath } = testInput;
-                    const { join } = fs.path;
-                    const sourcePath = join(tempDirectoryPath, 'sourceDir');
+
+                    const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');
 
                     fs.mkdirSync(sourcePath);
-                    fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT);
+                    fs.writeFileSync(fs.join(sourcePath, 'file'), SAMPLE_CONTENT);
 
-                    expect(() => fs.renameSync(sourcePath, join(tempDirectoryPath, 'destDir'))).not.to.throw('EEXIST');
+                    expect(() => fs.renameSync(sourcePath, fs.join(tempDirectoryPath, 'destDir'))).not.to.throw(
+                        'EEXIST'
+                    );
                 });
 
                 it(`allows copying copying a directory over an empty directory`, () => {
                     //tslint:disable-line
                     const { fs, tempDirectoryPath } = testInput;
-                    const { join } = fs.path;
-                    const sourcePath = join(tempDirectoryPath, 'sourceDir');
-                    const destPath = join(tempDirectoryPath, 'destDir');
+
+                    const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');
+                    const destPath = fs.join(tempDirectoryPath, 'destDir');
 
                     fs.mkdirSync(sourcePath);
                     fs.mkdirSync(destPath);
-                    fs.writeFileSync(join(sourcePath, 'file'), SAMPLE_CONTENT);
+                    fs.writeFileSync(fs.join(sourcePath, 'file'), SAMPLE_CONTENT);
 
                     expect(() => fs.renameSync(sourcePath, destPath)).not.to.throw('EEXIST');
                 });
@@ -527,8 +524,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         it('correctly exposes whether it is case sensitive', () => {
             const { fs, tempDirectoryPath } = testInput;
-            const { join } = fs.path;
-            const filePath = join(tempDirectoryPath, 'file');
+
+            const filePath = fs.join(tempDirectoryPath, 'file');
             const upperCaseFilePath = filePath.toUpperCase();
 
             fs.writeFileSync(filePath, SAMPLE_CONTENT);
@@ -547,36 +544,36 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             beforeEach(() => {
                 const { fs, tempDirectoryPath } = testInput;
-                const { join } = fs.path;
-                targetDirectoryPath = join(tempDirectoryPath, 'dir');
+
+                targetDirectoryPath = fs.join(tempDirectoryPath, 'dir');
                 fs.mkdirSync(targetDirectoryPath);
-                sourceFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+                sourceFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
                 fs.writeFileSync(sourceFilePath, SAMPLE_CONTENT);
             });
 
             it('can copy file', () => {
                 const { fs } = testInput;
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const targetPath = fs.join(targetDirectoryPath, SOURCE_FILE_NAME);
                 fs.copyFileSync(sourceFilePath, targetPath);
                 expect(fs.readFileSync(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT);
             });
 
             it('fails if source does not exist', () => {
                 const { fs, tempDirectoryPath } = testInput;
-                const sourcePath = fs.path.join(tempDirectoryPath, 'nonExistingFileName.txt');
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const sourcePath = fs.join(tempDirectoryPath, 'nonExistingFileName.txt');
+                const targetPath = fs.join(targetDirectoryPath, SOURCE_FILE_NAME);
                 expect(() => fs.copyFileSync(sourcePath, targetPath)).to.throw('ENOENT');
             });
 
             it('fails if target containing directory does not exist', () => {
                 const { fs } = testInput;
-                const targetPath = fs.path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME);
+                const targetPath = fs.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME);
                 expect(() => fs.copyFileSync(sourceFilePath, targetPath)).to.throw('ENOENT');
             });
 
             it('overwrites destination file by default', () => {
                 const { fs } = testInput;
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const targetPath = fs.join(targetDirectoryPath, SOURCE_FILE_NAME);
                 fs.writeFileSync(targetPath, 'content to be overwritten');
                 fs.copyFileSync(sourceFilePath, targetPath);
                 expect(fs.readFileSync(targetPath, 'utf8')).to.be.eql(SAMPLE_CONTENT);
@@ -584,7 +581,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
             it('fails if destination exists and flag COPYFILE_EXCL passed', () => {
                 const { fs } = testInput;
-                const targetPath = fs.path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const targetPath = fs.join(targetDirectoryPath, SOURCE_FILE_NAME);
                 fs.writeFileSync(targetPath, 'content to be overwritten');
                 expect(() => fs.copyFileSync(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL)).to.throw(
                     'EEXIST'

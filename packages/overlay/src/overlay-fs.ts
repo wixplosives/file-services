@@ -14,18 +14,18 @@ export function createOverlayFs(
     upperFs: IFileSystem,
     baseDirectoryPath = lowerFs.cwd()
 ): IFileSystem {
-    const { promises: lowerPromises, path: lowerPath } = lowerFs;
+    const { promises: lowerPromises } = lowerFs;
     const { promises: upperPromises } = upperFs;
-    const lowerFsRelativeUp = `..${lowerPath.sep}`;
+    const lowerFsRelativeUp = `..${lowerFs.sep}`;
 
     // ensure base Directory is absolute
-    baseDirectoryPath = lowerPath.resolve(baseDirectoryPath);
+    baseDirectoryPath = lowerFs.resolve(baseDirectoryPath);
 
     function resolvePaths(path: string): { resolvedLowerPath: string; resolvedUpperPath?: string } {
-        const resolvedLowerPath = lowerPath.resolve(path);
-        const relativeToBase = lowerPath.relative(baseDirectoryPath, resolvedLowerPath);
+        const resolvedLowerPath = lowerFs.resolve(path);
+        const relativeToBase = lowerFs.relative(baseDirectoryPath, resolvedLowerPath);
 
-        if (!relativeToBase.startsWith(lowerFsRelativeUp) && !lowerPath.isAbsolute(lowerFsRelativeUp)) {
+        if (!relativeToBase.startsWith(lowerFsRelativeUp) && !lowerFs.isAbsolute(lowerFsRelativeUp)) {
             return { resolvedLowerPath, resolvedUpperPath: relativeToBase.replace(/\\/g, '/') };
         } else {
             return { resolvedLowerPath };
@@ -78,7 +78,7 @@ export function createOverlayFs(
             const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
             if (resolvedUpperPath !== undefined) {
                 try {
-                    return lowerPath.join(baseDirectoryPath, upperFs.realpathSync(resolvedUpperPath));
+                    return lowerFs.join(baseDirectoryPath, upperFs.realpathSync(resolvedUpperPath));
                 } catch {
                     /**/
                 }
@@ -162,7 +162,7 @@ export function createOverlayFs(
             const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
             if (resolvedUpperPath !== undefined) {
                 try {
-                    return lowerPath.join(baseDirectoryPath, await upperPromises.realpath(resolvedUpperPath));
+                    return lowerFs.join(baseDirectoryPath, await upperPromises.realpath(resolvedUpperPath));
                 } catch {
                     /**/
                 }
@@ -273,7 +273,7 @@ export function createOverlayFs(
                     if (e) {
                         lowerFs.realpath(resolvedLowerPath, callback);
                     } else {
-                        callback(e, lowerPath.join(baseDirectoryPath, realPath));
+                        callback(e, lowerFs.join(baseDirectoryPath, realPath));
                     }
                 });
             } else {

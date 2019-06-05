@@ -4,7 +4,7 @@ import { createBaseCjsModuleSystem } from './base-cjs-module-system';
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
     const { fs, processEnv = { NODE_ENV: 'development' } } = options;
-    const { path, readFileSync } = fs;
+    const { dirname, readFileSync } = fs;
 
     const { resolver = createRequestResolver({ fs }) } = options;
 
@@ -14,7 +14,7 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
             const resolvedRequest = resolver(contextPath, request, requestOrigin);
             return resolvedRequest && resolvedRequest.resolvedFile;
         },
-        dirname: path.dirname,
+        dirname,
         readFileSync: filePath => readFileSync(filePath, 'utf8')
     });
 }

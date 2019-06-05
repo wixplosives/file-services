@@ -21,11 +21,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { stat, readFile, writeFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'file');
+                const filePath = join(tempDirectoryPath, 'file');
 
                 await writeFile(filePath, SAMPLE_CONTENT);
 
@@ -37,11 +37,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { stat, readFile, writeFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'file');
+                const filePath = join(tempDirectoryPath, 'file');
 
                 await writeFile(filePath, SAMPLE_CONTENT);
                 await writeFile(filePath, DIFFERENT_CONTENT);
@@ -54,11 +54,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { writeFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'missing-dir', 'file');
+                const filePath = join(tempDirectoryPath, 'missing-dir', 'file');
 
                 await expect(writeFile(filePath, SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT');
             });
@@ -67,11 +67,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { writeFile, mkdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'dir');
+                const directoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(directoryPath);
 
@@ -84,12 +84,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { readFile, writeFile }
                     }
                 } = testInput;
-                const firstFilePath = path.join(tempDirectoryPath, 'first-file');
-                const secondFilePath = path.join(tempDirectoryPath, 'second-file');
+                const firstFilePath = join(tempDirectoryPath, 'first-file');
+                const secondFilePath = join(tempDirectoryPath, 'second-file');
 
                 await writeFile(firstFilePath, SAMPLE_CONTENT);
                 await writeFile(secondFilePath, DIFFERENT_CONTENT);
@@ -102,11 +102,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { readFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'missing-file');
+                const filePath = join(tempDirectoryPath, 'missing-file');
 
                 await expect(readFile(filePath, 'utf8')).to.be.rejectedWith('ENOENT');
             });
@@ -128,11 +128,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { stat, unlink, writeFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'file');
+                const filePath = join(tempDirectoryPath, 'file');
 
                 await writeFile(filePath, SAMPLE_CONTENT);
                 await unlink(filePath);
@@ -144,11 +144,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { unlink }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'missing-file');
+                const filePath = join(tempDirectoryPath, 'missing-file');
 
                 await expect(unlink(filePath)).to.be.rejectedWith('ENOENT');
             });
@@ -157,11 +157,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir, unlink }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'dir');
+                const directoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(directoryPath);
 
@@ -179,14 +179,14 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { writeFile },
                         watchService
                     }
                 } = testInput;
                 validator = new WatchEventsValidator(watchService);
 
-                testFilePath = path.join(tempDirectoryPath, 'test-file');
+                testFilePath = join(tempDirectoryPath, 'test-file');
 
                 await writeFile(testFilePath, SAMPLE_CONTENT);
                 await watchService.watchPath(testFilePath);
@@ -243,11 +243,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir, stat, readdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'new-dir');
+                const directoryPath = join(tempDirectoryPath, 'new-dir');
 
                 await mkdir(directoryPath);
 
@@ -259,11 +259,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'dir');
+                const directoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(directoryPath);
 
@@ -274,11 +274,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir, writeFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'file');
+                const filePath = join(tempDirectoryPath, 'file');
 
                 await writeFile(filePath, SAMPLE_CONTENT);
 
@@ -289,11 +289,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'outer', 'inner');
+                const directoryPath = join(tempDirectoryPath, 'outer', 'inner');
 
                 await expect(mkdir(directoryPath)).to.be.rejectedWith('ENOENT');
             });
@@ -304,15 +304,15 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir, writeFile, readdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'dir');
+                const directoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(directoryPath);
-                await writeFile(path.join(directoryPath, 'file1'), SAMPLE_CONTENT);
-                await writeFile(path.join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT);
+                await writeFile(join(directoryPath, 'file1'), SAMPLE_CONTENT);
+                await writeFile(join(directoryPath, 'camelCasedName'), SAMPLE_CONTENT);
 
                 expect(await readdir(tempDirectoryPath)).to.eql(['dir']);
                 const directoryContents = await readdir(directoryPath);
@@ -325,11 +325,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { readdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'missing-dir');
+                const directoryPath = join(tempDirectoryPath, 'missing-dir');
 
                 await expect(readdir(directoryPath)).to.be.rejectedWith('ENOENT');
             });
@@ -338,11 +338,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { writeFile, readdir }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'file');
+                const filePath = join(tempDirectoryPath, 'file');
 
                 await writeFile(filePath, SAMPLE_CONTENT);
 
@@ -355,11 +355,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir, rmdir, stat }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'dir');
+                const directoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(directoryPath);
                 await rmdir(directoryPath);
@@ -371,14 +371,14 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { mkdir, writeFile, rmdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'dir');
+                const directoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(directoryPath);
-                await writeFile(path.join(directoryPath, 'file'), SAMPLE_CONTENT);
+                await writeFile(join(directoryPath, 'file'), SAMPLE_CONTENT);
 
                 await expect(rmdir(directoryPath)).to.be.rejectedWith('ENOTEMPTY');
             });
@@ -387,11 +387,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { rmdir }
                     }
                 } = testInput;
-                const directoryPath = path.join(tempDirectoryPath, 'missing-dir');
+                const directoryPath = join(tempDirectoryPath, 'missing-dir');
 
                 await expect(rmdir(directoryPath)).to.be.rejectedWith('ENOENT');
             });
@@ -400,11 +400,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { rmdir, writeFile }
                     }
                 } = testInput;
-                const filePath = path.join(tempDirectoryPath, 'file');
+                const filePath = join(tempDirectoryPath, 'file');
 
                 await writeFile(filePath, SAMPLE_CONTENT);
 
@@ -423,13 +423,13 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         promises: { mkdir },
-                        path,
+                        join,
                         watchService
                     }
                 } = testInput;
                 validator = new WatchEventsValidator(watchService);
 
-                testDirectoryPath = path.join(tempDirectoryPath, 'test-directory');
+                testDirectoryPath = join(tempDirectoryPath, 'test-directory');
                 await mkdir(testDirectoryPath);
             });
 
@@ -437,14 +437,14 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         promises: { writeFile, stat },
-                        path,
+                        join,
                         watchService
                     }
                 } = testInput;
 
                 await watchService.watchPath(testDirectoryPath);
 
-                const testFilePath = path.join(testDirectoryPath, 'test-file');
+                const testFilePath = join(testDirectoryPath, 'test-file');
                 await writeFile(testFilePath, SAMPLE_CONTENT);
 
                 await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }]);
@@ -455,12 +455,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         promises: { writeFile, stat },
-                        path,
+                        join,
                         watchService
                     }
                 } = testInput;
 
-                const testFilePath = path.join(testDirectoryPath, 'test-file');
+                const testFilePath = join(testDirectoryPath, 'test-file');
                 await writeFile(testFilePath, SAMPLE_CONTENT);
                 await watchService.watchPath(testDirectoryPath);
 
@@ -474,12 +474,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         promises: { writeFile, unlink },
-                        path,
+                        join,
                         watchService
                     }
                 } = testInput;
 
-                const testFilePath = path.join(testDirectoryPath, 'test-file');
+                const testFilePath = join(testDirectoryPath, 'test-file');
                 await writeFile(testFilePath, SAMPLE_CONTENT);
                 await watchService.watchPath(testDirectoryPath);
 
@@ -502,15 +502,15 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         promises: { writeFile, mkdir },
-                        path,
+                        join,
                         watchService
                     }
                 } = testInput;
                 validator = new WatchEventsValidator(watchService);
 
-                testDirectoryPath = path.join(tempDirectoryPath, 'test-directory');
+                testDirectoryPath = join(tempDirectoryPath, 'test-directory');
                 await mkdir(testDirectoryPath);
-                testFilePath = path.join(testDirectoryPath, 'test-file');
+                testFilePath = join(testDirectoryPath, 'test-file');
                 await writeFile(testFilePath, SAMPLE_CONTENT);
             });
 
@@ -554,16 +554,16 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { writeFile, stat, mkdir, rename, readFile }
                     }
                 } = testInput;
-                const sourcePath = path.join(tempDirectoryPath, 'file');
-                const destinationPath = path.join(tempDirectoryPath, 'dir', 'subdir', 'movedFile');
+                const sourcePath = join(tempDirectoryPath, 'file');
+                const destinationPath = join(tempDirectoryPath, 'dir', 'subdir', 'movedFile');
 
                 await writeFile(sourcePath, SAMPLE_CONTENT);
-                await mkdir(path.join(tempDirectoryPath, 'dir'));
-                await mkdir(path.join(tempDirectoryPath, 'dir', 'subdir'));
+                await mkdir(join(tempDirectoryPath, 'dir'));
+                await mkdir(join(tempDirectoryPath, 'dir', 'subdir'));
 
                 const sourceStats = await stat(sourcePath);
 
@@ -580,12 +580,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { rename }
                     }
                 } = testInput;
-                const sourcePath = path.join(tempDirectoryPath, 'file');
-                const destPath = path.join(tempDirectoryPath, 'file2');
+                const sourcePath = join(tempDirectoryPath, 'file');
+                const destPath = join(tempDirectoryPath, 'file2');
 
                 await expect(rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT');
             });
@@ -594,12 +594,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { rename }
                     }
                 } = testInput;
-                const sourcePath = path.join(tempDirectoryPath, 'unicorn', 'file');
-                const destPath = path.join(tempDirectoryPath, 'file2');
+                const sourcePath = join(tempDirectoryPath, 'unicorn', 'file');
+                const destPath = join(tempDirectoryPath, 'file2');
 
                 await expect(rename(sourcePath, destPath)).to.be.rejectedWith('ENOENT');
             });
@@ -608,12 +608,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { rename, writeFile }
                     }
                 } = testInput;
-                const sourcePath = path.join(tempDirectoryPath, 'file');
-                const destPath = path.join(tempDirectoryPath, 'dir', 'file2');
+                const sourcePath = join(tempDirectoryPath, 'file');
+                const destPath = join(tempDirectoryPath, 'dir', 'file2');
 
                 await writeFile(sourcePath, SAMPLE_CONTENT);
 
@@ -624,15 +624,15 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { rename, mkdir, readdir, writeFile }
                     }
                 } = testInput;
-                const sourcePath = path.join(tempDirectoryPath, 'sourceDir');
-                const destPath = path.join(tempDirectoryPath, 'destDir');
+                const sourcePath = join(tempDirectoryPath, 'sourceDir');
+                const destPath = join(tempDirectoryPath, 'destDir');
 
                 await mkdir(sourcePath);
-                await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT);
+                await writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT);
 
                 await rename(sourcePath, destPath);
 
@@ -644,21 +644,21 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     const {
                         tempDirectoryPath,
                         fs: {
-                            path,
+                            join,
                             promises: { rename, mkdir, writeFile, stat, readFile }
                         }
                     } = testInput;
-                    const sourcePath = path.join(tempDirectoryPath, 'dir');
-                    const destinationPath = path.join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir');
-                    await mkdir(path.join(tempDirectoryPath, 'dir'));
-                    await mkdir(path.join(tempDirectoryPath, 'anotherDir'));
-                    await mkdir(path.join(tempDirectoryPath, 'anotherDir', 'subdir'));
-                    await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT);
+                    const sourcePath = join(tempDirectoryPath, 'dir');
+                    const destinationPath = join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir');
+                    await mkdir(join(tempDirectoryPath, 'dir'));
+                    await mkdir(join(tempDirectoryPath, 'anotherDir'));
+                    await mkdir(join(tempDirectoryPath, 'anotherDir', 'subdir'));
+                    await writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT);
 
                     await rename(sourcePath, destinationPath);
 
                     expect((await stat(destinationPath)).isDirectory()).to.equal(true);
-                    expect(await readFile(path.join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT);
+                    expect(await readFile(join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT);
                     await expect(stat(sourcePath)).to.be.rejectedWith('ENOENT');
                 });
 
@@ -666,16 +666,16 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     const {
                         tempDirectoryPath,
                         fs: {
-                            path,
+                            join,
                             promises: { rename, mkdir, writeFile }
                         }
                     } = testInput;
-                    const sourcePath = path.join(tempDirectoryPath, 'sourceDir');
+                    const sourcePath = join(tempDirectoryPath, 'sourceDir');
 
                     await mkdir(sourcePath);
-                    await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT);
+                    await writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT);
 
-                    await expect(rename(sourcePath, path.join(tempDirectoryPath, 'destDir'))).to.not.be.rejectedWith(
+                    await expect(rename(sourcePath, join(tempDirectoryPath, 'destDir'))).to.not.be.rejectedWith(
                         'EEXIST'
                     );
                 });
@@ -684,16 +684,16 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     const {
                         tempDirectoryPath,
                         fs: {
-                            path,
+                            join,
                             promises: { rename, mkdir, writeFile }
                         }
                     } = testInput;
-                    const sourcePath = path.join(tempDirectoryPath, 'sourceDir');
-                    const destPath = path.join(tempDirectoryPath, 'destDir');
+                    const sourcePath = join(tempDirectoryPath, 'sourceDir');
+                    const destPath = join(tempDirectoryPath, 'destDir');
 
                     await mkdir(sourcePath);
                     await mkdir(destPath);
-                    await writeFile(path.join(sourcePath, 'file'), SAMPLE_CONTENT);
+                    await writeFile(join(sourcePath, 'file'), SAMPLE_CONTENT);
 
                     await expect(rename(sourcePath, destPath)).to.not.be.rejectedWith('EEXIST');
                 });
@@ -704,12 +704,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             const {
                 tempDirectoryPath,
                 fs: {
-                    path,
+                    join,
                     caseSensitive,
                     promises: { writeFile, stat }
                 }
             } = testInput;
-            const filePath = path.join(tempDirectoryPath, 'file');
+            const filePath = join(tempDirectoryPath, 'file');
             const upperCaseFilePath = filePath.toUpperCase();
 
             await writeFile(filePath, SAMPLE_CONTENT);
@@ -730,25 +730,25 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { writeFile, mkdir }
                     }
                 } = testInput;
-                targetDirectoryPath = path.join(tempDirectoryPath, 'dir');
+                targetDirectoryPath = join(tempDirectoryPath, 'dir');
 
                 await mkdir(targetDirectoryPath);
-                sourceFilePath = path.join(tempDirectoryPath, SOURCE_FILE_NAME);
+                sourceFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
                 await writeFile(sourceFilePath, SAMPLE_CONTENT);
             });
 
             it('can copy file', async () => {
                 const {
                     fs: {
-                        path,
+                        join,
                         promises: { copyFile, readFile }
                     }
                 } = testInput;
-                const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 
                 await copyFile(sourceFilePath, targetPath);
 
@@ -759,12 +759,12 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     tempDirectoryPath,
                     fs: {
-                        path,
+                        join,
                         promises: { copyFile }
                     }
                 } = testInput;
-                const sourcePath = path.join(tempDirectoryPath, 'nonExistingFileName.txt');
-                const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const sourcePath = join(tempDirectoryPath, 'nonExistingFileName.txt');
+                const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 
                 await expect(copyFile(sourcePath, targetPath)).to.be.rejectedWith('ENOENT');
             });
@@ -772,11 +772,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('fails if target containing directory does not exist', async () => {
                 const {
                     fs: {
-                        path,
+                        join,
                         promises: { copyFile }
                     }
                 } = testInput;
-                const targetPath = path.join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME);
+                const targetPath = join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME);
 
                 await expect(copyFile(sourceFilePath, targetPath)).to.be.rejectedWith('ENOENT');
             });
@@ -784,11 +784,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('overwrites destination file by default', async () => {
                 const {
                     fs: {
-                        path,
+                        join,
                         promises: { copyFile, readFile, writeFile }
                     }
                 } = testInput;
-                const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 
                 await writeFile(targetPath, 'content to be overwritten');
                 await copyFile(sourceFilePath, targetPath);
@@ -799,11 +799,11 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('fails if destination exists and flag COPYFILE_EXCL passed', async () => {
                 const {
                     fs: {
-                        path,
+                        join,
                         promises: { copyFile, writeFile }
                     }
                 } = testInput;
-                const targetPath = path.join(targetDirectoryPath, SOURCE_FILE_NAME);
+                const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 
                 await writeFile(targetPath, 'content to be overwritten');
 

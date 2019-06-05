@@ -42,13 +42,11 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
  * Currently a subset of the sync base file system API.
  */
 export interface IResolutionFileSystem {
-    path: {
-        dirname(path: string): string;
-        join(...paths: string[]): string;
-        resolve(...pathSegments: string[]): string;
-        isAbsolute(path: string): boolean;
-        basename(path: string): string;
-    };
+    dirname(path: string): string;
+    join(...paths: string[]): string;
+    resolve(...pathSegments: string[]): string;
+    isAbsolute(path: string): boolean;
+    basename(path: string): string;
     fileExistsSync(path: string): boolean;
     readFileSync(path: string, encoding: 'utf8'): string;
 }
