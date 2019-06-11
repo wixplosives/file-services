@@ -106,8 +106,10 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             readFile: function readFile(path: string, ...args: [ReadFileOptions]) {
                 return promises.readFile(resolveFullPath(path), ...args);
             } as IBaseFileSystemPromiseActions['readFile'],
-            realpath(path) {
-                return promises.realpath(resolveFullPath(path));
+            async realpath(path) {
+                const actualPath = await fs.promises.realpath(resolveFullPath(path));
+                const relativePath = relative(directoryPath, actualPath).replace(/\\/g, '/');
+                return relativePath.startsWith('../') ? relativePath : resolveScopedPath(relativePath);
             },
             rename(srcPath, destPath) {
                 return promises.rename(resolveFullPath(srcPath), resolveFullPath(destPath));
@@ -147,7 +149,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             return fs.readFileSync(resolveFullPath(path), ...args);
         } as IBaseFileSystemSyncActions['readFileSync'],
         realpathSync(path) {
-            return fs.realpathSync(resolveFullPath(path));
+            const actualPath = fs.realpathSync(resolveFullPath(path));
+            const relativePath = relative(directoryPath, actualPath).replace(/\\/g, '/');
+            return relativePath.startsWith('../') ? relativePath : resolveScopedPath(relativePath);
         },
         readlinkSync(path) {
             return fs.readlinkSync(resolveFullPath(path));

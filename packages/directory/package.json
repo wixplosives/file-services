@@ -9,7 +9,7 @@
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
     "test": "run-p test:node test:browser",
-    "test:node": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors",
+    "test:node": "mocha -r @ts-tools/node/r \"test/**/*.{spec,ix}.ts?(x)\" --watch-extensions ts,tsx --colors",
     "test:browser": "mocha-pup \"test/**/*.spec.ts?(x)\"",
     "prepack": "yarn build"
   },
