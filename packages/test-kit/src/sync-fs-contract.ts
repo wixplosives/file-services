@@ -256,7 +256,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                     fs.join(directoryPath, 'folder2', anotherFileName)
                 );
 
-                expect(fs.findClosestFileSync(directoryPath, anotherFileName)).to.equal(null);
+                expect(fs.findClosestFileSync(directoryPath, anotherFileName)).to.equal(undefined);
             });
         });
 

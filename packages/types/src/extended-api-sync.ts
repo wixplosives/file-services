@@ -40,9 +40,9 @@ export interface IFileSystemExtendedSyncActions {
      * Search for a specific file name in parent directory chain.
      * Useful for finding configuration or manifest files.
      *
-     * @returns absolute path of first found file, or `null` if none found.
+     * @returns absolute path of first found file, or `undefined` if none found.
      */
-    findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null;
+    findClosestFileSync(initialDirectoryPath: string, fileName: string): string | undefined;
 
     /**
      * Search for a specific file name in parent directory chain.

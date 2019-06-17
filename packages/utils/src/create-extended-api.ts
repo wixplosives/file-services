@@ -142,7 +142,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         return filePaths;
     }
 
-    function findClosestFileSync(initialDirectoryPath: string, fileName: string): string | null {
+    function findClosestFileSync(initialDirectoryPath: string, fileName: string): string | undefined {
         let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;
 
@@ -155,7 +155,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
             currentPath = dirname(currentPath);
         }
 
-        return null;
+        return undefined;
     }
 
     function findFilesInAncestorsSync(initialDirectoryPath: string, fileName: string): string[] {
@@ -304,7 +304,7 @@ export function createExtendedFileSystemPromiseActions(
 
         return filePaths;
     }
-    async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null> {
+    async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | undefined> {
         let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;
 
@@ -317,7 +317,7 @@ export function createExtendedFileSystemPromiseActions(
             currentPath = dirname(currentPath);
         }
 
-        return null;
+        return undefined;
     }
 
     async function findFilesInAncestors(initialDirectoryPath: string, fileName: string): Promise<string[]> {

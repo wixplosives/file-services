@@ -254,7 +254,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                     fs.join(directoryPath, 'folder2', anotherFileName)
                 );
 
-                expect(await fs.promises.findClosestFile(directoryPath, anotherFileName)).to.equal(null);
+                expect(await fs.promises.findClosestFile(directoryPath, anotherFileName)).to.equal(undefined);
             });
         });
 

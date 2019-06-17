@@ -44,9 +44,9 @@ export interface IFileSystemExtendedPromiseActions {
      * Search for a specific file name in parent directory chain.
      * Useful for finding configuration or manifest files.
      *
-     * @returns absolute path of first found file, or `null` if none found.
+     * @returns absolute path of first found file, or `undefined` if none found.
      */
-    findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | null>;
+    findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | undefined>;
 
     /**
      * Search for a specific file name in parent chain.
