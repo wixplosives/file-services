@@ -20,7 +20,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "10",
-    "@types/react": "^16.8.22",
+    "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/rimraf": "^2.0.2",
     "@types/webpack": "^4.4.34",
