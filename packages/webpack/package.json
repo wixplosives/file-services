@@ -9,7 +9,7 @@
     "clean": "rimraf ./cjs ./esm",
     "build": "ts-build ./src --cjs --esm",
     "test": "yarn test:node",
-    "test:node": "mocha -r @ts-tools/node/r \"test/**/*.spec.ts?(x)\" --watch-extensions ts,tsx --colors --timeout 10000",
+    "test:node": "mocha \"test/**/*.spec.ts?(x)\" --timeout 10000",
     "prepack": "yarn build"
   },
   "dependencies": {
