@@ -51,12 +51,29 @@ export class SetMultiMap<K, V> implements Iterable<[K, V]> {
         return !!existingSet && existingSet.size > 0;
     }
 
-    public *[Symbol.iterator](): IterableIterator<[K, V]> {
+    public [Symbol.iterator](): IterableIterator<[K, V]> {
+        return this.entries();
+    }
+
+    public *entries(): IterableIterator<[K, V]> {
         const { map } = this;
         for (const [key, valueSet] of map.entries()) {
             for (const value of valueSet) {
                 yield [key, value];
             }
         }
+    }
+
+    public *values(): IterableIterator<V> {
+        const { map } = this;
+        for (const valueSet of map.values()) {
+            for (const value of valueSet) {
+                yield value;
+            }
+        }
+    }
+
+    public keys(): IterableIterator<K> {
+        return this.map.keys();
     }
 }
