@@ -186,13 +186,11 @@ export class NodeWatchService implements IWatchService {
         }
     }
 
-    private onWatchError({ message }: Error, path: string) {
-        if (message.includes('EPERM')) {
-            this.onPathEvent('rename', path);
-            const watcher = this.fsWatchers.get(path);
-            if (watcher) {
-                watcher.close();
-            }
+    private onWatchError(_e: Error, path: string) {
+        this.onPathEvent('rename', path);
+        const watcher = this.fsWatchers.get(path);
+        if (watcher) {
+            watcher.close();
         }
     }
 
