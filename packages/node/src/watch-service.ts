@@ -170,9 +170,9 @@ export class NodeWatchService implements IWatchService {
         if (pathStats.isFile()) {
             const fileWatcher = watch(path, watchOptions, type => this.onPathEvent(type, path));
             fileWatcher.once('error', () => {
+                fileWatcher.removeAllListeners();
                 this.fsWatchers.delete(path);
                 fileWatcher.close();
-                fileWatcher.removeAllListeners();
             });
             this.fsWatchers.set(path, fileWatcher);
         } else if (pathStats.isDirectory()) {
@@ -180,9 +180,9 @@ export class NodeWatchService implements IWatchService {
                 this.onDirectoryEvent(type, path, fileName)
             );
             directoryWatcher.once('error', () => {
+                directoryWatcher.removeAllListeners();
                 this.fsWatchers.delete(path);
                 directoryWatcher.close();
-                directoryWatcher.removeAllListeners();
             });
             this.fsWatchers.set(path, directoryWatcher);
         } else {
