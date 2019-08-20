@@ -71,10 +71,7 @@ describe('Node Watch Service', function() {
 
         beforeEach('create temp fixture directory and intialize watch service', async () => {
             watchService = new NodeWatchService({ debounceWait });
-            validator = new WatchEventsValidator(watchService, {
-                noMoreEventsTimeout: 5_000,
-                validateTimeout: 5_000
-            });
+            validator = new WatchEventsValidator(watchService);
 
             tempDir = await createTempDirectory();
             testDirectoryPath = join(tempDir.path, 'test-directory');
