@@ -78,9 +78,8 @@ describe('Node Watch Service', function() {
             await mkdir(testDirectoryPath);
         });
 
-        // fails on Mac. should be investigated. possibly node/libuv bug.
-        it.skip('fires a watch event when a watched directory is removed', async () => {
-            await watchService.watchPath(testDirectoryPath);
+        it('fires a watch event when a watched directory is removed', async () => {
+            await watchService.watchPath(tempDir.path);
 
             await rmdir(testDirectoryPath);
 
