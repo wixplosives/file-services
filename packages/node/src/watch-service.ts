@@ -168,14 +168,29 @@ export class NodeWatchService implements IWatchService {
         // open fsWatcher
         const watchOptions = { persistent: this.options.persistent };
         if (pathStats.isFile()) {
-            this.fsWatchers.set(path, watch(path, watchOptions, type => this.onPathEvent(type, path)));
+            const fileWatcher = watch(path, watchOptions, type => this.onPathEvent(type, path));
+            fileWatcher.once('error', e => {
+                this.onWatchError(e, path);
+            });
+            this.fsWatchers.set(path, fileWatcher);
         } else if (pathStats.isDirectory()) {
-            this.fsWatchers.set(
-                path,
-                watch(path, watchOptions, (type, fileName) => this.onDirectoryEvent(type, path, fileName))
+            const directoryWatcher = watch(path, watchOptions, (type, fileName) =>
+                this.onDirectoryEvent(type, path, fileName)
             );
+            directoryWatcher.once('error', e => {
+                this.onWatchError(e, path);
+            });
+            this.fsWatchers.set(path, directoryWatcher);
         } else {
             throw new Error(`${path} does not point to a file or a directory`);
+        }
+    }
+
+    private onWatchError(_e: Error, path: string) {
+        this.onPathEvent('rename', path);
+        const watcher = this.fsWatchers.get(path);
+        if (watcher) {
+            watcher.close();
         }
     }
 
