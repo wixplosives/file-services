@@ -10,7 +10,8 @@
     "lint": "tslint -p ./tsconfig.test.json",
     "pretest": "yarn lint",
     "test": "lerna run test --stream --concurrency=1",
-    "prettify": "prettier \"packages/**/*.ts\" --write"
+    "prettify": "prettier \"packages/**/*.ts\" --write",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit"
   },
   "devDependencies": {
     "@ts-tools/build": "^0.1.16",
