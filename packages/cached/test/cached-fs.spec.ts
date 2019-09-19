@@ -221,9 +221,7 @@ describe('createCachedFs', () => {
 
     const testProvider = async () => {
         const fs = createCachedFs(createMemoryFs());
-        fs.watchService.addGlobalListener(ev => {
-            fs.invalidate(ev.path);
-        });
+        fs.watchService.addGlobalListener(ev => fs.invalidate(ev.path));
         return {
             fs,
             dispose: async () => undefined,

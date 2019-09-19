@@ -1,18 +1,28 @@
 import { IFileSystem, IFileSystemStats, CallbackFn } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
+const identity = (val: string) => val;
+const toLowerCase = (val: string) => val.toLowerCase();
+
 export interface ICachedFileSystem extends IFileSystem {
+    /**
+     *
+     * @param path the file path to clear from the cache
+     */
     invalidate(path: string): void;
 }
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
+    const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
     const statsCache = new Map<string, IFileSystemStats>();
+
+    const createCacheKey = (path: string) => getCanonicalPath(fs.resolve(path));
 
     return {
         ...createFileSystem({
             ...fs,
             statSync(path: string) {
-                path = fs.resolve(path);
+                path = createCacheKey(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
                     return cachedStats;
@@ -22,7 +32,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                 return stats;
             },
             stat(path: string, callback: CallbackFn<IFileSystemStats>) {
-                path = fs.resolve(path);
+                path = createCacheKey(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
                     callback(undefined, cachedStats);
@@ -36,7 +46,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
             }
         }),
         invalidate(path: string) {
-            statsCache.delete(fs.resolve(path));
+            statsCache.delete(createCacheKey(path));
         }
     };
 }
