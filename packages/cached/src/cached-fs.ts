@@ -7,10 +7,12 @@ export interface ICachedFileSystem extends IFileSystem {
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     const statsCache = new Map<string, IFileSystemStats>();
+
     return {
         ...createFileSystem({
             ...fs,
             statSync(path: string) {
+                path = fs.resolve(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
                     return cachedStats;
@@ -20,6 +22,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                 return stats;
             },
             stat(path: string, callback: CallbackFn<IFileSystemStats>) {
+                path = fs.resolve(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
                     callback(undefined, cachedStats);
@@ -33,7 +36,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
             }
         }),
         invalidate(path: string) {
-            statsCache.delete(path);
+            statsCache.delete(fs.resolve(path));
         }
     };
 }
