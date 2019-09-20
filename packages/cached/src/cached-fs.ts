@@ -10,6 +10,10 @@ export interface ICachedFileSystem extends IFileSystem {
      * @param path the file path to clear from the cache
      */
     invalidate(path: string): void;
+    /**
+     * invalidates all files
+     */
+    invalidateAll(): void;
 }
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
@@ -38,8 +42,10 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                     callback(undefined, cachedStats);
                     return;
                 }
-                fs.stat(path, (error: Error | null | undefined, stats: IFileSystemStats) => {
-                    statsCache.set(path, stats);
+                fs.stat(path, (error, stats) => {
+                    if (!error) {
+                        statsCache.set(path, stats);
+                    }
                     callback(error, stats);
                     return;
                 });
@@ -47,6 +53,9 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         }),
         invalidate(path: string) {
             statsCache.delete(createCacheKey(path));
+        },
+        invalidateAll() {
+            statsCache.clear();
         }
     };
 }

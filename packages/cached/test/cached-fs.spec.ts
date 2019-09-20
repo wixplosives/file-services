@@ -26,7 +26,7 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
-        it('caches statsSync calls with invalidation', async () => {
+        it('allows invalidating cache of file path', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
@@ -57,7 +57,7 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
-        it('caches stats (async) calls', async () => {
+        it('caches stats (callback-style) calls', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
@@ -77,7 +77,7 @@ describe('createCachedFs', () => {
             expect(statSpy.callCount).to.equal(1);
         });
 
-        it('caches stats (async) calls with invalidation', async () => {
+        it('allows invalidating cache of file path (callback-style version)', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
@@ -118,7 +118,7 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
-        it('caches statsSync calls with invalidation', async () => {
+        it('allows invalidating cache of file path', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
@@ -154,7 +154,7 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
-        it('caches stats (async) calls', async () => {
+        it('caches stats (callback-style) calls', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
@@ -179,7 +179,7 @@ describe('createCachedFs', () => {
             expect(statSpy.callCount).to.equal(1);
         });
 
-        it('caches stats (async) calls with invalidation', async () => {
+        it('allows invalidating cache of file path (callback-style version)', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 

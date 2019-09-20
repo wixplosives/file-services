@@ -3,8 +3,8 @@ import { createNodeFs } from '@file-services/node';
 import { createCachedFs } from '../src';
 
 describe(`cachedFs with Node's fs`, () => {
+    const filePath = '../../package.json';
     it('caches statsSync calls', async () => {
-        const filePath = '../../package.json';
         const nodeFs = createNodeFs();
 
         const fs = createCachedFs(nodeFs);
@@ -15,8 +15,7 @@ describe(`cachedFs with Node's fs`, () => {
         expect(stats).to.equal(stats2);
     });
 
-    it('caches statsSync calls with invalidation', async () => {
-        const filePath = '../../package.json';
+    it('allows invalidating cache of file path', async () => {
         const nodeFs = createNodeFs();
 
         const fs = createCachedFs(nodeFs);
@@ -29,7 +28,6 @@ describe(`cachedFs with Node's fs`, () => {
     });
 
     it('caches statsSync calls - through fileExists', async () => {
-        const filePath = '../../package.json';
         const nodeFs = createNodeFs();
 
         const fs = createCachedFs(nodeFs);
@@ -40,8 +38,7 @@ describe(`cachedFs with Node's fs`, () => {
         expect(exists).to.equal(exists2);
     });
 
-    it('caches stats (async) calls', async () => {
-        const filePath = '../../package.json';
+    it('caches stats (callback-style) calls', async () => {
         const nodeFs = createNodeFs();
 
         const fs = createCachedFs(nodeFs);
@@ -57,8 +54,7 @@ describe(`cachedFs with Node's fs`, () => {
         expect(stats).to.equal(stats2);
     });
 
-    it('caches stats (async) calls with invalidation', async () => {
-        const filePath = '../../package.json';
+    it('allows invalidating cache of file path (callback-style version)', async () => {
         const nodeFs = createNodeFs();
 
         const fs = createCachedFs(nodeFs);
