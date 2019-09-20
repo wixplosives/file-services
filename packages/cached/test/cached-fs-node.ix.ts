@@ -27,6 +27,18 @@ describe(`cachedFs with Node's fs`, () => {
         expect(stats).to.not.equal(stats2);
     });
 
+    it('allows invalidating cache of all file paths', async () => {
+        const nodeFs = createNodeFs();
+
+        const fs = createCachedFs(nodeFs);
+
+        const stats = fs.statSync(filePath);
+        fs.invalidateAll();
+        const stats2 = fs.statSync(filePath);
+
+        expect(stats).to.not.equal(stats2);
+    });
+
     it('caches statsSync calls - through fileExists', async () => {
         const nodeFs = createNodeFs();
 
@@ -64,6 +76,24 @@ describe(`cachedFs with Node's fs`, () => {
         );
 
         fs.invalidate(filePath);
+
+        const stats2 = await new Promise((res, rej) =>
+            fs.stat(filePath, (error, value) => (error ? rej(error) : res(value)))
+        );
+
+        expect(stats).to.not.equal(stats2);
+    });
+
+    it('allows invalidating cache of all file paths (callback-style version)', async () => {
+        const nodeFs = createNodeFs();
+
+        const fs = createCachedFs(nodeFs);
+
+        const stats = await new Promise((res, rej) =>
+            fs.stat(filePath, (error, value) => (error ? rej(error) : res(value)))
+        );
+
+        fs.invalidateAll();
 
         const stats2 = await new Promise((res, rej) =>
             fs.stat(filePath, (error, value) => (error ? rej(error) : res(value)))

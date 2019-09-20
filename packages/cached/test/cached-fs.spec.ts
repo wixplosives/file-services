@@ -42,6 +42,22 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(2);
         });
 
+        it('allows invalidating cache of file path', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+
+            const stats = fs.statSync(filePath);
+            fs.invalidateAll();
+            const stats2 = fs.statSync(filePath);
+
+            expect(stats).to.not.equal(stats2);
+            expect(statSyncSpy.callCount).to.equal(2);
+        });
+
         it('caches statsSync calls - through fileExists', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
@@ -98,6 +114,28 @@ describe('createCachedFs', () => {
             expect(stats).to.not.equal(stats2);
             expect(statSpy.callCount).to.equal(2);
         });
+
+        it('allows invalidating cache of all file paths (callback-style version)', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSpy = sinon.spy(memFs, 'stat');
+
+            const fs = createCachedFs(memFs);
+
+            const stats = await new Promise((res, rej) =>
+                fs.stat(filePath, (error, value) => (error ? rej(error) : res(value)))
+            );
+
+            fs.invalidateAll();
+
+            const stats2 = await new Promise((res, rej) =>
+                fs.stat(filePath, (error, value) => (error ? rej(error) : res(value)))
+            );
+
+            expect(stats).to.not.equal(stats2);
+            expect(statSpy.callCount).to.equal(2);
+        });
     });
 
     describe('Caching absolute + relative paths', () => {
@@ -130,6 +168,25 @@ describe('createCachedFs', () => {
             fs.invalidate(filePath);
             const stats2 = fs.statSync('file');
             fs.invalidate(filePath);
+            const stats3 = fs.statSync('./file');
+
+            expect(stats).to.not.equal(stats2);
+            expect(stats2).to.not.equal(stats3);
+            expect(statSyncSpy.callCount).to.equal(3);
+        });
+
+        it('allows invalidating cache of all file paths', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+
+            const stats = fs.statSync(filePath);
+            fs.invalidateAll();
+            const stats2 = fs.statSync('file');
+            fs.invalidateAll();
             const stats3 = fs.statSync('./file');
 
             expect(stats).to.not.equal(stats2);
@@ -198,6 +255,35 @@ describe('createCachedFs', () => {
             );
 
             fs.invalidate('./file');
+
+            const stats3 = await new Promise((res, rej) =>
+                fs.stat('./file', (error, value) => (error ? rej(error) : res(value)))
+            );
+
+            expect(stats).to.not.equal(stats2);
+            expect(stats2).to.not.equal(stats3);
+            expect(statSpy.callCount).to.equal(3);
+        });
+
+        it('allows invalidating cache of all file paths (callback-style version)', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSpy = sinon.spy(memFs, 'stat');
+
+            const fs = createCachedFs(memFs);
+
+            const stats = await new Promise((res, rej) =>
+                fs.stat(filePath, (error, value) => (error ? rej(error) : res(value)))
+            );
+
+            fs.invalidateAll();
+
+            const stats2 = await new Promise((res, rej) =>
+                fs.stat('file', (error, value) => (error ? rej(error) : res(value)))
+            );
+
+            fs.invalidateAll();
 
             const stats3 = await new Promise((res, rej) =>
                 fs.stat('./file', (error, value) => (error ? rej(error) : res(value)))
