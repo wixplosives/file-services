@@ -103,8 +103,6 @@ describe('createCachedFs', () => {
     describe('Caching absolute + relative paths', () => {
         it('caches statsSync calls with relative variations', async () => {
             const filePath = '/file';
-            const filePathRelative = 'file';
-            const filePathRelative2 = './file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
             const statSyncSpy = sinon.spy(memFs, 'statSync');
@@ -112,8 +110,8 @@ describe('createCachedFs', () => {
             const fs = createCachedFs(memFs);
 
             const stats = fs.statSync(filePath);
-            const stats2 = fs.statSync(filePathRelative);
-            const stats3 = fs.statSync(filePathRelative2);
+            const stats2 = fs.statSync('file');
+            const stats3 = fs.statSync('./file');
 
             expect(stats).to.equal(stats2);
             expect(stats2).to.equal(stats3);
@@ -122,8 +120,6 @@ describe('createCachedFs', () => {
 
         it('caches statsSync calls with invalidation', async () => {
             const filePath = '/file';
-            const filePathRelative = 'file';
-            const filePathRelative2 = './file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
             const statSyncSpy = sinon.spy(memFs, 'statSync');
@@ -132,9 +128,9 @@ describe('createCachedFs', () => {
 
             const stats = fs.statSync(filePath);
             fs.invalidate(filePath);
-            const stats2 = fs.statSync(filePathRelative);
+            const stats2 = fs.statSync('file');
             fs.invalidate(filePath);
-            const stats3 = fs.statSync(filePathRelative2);
+            const stats3 = fs.statSync('./file');
 
             expect(stats).to.not.equal(stats2);
             expect(stats2).to.not.equal(stats3);
@@ -143,8 +139,6 @@ describe('createCachedFs', () => {
 
         it('caches statsSync calls - through fileExists', async () => {
             const filePath = '/file';
-            const filePathRelative = 'file';
-            const filePathRelative2 = './file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
             const statSyncSpy = sinon.spy(memFs, 'statSync');
@@ -152,8 +146,8 @@ describe('createCachedFs', () => {
             const fs = createCachedFs(memFs);
 
             const exists = fs.fileExistsSync(filePath);
-            const exists2 = fs.fileExistsSync(filePathRelative);
-            const exists3 = fs.fileExistsSync(filePathRelative2);
+            const exists2 = fs.fileExistsSync('file');
+            const exists3 = fs.fileExistsSync('./file');
 
             expect(exists).to.equal(exists2);
             expect(exists2).to.equal(exists3);
@@ -162,8 +156,6 @@ describe('createCachedFs', () => {
 
         it('caches stats (async) calls', async () => {
             const filePath = '/file';
-            const filePathRelative = 'file';
-            const filePathRelative2 = './file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
             const statSpy = sinon.spy(memFs, 'stat');
@@ -175,11 +167,11 @@ describe('createCachedFs', () => {
             );
 
             const stats2 = await new Promise((res, rej) =>
-                fs.stat(filePathRelative, (error, value) => (error ? rej(error) : res(value)))
+                fs.stat('file', (error, value) => (error ? rej(error) : res(value)))
             );
 
             const stats3 = await new Promise((res, rej) =>
-                fs.stat(filePathRelative2, (error, value) => (error ? rej(error) : res(value)))
+                fs.stat('./file', (error, value) => (error ? rej(error) : res(value)))
             );
 
             expect(stats).to.equal(stats2);
@@ -189,8 +181,6 @@ describe('createCachedFs', () => {
 
         it('caches stats (async) calls with invalidation', async () => {
             const filePath = '/file';
-            const filePathRelative = 'file';
-            const filePathRelative2 = './file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
             const statSpy = sinon.spy(memFs, 'stat');
@@ -204,13 +194,13 @@ describe('createCachedFs', () => {
             fs.invalidate(filePath);
 
             const stats2 = await new Promise((res, rej) =>
-                fs.stat(filePathRelative, (error, value) => (error ? rej(error) : res(value)))
+                fs.stat('file', (error, value) => (error ? rej(error) : res(value)))
             );
 
-            fs.invalidate(filePathRelative2);
+            fs.invalidate('./file');
 
             const stats3 = await new Promise((res, rej) =>
-                fs.stat(filePathRelative2, (error, value) => (error ? rej(error) : res(value)))
+                fs.stat('./file', (error, value) => (error ? rej(error) : res(value)))
             );
 
             expect(stats).to.not.equal(stats2);
