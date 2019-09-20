@@ -3,8 +3,6 @@ import { createNodeFs } from '@file-services/node';
 import { createCachedFs } from '../src';
 
 describe(`cachedFs with Node's fs`, () => {
-    // const SAMPLE_CONTENT = 'content';
-
     it('caches statsSync calls', async () => {
         const filePath = '../../package.json';
         const nodeFs = createNodeFs();
