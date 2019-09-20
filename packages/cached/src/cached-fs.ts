@@ -56,6 +56,21 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         },
         invalidateAll() {
             statsCache.clear();
+        },
+        promises: {
+            ...fs.promises,
+            async stat(path: string) {
+                path = createCacheKey(path);
+                const cachedStats = statsCache.get(path);
+                if (cachedStats) {
+                    return cachedStats;
+                }
+                const stats = await new Promise((res: (value: IFileSystemStats) => void, rej) =>
+                    fs.stat(path, (error, value) => (error ? rej(error) : res(value)))
+                );
+                statsCache.set(path, stats);
+                return stats;
+            }
         }
     };
 }

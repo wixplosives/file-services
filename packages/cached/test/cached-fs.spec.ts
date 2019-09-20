@@ -93,6 +93,22 @@ describe('createCachedFs', () => {
             expect(statSpy.callCount).to.equal(1);
         });
 
+        it('caches stats (promises.stats style) calls', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSpy = sinon.spy(memFs, 'stat');
+
+            const fs = createCachedFs(memFs);
+
+            const stats = await fs.promises.stat(filePath);
+
+            const stats2 = await fs.promises.stat(filePath);
+
+            expect(stats).to.equal(stats2);
+            expect(statSpy.callCount).to.equal(1);
+        });
+
         it('allows invalidating cache of file path (callback-style version)', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
