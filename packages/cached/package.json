@@ -1,0 +1,33 @@
+{
+    "name": "@file-services/cached",
+    "description": "A file system wrapper that adds cache to any `IFileSystem` implementation.",
+    "version": "2.0.1",
+    "main": "cjs/index.js",
+    "module": "esm/index.js",
+    "types": "esm/index.d.ts",
+    "scripts": {
+        "clean": "rimraf ./cjs ./esm",
+        "build": "ts-build ./src --cjs --esm",
+        "test": "run-p test:node test:browser",
+        "test:node": "mocha \"test/**/*.{spec,ix}.ts?(x)\"",
+        "test:browser": "mocha-pup \"test/**/*.spec.ts?(x)\"",
+        "prepack": "yarn build"
+    },
+    "dependencies": {
+        "@file-services/types": "^2.0.1",
+        "@file-services/utils": "^2.0.1"
+    },
+    "files": [
+        "cjs",
+        "esm",
+        "src",
+        "!src/tsconfig.json"
+    ],
+    "license": "MIT",
+    "repository": "https://github.com/wixplosives/file-services/tree/master/packages/cached",
+    "homepage": "https://github.com/wixplosives/file-services",
+    "publishConfig": {
+        "access": "public"
+    },
+    "sideEffects": false
+}
