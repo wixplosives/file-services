@@ -16,16 +16,12 @@ export interface ICachedFileSystem extends IFileSystem {
     invalidateAll(): void;
 }
 
-export interface ICacheResult {
-    kind: 'success' | 'failure';
-}
-
-export interface ISuccessCacheResult extends ICacheResult {
+export interface ISuccessCacheResult {
     kind: 'success';
     stats: IFileSystemStats;
 }
 
-export interface IFailureCacheResult extends ICacheResult {
+export interface IFailureCacheResult {
     kind: 'failure';
     error: Error;
 }
