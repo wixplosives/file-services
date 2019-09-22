@@ -180,11 +180,11 @@ describe('createCachedFs', () => {
             expect(statSpy.callCount).to.equal(1);
         });
 
-        it('caches stats (promises.stats style) calls', async () => {
+        it('caches promises.stat calls', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
-            const statSpy = sinon.spy(memFs, 'stat');
+            const statSpy = sinon.spy(memFs.promises, 'stat');
 
             const fs = createCachedFs(memFs);
 
@@ -196,11 +196,11 @@ describe('createCachedFs', () => {
             expect(statSpy.callCount).to.equal(1);
         });
 
-        it('caches stats (promises.stats style) calls - non-existing files', async () => {
+        it('caches promises.stat calls - non-existing files', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
-            const statSpy = sinon.spy(memFs, 'stat');
+            const statSpy = sinon.spy(memFs.promises, 'stat');
 
             const fs = createCachedFs(memFs);
 
