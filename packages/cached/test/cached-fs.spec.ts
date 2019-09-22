@@ -204,9 +204,16 @@ describe('createCachedFs', () => {
 
             const fs = createCachedFs(memFs);
 
-            await fs.promises.stat('/no-file').catch();
-
-            await fs.promises.stat('/no-file').catch();
+            try {
+                await fs.promises.stat('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+            try {
+                await fs.promises.stat('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
 
             expect(statSpy.callCount).to.equal(1);
         });

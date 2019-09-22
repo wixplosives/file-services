@@ -51,7 +51,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                 path = createCacheKey(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
-                    isError(cachedStats) ? callback(cachedStats.error, undefined) : callback(undefined, cachedStats);
+                    if (isError(cachedStats)) {
+                        throw cachedStats.error;
+                    } else {
+                        callback(undefined, cachedStats);
+                    }
                     return;
                 }
                 fs.stat(path, (error, stats) => {
@@ -83,11 +87,16 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                     }
                     return cachedStats;
                 }
-                const stats = await new Promise((res: (value: IFileSystemStats) => void, rej) =>
-                    fs.stat(path, (error, value) => (error ? rej(error) : res(value)))
-                );
-                statsCache.set(path, stats);
-                return stats;
+                try {
+                    const stats = await new Promise((res: (value: IFileSystemStats) => void, rej) =>
+                        fs.stat(path, (error, value) => (error ? rej(error) : res(value)))
+                    );
+                    statsCache.set(path, stats);
+                    return stats;
+                } catch (ex) {
+                    statsCache.set(path, { error: ex });
+                    throw ex;
+                }
             }
         }
     };
