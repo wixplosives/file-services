@@ -26,6 +26,28 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
+        it('caches statsSync calls if file does not exist', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+
+            try {
+                fs.statSync('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+            try {
+                fs.statSync('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+
+            expect(statSyncSpy.callCount).to.equal(1);
+        });
+
         it('allows invalidating cache of file path', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
@@ -42,7 +64,30 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(2);
         });
 
-        it('allows invalidating cache of file path', async () => {
+        it('allows invalidating cache of non existing file path', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+
+            try {
+                fs.statSync(filePath);
+            } catch (ex) {
+                // NO-OP
+            }
+            fs.invalidate(filePath);
+            try {
+                fs.statSync(filePath);
+            } catch (ex) {
+                // NO-OP
+            }
+
+            expect(statSyncSpy.callCount).to.equal(2);
+        });
+
+        it('allows invalidating cache of all file paths', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
 
@@ -73,6 +118,21 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
+        it('caches statsSync calls - through fileExists - when not existing', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+
+            const exists = fs.fileExistsSync('/no-file');
+            const exists2 = fs.fileExistsSync('/no-file');
+
+            expect(exists).to.equal(exists2);
+            expect(statSyncSpy.callCount).to.equal(1);
+        });
+
         it('caches stats (callback-style) calls', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
@@ -93,6 +153,33 @@ describe('createCachedFs', () => {
             expect(statSpy.callCount).to.equal(1);
         });
 
+        it('caches stats (callback-style) calls', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSpy = sinon.spy(memFs, 'stat');
+
+            const fs = createCachedFs(memFs);
+
+            try {
+                await new Promise((res, rej) =>
+                    fs.stat('/no-file', (error, value) => (error ? rej(error) : res(value)))
+                );
+            } catch (ex) {
+                // NO-OP
+            }
+
+            try {
+                await new Promise((res, rej) =>
+                    fs.stat('/no-file', (error, value) => (error ? rej(error) : res(value)))
+                ).catch();
+            } catch (ex) {
+                // NO-OP
+            }
+
+            expect(statSpy.callCount).to.equal(1);
+        });
+
         it('caches stats (promises.stats style) calls', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
@@ -106,6 +193,28 @@ describe('createCachedFs', () => {
             const stats2 = await fs.promises.stat(filePath);
 
             expect(stats).to.equal(stats2);
+            expect(statSpy.callCount).to.equal(1);
+        });
+
+        it('caches stats (promises.stats style) calls - non-existing files', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSpy = sinon.spy(memFs, 'stat');
+
+            const fs = createCachedFs(memFs);
+
+            try {
+                await fs.promises.stat('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+            try {
+                await fs.promises.stat('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+
             expect(statSpy.callCount).to.equal(1);
         });
 
@@ -128,6 +237,35 @@ describe('createCachedFs', () => {
             );
 
             expect(stats).to.not.equal(stats2);
+            expect(statSpy.callCount).to.equal(2);
+        });
+
+        it('allows invalidating cache of non-existing file path (callback-style version)', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSpy = sinon.spy(memFs, 'stat');
+
+            const fs = createCachedFs(memFs);
+
+            try {
+                await new Promise((res, rej) =>
+                    fs.stat('/no-file', (error, value) => (error ? rej(error) : res(value)))
+                );
+            } catch (ex) {
+                // NO-OP
+            }
+
+            fs.invalidate('/no-file');
+
+            try {
+                await new Promise((res, rej) =>
+                    fs.stat('/no-file', (error, value) => (error ? rej(error) : res(value)))
+                );
+            } catch (ex) {
+                // NO-OP
+            }
+
             expect(statSpy.callCount).to.equal(2);
         });
 
@@ -172,6 +310,33 @@ describe('createCachedFs', () => {
             expect(statSyncSpy.callCount).to.equal(1);
         });
 
+        it('caches statsSync calls with relative variations of non-existing files', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+
+            try {
+                fs.statSync('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+            try {
+                fs.statSync('no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+            try {
+                fs.statSync('./no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+
+            expect(statSyncSpy.callCount).to.equal(1);
+        });
+
         it('allows invalidating cache of file path', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
@@ -188,6 +353,35 @@ describe('createCachedFs', () => {
 
             expect(stats).to.not.equal(stats2);
             expect(stats2).to.not.equal(stats3);
+            expect(statSyncSpy.callCount).to.equal(3);
+        });
+
+        it('allows invalidating cache of non-existing file path', async () => {
+            const filePath = '/file';
+            const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+            const statSyncSpy = sinon.spy(memFs, 'statSync');
+
+            const fs = createCachedFs(memFs);
+            try {
+                fs.statSync('/no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+            fs.invalidate('/no-file');
+            try {
+                fs.statSync('no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+
+            fs.invalidate('/no-file');
+            try {
+                fs.statSync('./no-file');
+            } catch (ex) {
+                // NO-OP
+            }
+
             expect(statSyncSpy.callCount).to.equal(3);
         });
 
