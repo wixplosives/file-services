@@ -30,17 +30,9 @@ export interface IFailureCacheResult extends ICacheResult {
     error: Error;
 }
 
-export const isSuccessResult = (result: ICacheResult): result is ISuccessCacheResult => {
-    return result.kind === 'success';
-};
-
-export const isFailureResult = (result: ICacheResult): result is IFailureCacheResult => {
-    return result.kind === 'failure';
-};
-
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
-    const statsCache = new Map<string, ICacheResult>();
+    const statsCache = new Map<string, ISuccessCacheResult | IFailureCacheResult>();
 
     const createCacheKey = (path: string) => getCanonicalPath(fs.resolve(path));
 
@@ -51,17 +43,17 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                 path = createCacheKey(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
-                    if (isFailureResult(cachedStats)) {
+                    if (cachedStats.kind === 'failure') {
                         throw cachedStats.error;
                     }
-                    return (cachedStats as ISuccessCacheResult).stats;
+                    return cachedStats.stats;
                 }
                 try {
                     const stats = fs.statSync(path);
-                    statsCache.set(path, { kind: 'success', stats } as ISuccessCacheResult);
+                    statsCache.set(path, { kind: 'success', stats });
                     return stats;
                 } catch (ex) {
-                    statsCache.set(path, { kind: 'failure', error: ex } as IFailureCacheResult);
+                    statsCache.set(path, { kind: 'failure', error: ex });
                     throw ex;
                 }
             },
@@ -69,18 +61,18 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                 path = createCacheKey(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
-                    if (isFailureResult(cachedStats)) {
-                        callback(cachedStats.error, undefined as any);
-                    } else if (isSuccessResult(cachedStats)) {
+                    if (cachedStats.kind === 'failure') {
+                        (callback as (e: Error) => void)(cachedStats.error);
+                    } else if (cachedStats.kind === 'success') {
                         callback(undefined, cachedStats.stats);
                     }
                     return;
                 }
                 fs.stat(path, (error, stats) => {
                     if (error) {
-                        statsCache.set(path, { kind: 'failure', error } as IFailureCacheResult);
+                        statsCache.set(path, { kind: 'failure', error });
                     } else if (stats) {
-                        statsCache.set(path, { kind: 'success', stats } as ISuccessCacheResult);
+                        statsCache.set(path, { kind: 'success', stats });
                     }
 
                     callback(error, stats);
@@ -100,19 +92,19 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                 path = createCacheKey(path);
                 const cachedStats = statsCache.get(path);
                 if (cachedStats) {
-                    if (isFailureResult(cachedStats)) {
+                    if (cachedStats.kind === 'failure') {
                         throw cachedStats.error;
                     }
-                    return (cachedStats as ISuccessCacheResult).stats;
+                    return cachedStats.stats;
                 }
                 try {
                     const stats = await new Promise((res: (value: IFileSystemStats) => void, rej) =>
                         fs.stat(path, (error, value) => (error ? rej(error) : res(value)))
                     );
-                    statsCache.set(path, { kind: 'success', stats } as ISuccessCacheResult);
+                    statsCache.set(path, { kind: 'success', stats });
                     return stats;
                 } catch (ex) {
-                    statsCache.set(path, { kind: 'failure', error: ex } as IFailureCacheResult);
+                    statsCache.set(path, { kind: 'failure', error: ex });
                     throw ex;
                 }
             }
