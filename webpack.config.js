@@ -15,9 +15,6 @@ module.exports = {
                 test: /\.tsx?$/,
                 loader: '@ts-tools/webpack-loader',
             },
-        ],
-        noParse: [
-            require.resolve('typescript/lib/typescript.js')
         ]
     }
 }
