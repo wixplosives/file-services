@@ -7,15 +7,15 @@
     "clean": "lerna run clean --stream --parallel",
     "prebuild": "yarn clean",
     "build": "lerna run build --stream",
-    "lint": "tslint -p ./tsconfig.test.json",
+    "lint": "tslint -p tsconfig.json",
     "pretest": "yarn lint",
     "test": "lerna run test --stream --concurrency=1",
     "prettify": "prettier \"packages/**/*.ts\" --write",
-    "typecheck": "tsc -p tsconfig.test.json --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@ts-tools/build": "^0.1.16",
-    "@ts-tools/node": "^0.9.10",
+    "@ts-tools/build": "^0.11.2",
+    "@ts-tools/node": "^0.11.0",
     "@ts-tools/webpack-loader": "^0.8.14",
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
@@ -39,12 +39,13 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "rimraf": "^3.0.0",
-    "sinon": "^7.4.2",
+    "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
+    "tsconfig-paths": "^3.9.0",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "~3.6.3",
-    "webpack": "^4.40.2"
+    "webpack": "^4.41.0"
   },
   "license": "MIT",
   "private": true

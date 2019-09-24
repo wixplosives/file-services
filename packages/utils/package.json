@@ -16,8 +16,7 @@
   "files": [
     "cjs",
     "esm",
-    "src",
-    "!src/tsconfig.json"
+    "src"
   ],
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/utils",
