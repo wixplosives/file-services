@@ -93,10 +93,8 @@ export interface IModule {
 export type ModuleEvalFn = (
     module: IModule,
     exports: unknown,
-    // tslint:disable:variable-name
     __filename: string,
     __dirname: string,
-    // tslint:enable:variable-name
     process: {
         env: Record<string, string | undefined>;
     },

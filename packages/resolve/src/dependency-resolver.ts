@@ -46,6 +46,7 @@ export function createDependencyResolver({
         const assetsToResolve: string[] = Array.isArray(assetKey) ? [...assetKey] : [assetKey];
 
         while (assetsToResolve.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const currentAsset = assetsToResolve.shift()!;
 
             if (resolvedAssets[currentAsset]) {

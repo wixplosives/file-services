@@ -339,7 +339,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(sourceNode) });
     }
 
-    function copyFileSync(sourcePath: string, destinationPath: string, flags: number = 0): void {
+    function copyFileSync(sourcePath: string, destinationPath: string, flags = 0): void {
         const resolvedSourcePath = resolvePath(sourcePath);
         const resolvedDestinationPath = resolvePath(destinationPath);
         const sourceFileNode = getNode(resolvedSourcePath);
@@ -364,7 +364,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const destinationFileNode = destParentNode.contents.get(lowerCaseTargetName);
 
         if (destinationFileNode) {
-            const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL); // tslint:disable-line no-bitwise
+            const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL);
 
             if (!shouldOverride) {
                 throw new Error(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`);

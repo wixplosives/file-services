@@ -133,7 +133,6 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
                 }
             } catch (e) {
                 if (printErrors) {
-                    // tslint:disable-next-line: no-console
                     console.error(e);
                 }
             }
@@ -296,7 +295,6 @@ export function createExtendedFileSystemPromiseActions(
                 }
             } catch (e) {
                 if (printErrors) {
-                    // tslint:disable-next-line: no-console
                     console.error(e);
                 }
             }

@@ -145,7 +145,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
             it('should fail on nonexistant', async () => {
                 const { fs, tempDirectoryPath } = testInput;
 
-                const filePath = await fs.join(tempDirectoryPath, 'file');
+                const filePath = fs.join(tempDirectoryPath, 'file');
 
                 return expect(fs.promises.remove(filePath)).to.eventually.rejectedWith(/ENOENT/);
             });

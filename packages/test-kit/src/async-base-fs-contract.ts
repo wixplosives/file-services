@@ -10,13 +10,13 @@ const SAMPLE_CONTENT = 'content';
 const DIFFERENT_CONTENT = 'another content';
 
 export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseFileSystemAsync>>): void {
-    describe('ASYNC file system contract', async () => {
+    describe('ASYNC file system contract', () => {
         let testInput: ITestInput<IBaseFileSystemAsync>;
 
         beforeEach(async () => (testInput = await testProvider()));
         afterEach(async () => await testInput.dispose());
 
-        describe('writing files', async () => {
+        describe('writing files', () => {
             it('can write a new file into an existing directory', async () => {
                 const {
                     tempDirectoryPath,
@@ -79,7 +79,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('reading files', async () => {
+        describe('reading files', () => {
             it('can read the contents of a file', async () => {
                 const {
                     tempDirectoryPath,
@@ -123,7 +123,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('removing files', async () => {
+        describe('removing files', () => {
             it('can remove files', async () => {
                 const {
                     tempDirectoryPath,
@@ -238,7 +238,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('creating directories', async () => {
+        describe('creating directories', () => {
             it('can create an empty directory inside an existing one', async () => {
                 const {
                     tempDirectoryPath,
@@ -299,7 +299,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('listing directories', async () => {
+        describe('listing directories', () => {
             it('can list an existing directory', async () => {
                 const {
                     tempDirectoryPath,
@@ -350,7 +350,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('removing directories', async () => {
+        describe('removing directories', () => {
             it('can remove an existing directory', async () => {
                 const {
                     tempDirectoryPath,
@@ -717,7 +717,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             if (caseSensitive) {
                 await expect(stat(upperCaseFilePath)).to.be.rejectedWith('ENOENT');
             } else {
-                await expect((await stat(upperCaseFilePath)).isFile()).to.equal(true);
+                expect((await stat(upperCaseFilePath)).isFile()).to.equal(true);
             }
         });
 

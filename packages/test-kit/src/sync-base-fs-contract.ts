@@ -493,7 +493,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 });
 
                 it(`allows copying a directory over a non-existing directory`, () => {
-                    //tslint:disable-line
                     const { fs, tempDirectoryPath } = testInput;
 
                     const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');
@@ -507,7 +506,6 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                 });
 
                 it(`allows copying copying a directory over an empty directory`, () => {
-                    //tslint:disable-line
                     const { fs, tempDirectoryPath } = testInput;
 
                     const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');

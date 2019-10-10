@@ -43,7 +43,6 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
             return newModule.exports;
         }
 
-        // tslint:disable-next-line:no-eval
         const moduleFn: ModuleEvalFn = eval(
             `(function (module, exports, __filename, __dirname, process, require, global){${fileContents}\n})`
         );

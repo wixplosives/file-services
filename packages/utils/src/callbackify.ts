@@ -30,7 +30,6 @@ export function callbackify<F extends (...args: unknown[]) => unknown>(fn: F): u
             const result = fn(...args);
             callback(undefined, result);
         } catch (e) {
-            // tslint:disable-next-line: semicolon
             (callback as ErrorCallbackFn)(e);
         }
     }) as unknown;

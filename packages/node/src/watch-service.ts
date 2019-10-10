@@ -104,7 +104,10 @@ export class NodeWatchService implements IWatchService {
      */
     private onPathEvent(eventType: string, eventPath: string) {
         const pendingEvent = this.pendingEvents.get(eventPath);
-        const timerId = setTimeout(() => this.emitEvent(eventPath), this.options.debounceWait);
+        const timerId = setTimeout(() => {
+            this.emitEvent(eventPath).catch(e => this.onWatchError(e, eventPath));
+        }, this.options.debounceWait);
+
         if (pendingEvent) {
             clearTimeout(pendingEvent.timerId);
             pendingEvent.renamed = pendingEvent.renamed || eventType === 'rename';
@@ -123,7 +126,7 @@ export class NodeWatchService implements IWatchService {
 
         const stats = await this.statSafe(path);
 
-        if (pendingEvent!.renamed) {
+        if (pendingEvent.renamed) {
             // if one of the bounced events was a rename, make sure to unwatch,
             // as the underlying native inode is now different, and our watcher
             // is not receiving events for the new one
@@ -174,9 +177,9 @@ export class NodeWatchService implements IWatchService {
             });
             this.fsWatchers.set(path, fileWatcher);
         } else if (pathStats.isDirectory()) {
-            const directoryWatcher = watch(path, watchOptions, (type, fileName) =>
-                this.onDirectoryEvent(type, path, fileName)
-            );
+            const directoryWatcher = watch(path, watchOptions, (type, fileName) => {
+                this.onDirectoryEvent(type, path, fileName).catch;
+            });
             directoryWatcher.once('error', e => {
                 this.onWatchError(e, path);
             });
@@ -200,7 +203,7 @@ export class NodeWatchService implements IWatchService {
         // Upon removal of the directory itself, the fileName parameter is just the directory name,
         // which can also be interpreted as an inner file with that name being removed.
         const directoryStats = await this.statSafe(directoryPath);
-        await this.onPathEvent(eventType, directoryStats ? join(directoryPath, fileName) : directoryPath);
+        this.onPathEvent(eventType, directoryStats ? join(directoryPath, fileName) : directoryPath);
     }
 
     private async statSafe(nodePath: string): Promise<IFileSystemStats | null> {
