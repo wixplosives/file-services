@@ -1,6 +1,6 @@
 # file-services
 
-[![Build Status](https://travis-ci.com/wixplosives/file-services.svg?token=JxepjChyzQB66ehAYhtG&branch=master)](https://travis-ci.com/wixplosives/file-services)
+[![Build Status](https://github.com/wixplosives/file-services/workflows/CI/badge.svg)](https://github.com/wixplosives/file-services/actions)
 
 Various file system packages.
 
