@@ -1,7 +1,7 @@
 {
     "env": {
         "browser": true,
-        "es6": true,
+        "es2017": true,
         "node": true
     },
     "extends": [
@@ -14,12 +14,6 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "noWatch": true,
-        "ecmaFeatures": {
-            "jsx": true
-        },
-        "ecmaVersion": 2018,
-        "sourceType": "module",
         "project": "./tsconfig.json"
     },
     "rules": {
