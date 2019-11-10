@@ -103,6 +103,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         return filePaths;
     }
 
+    // TODO: replace with rmdirSync(path, {recursive: true}) once Node 12+
     function removeSync(entryPath: string): void {
         const stats = lstatSync(entryPath);
         if (stats.isDirectory()) {
@@ -263,6 +264,7 @@ export function createExtendedFileSystemPromiseActions(
         return filePaths;
     }
 
+    // TODO: replace with rmdir(path, {recursive: true}) once Node 12+
     async function remove(entryPath: string): Promise<void> {
         const stats = await lstat(entryPath);
         if (stats.isDirectory()) {
@@ -302,6 +304,7 @@ export function createExtendedFileSystemPromiseActions(
 
         return filePaths;
     }
+
     async function findClosestFile(initialDirectoryPath: string, fileName: string): Promise<string | undefined> {
         let currentPath = resolve(initialDirectoryPath);
         let lastPath: string | undefined;

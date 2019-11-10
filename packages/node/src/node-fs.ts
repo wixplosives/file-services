@@ -41,6 +41,7 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
         caseSensitive,
         ...fs,
         promises: {
+            // TODO: replace with fs.promises once Node 12+
             copyFile: promisify(copyFile),
             lstat: promisify(lstat),
             mkdir: promisify(mkdir),
