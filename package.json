@@ -14,7 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@ts-tools/build": "^1.2.1",
+    "@ts-tools/build": "^1.2.2",
     "@ts-tools/node": "^1.1.2",
     "@ts-tools/webpack-loader": "^1.1.0",
     "@types/chai": "^4.2.4",
@@ -34,11 +34,11 @@
     "create-temp-directory": "^1.1.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.5.0",
-    "lerna": "^3.18.3",
+    "lerna": "^3.18.4",
     "mocha": "^6.2.2",
-    "mocha-pup": "^1.1.0",
+    "mocha-pup": "^1.1.1",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "promise-assist": "^1.2.6",
     "puppeteer": "^2.0.0",
     "react": "^16.11.0",
