@@ -475,7 +475,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             });
 
             describe('renaming directories', () => {
-                it('moves a directory', () => {
+                it('allows renaming a complex directory structure to another destination', () => {
                     const { fs, tempDirectoryPath } = testInput;
 
                     const sourcePath = fs.join(tempDirectoryPath, 'dir');
@@ -492,7 +492,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                     expect(() => fs.statSync(sourcePath)).to.throw('ENOENT');
                 });
 
-                it(`allows copying a directory over a non-existing directory`, () => {
+                it(`allows renaming a directory over a non-existing directory`, () => {
                     const { fs, tempDirectoryPath } = testInput;
 
                     const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');
@@ -505,7 +505,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
                     );
                 });
 
-                it(`allows copying copying a directory over an empty directory`, () => {
+                it(`allows renaming a directory over an empty directory`, () => {
                     const { fs, tempDirectoryPath } = testInput;
 
                     const sourcePath = fs.join(tempDirectoryPath, 'sourceDir');

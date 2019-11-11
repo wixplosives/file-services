@@ -640,7 +640,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
 
             describe('renaming directories', () => {
-                it('moves a directory', async () => {
+                it('allows renaming a complex directory structure to another destination', async () => {
                     const {
                         tempDirectoryPath,
                         fs: {
@@ -662,7 +662,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     await expect(stat(sourcePath)).to.be.rejectedWith('ENOENT');
                 });
 
-                it(`allows copying a directory over a non-existing directory`, async () => {
+                it(`allows renaming a directory over a non-existing directory`, async () => {
                     const {
                         tempDirectoryPath,
                         fs: {
@@ -680,7 +680,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     );
                 });
 
-                it(`allows copying copying a directory over an empty directory`, async () => {
+                it(`allows renaming a directory over an empty directory`, async () => {
                     const {
                         tempDirectoryPath,
                         fs: {
