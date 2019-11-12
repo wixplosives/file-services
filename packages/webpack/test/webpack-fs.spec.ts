@@ -45,7 +45,7 @@ describe('createWebpackFs', () => {
         const memFs = createMemoryFs({
             fixture: {
                 'index.js': `import value from './some-file'
-                             console.log(a)`
+                             console.log(value)`
             }
         });
 
