@@ -74,6 +74,11 @@ export interface IFileSystemExtendedSyncActions {
     readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown;
 
     /**
+     * Recursively copy a directory and its contents.
+     */
+    copyDirectorySync(sourcePath: string, destinationPath: string): void;
+
+    /**
      * Recursively walk over a directory and its contents.
      */
     // walkSync(rootDirectory: string, options?: IWalkOptions): IFileSystemDescriptor[]

@@ -78,6 +78,11 @@ export interface IFileSystemExtendedPromiseActions {
     readJsonFile(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): Promise<unknown>;
 
     /**
+     * Recursively copy a directory and its contents.
+     */
+    copyDirectory(sourcePath: string, destinationPath: string): Promise<void>;
+
+    /**
      * Recursively walk over a directory and its contents.
      */
     // walk(rootDirectory: string, options?: IWalkOptions): Promise<IFileSystemDescriptor[]>

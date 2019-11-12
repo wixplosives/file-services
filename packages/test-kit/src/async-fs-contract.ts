@@ -283,5 +283,39 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 ).to.eql([fs.join(directoryPath, 'folder2', anotherFileName)]);
             });
         });
+
+        describe('copyDirectory', () => {
+            it('copies a directory and its children', async () => {
+                const { fs, tempDirectoryPath } = testInput;
+                const sourcePath = fs.join(tempDirectoryPath, 'src');
+                const destinationPath = fs.join(tempDirectoryPath, 'dist');
+
+                await fs.promises.populateDirectory(sourcePath, {
+                    [fileName]: 'file in root',
+                    folder1: {
+                        [fileName]: 'file in sub-folder'
+                    },
+                    folder2: {
+                        folder3: {
+                            [anotherFileName]: 'file in deep folder'
+                        }
+                    },
+                    empty: {
+                        inside: {}
+                    }
+                });
+
+                await fs.promises.copyDirectory(sourcePath, destinationPath);
+
+                expect(await fs.promises.readFile(fs.join(destinationPath, fileName), 'utf8')).to.eql('file in root');
+                expect(await fs.promises.readFile(fs.join(destinationPath, 'folder1', fileName), 'utf8')).to.eql(
+                    'file in sub-folder'
+                );
+                expect(
+                    await fs.promises.readFile(fs.join(destinationPath, 'folder2/folder3', anotherFileName), 'utf8')
+                ).to.eql('file in deep folder');
+                expect(await fs.promises.directoryExists(fs.join(destinationPath, 'empty/inside'))).to.eql(true);
+            });
+        });
     });
 }

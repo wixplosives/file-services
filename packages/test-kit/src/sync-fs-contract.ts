@@ -285,5 +285,39 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 ]);
             });
         });
+
+        describe('copyDirectorySync', () => {
+            it('copies a directory and its children', () => {
+                const { fs, tempDirectoryPath } = testInput;
+                const sourcePath = fs.join(tempDirectoryPath, 'src');
+                const destinationPath = fs.join(tempDirectoryPath, 'dist');
+
+                fs.populateDirectorySync(sourcePath, {
+                    [fileName]: 'file in root',
+                    folder1: {
+                        [fileName]: 'file in sub-folder'
+                    },
+                    folder2: {
+                        folder3: {
+                            [anotherFileName]: 'file in deep folder'
+                        }
+                    },
+                    empty: {
+                        inside: {}
+                    }
+                });
+
+                fs.copyDirectorySync(sourcePath, destinationPath);
+
+                expect(fs.readFileSync(fs.join(destinationPath, fileName), 'utf8')).to.eql('file in root');
+                expect(fs.readFileSync(fs.join(destinationPath, 'folder1', fileName), 'utf8')).to.eql(
+                    'file in sub-folder'
+                );
+                expect(fs.readFileSync(fs.join(destinationPath, 'folder2/folder3', anotherFileName), 'utf8')).to.eql(
+                    'file in deep folder'
+                );
+                expect(fs.directoryExistsSync(fs.join(destinationPath, 'empty/inside'))).to.eql(true);
+            });
+        });
     });
 }

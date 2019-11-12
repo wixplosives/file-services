@@ -43,6 +43,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         lstatSync,
         readdirSync,
         readFileSync,
+        copyFileSync,
         dirname,
         join,
         resolve
@@ -181,6 +182,19 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         return filePaths;
     }
 
+    function copyDirectorySync(sourcePath: string, destinationPath: string): void {
+        ensureDirectorySync(destinationPath);
+        for (const item of readdirSync(sourcePath, { withFileTypes: true })) {
+            const sourceItemPath = join(sourcePath, item.name);
+            const destinationItemPath = join(destinationPath, item.name);
+            if (item.isFile()) {
+                copyFileSync(sourceItemPath, destinationItemPath);
+            } else if (item.isDirectory()) {
+                copyDirectorySync(sourceItemPath, destinationItemPath);
+            }
+        }
+    }
+
     return {
         fileExistsSync,
         directoryExistsSync,
@@ -189,6 +203,8 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         populateDirectorySync: (directoryPath, contents) => populateDirectorySync(resolve(directoryPath), contents),
         removeSync: entryPath => removeSync(resolve(entryPath)),
         findFilesSync: (rootDirectory, options) => findFilesSync(resolve(rootDirectory), options),
+        copyDirectorySync: (sourcePath, destinationPath) =>
+            copyDirectorySync(resolve(sourcePath), resolve(destinationPath)),
         findClosestFileSync,
         findFilesInAncestorsSync,
         readJsonFileSync
@@ -212,7 +228,7 @@ export function createExtendedFileSystemPromiseActions(
         dirname,
         resolve,
         join,
-        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile }
+        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile, copyFile }
     } = baseFs;
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
@@ -350,6 +366,19 @@ export function createExtendedFileSystemPromiseActions(
         return filePaths;
     }
 
+    async function copyDirectory(sourcePath: string, destinationPath: string): Promise<void> {
+        await ensureDirectory(destinationPath);
+        for (const item of await readdir(sourcePath, { withFileTypes: true })) {
+            const sourceItemPath = join(sourcePath, item.name);
+            const destinationItemPath = join(destinationPath, item.name);
+            if (item.isFile()) {
+                await copyFile(sourceItemPath, destinationItemPath);
+            } else if (item.isDirectory()) {
+                await copyDirectory(sourceItemPath, destinationItemPath);
+            }
+        }
+    }
+
     return {
         fileExists,
         directoryExists,
@@ -357,6 +386,7 @@ export function createExtendedFileSystemPromiseActions(
         populateDirectory: (directoryPath, contents) => populateDirectory(resolve(directoryPath), contents),
         remove: entryPath => remove(resolve(entryPath)),
         findFiles: (rootDirectory, options) => findFiles(resolve(rootDirectory), options),
+        copyDirectory: (sourcePath, destinationPath) => copyDirectory(resolve(sourcePath), resolve(destinationPath)),
         findClosestFile,
         findFilesInAncestors,
         readJsonFile
