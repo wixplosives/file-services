@@ -5,10 +5,8 @@ import { sleep } from 'promise-assist';
 
 describe('In-memory File System Implementation', () => {
     const testProvider = async () => {
-        const fs = createMemoryFs();
-
         return {
-            fs,
+            fs: createMemoryFs(),
             dispose: async () => undefined,
             tempDirectoryPath: '/'
         };
@@ -28,20 +26,27 @@ describe('In-memory File System Implementation', () => {
         });
     });
 
+    describe('creating directories', () => {
+        it('fails creating the root', async () => {
+            const fs = createMemoryFs();
+
+            expect(fs.readdirSync('/')).to.eql([]);
+            expect(() => fs.mkdirSync('/')).to.throw('EEXIST');
+            expect(fs.readdirSync('/')).to.eql([]);
+        });
+    });
+
     // these behaviors cannot be tested consistently across OSs,
     // so we test them for the memory implementation separately
     describe('copying files/directories', () => {
         const sourceFilePath = '/file.txt';
         const emptyDirectoryPath = '/empty_dir';
 
-        const createPopulatedFs = () =>
-            createMemoryFs({
+        it('preserves birthtime and updates mtime', async () => {
+            const fs = createMemoryFs({
                 [sourceFilePath]: 'test content',
                 [emptyDirectoryPath]: {}
             });
-
-        it('preserves birthtime and updates mtime', async () => {
-            const fs = createPopulatedFs();
             const sourceFileStats = fs.statSync(sourceFilePath);
             const destFilePath = fs.join(emptyDirectoryPath, 'dest');
 
@@ -56,13 +61,18 @@ describe('In-memory File System Implementation', () => {
         });
 
         it('fails if source is a directory', () => {
-            const fs = createPopulatedFs();
+            const fs = createMemoryFs({
+                [emptyDirectoryPath]: {}
+            });
 
             expect(() => fs.copyFileSync(emptyDirectoryPath, '/some_other_folder')).to.throw('EISDIR');
         });
 
         it('fails if target is a directory', () => {
-            const fs = createPopulatedFs();
+            const fs = createMemoryFs({
+                [sourceFilePath]: 'test content',
+                [emptyDirectoryPath]: {}
+            });
 
             expect(() => fs.copyFileSync(sourceFilePath, emptyDirectoryPath)).to.throw('EISDIR');
         });
