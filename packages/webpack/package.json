@@ -1,7 +1,7 @@
 {
   "name": "@file-services/webpack",
   "description": "Helpers for creation of webpack-compatible file systems.",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -13,7 +13,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^2.0.1"
+    "@file-services/types": "^2.1.0"
   },
   "files": [
     "cjs",
