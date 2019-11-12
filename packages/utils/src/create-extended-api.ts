@@ -72,18 +72,24 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     }
 
     function ensureDirectorySync(directoryPath: string): void {
-        if (directoryExistsSync(directoryPath)) {
-            return;
-        }
         try {
             mkdirSync(directoryPath);
         } catch (e) {
+            if (e && e.code === 'EEXIST') {
+                return;
+            }
             const parentPath = dirname(directoryPath);
             if (parentPath === directoryPath) {
                 throw e;
             }
             ensureDirectorySync(parentPath);
-            mkdirSync(directoryPath);
+            try {
+                mkdirSync(directoryPath);
+            } catch (e) {
+                if (!e || e.code !== 'EEXIST') {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -233,18 +239,24 @@ export function createExtendedFileSystemPromiseActions(
     }
 
     async function ensureDirectory(directoryPath: string): Promise<void> {
-        if (await directoryExists(directoryPath)) {
-            return;
-        }
         try {
             await mkdir(directoryPath);
         } catch (e) {
+            if (e && e.code === 'EEXIST') {
+                return;
+            }
             const parentPath = dirname(directoryPath);
             if (parentPath === directoryPath) {
                 throw e;
             }
             await ensureDirectory(parentPath);
-            await mkdir(directoryPath);
+            try {
+                await mkdir(directoryPath);
+            } catch (e) {
+                if (!e || e.code !== 'EEXIST') {
+                    throw e;
+                }
+            }
         }
     }
 
