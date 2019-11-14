@@ -17,7 +17,7 @@
     "@ts-tools/build": "^1.2.2",
     "@ts-tools/node": "^1.1.2",
     "@ts-tools/webpack-loader": "^1.1.0",
-    "@types/chai": "^4.2.4",
+    "@types/chai": "^4.2.5",
     "@types/chai-as-promised": "^7.1.2",
     "@types/mocha": "^5.2.7",
     "@types/node": "10",
