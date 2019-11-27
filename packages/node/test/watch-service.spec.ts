@@ -42,24 +42,22 @@ describe('Node Watch Service', function() {
             await writeFile(testFilePath, SAMPLE_CONTENT);
             await writeFile(testFilePath, SAMPLE_CONTENT);
 
-            await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }]);
+            await validator.validateEvents(async () => [{ path: testFilePath, stats: await stat(testFilePath) }]);
             await validator.noMoreEvents();
         });
 
         it(`emits two different watch events when changes are >${debounceWait}ms appart`, async () => {
             await writeFile(testFilePath, SAMPLE_CONTENT);
 
-            await sleep(debounceWait);
+            await sleep(debounceWait * 1.1);
 
             const firstWriteStats = await stat(testFilePath);
 
             await writeFile(testFilePath, SAMPLE_CONTENT);
 
-            const secondWriteStats = await stat(testFilePath);
-
-            await validator.validateEvents([
+            await validator.validateEvents(async () => [
                 { path: testFilePath, stats: firstWriteStats },
-                { path: testFilePath, stats: secondWriteStats }
+                { path: testFilePath, stats: await stat(testFilePath) }
             ]);
             await validator.noMoreEvents();
         });
@@ -110,7 +108,7 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT);
 
-            await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }]);
+            await validator.validateEvents(async () => [{ path: testFilePath, stats: await stat(testFilePath) }]);
             await validator.noMoreEvents();
         });
 
@@ -120,7 +118,7 @@ describe('Node Watch Service', function() {
 
             await writeFile(testFilePath, SAMPLE_CONTENT);
 
-            await validator.validateEvents([{ path: testFilePath, stats: await stat(testFilePath) }]);
+            await validator.validateEvents(async () => [{ path: testFilePath, stats: await stat(testFilePath) }]);
             await validator.noMoreEvents();
         });
     });

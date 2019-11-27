@@ -35,12 +35,18 @@ export class WatchEventsValidator {
      * Resolves or rejects depending whether last captured watch events
      * equal `expectedEvents`
      */
-    public async validateEvents(expectedEvents: IWatchEvent[]): Promise<void> {
+    public async validateEvents(
+        expectedEventsProvider: IWatchEvent[] | (() => IWatchEvent[] | Promise<IWatchEvent[]>)
+    ): Promise<void> {
         const { capturedEvents } = this;
-        const expected = expectedEvents.map(simplifyEvent);
 
         await waitFor(
-            () => {
+            async () => {
+                const expectedEvents =
+                    typeof expectedEventsProvider === 'function'
+                        ? await expectedEventsProvider()
+                        : expectedEventsProvider;
+                const expected = expectedEvents.map(simplifyEvent);
                 const actual = capturedEvents.slice(-1 * expectedEvents.length).map(simplifyEvent);
                 expect(actual).to.eql(expected);
             },
