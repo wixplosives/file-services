@@ -8,7 +8,6 @@ Implements the following behaviors:
 - https://nodejs.org/api/modules.html#modules_all_together
 - https://github.com/defunctzombie/package-browser-field-spec ("basic" section)
 
-
 ## Getting started
 
 Install library in project:
