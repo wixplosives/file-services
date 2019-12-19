@@ -108,7 +108,13 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         getCanonicalFileName: caseSensitive ? identity : toLowerCase,
         getCurrentDirectory: cwd,
         getNewLine: defaultGetNewLine,
-        realpath: realpathSync,
+        realpath(path: string) {
+            try {
+                return realpathSync(path);
+            } catch (e) {
+                return path;
+            }
+        },
         dirname,
         normalize,
         join
