@@ -71,6 +71,14 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         return { files, directories };
     }
 
+    function realpath(path: string): string {
+        try {
+            return realpathSync(path);
+        } catch (e) {
+            return path;
+        }
+    }
+
     return {
         readDirectory(rootDir, extensions, excludes, includes, depth) {
             return ts.matchFiles(
@@ -82,7 +90,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
                 rootDir,
                 depth,
                 getFileSystemEntries,
-                realpathSync
+                realpath
             );
         },
         getDirectories(path) {
@@ -108,13 +116,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         getCanonicalFileName: caseSensitive ? identity : toLowerCase,
         getCurrentDirectory: cwd,
         getNewLine: defaultGetNewLine,
-        realpath(path: string) {
-            try {
-                return realpathSync(path);
-            } catch (e) {
-                return path;
-            }
-        },
+        realpath,
         dirname,
         normalize,
         join
