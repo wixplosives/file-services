@@ -1,7 +1,7 @@
 {
   "name": "@file-services/typescript",
   "description": "Helpers for creation of TypeScript hosts",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
