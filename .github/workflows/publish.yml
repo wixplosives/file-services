@@ -1,4 +1,4 @@
-name: Publish Master Snapshot
+name: Publish Unpublished Versions
 on: 
   push:
     branches: [master]
@@ -21,4 +21,6 @@ jobs:
       run: echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc 
     - env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: npx lerna-publisher publishSnapshot
+      run: npx lerna-publisher publish
+
+
