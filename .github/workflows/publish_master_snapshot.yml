@@ -1,0 +1,24 @@
+name: Publish Master Snapshot
+on: 
+  push:
+    branches: [master]
+jobs:
+  publish:
+    name: node 12 / ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js 12
+      uses: actions/setup-node@v1
+      with:
+        node_version: 12
+    - run: npm i -g yarn
+    - run: yarn
+      env:
+        CI: true  
+    - env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc 
+    - env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npx lerna-publisher publishSnapshot
