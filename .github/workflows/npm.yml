@@ -1,0 +1,19 @@
+name: npm
+on: 
+  push:
+    branches: [master]
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js 12
+      uses: actions/setup-node@v1
+      with:
+        node_version: 12
+    - run: npm i -g yarn@1
+    - run: yarn
+    - run: echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc 
+    - run: npx lerna-publisher publish
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
