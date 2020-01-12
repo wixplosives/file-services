@@ -82,6 +82,11 @@ export interface IModule {
     /**
      * Absolute path to module's source file.
      */
+    id: string;
+
+    /**
+     * Absolute path to module's source file.
+     */
     filename: string;
 
     /**

@@ -32,7 +32,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
             return existingModule.exports;
         }
 
-        const newModule: IModule = { exports: {}, filename: filePath };
+        const newModule: IModule = { exports: {}, filename: filePath, id: filePath };
 
         const contextPath = dirname(filePath);
         const fileContents = readFileSync(filePath);
