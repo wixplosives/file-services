@@ -867,7 +867,7 @@
     "@sinonjs/commons" "^1"
     "@sinonjs/samsam" "^4.2.0"
 
-"@sinonjs/samsam@^4.2.0", "@sinonjs/samsam@^4.2.1":
+"@sinonjs/samsam@^4.2.0", "@sinonjs/samsam@^4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-4.2.2.tgz#0f6cb40e467865306d8a20a97543a94005204e23"
   integrity sha512-z9o4LZUzSD9Hl22zV38aXNykgFeVj8acqfFabCY6FY83n/6s/XwNJyYYldz6/9lBJanpno9h+oL6HTISkviweA==
@@ -973,9 +973,9 @@
   integrity sha512-NYrtPht0wGzhwe9+/idPaBB+TqkY9AhTvOLMkThm0IoEfLaiVQZwBwyJ5puCkO3AUCWrmcoePjp2mbFocKy4SQ==
 
 "@types/node@*", "@types/node@>= 8":
-  version "13.1.6"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.6.tgz#076028d0b0400be8105b89a0a55550c86684ffec"
-  integrity sha512-Jg1F+bmxcpENHP23sVKkNuU3uaxPnsBMW0cLjleiikFKomJQbsn0Cqk2yDvQArqzZN6ABfBkZ0To7pQ8sLdWDg==
+  version "13.1.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.1.7.tgz#db51d28b8dfacfe4fb2d0da88f5eb0a2eca00675"
+  integrity sha512-HU0q9GXazqiKwviVxg9SI/+t/nAsGkvLDkIdxz+ObejG2nX6Si00TeLqHMoS+a/1tjH7a8YpKVQwtgHuMQsldg==
 
 "@types/node@10":
   version "10.17.13"
@@ -1586,9 +1586,9 @@ aws-sign2@~0.7.0:
   integrity sha1-tG6JCTSpWR8tL2+G1+ap8bP+dqg=
 
 aws4@^1.8.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.9.0.tgz#24390e6ad61386b0a747265754d2a17219de862c"
-  integrity sha512-Uvq6hVe90D0B2WEnUqtdgY1bATGz3mw33nH9Y+dmA+w5DHvUmBgkr5rM/KCHpCsiFNRUfokW/szpPPgMK2hm4A==
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.9.1.tgz#7e33d8f7d449b3f673cd72deb9abdc552dbe528e"
+  integrity sha512-wMHVg2EOHaMRxbzgFJ9gtjOOCrI80OHLG14rxi28XwOW8ux6IiEbRCGGGqCtdAIg4FQCbW20k9RsT4y3gJlFug==
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -2666,7 +2666,7 @@ diff@3.5.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
   integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
 
-diff@^4.0.1:
+diff@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
   integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
@@ -2885,9 +2885,9 @@ error-ex@^1.2.0, error-ex@^1.3.1:
     is-arrayish "^0.2.1"
 
 es-abstract@^1.17.0-next.1:
-  version "1.17.0"
-  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.17.0.tgz#f42a517d0036a5591dbb2c463591dc8bb50309b1"
-  integrity sha512-yYkE07YF+6SIBmg1MsJ9dlub5L48Ek7X0qz+c/CPCHS9EBXfESorzng4cJQjJW5/pB6vDF41u7F8vUhLVDqIug==
+  version "1.17.2"
+  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.17.2.tgz#965b10af56597b631da15872c17a405e86c1fd46"
+  integrity sha512-YoKuru3Lyoy7yVTBSH2j7UxTqe/je3dWAruC0sHvZX1GNd5zX8SSLvQqEgO9b3Ex8IW+goFI9arEEsFIbulhOw==
   dependencies:
     es-to-primitive "^1.2.1"
     function-bind "^1.1.1"
@@ -4438,9 +4438,9 @@ kind-of@^5.0.0:
   integrity sha512-NGEErnH6F2vUuXDh+OlbcKW7/wOcfdRHaZ7VWtqCztfHri/++YKmP51OdWeGPuqCOba6kk2OTe5d02VmTB80Pw==
 
 kind-of@^6.0.0, kind-of@^6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.2.tgz#01146b36a6218e64e58f3a8d66de5d7fc6f6d051"
-  integrity sha512-s5kLOcnH0XqDO+FvuaLX8DDjZ18CGFk7VygH40QoKPUQhW4e2rvM0rwUq0t8IQDOwYSeLK01U90OjzBTme2QqA==
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
+  integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
 lerna@^3.20.2:
   version "3.20.2"
@@ -6462,9 +6462,9 @@ schema-utils@^1.0.0:
     ajv-keywords "^3.1.0"
 
 schema-utils@^2.0.1, schema-utils@^2.6.0:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-2.6.1.tgz#eb78f0b945c7bcfa2082b3565e8db3548011dc4f"
-  integrity sha512-0WXHDs1VDJyo+Zqs9TKLKyD/h7yDpHUhEFsM2CzkICFdoX1av+GBq/J2xRTFfsQO5kBfhZzANf2VcIm84jqDbg==
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-2.6.2.tgz#9205ec5978709b0d9edbccb9a316faf11617a017"
+  integrity sha512-sazKNMBX/jwrXRkOI7N6dtiTVYqzSckzol8SGuHt0lE/v3xSW6cUkOqzu6Bq2tW+dlUzq3CWIqHU3ZKauliqdg==
   dependencies:
     ajv "^6.10.2"
     ajv-keywords "^3.4.1"
@@ -6580,15 +6580,15 @@ sinon-chai@^3.4.0:
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.4.0.tgz#06fb88dee80decc565106a3061d380007f21e18d"
   integrity sha512-BpVxsjEkGi6XPbDXrgWUe7Cb1ZzIfxKUbu/MmH5RoUnS7AXpKo3aIYIyQUg0FMvlUL05aPt7VZuAdaeQhEnWxg==
 
-sinon@^8.0.4:
-  version "8.0.4"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-8.0.4.tgz#eb13242fa50bf876c54e88bdc96f281a0dd08a53"
-  integrity sha512-cFsmgmvsgFb87e7SV7IcekogITlHX2KmlplyI9Pda0FH1Z8Ms/kWbpLs25Idp0m6ZJ3HEEjhaYYXbcTtWWUn4w==
+sinon@^8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-8.1.0.tgz#30f82371ac6e7d4dccb77fa1525f5ea748c636ff"
+  integrity sha512-6/05TR+8QhEgTbyMWaConm8iPL609Eno7SqToPq63wC/jS/6NMEI4NxqtzlLkk3r/KcZT9xPXQodH0oJ917Hbg==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
     "@sinonjs/formatio" "^4.0.1"
-    "@sinonjs/samsam" "^4.2.1"
-    diff "^4.0.1"
+    "@sinonjs/samsam" "^4.2.2"
+    diff "^4.0.2"
     lolex "^5.1.2"
     nise "^3.0.1"
     supports-color "^7.1.0"
