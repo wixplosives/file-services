@@ -14,6 +14,6 @@ jobs:
     - run: npm i -g yarn@1
     - run: yarn
     - run: echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc 
-    - run: npx lerna-publisher publish
+    - run: npx pleb publish
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
