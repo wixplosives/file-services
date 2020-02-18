@@ -11,9 +11,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node_version: 12
+        registry-url: 'https://registry.npmjs.org/'
     - run: npm i -g yarn@1
     - run: yarn
-    - run: echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc 
-    - run: npx pleb publish
+    - run: npx pleb@1 publish
       env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
