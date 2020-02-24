@@ -1,5 +1,5 @@
 import { IBaseModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types';
-import { globalThis } from './global-this';
+import { envGlobal } from './global-this';
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
     const { resolveFrom, dirname, readFileSync, processEnv = { NODE_ENV: 'development' } } = options;
@@ -52,15 +52,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
         requireFromContext.resolve = (request: string) => resolveThrow(contextPath, request, filePath);
 
         try {
-            moduleFn(
-                newModule,
-                newModule.exports,
-                filePath,
-                contextPath,
-                globalProcess,
-                requireFromContext,
-                globalThis
-            );
+            moduleFn(newModule, newModule.exports, filePath, contextPath, globalProcess, requireFromContext, envGlobal);
         } catch (e) {
             loadedModules.delete(filePath);
             throw e;
