@@ -26,7 +26,7 @@
     "@types/rimraf": "^2.0.3",
     "@types/sinon": "^7.5.2",
     "@types/sinon-chai": "^3.2.3",
-    "@types/webpack": "^4.41.6",
+    "@types/webpack": "^4.41.7",
     "@typescript-eslint/eslint-plugin": "^2.21.0",
     "@typescript-eslint/parser": "^2.21.0",
     "chai": "^4.2.0",
@@ -47,7 +47,7 @@
     "sinon-chai": "^3.5.0",
     "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-webpack-plugin": "^3.2.0",
-    "typescript": "~3.8.2",
+    "typescript": "~3.8.3",
     "webpack": "^4.41.6"
   },
   "license": "MIT",
