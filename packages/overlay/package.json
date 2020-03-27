@@ -1,7 +1,7 @@
 {
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -14,8 +14,8 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/types": "^2.1.0",
-    "@file-services/utils": "^2.1.0"
+    "@file-services/types": "^2.2.0",
+    "@file-services/utils": "^2.2.0"
   },
   "files": [
     "cjs",
