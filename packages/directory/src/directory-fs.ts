@@ -11,8 +11,10 @@ import {
     ReadFileOptions,
     WriteFileOptions
 } from '@file-services/types';
-import posixPath from '@file-services/posix-path';
+import path from '@file-services/path';
 import { createFileSystem } from '@file-services/utils';
+
+const posixPath = path.posix;
 
 /**
  * Creates a wrapped `IFileSystem` which scopes the provided `fs`
@@ -24,7 +26,7 @@ import { createFileSystem } from '@file-services/utils';
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
     const { watchService, promises, join, relative, sep } = fs;
 
-    let workingDirectoryPath: string = posixPath.POSIX_ROOT;
+    let workingDirectoryPath: string = posixPath.sep;
 
     function resolveScopedPath(...pathSegments: string[]): string {
         return posixPath.resolve(workingDirectoryPath, ...pathSegments);
@@ -44,7 +46,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
                 listener({
                     stats: e.stats,
                     // use posixPath to ensure we give posix-style paths back
-                    path: posixPath.join(posixPath.POSIX_ROOT, relativeEventPath.replace(/\\/g, '/'))
+                    path: posixPath.join(posixPath.sep, relativeEventPath.replace(/\\/g, '/'))
                 });
             }
         };

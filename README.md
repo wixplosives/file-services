@@ -30,7 +30,7 @@ Various file system packages.
 
 -   **[@file-services/directory](https://github.com/wixplosives/file-services/tree/master/packages/directory)** - A file system wrapper that adds directory scoping to any `IFileSystem` implementation.
 
--   **[@file-services/posix-path](https://github.com/wixplosives/file-services/tree/master/packages/posix-path)** - Node's posix-`path` implementation converted to TypeScript and ready for the web.
+-   **[@file-services/path](https://github.com/wixplosives/file-services/tree/master/packages/path)** - Node's `path` implementation, ready for the web.
 
 ### License
 

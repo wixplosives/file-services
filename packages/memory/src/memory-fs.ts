@@ -1,5 +1,5 @@
 import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils';
-import posixPath from '@file-services/posix-path';
+import path from '@file-services/path';
 import {
     IDirectoryContents,
     IFileSystemStats,
@@ -19,6 +19,8 @@ import {
     IFsMemDirectoryNode
 } from './types';
 
+const posixPath = path.posix;
+
 /**
  * This is the main function to use, returning a sync/async
  * in-memory file system with extended API.
@@ -34,7 +36,7 @@ export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSyste
     };
 
     if (rootContents) {
-        fs.populateDirectorySync(posixPath.POSIX_ROOT, rootContents);
+        fs.populateDirectorySync(posixPath.sep, rootContents);
     }
 
     return fs;
@@ -57,7 +59,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root');
     const pathListeners = new SetMultiMap<string, WatchEventListener>();
     const globalListeners = new Set<WatchEventListener>();
-    let workingDirectoryPath: string = posixPath.POSIX_ROOT;
+    let workingDirectoryPath: string = posixPath.sep;
     return {
         root,
         ...posixPath,

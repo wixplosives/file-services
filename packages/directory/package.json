@@ -14,7 +14,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/posix-path": "^2.1.0",
+    "@file-services/path": "^2.1.0",
     "@file-services/types": "^2.1.0",
     "@file-services/utils": "^2.1.0"
   },

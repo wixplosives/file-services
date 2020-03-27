@@ -19,7 +19,7 @@ import fs, {
 } from 'fs';
 
 import { createFileSystem } from '@file-services/utils';
-import { IBaseFileSystem, IFileSystem } from '@file-services/types';
+import { IBaseFileSystem, IFileSystem, IFileSystemPath } from '@file-services/types';
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service';
 
 const caseSensitive = !existsSync(__filename.toUpperCase());
@@ -34,7 +34,7 @@ export function createNodeFs(options?: ICreateNodeFsOptions): IFileSystem {
 
 export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSystem {
     return {
-        ...path,
+        ...(path as IFileSystemPath),
         chdir,
         cwd,
         watchService: new NodeWatchService(options && options.watchOptions),
