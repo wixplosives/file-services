@@ -5,11 +5,6 @@
   "main": "index.js",
   "types": "index.d.ts",
   "browser": "browser-path.js",
-  "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "prepack": "yarn build"
-  },
   "dependencies": {
     "@file-services/types": "^2.1.0"
   },
