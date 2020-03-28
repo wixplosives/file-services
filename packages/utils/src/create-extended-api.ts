@@ -76,7 +76,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         try {
             mkdirSync(directoryPath);
         } catch (e) {
-            if (e && e.code === 'EEXIST') {
+            if (e && (e.code === 'EEXIST' || e.code === 'EISDIR')) {
                 return;
             }
             const parentPath = dirname(directoryPath);
@@ -87,7 +87,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
             try {
                 mkdirSync(directoryPath);
             } catch (e) {
-                if (!e || e.code !== 'EEXIST') {
+                if (!e || (e.code !== 'EEXIST' && e.code !== 'EISDIR')) {
                     throw e;
                 }
             }
@@ -258,7 +258,7 @@ export function createExtendedFileSystemPromiseActions(
         try {
             await mkdir(directoryPath);
         } catch (e) {
-            if (e && e.code === 'EEXIST') {
+            if (e && (e.code === 'EEXIST' || e.code === 'EISDIR')) {
                 return;
             }
             const parentPath = dirname(directoryPath);
@@ -269,7 +269,7 @@ export function createExtendedFileSystemPromiseActions(
             try {
                 await mkdir(directoryPath);
             } catch (e) {
-                if (!e || e.code !== 'EEXIST') {
+                if (!e || (e.code !== 'EEXIST' && e.code !== 'EISDIR')) {
                     throw e;
                 }
             }
