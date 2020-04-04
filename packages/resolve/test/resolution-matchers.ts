@@ -1,5 +1,5 @@
 export const resolutionMatchers: Chai.ChaiPlugin = (chai, util) => {
-    chai.Assertion.addMethod('resolvedTo', function(expectedFilePath: string | undefined) {
+    chai.Assertion.addMethod('resolvedTo', function (expectedFilePath: string | undefined) {
         const { flag } = util;
         const resolutionOutput = flag(this, 'object');
         const resolvedFilePath = (resolutionOutput && resolutionOutput.resolvedFile) || resolutionOutput;

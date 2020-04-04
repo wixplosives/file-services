@@ -8,7 +8,7 @@ import {
     FileSystemConstants,
     BufferEncoding,
     IDirectoryEntry,
-    IBaseFileSystemSyncActions
+    IBaseFileSystemSyncActions,
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes';
 import {
@@ -16,7 +16,7 @@ import {
     IBaseMemFileSystem,
     IBaseMemFileSystemSync,
     IFsMemFileNode,
-    IFsMemDirectoryNode
+    IFsMemDirectoryNode,
 } from './types';
 
 const posixPath = path.posix;
@@ -32,7 +32,7 @@ export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSyste
 
     const fs: IMemFileSystem = {
         ...createFileSystem(baseFs),
-        root: baseFs.root
+        root: baseFs.root,
     };
 
     if (rootContents) {
@@ -90,7 +90,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
             },
             clearGlobalListeners() {
                 globalListeners.clear();
-            }
+            },
         },
         caseSensitive: false,
         cwd,
@@ -109,7 +109,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         rmdirSync,
         statSync,
         unlinkSync,
-        writeFileSync
+        writeFileSync,
     };
 
     function resolvePath(...pathSegments: string[]): string {
@@ -157,7 +157,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
                 name: fileName,
                 birthtime: currentDate,
                 mtime: currentDate,
-                contents: fileContent
+                contents: fileContent,
             };
             parentNode.contents.set(lowerCaseFileName, newFileNode);
             emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newFileNode) });
@@ -216,7 +216,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         const childNodes = Array.from(directoryNode.contents.values());
 
         return !!options && typeof options === 'object' && options.withFileTypes
-            ? childNodes.map(node => ({ name: node.name, ...createStatsFromNode(node) }))
+            ? childNodes.map((node) => ({ name: node.name, ...createStatsFromNode(node) }))
             : childNodes.map(({ name }) => name);
     }
 
@@ -415,7 +415,7 @@ function createMemDirectory(name: string): IFsMemDirectoryNode {
         name,
         contents: new Map(),
         birthtime: currentDate,
-        mtime: currentDate
+        mtime: currentDate,
     };
 }
 
@@ -428,7 +428,7 @@ function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode): IFileS
         mtime: node.mtime,
         isFile: node.type === 'file' ? returnsTrue : returnsFalse,
         isDirectory: node.type === 'dir' ? returnsTrue : returnsFalse,
-        isSymbolicLink: returnsFalse
+        isSymbolicLink: returnsFalse,
     };
 }
 

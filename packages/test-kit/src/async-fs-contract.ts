@@ -116,13 +116,13 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                     folder1: {
                         'file1.ts': '',
                         'file2.ts': '',
-                        'file3.ts': ''
+                        'file3.ts': '',
                     },
                     folder2: {
                         'file1.ts': '',
                         'file2.ts': '',
-                        'file3.ts': ''
-                    }
+                        'file3.ts': '',
+                    },
                 });
 
                 await fs.promises.remove(directoryPath);
@@ -162,21 +162,21 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.promises.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(await fs.promises.findFiles(directoryPath)).to.eql([
                     fs.join(directoryPath, fileName),
                     fs.join(directoryPath, 'folder1', fileName),
-                    fs.join(directoryPath, 'folder2', anotherFileName)
+                    fs.join(directoryPath, 'folder2', anotherFileName),
                 ]);
 
                 expect(await fs.promises.findFiles(fs.join(directoryPath, 'folder1'))).to.eql([
-                    fs.join(directoryPath, 'folder1', fileName)
+                    fs.join(directoryPath, 'folder1', fileName),
                 ]);
             });
 
@@ -187,11 +187,11 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.promises.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(
@@ -210,11 +210,11 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.promises.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(
@@ -235,11 +235,11 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.promises.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(await fs.promises.findClosestFile(fs.join(directoryPath, 'folder1'), fileName)).to.equal(
@@ -266,16 +266,16 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.promises.populateDirectory(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(await fs.promises.findFilesInAncestors(fs.join(directoryPath, 'folder1'), fileName)).to.eql([
                     fs.join(directoryPath, 'folder1', fileName),
-                    fs.join(directoryPath, fileName)
+                    fs.join(directoryPath, fileName),
                 ]);
 
                 expect(
@@ -293,16 +293,16 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
                 await fs.promises.populateDirectory(sourcePath, {
                     [fileName]: 'file in root',
                     folder1: {
-                        [fileName]: 'file in sub-folder'
+                        [fileName]: 'file in sub-folder',
                     },
                     folder2: {
                         folder3: {
-                            [anotherFileName]: 'file in deep folder'
-                        }
+                            [anotherFileName]: 'file in deep folder',
+                        },
                     },
                     empty: {
-                        inside: {}
-                    }
+                        inside: {},
+                    },
                 });
 
                 await fs.promises.copyDirectory(sourcePath, destinationPath);

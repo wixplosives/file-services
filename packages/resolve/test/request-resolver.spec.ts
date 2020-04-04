@@ -15,10 +15,10 @@ describe('request resolver', () => {
                 src: {
                     'typed.ts': EMPTY,
                     'file.js': EMPTY,
-                    'data.json': EMPTY
+                    'data.json': EMPTY,
                 },
                 'style.css': EMPTY,
-                'image.jpg': EMPTY
+                'image.jpg': EMPTY,
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -34,9 +34,9 @@ describe('request resolver', () => {
             const fs = createMemoryFs({
                 src: {
                     'file.js': EMPTY,
-                    'style.css.js': EMPTY
+                    'style.css.js': EMPTY,
                 },
-                'data.json': EMPTY
+                'data.json': EMPTY,
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -50,12 +50,12 @@ describe('request resolver', () => {
             const fs = createMemoryFs({
                 src: {
                     'same_name.tsx': EMPTY,
-                    'same_name.ts': EMPTY
+                    'same_name.ts': EMPTY,
                 },
                 'file.ts': EMPTY,
                 'another.tsx': EMPTY,
                 'style.css.ts': EMPTY,
-                'now_ignored.js': EMPTY
+                'now_ignored.js': EMPTY,
             });
             const resolveRequest = createRequestResolver({ fs, extensions: ['.ts', '.tsx'] });
 
@@ -72,12 +72,12 @@ describe('request resolver', () => {
             const fs = createMemoryFs({
                 src: {
                     folder: {
-                        'file.js': EMPTY
-                    }
+                        'file.js': EMPTY,
+                    },
                 },
                 folder: {
-                    'file.js': EMPTY
-                }
+                    'file.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -90,9 +90,9 @@ describe('request resolver', () => {
         it('resolves requests to files across folders', () => {
             const fs = createMemoryFs({
                 src: {
-                    'file.js': EMPTY
+                    'file.js': EMPTY,
                 },
-                'another.js': EMPTY
+                'another.js': EMPTY,
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -105,7 +105,7 @@ describe('request resolver', () => {
         it('resolves requests to dot files', () => {
             const fs = createMemoryFs({
                 '.npmrc': EMPTY,
-                '.js': EMPTY
+                '.js': EMPTY,
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -119,14 +119,14 @@ describe('request resolver', () => {
         it('resolves requests to a folder if it contains an index file', () => {
             const fs = createMemoryFs({
                 src: {
-                    'index.js': EMPTY
+                    'index.js': EMPTY,
                 },
                 data: {
-                    'index.json': EMPTY
+                    'index.json': EMPTY,
                 },
                 typed: {
-                    'index.ts': EMPTY
-                }
+                    'index.ts': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs, extensions: ['.ts', '.js', '.json'] });
 
@@ -139,44 +139,44 @@ describe('request resolver', () => {
             const fs = createMemoryFs({
                 with_ext: {
                     'package.json': stringify({ main: 'entry.js' }),
-                    'entry.js': EMPTY
+                    'entry.js': EMPTY,
                 },
                 without_ext: {
                     'package.json': stringify({ main: 'main_file' }),
-                    'main_file.js': EMPTY
+                    'main_file.js': EMPTY,
                 },
                 to_inner_folder: {
                     inner: { 'index.js': EMPTY },
-                    'package.json': stringify({ main: 'inner' })
+                    'package.json': stringify({ main: 'inner' }),
                 },
                 to_file_in_folder: {
                     inner: { 'file.js': EMPTY },
-                    'package.json': stringify({ main: 'inner/file.js' })
+                    'package.json': stringify({ main: 'inner/file.js' }),
                 },
                 preferred: {
                     'package.json': stringify({ main: 'preferred.js' }),
                     'preferred.js': 'will be picked over index',
-                    'index.js': EMPTY
+                    'index.js': EMPTY,
                 },
                 dot_main: {
                     'package.json': stringify({ main: '.' }),
-                    'index.js': EMPTY
+                    'index.js': EMPTY,
                 },
                 empty_main: {
                     'package.json': stringify({ main: '' }),
-                    'index.js': EMPTY
+                    'index.js': EMPTY,
                 },
                 invalid_json: {
                     'package.json': '#invalid json#',
-                    'index.js': EMPTY
+                    'index.js': EMPTY,
                 },
                 invalid_json_no_index: {
-                    'package.json': '#invalid json#'
+                    'package.json': '#invalid json#',
                 },
                 no_main: {
                     'package.json': stringify({}),
-                    'index.js': EMPTY
-                }
+                    'index.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -200,18 +200,18 @@ describe('request resolver', () => {
                     express: {
                         'package.json': stringify({ main: 'main.js' }),
                         'main.js': EMPTY,
-                        'another_entry.js': EMPTY
+                        'another_entry.js': EMPTY,
                     },
                     lodash: {
                         'package.json': stringify({ main: 'some-index' }),
                         'some-index.js': EMPTY,
                         'test-utils': {
                             'index.js': EMPTY,
-                            'util1.js': EMPTY
-                        }
+                            'util1.js': EMPTY,
+                        },
                     },
-                    'just-a-file.js': EMPTY
-                }
+                    'just-a-file.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -245,18 +245,18 @@ describe('request resolver', () => {
                         node_modules: {
                             lodash: {
                                 'package.json': stringify({ main: 'v1.js' }),
-                                'v1.js': EMPTY
-                            }
+                                'v1.js': EMPTY,
+                            },
                         },
                         'package.json': stringify({ main: 'main.js' }),
-                        'main.js': EMPTY
+                        'main.js': EMPTY,
                     },
                     lodash: {
                         'package.json': stringify({ main: 'v2.js' }),
                         'v2.js': EMPTY,
-                        'v2-specific-file.js': EMPTY
-                    }
-                }
+                        'v2-specific-file.js': EMPTY,
+                    },
+                },
             });
 
             const resolveRequest = createRequestResolver({ fs });
@@ -281,10 +281,10 @@ describe('request resolver', () => {
                     '@stylable': {
                         cli: {
                             'index.js': EMPTY,
-                            'test-utils.js': EMPTY
-                        }
-                    }
-                }
+                            'test-utils.js': EMPTY,
+                        },
+                    },
+                },
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -301,15 +301,15 @@ describe('request resolver', () => {
                     third_party: {
                         koa: {
                             'package.json': stringify({ main: 'main-index' }),
-                            'main-index.js': EMPTY
-                        }
-                    }
+                            'main-index.js': EMPTY,
+                        },
+                    },
                 },
                 root_libs: {
                     react: {
-                        'index.js': EMPTY
-                    }
-                }
+                        'index.js': EMPTY,
+                    },
+                },
             });
             const resolveRequest = createRequestResolver({ fs, packageRoots: ['third_party', '/root_libs'] });
 
@@ -325,8 +325,8 @@ describe('request resolver', () => {
                 lodash: {
                     'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
                     'entry.js': EMPTY,
-                    'browser.js': EMPTY
-                }
+                    'browser.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -337,8 +337,8 @@ describe('request resolver', () => {
             const fs = createMemoryFs({
                 lodash: {
                     'package.json': stringify({ browser: 'file.js' }),
-                    'file.js': EMPTY
-                }
+                    'file.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs });
 
@@ -350,8 +350,8 @@ describe('request resolver', () => {
                 lodash: {
                     'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
                     'entry.js': EMPTY,
-                    'browser.js': EMPTY
-                }
+                    'browser.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs, target: 'node' });
 
@@ -363,8 +363,8 @@ describe('request resolver', () => {
                 lodash: {
                     'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
                     'entry.js': EMPTY,
-                    'browser.js': EMPTY
-                }
+                    'browser.js': EMPTY,
+                },
             });
             const resolveRequest = createRequestResolver({ fs, target: 'browser' });
 

@@ -10,7 +10,7 @@ import {
     IBaseFileSystem,
     IFileSystem,
     IFileSystemExtendedSyncActions,
-    IFileSystemExtendedPromiseActions
+    IFileSystemExtendedPromiseActions,
 } from '@file-services/types';
 
 const returnsTrue = () => true;
@@ -21,15 +21,15 @@ export function createFileSystem(baseFs: IBaseFileSystem): IFileSystem {
         ...createExtendedSyncActions(baseFs),
         promises: {
             ...baseFs.promises,
-            ...createExtendedFileSystemPromiseActions(baseFs)
-        }
+            ...createExtendedFileSystemPromiseActions(baseFs),
+        },
     };
 }
 
 export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSync {
     return {
         ...baseFs,
-        ...createExtendedSyncActions(baseFs)
+        ...createExtendedSyncActions(baseFs),
     };
 }
 
@@ -46,7 +46,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         copyFileSync,
         dirname,
         join,
-        resolve
+        resolve,
     } = baseFs;
 
     function fileExistsSync(filePath: string, statFn = statSync): boolean {
@@ -199,15 +199,15 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         fileExistsSync,
         directoryExistsSync,
         // resolve path once for recursive functions
-        ensureDirectorySync: directoryPath => ensureDirectorySync(resolve(directoryPath)),
+        ensureDirectorySync: (directoryPath) => ensureDirectorySync(resolve(directoryPath)),
         populateDirectorySync: (directoryPath, contents) => populateDirectorySync(resolve(directoryPath), contents),
-        removeSync: entryPath => removeSync(resolve(entryPath)),
+        removeSync: (entryPath) => removeSync(resolve(entryPath)),
         findFilesSync: (rootDirectory, options) => findFilesSync(resolve(rootDirectory), options),
         copyDirectorySync: (sourcePath, destinationPath) =>
             copyDirectorySync(resolve(sourcePath), resolve(destinationPath)),
         findClosestFileSync,
         findFilesInAncestorsSync,
-        readJsonFileSync
+        readJsonFileSync,
     };
 }
 
@@ -216,8 +216,8 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
         ...baseFs,
         promises: {
             ...baseFs.promises,
-            ...createExtendedFileSystemPromiseActions(baseFs)
-        }
+            ...createExtendedFileSystemPromiseActions(baseFs),
+        },
     };
 }
 
@@ -228,7 +228,7 @@ export function createExtendedFileSystemPromiseActions(
         dirname,
         resolve,
         join,
-        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile, copyFile }
+        promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile, copyFile },
     } = baseFs;
 
     async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
@@ -297,7 +297,7 @@ export function createExtendedFileSystemPromiseActions(
         const stats = await lstat(entryPath);
         if (stats.isDirectory()) {
             const directoryItems = await readdir(entryPath);
-            await Promise.all(directoryItems.map(entryName => remove(join(entryPath, entryName))));
+            await Promise.all(directoryItems.map((entryName) => remove(join(entryPath, entryName))));
             await rmdir(entryPath);
         } else if (stats.isFile() || stats.isSymbolicLink()) {
             await unlink(entryPath);
@@ -382,13 +382,13 @@ export function createExtendedFileSystemPromiseActions(
     return {
         fileExists,
         directoryExists,
-        ensureDirectory: directoryPath => ensureDirectory(resolve(directoryPath)),
+        ensureDirectory: (directoryPath) => ensureDirectory(resolve(directoryPath)),
         populateDirectory: (directoryPath, contents) => populateDirectory(resolve(directoryPath), contents),
-        remove: entryPath => remove(resolve(entryPath)),
+        remove: (entryPath) => remove(resolve(entryPath)),
         findFiles: (rootDirectory, options) => findFiles(resolve(rootDirectory), options),
         copyDirectory: (sourcePath, destinationPath) => copyDirectory(resolve(sourcePath), resolve(destinationPath)),
         findClosestFile,
         findFilesInAncestors,
-        readJsonFile
+        readJsonFile,
     };
 }

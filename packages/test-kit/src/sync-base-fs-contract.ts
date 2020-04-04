@@ -125,7 +125,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             });
         });
 
-        describe('watching files', function() {
+        describe('watching files', function () {
             this.timeout(10000);
 
             let validator: WatchEventsValidator;
@@ -306,7 +306,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             });
         });
 
-        describe('watching directories', function() {
+        describe('watching directories', function () {
             this.timeout(10000);
 
             let validator: WatchEventsValidator;
@@ -359,7 +359,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
             });
         });
 
-        describe('watching both directories and files', function() {
+        describe('watching both directories and files', function () {
             this.timeout(10000);
 
             let validator: WatchEventsValidator;

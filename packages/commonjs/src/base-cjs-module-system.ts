@@ -11,7 +11,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
         requireModule,
         requireFrom,
         resolveFrom,
-        loadedModules
+        loadedModules,
     };
 
     function resolveThrow(contextPath: string, request: string, requestOrigin?: string): string {

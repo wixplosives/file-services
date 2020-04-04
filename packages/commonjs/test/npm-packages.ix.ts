@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { nodeFs } from '@file-services/node';
 import { createCjsModuleSystem } from '../src';
 
-describe('commonjs module system - integration with existing npm packages', function() {
+describe('commonjs module system - integration with existing npm packages', function () {
     this.timeout(10_000); // 10s
 
     it('evaluates react/react-dom successfully', () => {

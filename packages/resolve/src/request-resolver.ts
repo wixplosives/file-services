@@ -7,7 +7,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         fs: { fileExistsSync, readFileSync, dirname, join, resolve, isAbsolute, basename },
         packageRoots = ['node_modules'],
         extensions = ['.js', '.json'],
-        target = 'browser'
+        target = 'browser',
     } = options;
 
     return resolveRequest;

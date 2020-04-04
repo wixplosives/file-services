@@ -907,7 +907,7 @@ const win32 = {
     sep: '\\',
     delimiter: ';',
     win32: null,
-    posix: null
+    posix: null,
 };
 
 const posix = {
@@ -1276,7 +1276,7 @@ const posix = {
     sep: '/',
     delimiter: ':',
     win32: null,
-    posix: null
+    posix: null,
 };
 
 posix.win32 = win32.win32 = win32;

@@ -12,7 +12,7 @@ describe('commonjs module system', () => {
         const fs = createMemoryFs({
             'numeric.js': `module.exports = ${sampleNumber}`,
             'object.js': `module.exports = ${JSON.stringify(sampleObject)}`,
-            'string.js': `module.exports = ${JSON.stringify(sampleString)}`
+            'string.js': `module.exports = ${JSON.stringify(sampleString)}`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -26,7 +26,7 @@ describe('commonjs module system', () => {
             [sampleFilePath]: `
                     module.exports.a = ${sampleNumber}
                     module.exports.b = ${JSON.stringify(sampleObject)}
-                `
+                `,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -38,7 +38,7 @@ describe('commonjs module system', () => {
             [sampleFilePath]: `
                     exports.a = ${sampleNumber}
                     exports.b = ${JSON.stringify(sampleObject)}
-                `
+                `,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -47,7 +47,7 @@ describe('commonjs module system', () => {
 
     it('caches module evaluation and returns same exported instances', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = {}`
+            [sampleFilePath]: `module.exports = {}`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -57,7 +57,7 @@ describe('commonjs module system', () => {
 
     it('provides current file path via __filename', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = __filename`
+            [sampleFilePath]: `module.exports = __filename`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -66,7 +66,7 @@ describe('commonjs module system', () => {
 
     it('provides current file path via __dirname', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = __dirname`
+            [sampleFilePath]: `module.exports = __dirname`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -75,7 +75,7 @@ describe('commonjs module system', () => {
 
     it('exposes process.env with NODE_ENV === "development"', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = process.env.NODE_ENV`
+            [sampleFilePath]: `module.exports = process.env.NODE_ENV`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -84,11 +84,11 @@ describe('commonjs module system', () => {
 
     it('allows specifying a custom process.env record', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = {...process.env }`
+            [sampleFilePath]: `module.exports = {...process.env }`,
         });
         const processEnv = {
             NODE_ENV: 'production',
-            ENV_FLAG: 'some-value'
+            ENV_FLAG: 'some-value',
         };
 
         const { requireModule } = createCjsModuleSystem({ fs, processEnv });
@@ -99,7 +99,7 @@ describe('commonjs module system', () => {
     it('allows requiring other js modules', () => {
         const fs = createMemoryFs({
             'index.js': `module.exports = require('./numeric')`,
-            'numeric.js': `module.exports = ${sampleNumber}`
+            'numeric.js': `module.exports = ${sampleNumber}`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -109,7 +109,7 @@ describe('commonjs module system', () => {
     it('allows requiring json modules', () => {
         const fs = createMemoryFs({
             'index.js': `module.exports = require('./package.json')`,
-            'package.json': `{ "name": "test" }`
+            'package.json': `{ "name": "test" }`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -119,7 +119,7 @@ describe('commonjs module system', () => {
     it('allows resolving modules using require.resolve', () => {
         const fs = createMemoryFs({
             'index.js': `module.exports = require.resolve('./target')`,
-            'target.js': ``
+            'target.js': ``,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -141,7 +141,7 @@ describe('commonjs module system', () => {
                     afterFromA: a.after
                 }
                 exports.a = a
-            `
+            `,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -149,9 +149,9 @@ describe('commonjs module system', () => {
             before: sampleNumber,
             bAtEval: {
                 beforeFromA: sampleNumber,
-                afterFromA: undefined
+                afterFromA: undefined,
             },
-            after: sampleString
+            after: sampleString,
         });
 
         // after `a.js` completed evaluation, b has access to fields added post its evaluation
@@ -161,7 +161,7 @@ describe('commonjs module system', () => {
 
     it('exposes "global" as the global object in each js runtime (browser/worker/node)', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = typeof global`
+            [sampleFilePath]: `module.exports = typeof global`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -172,8 +172,8 @@ describe('commonjs module system', () => {
         const fs = createMemoryFs({
             src: {
                 'a.js': `module.exports = require('some-package')`,
-                'package.js': `module.exports = 'custom package'`
-            }
+                'package.js': `module.exports = 'custom package'`,
+            },
         });
 
         const resolver = (_contextPath: string, request: string) =>
@@ -193,7 +193,7 @@ describe('commonjs module system', () => {
 
     it('throws when it cannot resolve a request', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = require('missing')`
+            [sampleFilePath]: `module.exports = require('missing')`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -202,7 +202,7 @@ describe('commonjs module system', () => {
 
     it('throws evaluation-time errors', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `throw new Error('Thanos is coming!')`
+            [sampleFilePath]: `throw new Error('Thanos is coming!')`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -211,7 +211,7 @@ describe('commonjs module system', () => {
 
     it('does not cache module if code parsing failed', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `module.exports = #1#`
+            [sampleFilePath]: `module.exports = #1#`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -224,7 +224,7 @@ describe('commonjs module system', () => {
 
     it('does not cache module if code evaluation failed', () => {
         const fs = createMemoryFs({
-            [sampleFilePath]: `throw new Error('Thanos is coming!')`
+            [sampleFilePath]: `throw new Error('Thanos is coming!')`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -238,7 +238,7 @@ describe('commonjs module system', () => {
     it('does not cache module if json parsing failed', () => {
         const sampleJsonPath = '/package.json';
         const fs = createMemoryFs({
-            [sampleJsonPath]: `{ "name": #"test"# }`
+            [sampleJsonPath]: `{ "name": #"test"# }`,
         });
         const { requireModule } = createCjsModuleSystem({ fs });
 

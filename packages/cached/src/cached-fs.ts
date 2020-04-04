@@ -140,7 +140,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                     callback(error, stats);
                     return;
                 });
-            }
+            },
         }),
         invalidate(path) {
             return invalidateAbsolute(fs.resolve(path));
@@ -200,7 +200,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
                     statsCache.set(cacheKey, { kind: 'failure', error: ex });
                     throw ex;
                 }
-            }
-        }
+            },
+        },
     };
 }

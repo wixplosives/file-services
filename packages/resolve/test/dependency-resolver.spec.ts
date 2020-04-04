@@ -22,7 +22,7 @@ describe('dependency resolver', () => {
     const fs = createMemoryFs({
         [firstFilePath]: JSON.stringify([requestSecondFile, requestThirdFile]),
         [secondFilePath]: JSON.stringify([requestThirdFile, requestMissingFile]),
-        [thirdFilePath]: JSON.stringify([requestFirstFile])
+        [thirdFilePath]: JSON.stringify([requestFirstFile]),
     });
 
     // using our cross-module node-like resolver
@@ -38,7 +38,7 @@ describe('dependency resolver', () => {
             // the node resolver requires directory path, not the origin file path
             const resolved = resolveRequest(fs.dirname(filePath), request);
             return resolved && resolved.resolvedFile;
-        }
+        },
     });
 
     it('uses provided request extractor/resolver and resolves all requests by a file', () => {
@@ -46,28 +46,28 @@ describe('dependency resolver', () => {
         expect(resolveDependencies(firstFilePath)).to.eql({
             [firstFilePath]: {
                 [requestSecondFile]: secondFilePath,
-                [requestThirdFile]: thirdFilePath
-            }
+                [requestThirdFile]: thirdFilePath,
+            },
         });
 
         // file with a request resolving to undefined
         expect(resolveDependencies(secondFilePath)).to.eql({
             [secondFilePath]: {
                 [requestThirdFile]: thirdFilePath,
-                [requestMissingFile]: undefined
-            }
+                [requestMissingFile]: undefined,
+            },
         });
 
         // array of both files
         expect(resolveDependencies([firstFilePath, secondFilePath])).to.eql({
             [firstFilePath]: {
                 [requestSecondFile]: secondFilePath,
-                [requestThirdFile]: thirdFilePath
+                [requestThirdFile]: thirdFilePath,
             },
             [secondFilePath]: {
                 [requestThirdFile]: thirdFilePath,
-                [requestMissingFile]: undefined
-            }
+                [requestMissingFile]: undefined,
+            },
         });
     });
 
@@ -75,15 +75,15 @@ describe('dependency resolver', () => {
         expect(resolveDependencies(firstFilePath, true /* deep */)).to.eql({
             [firstFilePath]: {
                 [requestSecondFile]: secondFilePath,
-                [requestThirdFile]: thirdFilePath
+                [requestThirdFile]: thirdFilePath,
             },
             [secondFilePath]: {
                 [requestThirdFile]: thirdFilePath,
-                [requestMissingFile]: undefined
+                [requestMissingFile]: undefined,
             },
             [thirdFilePath]: {
-                [requestFirstFile]: firstFilePath
-            }
+                [requestFirstFile]: firstFilePath,
+            },
         });
     });
 });

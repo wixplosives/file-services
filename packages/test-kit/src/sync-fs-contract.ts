@@ -114,13 +114,13 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                     folder1: {
                         'file1.ts': '',
                         'file2.ts': '',
-                        'file3.ts': ''
+                        'file3.ts': '',
                     },
                     folder2: {
                         'file1.ts': '',
                         'file2.ts': '',
-                        'file3.ts': ''
-                    }
+                        'file3.ts': '',
+                    },
                 });
 
                 fs.removeSync(directoryPath);
@@ -163,21 +163,21 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(fs.findFilesSync(directoryPath)).to.eql([
                     fs.join(directoryPath, fileName),
                     fs.join(directoryPath, 'folder1', fileName),
-                    fs.join(directoryPath, 'folder2', anotherFileName)
+                    fs.join(directoryPath, 'folder2', anotherFileName),
                 ]);
 
                 expect(fs.findFilesSync(fs.join(directoryPath, 'folder1'))).to.eql([
-                    fs.join(directoryPath, 'folder1', fileName)
+                    fs.join(directoryPath, 'folder1', fileName),
                 ]);
             });
 
@@ -188,20 +188,20 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(fs.findFilesSync(directoryPath, { filterFile: ({ name }) => name === fileName })).to.eql([
                     fs.join(directoryPath, fileName),
-                    fs.join(directoryPath, 'folder1', fileName)
+                    fs.join(directoryPath, 'folder1', fileName),
                 ]);
 
                 expect(fs.findFilesSync(directoryPath, { filterFile: ({ name }) => name === anotherFileName })).to.eql([
-                    fs.join(directoryPath, 'folder2', anotherFileName)
+                    fs.join(directoryPath, 'folder2', anotherFileName),
                 ]);
             });
 
@@ -212,21 +212,21 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(fs.findFilesSync(directoryPath, { filterDirectory: ({ name }) => name === 'folder1' })).to.eql([
                     fs.join(directoryPath, fileName),
-                    fs.join(directoryPath, 'folder1', fileName)
+                    fs.join(directoryPath, 'folder1', fileName),
                 ]);
 
                 expect(fs.findFilesSync(directoryPath, { filterDirectory: ({ name }) => name === 'folder2' })).to.eql([
                     fs.join(directoryPath, fileName),
-                    fs.join(directoryPath, 'folder2', anotherFileName)
+                    fs.join(directoryPath, 'folder2', anotherFileName),
                 ]);
             });
         });
@@ -239,11 +239,11 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(fs.findClosestFileSync(fs.join(directoryPath, 'folder1'), fileName)).to.equal(
@@ -268,20 +268,20 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(directoryPath, {
                     [fileName]: '',
                     folder1: {
-                        [fileName]: ''
+                        [fileName]: '',
                     },
                     folder2: {
-                        [anotherFileName]: ''
-                    }
+                        [anotherFileName]: '',
+                    },
                 });
 
                 expect(fs.findFilesInAncestorsSync(fs.join(directoryPath, 'folder1'), fileName)).to.eql([
                     fs.join(directoryPath, 'folder1', fileName),
-                    fs.join(directoryPath, fileName)
+                    fs.join(directoryPath, fileName),
                 ]);
 
                 expect(fs.findFilesInAncestorsSync(fs.join(directoryPath, 'folder2'), anotherFileName)).to.eql([
-                    fs.join(directoryPath, 'folder2', anotherFileName)
+                    fs.join(directoryPath, 'folder2', anotherFileName),
                 ]);
             });
         });
@@ -295,16 +295,16 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
                 fs.populateDirectorySync(sourcePath, {
                     [fileName]: 'file in root',
                     folder1: {
-                        [fileName]: 'file in sub-folder'
+                        [fileName]: 'file in sub-folder',
                     },
                     folder2: {
                         folder3: {
-                            [anotherFileName]: 'file in deep folder'
-                        }
+                            [anotherFileName]: 'file in deep folder',
+                        },
                     },
                     empty: {
-                        inside: {}
-                    }
+                        inside: {},
+                    },
                 });
 
                 fs.copyDirectorySync(sourcePath, destinationPath);

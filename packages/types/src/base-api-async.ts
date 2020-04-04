@@ -5,7 +5,7 @@ import {
     CallbackFn,
     WriteFileOptions,
     ReadFileOptions,
-    IDirectoryEntry
+    IDirectoryEntry,
 } from './common-fs-types';
 import { IFileSystemPath } from './path';
 import { IWatchService } from './watch-api';

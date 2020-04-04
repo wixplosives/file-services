@@ -9,7 +9,7 @@ import {
     IBaseFileSystemCallbackActions,
     IBaseFileSystemPromiseActions,
     ReadFileOptions,
-    WriteFileOptions
+    WriteFileOptions,
 } from '@file-services/types';
 import path from '@file-services/path';
 import { createFileSystem } from '@file-services/utils';
@@ -39,14 +39,14 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     const scopedListeners: WeakMap<WatchEventListener, WatchEventListener> = new WeakMap();
 
     function createScopedListener(listener: WatchEventListener) {
-        const scopedListener: WatchEventListener = e => {
+        const scopedListener: WatchEventListener = (e) => {
             const relativeEventPath = relative(directoryPath, e.path);
             // we don't want to pass events outside of scoped directory
             if (!relativeEventPath.startsWith(`..${sep}`)) {
                 listener({
                     stats: e.stats,
                     // use posixPath to ensure we give posix-style paths back
-                    path: posixPath.join(posixPath.sep, relativeEventPath.replace(/\\/g, '/'))
+                    path: posixPath.join(posixPath.sep, relativeEventPath.replace(/\\/g, '/')),
                 });
             }
         };
@@ -78,7 +78,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         },
         clearGlobalListeners() {
             return watchService.clearGlobalListeners();
-        }
+        },
     };
 
     const scopedBaseFs: IBaseFileSystem = {
@@ -133,7 +133,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
             },
             readlink(path) {
                 return promises.readlink(resolveFullPath(path));
-            }
+            },
         },
         copyFileSync(src, dest, ...args) {
             return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...args);
@@ -214,7 +214,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         } as IBaseFileSystemCallbackActions['writeFile'],
         readlink(path, callback) {
             return fs.readlink(resolveFullPath(path), callback);
-        }
+        },
     };
 
     return createFileSystem(scopedBaseFs);

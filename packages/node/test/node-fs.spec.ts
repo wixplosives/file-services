@@ -17,7 +17,7 @@ describe('Node File System Implementation', () => {
                 await watchService.unwatchAllPaths();
                 await tempDirectory.remove();
             },
-            tempDirectoryPath: tempDirectory.path
+            tempDirectoryPath: tempDirectory.path,
         };
     };
 

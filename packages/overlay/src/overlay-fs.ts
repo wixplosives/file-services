@@ -5,7 +5,7 @@ import {
     IBaseFileSystemCallbackActions,
     CallbackFn,
     ReadFileOptions,
-    IDirectoryEntry
+    IDirectoryEntry,
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
@@ -111,7 +111,7 @@ export function createOverlayFs(
                 }
             }
             return lowerFs.readdirSync(resolvedLowerPath, ...args);
-        }) as IBaseFileSystemSyncActions['readdirSync']
+        }) as IBaseFileSystemSyncActions['readdirSync'],
     };
 
     const basePromiseActions: Partial<IBaseFileSystemPromiseActions> = {
@@ -196,14 +196,14 @@ export function createOverlayFs(
                 }
             }
             return lowerPromises.readdir(resolvedLowerPath, ...args);
-        } as IBaseFileSystemPromiseActions['readdir']
+        } as IBaseFileSystemPromiseActions['readdir'],
     };
 
     const baseCallbackActions: Partial<IBaseFileSystemCallbackActions> = {
         exists(path, callback) {
             const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
             if (resolvedUpperPath !== undefined) {
-                upperFs.exists(resolvedUpperPath, pathExists => {
+                upperFs.exists(resolvedUpperPath, (pathExists) => {
                     if (pathExists) {
                         callback(pathExists);
                     } else {
@@ -324,7 +324,7 @@ export function createOverlayFs(
                                 } else {
                                     (callback as CallbackFn<IDirectoryEntry[]>)(upperError, [
                                         ...lowerItems,
-                                        ...upperItems
+                                        ...upperItems,
                                     ]);
                                 }
                             }
@@ -338,13 +338,13 @@ export function createOverlayFs(
                     callback as CallbackFn<IDirectoryEntry[]>
                 );
             }
-        }
+        },
     };
 
     return createFileSystem({
         ...lowerFs,
         ...baseSyncActions,
         ...baseCallbackActions,
-        promises: { ...lowerPromises, ...basePromiseActions }
+        promises: { ...lowerPromises, ...basePromiseActions },
     });
 }

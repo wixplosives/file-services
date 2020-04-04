@@ -11,8 +11,8 @@ describe('createWebpackFs', () => {
             src: {
                 'index.js': `import {a} from './some-file'
                              console.log(a)`,
-                'some-file.js': `export const a = 123`
-            }
+                'some-file.js': `export const a = 123`,
+            },
         });
 
         const webpackFs = createWebpackFs(memFs);
@@ -20,8 +20,8 @@ describe('createWebpackFs', () => {
             mode: 'development',
             context: memFs.cwd(),
             output: {
-                path: memFs.resolve('dist') // otherwise it defaults to join(process.cwd(), 'dist')
-            }
+                path: memFs.resolve('dist'), // otherwise it defaults to join(process.cwd(), 'dist')
+            },
         });
 
         compiler.inputFileSystem = webpackFs;
@@ -45,8 +45,8 @@ describe('createWebpackFs', () => {
         const memFs = createMemoryFs({
             fixture: {
                 'index.js': `import value from './some-file'
-                             console.log(value)`
-            }
+                             console.log(value)`,
+            },
         });
 
         const webpackFs = createWebpackFs(createOverlayFs(nodeFs, memFs, __dirname));
@@ -55,8 +55,8 @@ describe('createWebpackFs', () => {
             mode: 'development',
             context: __dirname,
             output: {
-                path: memFs.resolve('dist') // otherwise it defaults to join(process.cwd(), 'dist')
-            }
+                path: memFs.resolve('dist'), // otherwise it defaults to join(process.cwd(), 'dist')
+            },
         });
 
         compiler.inputFileSystem = webpackFs;

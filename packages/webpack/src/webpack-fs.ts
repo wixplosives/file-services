@@ -10,7 +10,7 @@ export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
     const {
         watchService,
         readJsonFileSync,
-        promises: { ensureDirectory, readJsonFile }
+        promises: { ensureDirectory, readJsonFile },
     } = fs;
 
     return {
@@ -18,8 +18,8 @@ export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
         readJsonSync: readJsonFileSync,
         readJson(filePath, callback) {
             readJsonFile(filePath)
-                .then(value => callback(undefined, value))
-                .catch(e => callback(e, undefined));
+                .then((value) => callback(undefined, value))
+                .catch((e) => callback(e, undefined));
         },
         mkdirp(directoryPath, callback) {
             ensureDirectory(directoryPath)
@@ -29,6 +29,6 @@ export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
         async purge() {
             watchService.clearGlobalListeners();
             await watchService.unwatchAllPaths();
-        }
+        },
     };
 }

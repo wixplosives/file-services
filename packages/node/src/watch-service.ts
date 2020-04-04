@@ -105,7 +105,7 @@ export class NodeWatchService implements IWatchService {
     private onPathEvent(eventType: string, eventPath: string) {
         const pendingEvent = this.pendingEvents.get(eventPath);
         const timerId = setTimeout(() => {
-            this.emitEvent(eventPath).catch(e => this.onWatchError(e, eventPath));
+            this.emitEvent(eventPath).catch((e) => this.onWatchError(e, eventPath));
         }, this.options.debounceWait);
 
         if (pendingEvent) {
@@ -171,8 +171,8 @@ export class NodeWatchService implements IWatchService {
         // open fsWatcher
         const watchOptions = { persistent: this.options.persistent };
         if (pathStats.isFile()) {
-            const fileWatcher = watch(path, watchOptions, type => this.onPathEvent(type, path));
-            fileWatcher.once('error', e => {
+            const fileWatcher = watch(path, watchOptions, (type) => this.onPathEvent(type, path));
+            fileWatcher.once('error', (e) => {
                 this.onWatchError(e, path);
             });
             this.fsWatchers.set(path, fileWatcher);
@@ -180,7 +180,7 @@ export class NodeWatchService implements IWatchService {
             const directoryWatcher = watch(path, watchOptions, (type, fileName) => {
                 this.onDirectoryEvent(type, path, fileName).catch;
             });
-            directoryWatcher.once('error', e => {
+            directoryWatcher.once('error', (e) => {
                 this.onWatchError(e, path);
             });
             this.fsWatchers.set(path, directoryWatcher);

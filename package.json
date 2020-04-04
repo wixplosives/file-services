@@ -11,7 +11,7 @@
     "pretest": "yarn typecheck && yarn lint",
     "test": "lerna run test --stream --concurrency=1",
     "typecheck": "tsc --noEmit",
-    "prettify": "npx prettier \"packages/**/*.ts\" --write"
+    "prettify": "npx prettier \"./**/*.{js,ts,tsx}\" --write"
   },
   "devDependencies": {
     "@ts-tools/build": "^1.2.6",

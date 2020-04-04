@@ -44,7 +44,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         realpathSync,
         join,
         dirname,
-        normalize
+        normalize,
     } = fs;
 
     function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {
@@ -119,7 +119,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         realpath,
         dirname,
         normalize,
-        join
+        join,
     };
 }
 
@@ -153,7 +153,7 @@ export function createLanguageServiceHost(
             return fileContents !== undefined ? ts.ScriptSnapshot.fromString(fileContents) : undefined;
         },
         getNewLine: () => ts.getNewLineCharacter(getCompilationSettings(), getNewLine),
-        getDefaultLibFileName: options => join(defaultLibsDirectory, ts.getDefaultLibFileName(options)),
-        useCaseSensitiveFileNames: () => useCaseSensitiveFileNames
+        getDefaultLibFileName: (options) => join(defaultLibsDirectory, ts.getDefaultLibFileName(options)),
+        useCaseSensitiveFileNames: () => useCaseSensitiveFileNames,
     };
 }

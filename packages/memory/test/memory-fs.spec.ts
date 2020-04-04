@@ -8,7 +8,7 @@ describe('In-memory File System Implementation', () => {
         return {
             fs: createMemoryFs(),
             dispose: async () => undefined,
-            tempDirectoryPath: '/'
+            tempDirectoryPath: '/',
         };
     };
 
@@ -45,7 +45,7 @@ describe('In-memory File System Implementation', () => {
         it('preserves birthtime and updates mtime', async () => {
             const fs = createMemoryFs({
                 [sourceFilePath]: 'test content',
-                [emptyDirectoryPath]: {}
+                [emptyDirectoryPath]: {},
             });
             const sourceFileStats = fs.statSync(sourceFilePath);
             const destFilePath = fs.join(emptyDirectoryPath, 'dest');
@@ -62,7 +62,7 @@ describe('In-memory File System Implementation', () => {
 
         it('fails if source is a directory', () => {
             const fs = createMemoryFs({
-                [emptyDirectoryPath]: {}
+                [emptyDirectoryPath]: {},
             });
 
             expect(() => fs.copyFileSync(emptyDirectoryPath, '/some_other_folder')).to.throw('EISDIR');
@@ -71,7 +71,7 @@ describe('In-memory File System Implementation', () => {
         it('fails if target is a directory', () => {
             const fs = createMemoryFs({
                 [sourceFilePath]: 'test content',
-                [emptyDirectoryPath]: {}
+                [emptyDirectoryPath]: {},
             });
 
             expect(() => fs.copyFileSync(sourceFilePath, emptyDirectoryPath)).to.throw('EISDIR');

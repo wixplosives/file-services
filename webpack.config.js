@@ -10,15 +10,15 @@ module.exports = {
 
     resolve: {
         extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
-        plugins: [new TsconfigPathsPlugin({ configFile: join(__dirname, 'tsconfig.json') })]
+        plugins: [new TsconfigPathsPlugin({ configFile: join(__dirname, 'tsconfig.json') })],
     },
 
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
-                loader: '@ts-tools/webpack-loader'
-            }
-        ]
-    }
+                loader: '@ts-tools/webpack-loader',
+            },
+        ],
+    },
 };

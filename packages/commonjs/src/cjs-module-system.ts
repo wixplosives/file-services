@@ -15,6 +15,6 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
             return resolvedRequest && resolvedRequest.resolvedFile;
         },
         dirname,
-        readFileSync: filePath => readFileSync(filePath, 'utf8')
+        readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     });
 }

@@ -39,7 +39,7 @@ const { hasOwnProperty } = Object.prototype;
  */
 export function createDependencyResolver({
     extractRequests,
-    resolveRequest
+    resolveRequest,
 }: IDependencyResolverOptions): DependencyResolver {
     return (assetKey, deep) => {
         const resolvedAssets: Record<string, ResolvedRequests> = {};

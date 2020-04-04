@@ -12,7 +12,7 @@ describe('overlay fs', () => {
         return {
             fs: createOverlayFs(createMemoryFs(), createMemoryFs()),
             dispose: async () => undefined,
-            tempDirectoryPath: '/'
+            tempDirectoryPath: '/',
         };
     };
 
@@ -29,12 +29,12 @@ describe('overlay fs', () => {
 
         const lower = createMemoryFs({
             [srcFile1Path]: sampleContent1,
-            [srcFile2Path]: sampleContent2
+            [srcFile2Path]: sampleContent2,
         });
         const higher = createMemoryFs({
             [rootFile1Path]: sampleContent3,
             [srcFile2Path]: sampleContent3,
-            [folderPath]: {}
+            [folderPath]: {},
         });
 
         const {
@@ -42,7 +42,7 @@ describe('overlay fs', () => {
             fileExistsSync,
             directoryExistsSync,
             existsSync,
-            promises: { readFile, fileExists, directoryExists, exists }
+            promises: { readFile, fileExists, directoryExists, exists },
         } = createOverlayFs(lower, higher);
 
         expect(readFileSync(srcFile1Path, 'utf8')).to.equal(sampleContent1);
@@ -75,17 +75,17 @@ describe('overlay fs', () => {
 
         const lower = createMemoryFs({
             [fileInLower]: sampleContent1,
-            [folderInLower]: {}
+            [folderInLower]: {},
         });
 
         const higher = createMemoryFs({
             [fileInHigher]: sampleContent1,
-            [folderInHigher]: {}
+            [folderInHigher]: {},
         });
 
         const {
             readdirSync,
-            promises: { readdir }
+            promises: { readdir },
         } = createOverlayFs(lower, higher);
 
         expect(readdirSync(commonFolder)).to.eql(['file1.js', 'folder-1', 'file2.js', 'folder-2']);

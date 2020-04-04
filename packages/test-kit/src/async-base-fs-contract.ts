@@ -22,8 +22,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { stat, readFile, writeFile }
-                    }
+                        promises: { stat, readFile, writeFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'file');
 
@@ -38,8 +38,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { stat, readFile, writeFile }
-                    }
+                        promises: { stat, readFile, writeFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'file');
 
@@ -55,8 +55,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { writeFile }
-                    }
+                        promises: { writeFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'missing-dir', 'file');
 
@@ -68,8 +68,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { writeFile, mkdir }
-                    }
+                        promises: { writeFile, mkdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'dir');
 
@@ -85,8 +85,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { readFile, writeFile }
-                    }
+                        promises: { readFile, writeFile },
+                    },
                 } = testInput;
                 const firstFilePath = join(tempDirectoryPath, 'first-file');
                 const secondFilePath = join(tempDirectoryPath, 'second-file');
@@ -103,8 +103,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { readFile }
-                    }
+                        promises: { readFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'missing-file');
 
@@ -114,9 +114,9 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('fails if reading a directory as a file', async () => {
                 const {
                     fs: {
-                        promises: { readFile }
+                        promises: { readFile },
                     },
-                    tempDirectoryPath
+                    tempDirectoryPath,
                 } = testInput;
 
                 await expect(readFile(tempDirectoryPath, 'utf8')).to.be.rejectedWith('EISDIR');
@@ -129,8 +129,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { stat, unlink, writeFile }
-                    }
+                        promises: { stat, unlink, writeFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'file');
 
@@ -145,8 +145,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { unlink }
-                    }
+                        promises: { unlink },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'missing-file');
 
@@ -158,8 +158,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir, unlink }
-                    }
+                        promises: { mkdir, unlink },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'dir');
 
@@ -169,7 +169,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('watching files', function() {
+        describe('watching files', function () {
             this.timeout(10000);
 
             let validator: WatchEventsValidator;
@@ -181,8 +181,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     fs: {
                         join,
                         promises: { writeFile },
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
                 validator = new WatchEventsValidator(watchService);
 
@@ -195,8 +195,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('emits watch event when a watched file changes', async () => {
                 const {
                     fs: {
-                        promises: { writeFile, stat }
-                    }
+                        promises: { writeFile, stat },
+                    },
                 } = testInput;
 
                 await writeFile(testFilePath, DIFFERENT_CONTENT);
@@ -208,8 +208,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('emits watch event when a watched file is removed', async () => {
                 const {
                     fs: {
-                        promises: { unlink }
-                    }
+                        promises: { unlink },
+                    },
                 } = testInput;
 
                 await unlink(testFilePath);
@@ -221,8 +221,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             it('keeps watching if file is deleted and recreated immediately', async () => {
                 const {
                     fs: {
-                        promises: { unlink, writeFile, stat }
-                    }
+                        promises: { unlink, writeFile, stat },
+                    },
                 } = testInput;
 
                 await writeFile(testFilePath, SAMPLE_CONTENT);
@@ -244,8 +244,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir, stat, readdir }
-                    }
+                        promises: { mkdir, stat, readdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'new-dir');
 
@@ -260,8 +260,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir }
-                    }
+                        promises: { mkdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'dir');
 
@@ -275,8 +275,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir, writeFile }
-                    }
+                        promises: { mkdir, writeFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'file');
 
@@ -290,8 +290,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir }
-                    }
+                        promises: { mkdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'outer', 'inner');
 
@@ -305,8 +305,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir, writeFile, readdir }
-                    }
+                        promises: { mkdir, writeFile, readdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'dir');
 
@@ -326,8 +326,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { readdir }
-                    }
+                        promises: { readdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'missing-dir');
 
@@ -339,8 +339,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { writeFile, readdir }
-                    }
+                        promises: { writeFile, readdir },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'file');
 
@@ -356,8 +356,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir, rmdir, stat }
-                    }
+                        promises: { mkdir, rmdir, stat },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'dir');
 
@@ -372,8 +372,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { mkdir, writeFile, rmdir }
-                    }
+                        promises: { mkdir, writeFile, rmdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'dir');
 
@@ -388,8 +388,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { rmdir }
-                    }
+                        promises: { rmdir },
+                    },
                 } = testInput;
                 const directoryPath = join(tempDirectoryPath, 'missing-dir');
 
@@ -401,8 +401,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { rmdir, writeFile }
-                    }
+                        promises: { rmdir, writeFile },
+                    },
                 } = testInput;
                 const filePath = join(tempDirectoryPath, 'file');
 
@@ -412,7 +412,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('watching directories', function() {
+        describe('watching directories', function () {
             this.timeout(10000);
 
             let validator: WatchEventsValidator;
@@ -424,8 +424,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     fs: {
                         promises: { mkdir },
                         join,
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
                 validator = new WatchEventsValidator(watchService);
 
@@ -438,8 +438,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     fs: {
                         promises: { writeFile, stat },
                         join,
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
 
                 await watchService.watchPath(testDirectoryPath);
@@ -456,8 +456,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     fs: {
                         promises: { writeFile, stat },
                         join,
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
 
                 const testFilePath = join(testDirectoryPath, 'test-file');
@@ -475,8 +475,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     fs: {
                         promises: { writeFile, unlink },
                         join,
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
 
                 const testFilePath = join(testDirectoryPath, 'test-file');
@@ -490,7 +490,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
             });
         });
 
-        describe('watching both directories and files', function() {
+        describe('watching both directories and files', function () {
             this.timeout(10000);
 
             let validator: WatchEventsValidator;
@@ -503,8 +503,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     fs: {
                         promises: { writeFile, mkdir },
                         join,
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
                 validator = new WatchEventsValidator(watchService);
 
@@ -518,8 +518,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         promises: { writeFile, stat },
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
 
                 await watchService.watchPath(testFilePath);
@@ -535,8 +535,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         promises: { writeFile, stat },
-                        watchService
-                    }
+                        watchService,
+                    },
                 } = testInput;
 
                 await watchService.watchPath(testDirectoryPath);
@@ -555,8 +555,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { writeFile, stat, mkdir, rename, readFile }
-                    }
+                        promises: { writeFile, stat, mkdir, rename, readFile },
+                    },
                 } = testInput;
                 const sourcePath = join(tempDirectoryPath, 'file');
                 const destinationPath = join(tempDirectoryPath, 'dir', 'subdir', 'movedFile');
@@ -581,8 +581,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { rename }
-                    }
+                        promises: { rename },
+                    },
                 } = testInput;
                 const sourcePath = join(tempDirectoryPath, 'file');
                 const destPath = join(tempDirectoryPath, 'file2');
@@ -595,8 +595,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { rename }
-                    }
+                        promises: { rename },
+                    },
                 } = testInput;
                 const sourcePath = join(tempDirectoryPath, 'unicorn', 'file');
                 const destPath = join(tempDirectoryPath, 'file2');
@@ -609,8 +609,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { rename, writeFile }
-                    }
+                        promises: { rename, writeFile },
+                    },
                 } = testInput;
                 const sourcePath = join(tempDirectoryPath, 'file');
                 const destPath = join(tempDirectoryPath, 'dir', 'file2');
@@ -625,8 +625,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { rename, mkdir, readdir, writeFile }
-                    }
+                        promises: { rename, mkdir, readdir, writeFile },
+                    },
                 } = testInput;
                 const sourcePath = join(tempDirectoryPath, 'sourceDir');
                 const destPath = join(tempDirectoryPath, 'destDir');
@@ -645,8 +645,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                         tempDirectoryPath,
                         fs: {
                             join,
-                            promises: { rename, mkdir, writeFile, stat, readFile }
-                        }
+                            promises: { rename, mkdir, writeFile, stat, readFile },
+                        },
                     } = testInput;
                     const sourcePath = join(tempDirectoryPath, 'dir');
                     const destinationPath = join(tempDirectoryPath, 'anotherDir', 'subdir', 'movedDir');
@@ -667,8 +667,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                         tempDirectoryPath,
                         fs: {
                             join,
-                            promises: { rename, mkdir, writeFile }
-                        }
+                            promises: { rename, mkdir, writeFile },
+                        },
                     } = testInput;
                     const sourcePath = join(tempDirectoryPath, 'sourceDir');
 
@@ -685,8 +685,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                         tempDirectoryPath,
                         fs: {
                             join,
-                            promises: { rename, mkdir, writeFile }
-                        }
+                            promises: { rename, mkdir, writeFile },
+                        },
                     } = testInput;
                     const sourcePath = join(tempDirectoryPath, 'sourceDir');
                     const destPath = join(tempDirectoryPath, 'destDir');
@@ -706,8 +706,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 fs: {
                     join,
                     caseSensitive,
-                    promises: { writeFile, stat }
-                }
+                    promises: { writeFile, stat },
+                },
             } = testInput;
             const filePath = join(tempDirectoryPath, 'file');
             const upperCaseFilePath = filePath.toUpperCase();
@@ -731,8 +731,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { writeFile, mkdir }
-                    }
+                        promises: { writeFile, mkdir },
+                    },
                 } = testInput;
                 targetDirectoryPath = join(tempDirectoryPath, 'dir');
 
@@ -745,8 +745,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         join,
-                        promises: { copyFile, readFile }
-                    }
+                        promises: { copyFile, readFile },
+                    },
                 } = testInput;
                 const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 
@@ -760,8 +760,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                     tempDirectoryPath,
                     fs: {
                         join,
-                        promises: { copyFile }
-                    }
+                        promises: { copyFile },
+                    },
                 } = testInput;
                 const sourcePath = join(tempDirectoryPath, 'nonExistingFileName.txt');
                 const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
@@ -773,8 +773,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         join,
-                        promises: { copyFile }
-                    }
+                        promises: { copyFile },
+                    },
                 } = testInput;
                 const targetPath = join(targetDirectoryPath, 'nonExistingDirectory', SOURCE_FILE_NAME);
 
@@ -785,8 +785,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         join,
-                        promises: { copyFile, readFile, writeFile }
-                    }
+                        promises: { copyFile, readFile, writeFile },
+                    },
                 } = testInput;
                 const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 
@@ -800,8 +800,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
                 const {
                     fs: {
                         join,
-                        promises: { copyFile, writeFile }
-                    }
+                        promises: { copyFile, writeFile },
+                    },
                 } = testInput;
                 const targetPath = join(targetDirectoryPath, SOURCE_FILE_NAME);
 

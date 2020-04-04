@@ -13,10 +13,10 @@ describe('createDirectoryFs', () => {
         createMemoryFs({
             [scopedDirectoryPath]: {
                 src: {
-                    'index.ts': SAMPLE_CONTENT
-                }
+                    'index.ts': SAMPLE_CONTENT,
+                },
             },
-            'outside-scope-file.ts': SAMPLE_CONTENT
+            'outside-scope-file.ts': SAMPLE_CONTENT,
         });
 
     it('can access a file using an absolute path relative to scoped directory', async () => {
@@ -46,14 +46,14 @@ describe('createDirectoryFs', () => {
     const testProvider = async () => {
         const memFs = createMemoryFs({
             [scopedDirectoryPath]: {},
-            'file-outside.js': ''
+            'file-outside.js': '',
         });
         const scopedFs = createDirectoryFs(memFs, scopedDirectoryPath);
 
         return {
             fs: scopedFs,
             dispose: async () => undefined,
-            tempDirectoryPath: '/' // for the scoped fs user, root is empty folder
+            tempDirectoryPath: '/', // for the scoped fs user, root is empty folder
         };
     };
 

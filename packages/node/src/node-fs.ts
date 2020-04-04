@@ -15,7 +15,7 @@ import fs, {
     rmdir,
     stat,
     unlink,
-    writeFile
+    writeFile,
 } from 'fs';
 
 import { createFileSystem } from '@file-services/utils';
@@ -54,7 +54,7 @@ export function createBaseNodeFs(options?: ICreateNodeFsOptions): IBaseFileSyste
             stat: promisify(stat),
             unlink: promisify(unlink),
             writeFile: promisify(writeFile),
-            exists: promisify(exists)
-        }
+            exists: promisify(exists),
+        },
     };
 }
