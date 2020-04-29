@@ -11,7 +11,7 @@
     "pretest": "yarn typecheck && yarn lint",
     "test": "lerna run test --stream --concurrency=1",
     "typecheck": "tsc --noEmit",
-    "prettify": "npx prettier \"./**/*.{js,ts,tsx}\" --write"
+    "prettify": "npx prettier \"./**/*.{md,js,ts,tsx}\" --write"
   },
   "devDependencies": {
     "@ts-tools/build": "^1.2.6",
@@ -34,6 +34,7 @@
     "create-temp-directory": "^1.1.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-no-only-tests": "^2.4.0",
     "lerna": "^3.20.2",
     "mocha": "^7.1.2",
     "mocha-pup": "^3.0.0",
@@ -51,5 +52,9 @@
     "webpack": "^4.43.0"
   },
   "license": "MIT",
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true
+  },
   "private": true
 }

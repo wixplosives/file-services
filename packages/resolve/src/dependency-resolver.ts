@@ -14,21 +14,21 @@ export type DependencyResolver = (assetKey: string | string[], deep?: boolean) =
 export type ResolvedRequests = Record<string, string | undefined>;
 
 export interface IDependencyResolverOptions {
-    /**
-     * Extracts a dependency requests list of an asset.
-     *
-     * @param assetKey unique identifier for an asset to extract from.
-     * @returns list of dependency requests by the asset.
-     */
-    extractRequests(assetKey: string): string[];
+  /**
+   * Extracts a dependency requests list of an asset.
+   *
+   * @param assetKey unique identifier for an asset to extract from.
+   * @returns list of dependency requests by the asset.
+   */
+  extractRequests(assetKey: string): string[];
 
-    /**
-     * Resolve a dependency request by an asset.
-     *
-     * @param assetKey unique identifier of the requesting asset.
-     * @returns unique key for the asset the request resolves to, or `undefined` if cannot resolve.
-     */
-    resolveRequest(assetKey: string, request: string): string | undefined;
+  /**
+   * Resolve a dependency request by an asset.
+   *
+   * @param assetKey unique identifier of the requesting asset.
+   * @returns unique key for the asset the request resolves to, or `undefined` if cannot resolve.
+   */
+  resolveRequest(assetKey: string, request: string): string | undefined;
 }
 
 const { hasOwnProperty } = Object.prototype;
@@ -38,39 +38,39 @@ const { hasOwnProperty } = Object.prototype;
  * and another callbck to resolve such requests.
  */
 export function createDependencyResolver({
-    extractRequests,
-    resolveRequest,
+  extractRequests,
+  resolveRequest,
 }: IDependencyResolverOptions): DependencyResolver {
-    return (assetKey, deep) => {
-        const resolvedAssets: Record<string, ResolvedRequests> = {};
-        const assetsToResolve: string[] = Array.isArray(assetKey) ? [...assetKey] : [assetKey];
+  return (assetKey, deep) => {
+    const resolvedAssets: Record<string, ResolvedRequests> = {};
+    const assetsToResolve: string[] = Array.isArray(assetKey) ? [...assetKey] : [assetKey];
 
-        while (assetsToResolve.length > 0) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const currentAsset = assetsToResolve.shift()!;
+    while (assetsToResolve.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const currentAsset = assetsToResolve.shift()!;
 
-            if (resolvedAssets[currentAsset]) {
-                continue;
-            }
+      if (resolvedAssets[currentAsset]) {
+        continue;
+      }
 
-            const resolvedRequests: ResolvedRequests = {};
-            resolvedAssets[currentAsset] = resolvedRequests;
+      const resolvedRequests: ResolvedRequests = {};
+      resolvedAssets[currentAsset] = resolvedRequests;
 
-            const assetRequests = extractRequests(currentAsset);
+      const assetRequests = extractRequests(currentAsset);
 
-            for (const request of assetRequests) {
-                if (hasOwnProperty.call(resolvedRequests, request)) {
-                    continue; // already resolved this request
-                }
-
-                const resolvedRequest = resolveRequest(currentAsset, request);
-                resolvedRequests[request] = resolvedRequest;
-                if (deep && resolvedRequest !== undefined) {
-                    assetsToResolve.push(resolvedRequest);
-                }
-            }
+      for (const request of assetRequests) {
+        if (hasOwnProperty.call(resolvedRequests, request)) {
+          continue; // already resolved this request
         }
 
-        return resolvedAssets;
-    };
+        const resolvedRequest = resolveRequest(currentAsset, request);
+        resolvedRequests[request] = resolvedRequest;
+        if (deep && resolvedRequest !== undefined) {
+          assetsToResolve.push(resolvedRequest);
+        }
+      }
+    }
+
+    return resolvedAssets;
+  };
 }

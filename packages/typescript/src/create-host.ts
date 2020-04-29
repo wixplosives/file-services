@@ -10,17 +10,17 @@ const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE;
  * formatting diagnostics, and resolving modules using TypeScript.
  */
 export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost, ts.ModuleResolutionHost {
-    getCurrentDirectory: IFileSystemSync['cwd'];
-    directoryExists: IFileSystemSync['directoryExistsSync'];
+  getCurrentDirectory: IFileSystemSync['cwd'];
+  directoryExists: IFileSystemSync['directoryExistsSync'];
 
-    readDirectory: NonNullable<ts.LanguageServiceHost['readDirectory']>;
-    getDirectories: NonNullable<ts.ModuleResolutionHost['getDirectories']>;
+  readDirectory: NonNullable<ts.LanguageServiceHost['readDirectory']>;
+  getDirectories: NonNullable<ts.ModuleResolutionHost['getDirectories']>;
 
-    getScriptVersion: ts.LanguageServiceHost['getScriptVersion'];
+  getScriptVersion: ts.LanguageServiceHost['getScriptVersion'];
 
-    dirname: IFileSystemPath['dirname'];
-    normalize: IFileSystemPath['normalize'];
-    join: IFileSystemPath['join'];
+  dirname: IFileSystemPath['dirname'];
+  normalize: IFileSystemPath['normalize'];
+  join: IFileSystemPath['join'];
 }
 
 /**
@@ -33,94 +33,94 @@ export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost,
  * @param cwd current working directory to use
  */
 export function createBaseHost(fs: IFileSystemSync): IBaseHost {
-    const {
+  const {
+    caseSensitive,
+    statSync,
+    readFileSync,
+    readdirSync,
+    fileExistsSync,
+    directoryExistsSync,
+    cwd,
+    realpathSync,
+    join,
+    dirname,
+    normalize,
+  } = fs;
+
+  function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {
+    const files: string[] = [];
+    const directories: string[] = [];
+
+    try {
+      const dirEntries = readdirSync(path);
+      for (const entryName of dirEntries) {
+        const entryStats = statSync(join(path, entryName));
+        if (!entryStats) {
+          continue;
+        }
+        if (entryStats.isFile()) {
+          files.push(entryName);
+        } else if (entryStats.isDirectory()) {
+          directories.push(entryName);
+        }
+      }
+    } catch {
+      /* */
+    }
+
+    return { files, directories };
+  }
+
+  function realpath(path: string): string {
+    try {
+      return realpathSync(path);
+    } catch (e) {
+      return path;
+    }
+  }
+
+  return {
+    readDirectory(rootDir, extensions, excludes, includes, depth) {
+      return ts.matchFiles(
+        rootDir,
+        extensions,
+        excludes,
+        includes,
         caseSensitive,
-        statSync,
-        readFileSync,
-        readdirSync,
-        fileExistsSync,
-        directoryExistsSync,
-        cwd,
-        realpathSync,
-        join,
-        dirname,
-        normalize,
-    } = fs;
-
-    function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {
-        const files: string[] = [];
-        const directories: string[] = [];
-
-        try {
-            const dirEntries = readdirSync(path);
-            for (const entryName of dirEntries) {
-                const entryStats = statSync(join(path, entryName));
-                if (!entryStats) {
-                    continue;
-                }
-                if (entryStats.isFile()) {
-                    files.push(entryName);
-                } else if (entryStats.isDirectory()) {
-                    directories.push(entryName);
-                }
-            }
-        } catch {
-            /* */
-        }
-
-        return { files, directories };
-    }
-
-    function realpath(path: string): string {
-        try {
-            return realpathSync(path);
-        } catch (e) {
-            return path;
-        }
-    }
-
-    return {
-        readDirectory(rootDir, extensions, excludes, includes, depth) {
-            return ts.matchFiles(
-                rootDir,
-                extensions,
-                excludes,
-                includes,
-                caseSensitive,
-                rootDir,
-                depth,
-                getFileSystemEntries,
-                realpath
-            );
-        },
-        getDirectories(path) {
-            return getFileSystemEntries(path).directories;
-        },
-        fileExists: fileExistsSync,
-        directoryExists: directoryExistsSync,
-        readFile(filePath) {
-            try {
-                return readFileSync(filePath, 'utf8');
-            } catch {
-                return undefined;
-            }
-        },
-        getScriptVersion(filePath) {
-            try {
-                return `${statSync(filePath).mtime.getTime()}`;
-            } catch {
-                return `${Date.now()}`;
-            }
-        },
-        useCaseSensitiveFileNames: caseSensitive,
-        getCanonicalFileName: caseSensitive ? identity : toLowerCase,
-        getCurrentDirectory: cwd,
-        getNewLine: defaultGetNewLine,
-        realpath,
-        dirname,
-        normalize,
-        join,
-    };
+        rootDir,
+        depth,
+        getFileSystemEntries,
+        realpath
+      );
+    },
+    getDirectories(path) {
+      return getFileSystemEntries(path).directories;
+    },
+    fileExists: fileExistsSync,
+    directoryExists: directoryExistsSync,
+    readFile(filePath) {
+      try {
+        return readFileSync(filePath, 'utf8');
+      } catch {
+        return undefined;
+      }
+    },
+    getScriptVersion(filePath) {
+      try {
+        return `${statSync(filePath).mtime.getTime()}`;
+      } catch {
+        return `${Date.now()}`;
+      }
+    },
+    useCaseSensitiveFileNames: caseSensitive,
+    getCanonicalFileName: caseSensitive ? identity : toLowerCase,
+    getCurrentDirectory: cwd,
+    getNewLine: defaultGetNewLine,
+    realpath,
+    dirname,
+    normalize,
+    join,
+  };
 }
 
 /**
@@ -135,25 +135,25 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
  * @param getCustomTransformers optional transformers to apply during transpilation
  */
 export function createLanguageServiceHost(
-    baseHost: IBaseHost,
-    getScriptFileNames: () => string[],
-    getCompilationSettings: () => ts.CompilerOptions,
-    defaultLibsDirectory: string,
-    getCustomTransformers?: () => ts.CustomTransformers | undefined
+  baseHost: IBaseHost,
+  getScriptFileNames: () => string[],
+  getCompilationSettings: () => ts.CompilerOptions,
+  defaultLibsDirectory: string,
+  getCustomTransformers?: () => ts.CustomTransformers | undefined
 ): ts.LanguageServiceHost {
-    const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost;
+  const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost;
 
-    return {
-        ...baseHost,
-        getCompilationSettings,
-        getScriptFileNames,
-        getCustomTransformers,
-        getScriptSnapshot(filePath) {
-            const fileContents = readFile(filePath);
-            return fileContents !== undefined ? ts.ScriptSnapshot.fromString(fileContents) : undefined;
-        },
-        getNewLine: () => ts.getNewLineCharacter(getCompilationSettings(), getNewLine),
-        getDefaultLibFileName: (options) => join(defaultLibsDirectory, ts.getDefaultLibFileName(options)),
-        useCaseSensitiveFileNames: () => useCaseSensitiveFileNames,
-    };
+  return {
+    ...baseHost,
+    getCompilationSettings,
+    getScriptFileNames,
+    getCustomTransformers,
+    getScriptSnapshot(filePath) {
+      const fileContents = readFile(filePath);
+      return fileContents !== undefined ? ts.ScriptSnapshot.fromString(fileContents) : undefined;
+    },
+    getNewLine: () => ts.getNewLineCharacter(getCompilationSettings(), getNewLine),
+    getDefaultLibFileName: (options) => join(defaultLibsDirectory, ts.getDefaultLibFileName(options)),
+    useCaseSensitiveFileNames: () => useCaseSensitiveFileNames,
+  };
 }

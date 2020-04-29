@@ -1,4 +1,5 @@
 # @file-services/typescript
+
 [![npm version](https://img.shields.io/npm/v/@file-services/typescript.svg)](https://www.npmjs.com/package/@file-services/typescript)
 [![package size](https://badgen.net/bundlephobia/minzip/@file-services/typescript)](https://bundlephobia.com/result?p=@file-services/typescript)
 
@@ -7,6 +8,7 @@ Helpers for creation of TypeScript hosts.
 ## Installation
 
 Install library in project:
+
 ```sh
 yarn add @file-services/typescript
 ```
@@ -25,7 +27,6 @@ yarn add @file-services/typescript
  */
 export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost;
 
-
 /**
  * Create a TypeScript `LanguageServiceHost` using provided file system.
  *
@@ -39,12 +40,12 @@ export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost;
  * @param customTransformers optional custom transformers to apply during transpilation
  */
 export function createLanguageServiceHost(
-    fs: IFileSystemSync,
-    baseHost: IBaseHost,
-    fileNames: string[],
-    compilerOptions: ts.CompilerOptions,
-    defaultLibsDirectory: string,
-    customTransformers?: ts.CustomTransformers,
+  fs: IFileSystemSync,
+  baseHost: IBaseHost,
+  fileNames: string[],
+  compilerOptions: ts.CompilerOptions,
+  defaultLibsDirectory: string,
+  customTransformers?: ts.CustomTransformers
 ): ts.LanguageServiceHost;
 ```
 

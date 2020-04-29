@@ -15,30 +15,28 @@ Currently, all write operations go directly to the original lower fs.
 ## Getting started
 
 Install library in project:
+
 ```sh
 yarn add @file-services/overlay
 ```
 
 Then, use the programmatic API:
+
 ```ts
 import { createOverlayFs } from '@file-services/overlay';
 import { createMemoryFs } from '@file-services/memory';
 import { nodeFs } from '@file-services/node';
 
 const memFs = createMemoryFs({
-    src: {
-        'a.txt': `A`,
-        'b.txt': `B`
-    }
-})
+  src: {
+    'a.txt': `A`,
+    'b.txt': `B`,
+  },
+});
 
-const overlayFs = createOverlayFs(
-    nodeFs, /* lower fs */
-    memFs,  /* higher fs */
-)
+const overlayFs = createOverlayFs(nodeFs /* lower fs */, memFs /* higher fs */);
 
 // overlayFs.readFileSync('src/a.txt', 'utf8') === 'A'
-
 ```
 
 `createOverlayFs` also accepts a directory path as third parameter which specifies which directory in lower fs should be overlaid upon (defaults to `lowerFs.cwd()`). This is important when overlaying a memory fs over native node fs and running on Windows. Memory fs uses posix-style paths, so the base directory is where memory's root `/` begins to overlay.
@@ -46,4 +44,3 @@ const overlayFs = createOverlayFs(
 ## License
 
 MIT
-

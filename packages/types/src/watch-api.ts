@@ -5,40 +5,40 @@ import { IFileSystemStats } from './common-fs-types';
  * Emits naive watch events containing path and latest stats.
  */
 export interface IWatchService {
-    /**
-     * Start watching `path` (file or directory).
-     * if `listener` is provided, it will receive watch events for `path`.
-     * Any global listeners will also receive events for path.
-     */
-    watchPath(path: string, listener?: WatchEventListener): Promise<void>;
+  /**
+   * Start watching `path` (file or directory).
+   * if `listener` is provided, it will receive watch events for `path`.
+   * Any global listeners will also receive events for path.
+   */
+  watchPath(path: string, listener?: WatchEventListener): Promise<void>;
 
-    /**
-     * Stop watching `path` (file or directory).
-     * if `listener` is provided, it will stop receiving watch events for `path`.
-     * if `listener is not provided, path will be unwatched with its listeners cleared.
-     */
-    unwatchPath(path: string, listener?: WatchEventListener): Promise<void>;
+  /**
+   * Stop watching `path` (file or directory).
+   * if `listener` is provided, it will stop receiving watch events for `path`.
+   * if `listener is not provided, path will be unwatched with its listeners cleared.
+   */
+  unwatchPath(path: string, listener?: WatchEventListener): Promise<void>;
 
-    /**
-     * Unwatch all watched paths.
-     */
-    unwatchAllPaths(): Promise<void>;
+  /**
+   * Unwatch all watched paths.
+   */
+  unwatchAllPaths(): Promise<void>;
 
-    /**
-     * Add a global watch event listener.
-     * It will receive watch events for all watched paths.
-     */
-    addGlobalListener(listener: WatchEventListener): void;
+  /**
+   * Add a global watch event listener.
+   * It will receive watch events for all watched paths.
+   */
+  addGlobalListener(listener: WatchEventListener): void;
 
-    /**
-     * Remove a global watch event listener.
-     */
-    removeGlobalListener(listener: WatchEventListener): void;
+  /**
+   * Remove a global watch event listener.
+   */
+  removeGlobalListener(listener: WatchEventListener): void;
 
-    /**
-     * Clears all registered global watch event listeners.
-     */
-    clearGlobalListeners(): void;
+  /**
+   * Clears all registered global watch event listeners.
+   */
+  clearGlobalListeners(): void;
 }
 
 /**
@@ -46,8 +46,8 @@ export interface IWatchService {
  * happens on a path.
  */
 export interface IWatchEvent {
-    path: string;
-    stats: IFileSystemStats | null;
+  path: string;
+  stats: IFileSystemStats | null;
 }
 
 /**

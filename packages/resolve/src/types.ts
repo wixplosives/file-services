@@ -1,32 +1,32 @@
 export interface IRequestResolverOptions {
-    /**
-     * File system to use when resolving requests.
-     */
-    fs: IResolutionFileSystem;
+  /**
+   * File system to use when resolving requests.
+   */
+  fs: IResolutionFileSystem;
 
-    /**
-     * Folders to use when searching for packages.
-     *
-     * @default ['node_modules']
-     */
-    packageRoots?: string[];
+  /**
+   * Folders to use when searching for packages.
+   *
+   * @default ['node_modules']
+   */
+  packageRoots?: string[];
 
-    /**
-     * File extensions to try resolving the request with.
-     *
-     * @default ['.js', '.json']
-     */
-    extensions?: string[];
+  /**
+   * File extensions to try resolving the request with.
+   *
+   * @default ['.js', '.json']
+   */
+  extensions?: string[];
 
-    /**
-     * Whether to prefer the 'browser' field or 'main' field
-     * in `package.json`.
-     */
-    target?: 'node' | 'browser';
+  /**
+   * Whether to prefer the 'browser' field or 'main' field
+   * in `package.json`.
+   */
+  target?: 'node' | 'browser';
 }
 
 export interface IResolutionOutput {
-    resolvedFile: string;
+  resolvedFile: string;
 }
 
 /**
@@ -42,11 +42,11 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
  * Currently a subset of the sync base file system API.
  */
 export interface IResolutionFileSystem {
-    dirname(path: string): string;
-    join(...paths: string[]): string;
-    resolve(...pathSegments: string[]): string;
-    isAbsolute(path: string): boolean;
-    basename(path: string): string;
-    fileExistsSync(path: string): boolean;
-    readFileSync(path: string, encoding: 'utf8'): string;
+  dirname(path: string): string;
+  join(...paths: string[]): string;
+  resolve(...pathSegments: string[]): string;
+  isAbsolute(path: string): boolean;
+  basename(path: string): string;
+  fileExistsSync(path: string): boolean;
+  readFileSync(path: string, encoding: 'utf8'): string;
 }
