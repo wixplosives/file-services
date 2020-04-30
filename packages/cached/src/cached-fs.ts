@@ -4,6 +4,8 @@ import {
   CallbackFnVoid,
   IBaseFileSystemSyncActions,
   ReadFileOptions,
+  IBaseFileSystemCallbackActions,
+  CallbackFn,
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
@@ -65,6 +67,19 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(directoryPath);
         return fs.mkdirSync(directoryPath);
       },
+      readFile: function readFile(path: string, callback: CallbackFn<string | Buffer>) {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedContent = contentCache.get(cacheKey);
+        if (cachedContent) {
+          return callback(undefined, cachedContent);
+        } else {
+          return fs.readFile(path, (error, value) => {
+            contentCache.set(cacheKey, value);
+            callback(error, value);
+          });
+        }
+      } as IBaseFileSystemCallbackActions['readFile'],
       readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]): string | Buffer {
         path = fs.resolve(path);
         const cacheKey = getCanonicalPath(path);
@@ -224,6 +239,17 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           throw ex;
         }
       },
+      // async readFile(path: string, ...args: [ReadFileOptions]) {
+      //   path = fs.resolve(path);
+      //   const cacheKey = getCanonicalPath(path);
+      //   const cachedContent = contentCache.get(cacheKey);
+      //   if (cachedContent) {
+      //     return cachedContent;
+      //   }
+      //   const content = await promises.readFile(path, ...args);
+      //   contentCache.set(cacheKey, content);
+      //   return content;
+      // },
     },
   };
 }
