@@ -422,44 +422,6 @@ describe('createCachedFs', () => {
       
             expect(readFileSpy.callCount).to.equal(2);
         });
-      
-        // it('caches promises.readfile calls', async () => {
-        //     const filePath = '/file';
-        //     const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-      
-        //     const readFileSpy = sinon.spy(memFs, 'readFile');
-      
-        //     const fs = createCachedFs(memFs);
-      
-        //     const content = await fs.promises.readFile(filePath);
-      
-        //     const content2 = await fs.promises.readFile(filePath);
-      
-        //     expect(content).to.equal(content2);
-        //     expect(readFileSpy.callCount).to.equal(1);
-        // });
-      
-        // it('caches promises.readfile calls - non-existing files', async () => {
-        //     const filePath = '/file';
-        //     const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-      
-        //     const readFileSpy = sinon.spy(memFs, 'readFile');
-      
-        //     const fs = createCachedFs(memFs);
-      
-        //     try {
-        //       await fs.promises.readFile('/no-file');
-        //     } catch (ex) {
-        //       // NO-OP
-        //     }
-        //     try {
-        //       await fs.promises.readFile('/no-file');
-        //     } catch (ex) {
-        //       // NO-OP
-        //     }
-      
-        //     expect(readFileSpy.callCount).to.equal(1);
-        // });
     });
     
   });

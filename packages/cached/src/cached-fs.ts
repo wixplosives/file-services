@@ -239,17 +239,6 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           throw ex;
         }
       },
-      // async readFile(path: string, ...args: [ReadFileOptions]) {
-      //   path = fs.resolve(path);
-      //   const cacheKey = getCanonicalPath(path);
-      //   const cachedContent = contentCache.get(cacheKey);
-      //   if (cachedContent) {
-      //     return cachedContent;
-      //   }
-      //   const content = await promises.readFile(path, ...args);
-      //   contentCache.set(cacheKey, content);
-      //   return content;
-      // },
     },
   };
 }
