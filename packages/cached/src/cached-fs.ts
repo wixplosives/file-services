@@ -1,4 +1,10 @@
-import { IFileSystem, IFileSystemStats, CallbackFnVoid } from '@file-services/types';
+import {
+  IFileSystem,
+  IFileSystemStats,
+  CallbackFnVoid,
+  IBaseFileSystemSyncActions,
+  ReadFileOptions,
+} from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
 const identity = (val: string) => val;
@@ -28,9 +34,13 @@ export interface IFailureCacheResult {
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
+  const contentCache = new Map<string, Buffer | string>();
   const statsCache = new Map<string, ISuccessCacheResult | IFailureCacheResult>();
   const { promises } = fs;
-  const invalidateAbsolute = (absolutePath: string) => statsCache.delete(getCanonicalPath(absolutePath));
+  const invalidateAbsolute = (absolutePath: string) => {
+    contentCache.delete(getCanonicalPath(absolutePath));
+    statsCache.delete(getCanonicalPath(absolutePath));
+  };
 
   return {
     ...createFileSystem({
@@ -55,6 +65,18 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(directoryPath);
         return fs.mkdirSync(directoryPath);
       },
+      readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]): string | Buffer {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedContent = contentCache.get(cacheKey);
+        if (cachedContent) {
+          return cachedContent;
+        }
+
+        const content = fs.readFileSync(path, ...args);
+        contentCache.set(cacheKey, content);
+        return content;
+      } as IBaseFileSystemSyncActions['readFileSync'],
       rename(sourcePath, destinationPath, callback) {
         sourcePath = fs.resolve(sourcePath);
         destinationPath = fs.resolve(destinationPath);
@@ -147,6 +169,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     },
     invalidateAll() {
       statsCache.clear();
+      contentCache.clear();
     },
     promises: {
       ...promises,
