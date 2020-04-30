@@ -287,7 +287,7 @@ describe('createCachedFs', () => {
         });
     })
     
-    describe.only('Cached readFile', () => {
+    describe('Cached readFile', () => {
         it('caches readFileSync calls', async () => {
             const filePath = '/file';
             const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
