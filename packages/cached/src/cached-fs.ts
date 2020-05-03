@@ -40,8 +40,9 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const statsCache = new Map<string, ISuccessCacheResult | IFailureCacheResult>();
   const { promises } = fs;
   const invalidateAbsolute = (absolutePath: string) => {
-    contentCache.delete(getCanonicalPath(absolutePath));
-    statsCache.delete(getCanonicalPath(absolutePath));
+    const absoluteCanonicalPath = getCanonicalPath(absolutePath);
+    contentCache.delete(absoluteCanonicalPath);
+    statsCache.delete(absoluteCanonicalPath);
   };
 
   return {
