@@ -58,7 +58,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   }
 
   function readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown {
-    return JSON.parse(readFileSync(filePath, options || 'utf8'));
+    return JSON.parse(readFileSync(filePath, options || 'utf8')) as unknown;
   }
 
   function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
@@ -73,7 +73,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     try {
       mkdirSync(directoryPath);
     } catch (e) {
-      if (e && (e.code === 'EEXIST' || e.code === 'EISDIR')) {
+      if (e && ((e as NodeJS.ErrnoException).code === 'EEXIST' || (e as NodeJS.ErrnoException).code === 'EISDIR')) {
         return;
       }
       const parentPath = dirname(directoryPath);
@@ -84,7 +84,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       try {
         mkdirSync(directoryPath);
       } catch (e) {
-        if (!e || (e.code !== 'EEXIST' && e.code !== 'EISDIR')) {
+        if (!e || ((e as NodeJS.ErrnoException).code !== 'EEXIST' && (e as NodeJS.ErrnoException).code !== 'EISDIR')) {
           throw e;
         }
       }
@@ -249,14 +249,14 @@ export function createExtendedFileSystemPromiseActions(
     filePath: string,
     options?: BufferEncoding | { encoding: BufferEncoding } | null
   ): Promise<unknown> {
-    return JSON.parse(await readFile(filePath, options || 'utf8'));
+    return JSON.parse(await readFile(filePath, options || 'utf8')) as unknown;
   }
 
   async function ensureDirectory(directoryPath: string): Promise<void> {
     try {
       await mkdir(directoryPath);
     } catch (e) {
-      if (e && (e.code === 'EEXIST' || e.code === 'EISDIR')) {
+      if (e && ((e as NodeJS.ErrnoException).code === 'EEXIST' || (e as NodeJS.ErrnoException).code === 'EISDIR')) {
         return;
       }
       const parentPath = dirname(directoryPath);
@@ -267,7 +267,7 @@ export function createExtendedFileSystemPromiseActions(
       try {
         await mkdir(directoryPath);
       } catch (e) {
-        if (!e || (e.code !== 'EEXIST' && e.code !== 'EISDIR')) {
+        if (!e || ((e as NodeJS.ErrnoException).code !== 'EEXIST' && (e as NodeJS.ErrnoException).code !== 'EISDIR')) {
           throw e;
         }
       }

@@ -113,9 +113,9 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           const stats = fs.statSync(path);
           statsCache.set(cacheKey, { kind: 'success', stats });
           return stats;
-        } catch (ex) {
-          statsCache.set(cacheKey, { kind: 'failure', error: ex });
-          throw ex;
+        } catch (e) {
+          statsCache.set(cacheKey, { kind: 'failure', error: e as Error });
+          throw e;
         }
       },
       stat(path, callback) {
@@ -196,9 +196,9 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           const stats = await promises.stat(path);
           statsCache.set(cacheKey, { kind: 'success', stats });
           return stats;
-        } catch (ex) {
-          statsCache.set(cacheKey, { kind: 'failure', error: ex });
-          throw ex;
+        } catch (e) {
+          statsCache.set(cacheKey, { kind: 'failure', error: e as Error });
+          throw e;
         }
       },
     },

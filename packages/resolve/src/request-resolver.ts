@@ -39,9 +39,10 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     const packageJsonPath = join(requestPath, 'package.json');
     if (fileExistsSync(packageJsonPath)) {
       try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-        const browserField = packageJson && packageJson.browser;
-        const mainField = packageJson && packageJson.main;
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as Record<string, unknown> | undefined;
+        const mainField = packageJson?.main;
+        const browserField = packageJson?.browser;
+
         if (target === 'browser' && typeof browserField === 'string') {
           const targetPath = join(requestPath, browserField);
           return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'));

@@ -413,7 +413,7 @@ function createMemDirectory(name: string): IFsMemDirectoryNode {
   return {
     type: 'dir',
     name,
-    contents: new Map(),
+    contents: new Map<string, IFsMemDirectoryNode | IFsMemFileNode>(),
     birthtime: currentDate,
     mtime: currentDate,
   };

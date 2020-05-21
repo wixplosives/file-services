@@ -38,14 +38,14 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     const fileContents = readFileSync(filePath);
 
     if (filePath.endsWith('.json')) {
-      newModule.exports = JSON.parse(fileContents);
+      newModule.exports = JSON.parse(fileContents) as unknown;
       loadedModules.set(filePath, newModule);
       return newModule.exports;
     }
 
-    const moduleFn: ModuleEvalFn = eval(
+    const moduleFn = eval(
       `(function (module, exports, __filename, __dirname, process, require, global){${fileContents}\n})`
-    );
+    ) as ModuleEvalFn;
 
     loadedModules.set(filePath, newModule);
     const requireFromContext = (request: string) => requireFrom(contextPath, request, filePath);

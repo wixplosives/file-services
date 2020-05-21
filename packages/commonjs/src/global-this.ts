@@ -1,7 +1,7 @@
 // to appease typescript without having to add types of all js environments
-declare const window: object;
-declare const global: object;
-declare const self: object;
+declare const window: unknown;
+declare const global: unknown;
+declare const self: unknown;
 
 export const envGlobal =
   typeof globalThis !== 'undefined'

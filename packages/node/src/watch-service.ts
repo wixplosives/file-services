@@ -43,10 +43,10 @@ export class NodeWatchService implements IWatchService {
   private watchedPaths = new SetMultiMap<string, WatchEventListener>();
 
   /** path to actual FSWatcher instance opened for it */
-  private fsWatchers: Map<string, FSWatcher> = new Map();
+  private fsWatchers = new Map<string, FSWatcher>();
 
   /** path to its pending event (debounced watch event) */
-  private pendingEvents: Map<string, IPendingEvent> = new Map();
+  private pendingEvents = new Map<string, IPendingEvent>();
 
   /**
    * Construct a new Node file system watch service
