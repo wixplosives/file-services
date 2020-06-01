@@ -94,7 +94,7 @@ export class NodeWatchService implements IWatchService {
     this.globalListeners.delete(listener);
   }
 
-  public clearGlobalListeners() {
+  public clearGlobalListeners(): void {
     this.globalListeners.clear();
   }
 
