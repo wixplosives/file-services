@@ -19,7 +19,7 @@ import fs, {
 } from 'fs';
 
 import { createFileSystem } from '@file-services/utils';
-import { IBaseFileSystem, IFileSystem, IFileSystemPath } from '@file-services/types';
+import type { IBaseFileSystem, IFileSystem, IFileSystemPath } from '@file-services/types';
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service';
 
 const caseSensitive = !existsSync(__filename.toUpperCase());

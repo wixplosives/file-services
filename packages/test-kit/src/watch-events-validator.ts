@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { sleep, waitFor } from 'promise-assist';
-import { IWatchEvent, IWatchService } from '@file-services/types';
+import type { IWatchEvent, IWatchService } from '@file-services/types';
 
 export interface IWatchEventValidatorOptions {
   /**

@@ -1,5 +1,5 @@
-import { IFileSystemSync } from '@file-services/types';
-import { RequestResolver } from '@file-services/resolve';
+import type { IFileSystemSync } from '@file-services/types';
+import type { RequestResolver } from '@file-services/resolve';
 
 export interface IBaseModuleSystemOptions {
   /**

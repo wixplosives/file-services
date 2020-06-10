@@ -1,4 +1,4 @@
-import { IFileSystem, IFileSystemStats, CallbackFnVoid } from '@file-services/types';
+import type { IFileSystem, IFileSystemStats, CallbackFnVoid } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
 const identity = (val: string) => val;

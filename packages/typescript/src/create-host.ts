@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { IFileSystemSync, IFileSystemPath } from '@file-services/types';
+import type { IFileSystemSync, IFileSystemPath } from '@file-services/types';
 
 const UNIX_NEW_LINE = '\n';
 const identity = (val: string) => val;

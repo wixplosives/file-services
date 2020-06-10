@@ -11,7 +11,7 @@ import {
   IBaseFileSystemSyncActions,
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes';
-import {
+import type {
   IMemFileSystem,
   IBaseMemFileSystem,
   IBaseMemFileSystemSync,

@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { IBaseFileSystemAsync, FileSystemConstants } from '@file-services/types';
-import { ITestInput } from './types';
+import type { ITestInput } from './types';
 import { WatchEventsValidator } from './watch-events-validator';
 
 chai.use(chaiAsPromised);

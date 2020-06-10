@@ -1,12 +1,12 @@
-import {
+import type {
   IFileSystemStats,
   BufferEncoding,
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
 } from './common-fs-types';
-import { IFileSystemPath } from './path';
-import { IWatchService } from './watch-api';
+import type { IFileSystemPath } from './path';
+import type { IWatchService } from './watch-api';
 
 /**
  * SYNC-only base file system.

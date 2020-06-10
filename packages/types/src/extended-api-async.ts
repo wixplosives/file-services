@@ -1,5 +1,5 @@
-import { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types';
-import { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async';
+import type { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types';
+import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async';
 
 /**
  * ASYNC-only file system.

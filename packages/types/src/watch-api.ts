@@ -1,4 +1,4 @@
-import { IFileSystemStats } from './common-fs-types';
+import type { IFileSystemStats } from './common-fs-types';
 
 /**
  * File watching service.

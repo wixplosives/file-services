@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { IWatchService } from '@file-services/types';
+import type { IWatchService } from '@file-services/types';
 import { sleep } from 'promise-assist';
 import { WatchEventsValidator } from '@file-services/test-kit';
 

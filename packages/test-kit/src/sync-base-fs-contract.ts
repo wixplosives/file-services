@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { IBaseFileSystemSync, FileSystemConstants } from '@file-services/types';
-import { ITestInput } from './types';
+import type { ITestInput } from './types';
 import { WatchEventsValidator } from './watch-events-validator';
 
 const SAMPLE_CONTENT = 'content';

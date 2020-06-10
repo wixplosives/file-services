@@ -1,4 +1,4 @@
-import { IBaseFileSystemSync, IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from '@file-services/types';
+import type { IBaseFileSystemSync, IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from '@file-services/types';
 import { callbackify } from './callbackify';
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {

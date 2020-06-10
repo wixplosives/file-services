@@ -1,7 +1,7 @@
 import { promisify } from 'util';
 import { join } from 'path';
 import { stat as statCb, watch, FSWatcher } from 'fs';
-import { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types';
+import type { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types';
 import { SetMultiMap } from '@file-services/utils';
 
 const stat = promisify(statCb);

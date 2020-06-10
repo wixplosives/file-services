@@ -1,5 +1,5 @@
-import webpack from 'webpack';
-import { IFileSystem, CallbackFn } from '@file-services/types';
+import type webpack from 'webpack';
+import type { IFileSystem, CallbackFn } from '@file-services/types';
 
 export interface IWebpackFileSystem extends webpack.InputFileSystem, webpack.OutputFileSystem {
   readJson(filePath: string, callback: CallbackFn<unknown>): void;

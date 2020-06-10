@@ -1,5 +1,5 @@
 import { createRequestResolver } from '@file-services/resolve';
-import { IModuleSystemOptions, ICommonJsModuleSystem } from './types';
+import type { IModuleSystemOptions, ICommonJsModuleSystem } from './types';
 import { createBaseCjsModuleSystem } from './base-cjs-module-system';
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {

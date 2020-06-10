@@ -1,4 +1,4 @@
-import { IBaseModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types';
+import type { IBaseModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types';
 import { envGlobal } from './global-this';
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {

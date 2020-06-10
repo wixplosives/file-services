@@ -1,4 +1,4 @@
-import { RequestResolver, IResolutionOutput, IRequestResolverOptions } from './types';
+import type { RequestResolver, IResolutionOutput, IRequestResolverOptions } from './types';
 
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
 

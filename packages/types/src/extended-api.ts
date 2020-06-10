@@ -1,5 +1,5 @@
-import { IFileSystemSync } from './extended-api-sync';
-import { IFileSystemAsync } from './extended-api-async';
+import type { IFileSystemSync } from './extended-api-sync';
+import type { IFileSystemAsync } from './extended-api-async';
 
 export * from './extended-api-sync';
 export * from './extended-api-async';
