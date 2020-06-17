@@ -1,13 +1,12 @@
 import { expect } from 'chai';
-import { nodeFs } from '@file-services/node';
+import fs from '@file-services/node';
 import { createCjsModuleSystem } from '../src';
 
 describe('commonjs module system - integration with existing npm packages', function () {
   this.timeout(10_000); // 10s
 
   it('evaluates react/react-dom successfully', () => {
-    const ms = createCjsModuleSystem({ fs: nodeFs });
-    const { requireFrom } = ms;
+    const { requireFrom } = createCjsModuleSystem({ fs });
 
     const React = requireFrom(__dirname, 'react') as typeof import('react');
     const ReactDOM = requireFrom(__dirname, 'react-dom') as typeof import('react-dom');
@@ -18,8 +17,7 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates chai successfully', () => {
-    const ms = createCjsModuleSystem({ fs: nodeFs });
-    const { requireFrom } = ms;
+    const { requireFrom } = createCjsModuleSystem({ fs });
 
     const chai = requireFrom(__dirname, 'chai') as typeof import('chai');
 
@@ -29,12 +27,21 @@ describe('commonjs module system - integration with existing npm packages', func
 
   // skipped until we resolver support "browser": {}
   it.skip('evaluates mocha successfully', () => {
-    const ms = createCjsModuleSystem({ fs: nodeFs });
-    const { requireFrom } = ms;
+    const { requireFrom } = createCjsModuleSystem({ fs });
 
     const mocha = requireFrom(__dirname, 'mocha') as typeof import('mocha');
 
     expect(mocha.setup).to.be.instanceOf(Function);
     expect(mocha.run).to.be.instanceOf(Function);
+  });
+
+  // skipped until external modules (node apis) can be provided using options
+  it.skip('evaluates sass successfully', () => {
+    const { requireFrom } = createCjsModuleSystem({ fs });
+
+    const sass = requireFrom(__dirname, 'sass') as typeof import('sass');
+
+    expect(sass.render).to.be.instanceOf(Function);
+    expect(sass.renderSync).to.be.instanceOf(Function);
   });
 });
