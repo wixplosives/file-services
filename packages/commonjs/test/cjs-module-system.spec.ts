@@ -195,9 +195,10 @@ describe('commonjs module system', () => {
     const fs = createMemoryFs({
       [sampleFilePath]: `module.exports = require('missing')`,
     });
-    const { requireModule } = createCjsModuleSystem({ fs });
+    const { requireModule, requireFrom } = createCjsModuleSystem({ fs });
 
     expect(() => requireModule(sampleFilePath)).to.throw(`Cannot resolve "missing" in ${sampleFilePath}`);
+    expect(() => requireFrom(fs.cwd(), 'missing')).to.throw(`Cannot resolve "missing" in ${fs.cwd()}`);
   });
 
   it('throws evaluation-time errors', () => {
