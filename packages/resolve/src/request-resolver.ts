@@ -1,80 +1,97 @@
-import type { RequestResolver, IResolutionOutput, IRequestResolverOptions } from './types';
+import type { RequestResolver, IRequestResolverOptions } from './types';
 
+const defaultTarget = 'browser';
+const defaultPackageRoots = ['node_modules'];
+const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
     fs: { fileExistsSync, readFileSync, dirname, join, resolve, isAbsolute, basename },
-    packageRoots = ['node_modules'],
-    extensions = ['.js', '.json'],
-    target = 'browser',
+    packageRoots = defaultPackageRoots,
+    extensions = defaultExtensions,
+    target = defaultTarget,
   } = options;
 
-  return resolveRequest;
+  return (contextPath, request) => {
+    for (const resolvedFile of requestCandidates(contextPath, request)) {
+      if (fileExistsSync(resolvedFile)) {
+        return { resolvedFile };
+      }
+    }
+    return undefined;
+  };
 
-  function resolveRequest(contextPath: string, request: string): IResolutionOutput | undefined {
+  function* requestCandidates(contextPath: string, request: string) {
     if (isRelative(request) || isAbsolute(request)) {
       const requestPath = resolve(contextPath, request);
-      return resolveAsFile(requestPath) || resolveAsDirectory(requestPath);
+      yield* resolveAsFile(requestPath);
+      yield* resolveAsDirectory(requestPath);
     } else {
-      return resolveAsPackage(contextPath, request);
+      yield* resolveAsPackage(contextPath, request);
     }
   }
 
-  function resolveAsFile(requestPath: string): IResolutionOutput | undefined {
-    if (fileExistsSync(requestPath)) {
-      return { resolvedFile: requestPath };
-    } else {
-      for (const ext of extensions) {
-        const pathWithExt = requestPath + ext;
-        if (fileExistsSync(pathWithExt)) {
-          return { resolvedFile: pathWithExt };
-        }
-      }
+  function* resolveAsFile(requestPath: string) {
+    yield requestPath;
+    for (const ext of extensions) {
+      yield requestPath + ext;
     }
-    return undefined;
   }
 
-  function resolveAsDirectory(requestPath: string): IResolutionOutput | undefined {
+  function* resolveAsDirectory(requestPath: string) {
     const packageJsonPath = join(requestPath, 'package.json');
-    if (fileExistsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as Record<string, unknown> | undefined;
-        const mainField = packageJson?.main;
-        const browserField = packageJson?.browser;
+    const packageJson = safeReadJsonFileSync(packageJsonPath) as Record<string, unknown> | undefined;
+    const mainField = packageJson?.main;
+    const browserField = packageJson?.browser;
 
-        if (target === 'browser' && typeof browserField === 'string') {
-          const targetPath = join(requestPath, browserField);
-          return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'));
-        } else if (typeof mainField === 'string') {
-          const targetPath = join(requestPath, mainField);
-          return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'));
-        }
-      } catch {
-        /* we don't reject, just return undefined */
-      }
+    if (target === 'browser' && typeof browserField === 'string') {
+      const targetPath = join(requestPath, browserField);
+      yield* resolveAsFile(targetPath);
+      yield* resolveAsFile(join(targetPath, 'index'));
+    } else if (typeof mainField === 'string') {
+      const targetPath = join(requestPath, mainField);
+      yield* resolveAsFile(targetPath);
+      yield* resolveAsFile(join(targetPath, 'index'));
     }
-    return resolveAsFile(join(requestPath, 'index'));
+    yield* resolveAsFile(join(requestPath, 'index'));
   }
 
-  function resolveAsPackage(initialPath: string, request: string): IResolutionOutput | undefined {
-    for (const packageRoot of packageRoots) {
-      let currentPath = initialPath;
-      let lastPath: string | undefined;
-      while (lastPath !== currentPath) {
-        const isPackagesRoot = basename(currentPath) === packageRoot;
-        const packagesPath = isPackagesRoot ? currentPath : resolve(currentPath, packageRoot);
-        const requestInPackages = join(packagesPath, request);
-        const resolved = resolveAsFile(requestInPackages) || resolveAsDirectory(requestInPackages);
-        if (resolved) {
-          return resolved;
-        }
-        lastPath = currentPath;
+  function* resolveAsPackage(initialPath: string, request: string) {
+    for (const packagesPath of packageRootsToPaths(initialPath)) {
+      const requestInPackages = join(packagesPath, request);
+      yield* resolveAsFile(requestInPackages);
+      yield* resolveAsDirectory(requestInPackages);
+    }
+  }
 
-        // if in /some/path/node_modules, jump directly to /some/node_modules (dirname twice)
-        currentPath = isPackagesRoot ? dirname(dirname(currentPath)) : dirname(currentPath);
+  function* packageRootsToPaths(initialPath: string) {
+    for (const packageRoot of packageRoots) {
+      if (isAbsolute(packageRoot)) {
+        yield packageRoot;
+      } else {
+        yield* namedPackageRootToPaths(initialPath, packageRoot);
       }
     }
-    return undefined;
+  }
+
+  function* namedPackageRootToPaths(initialPath: string, packageRoot: string) {
+    let currentPath = initialPath;
+    let lastPath: string | undefined;
+    while (lastPath !== currentPath) {
+      const isPackagesRoot = basename(currentPath) === packageRoot;
+      yield isPackagesRoot ? currentPath : join(currentPath, packageRoot);
+      lastPath = currentPath;
+      // if currentPath is /some/path/node_modules, jump directly to /some (dirname twice)
+      currentPath = isPackagesRoot ? dirname(dirname(currentPath)) : dirname(currentPath);
+    }
+  }
+
+  function safeReadJsonFileSync(filePath: string): unknown {
+    try {
+      return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+    } catch (e) {
+      return undefined;
+    }
   }
 }
