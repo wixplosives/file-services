@@ -7,7 +7,7 @@ const isRelative = (request: string) => request.startsWith('./') || request.star
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
-    fs: { fileExistsSync, readFileSync, dirname, join, resolve, isAbsolute, basename },
+    fs: { fileExistsSync, directoryExistsSync, readFileSync, dirname, join, resolve, isAbsolute },
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     target = defaultTarget,
@@ -59,6 +59,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function* resolveAsPackage(initialPath: string, request: string) {
     for (const packagesPath of packageRootsToPaths(initialPath)) {
+      if (!directoryExistsSync(packagesPath)) {
+        continue;
+      }
       const requestInPackages = join(packagesPath, request);
       yield* resolveAsFile(requestInPackages);
       yield* resolveAsDirectory(requestInPackages);
@@ -66,24 +69,19 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* packageRootsToPaths(initialPath: string) {
-    for (const packageRoot of packageRoots) {
-      if (isAbsolute(packageRoot)) {
-        yield packageRoot;
-      } else {
-        yield* namedPackageRootToPaths(initialPath, packageRoot);
+    for (const directoryPath of pathChainToTopLevel(initialPath)) {
+      for (const packageRoot of packageRoots) {
+        yield join(directoryPath, packageRoot);
       }
     }
   }
 
-  function* namedPackageRootToPaths(initialPath: string, packageRoot: string) {
-    let currentPath = initialPath;
+  function* pathChainToTopLevel(currentPath: string) {
     let lastPath: string | undefined;
     while (lastPath !== currentPath) {
-      const isPackagesRoot = basename(currentPath) === packageRoot;
-      yield isPackagesRoot ? currentPath : join(currentPath, packageRoot);
+      yield currentPath;
       lastPath = currentPath;
-      // if currentPath is /some/path/node_modules, jump directly to /some (dirname twice)
-      currentPath = isPackagesRoot ? dirname(dirname(currentPath)) : dirname(currentPath);
+      currentPath = dirname(currentPath);
     }
   }
 
