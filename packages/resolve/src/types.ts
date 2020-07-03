@@ -46,7 +46,7 @@ export interface IResolutionFileSystem {
   join(...paths: string[]): string;
   resolve(...pathSegments: string[]): string;
   isAbsolute(path: string): boolean;
-  basename(path: string): string;
   fileExistsSync(path: string): boolean;
+  directoryExistsSync(path: string): boolean;
   readFileSync(path: string, encoding: 'utf8'): string;
 }
