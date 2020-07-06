@@ -41,6 +41,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* resolveAsDirectory(requestPath: string) {
+    if (!directoryExistsSync(requestPath)) {
+      return;
+    }
     const packageJsonPath = join(requestPath, 'package.json');
     const packageJson = safeReadJsonFileSync(packageJsonPath) as PackageJson;
     const mainField = packageJson?.main;
@@ -54,8 +57,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       const targetPath = join(requestPath, mainField);
       yield* resolveAsFile(targetPath);
       yield* resolveAsFile(join(targetPath, 'index'));
+    } else {
+      yield* resolveAsFile(join(requestPath, 'index'));
     }
-    yield* resolveAsFile(join(requestPath, 'index'));
   }
 
   function* resolveAsPackage(initialPath: string, request: string) {
@@ -87,10 +91,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function safeReadJsonFileSync(filePath: string): unknown {
+    let parsedValue: unknown = undefined;
     try {
-      return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
-    } catch (e) {
-      return undefined;
+      parsedValue = JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+    } catch {
+      /**/
     }
+    return parsedValue;
   }
 }

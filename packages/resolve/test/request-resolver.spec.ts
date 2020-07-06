@@ -210,6 +210,9 @@ describe('request resolver', () => {
               'util1.js': EMPTY,
             },
           },
+          'missing-main': {
+            'package.json': stringifyPackageJson({ main: 'main.js' }),
+          },
           'just-a-file.js': EMPTY,
         },
       });
@@ -218,6 +221,7 @@ describe('request resolver', () => {
       expect(resolveRequest('/', 'express')).to.be.resolvedTo('/node_modules/express/main.js');
 
       expect(resolveRequest('/', 'not-existing')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', 'missing-main')).to.be.resolvedTo(undefined);
 
       // alternative entry point
       expect(resolveRequest('/', 'express/another_entry')).to.be.resolvedTo('/node_modules/express/another_entry.js');
@@ -376,10 +380,15 @@ describe('request resolver', () => {
           'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser' }),
           'entry.js': EMPTY,
         },
+        'another-package': {
+          browser: {},
+          'package.json': stringifyPackageJson({ browser: './browser' }),
+        },
       });
       const resolveRequest = createRequestResolver({ fs });
 
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser/index.js');
+      expect(resolveRequest('/', './another-package')).to.be.resolvedTo(undefined);
     });
   });
 });
