@@ -1,5 +1,32 @@
-import type { IBaseModuleSystemOptions, IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types';
+import type { IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types';
 import { envGlobal } from './global-this';
+
+export interface IBaseModuleSystemOptions {
+  /**
+   * Exposed to modules as `process.env`.
+   *
+   * @default { NODE_ENV: 'development' }
+   */
+  processEnv?: Record<string, string | undefined>;
+
+  /**
+   * @returns textual contents of `filePath`.
+   * @throws if file doesn't exist or other error.
+   */
+  readFileSync(filePath: string): string;
+
+  /**
+   * @returns parent directory of provided `path`.
+   */
+  dirname(path: string): string;
+
+  /**
+   * Resolve a module request from some context (directory path).
+   *
+   * @returns resolved path, or `undefined` if cannot resolve.
+   */
+  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | undefined;
+}
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
   const { resolveFrom, dirname, readFileSync, processEnv = { NODE_ENV: 'development' } } = options;
