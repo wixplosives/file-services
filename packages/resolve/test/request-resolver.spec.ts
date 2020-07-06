@@ -217,6 +217,8 @@ describe('request resolver', () => {
 
       expect(resolveRequest('/', 'express')).to.be.resolvedTo('/node_modules/express/main.js');
 
+      expect(resolveRequest('/', 'not-existing')).to.be.resolvedTo(undefined);
+
       // alternative entry point
       expect(resolveRequest('/', 'express/another_entry')).to.be.resolvedTo('/node_modules/express/another_entry.js');
 
@@ -365,6 +367,19 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs, target: 'browser' });
 
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('resolves "browser" which points to a folder with an index file', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          browser: { 'index.js': EMPTY },
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser' }),
+          'entry.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser/index.js');
     });
   });
 });
