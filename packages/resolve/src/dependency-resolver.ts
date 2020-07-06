@@ -42,7 +42,7 @@ export function createDependencyResolver({
   resolveRequest,
 }: IDependencyResolverOptions): DependencyResolver {
   return (assetKey, deep) => {
-    const resolvedAssets: Record<string, ResolvedRequests> = {};
+    const resolvedAssets = Object.create(null) as Record<string, ResolvedRequests>;
     const assetsToResolve: string[] = Array.isArray(assetKey) ? [...assetKey] : [assetKey];
 
     while (assetsToResolve.length > 0) {
@@ -53,7 +53,7 @@ export function createDependencyResolver({
         continue;
       }
 
-      const resolvedRequests: ResolvedRequests = {};
+      const resolvedRequests = Object.create(null) as ResolvedRequests;
       resolvedAssets[currentAsset] = resolvedRequests;
 
       const assetRequests = extractRequests(currentAsset);
