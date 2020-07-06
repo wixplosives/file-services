@@ -2,10 +2,10 @@ import chai, { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
 import { createRequestResolver } from '../src';
 import { resolutionMatchers } from './resolution-matchers';
+import type { PackageJson } from 'type-fest';
 
-const { stringify } = JSON;
 chai.use(resolutionMatchers);
-
+const stringifyPackageJson = (packageJson: PackageJson) => JSON.stringify(packageJson);
 const EMPTY = '';
 
 describe('request resolver', () => {
@@ -138,32 +138,32 @@ describe('request resolver', () => {
     it('resolves requests to a folder if it contains a package.json with a main', () => {
       const fs = createMemoryFs({
         with_ext: {
-          'package.json': stringify({ main: 'entry.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js' }),
           'entry.js': EMPTY,
         },
         without_ext: {
-          'package.json': stringify({ main: 'main_file' }),
+          'package.json': stringifyPackageJson({ main: 'main_file' }),
           'main_file.js': EMPTY,
         },
         to_inner_folder: {
           inner: { 'index.js': EMPTY },
-          'package.json': stringify({ main: 'inner' }),
+          'package.json': stringifyPackageJson({ main: 'inner' }),
         },
         to_file_in_folder: {
           inner: { 'file.js': EMPTY },
-          'package.json': stringify({ main: 'inner/file.js' }),
+          'package.json': stringifyPackageJson({ main: 'inner/file.js' }),
         },
         preferred: {
-          'package.json': stringify({ main: 'preferred.js' }),
+          'package.json': stringifyPackageJson({ main: 'preferred.js' }),
           'preferred.js': 'will be picked over index',
           'index.js': EMPTY,
         },
         dot_main: {
-          'package.json': stringify({ main: '.' }),
+          'package.json': stringifyPackageJson({ main: '.' }),
           'index.js': EMPTY,
         },
         empty_main: {
-          'package.json': stringify({ main: '' }),
+          'package.json': stringifyPackageJson({ main: '' }),
           'index.js': EMPTY,
         },
         invalid_json: {
@@ -174,7 +174,7 @@ describe('request resolver', () => {
           'package.json': '#invalid json#',
         },
         no_main: {
-          'package.json': stringify({}),
+          'package.json': stringifyPackageJson({}),
           'index.js': EMPTY,
         },
       });
@@ -198,12 +198,12 @@ describe('request resolver', () => {
       const fs = createMemoryFs({
         node_modules: {
           express: {
-            'package.json': stringify({ main: 'main.js' }),
+            'package.json': stringifyPackageJson({ main: 'main.js' }),
             'main.js': EMPTY,
             'another_entry.js': EMPTY,
           },
           lodash: {
-            'package.json': stringify({ main: 'some-index' }),
+            'package.json': stringifyPackageJson({ main: 'some-index' }),
             'some-index.js': EMPTY,
             'test-utils': {
               'index.js': EMPTY,
@@ -240,15 +240,15 @@ describe('request resolver', () => {
           express: {
             node_modules: {
               lodash: {
-                'package.json': stringify({ main: 'v1.js' }),
+                'package.json': stringifyPackageJson({ main: 'v1.js' }),
                 'v1.js': EMPTY,
               },
             },
-            'package.json': stringify({ main: 'main.js' }),
+            'package.json': stringifyPackageJson({ main: 'main.js' }),
             'main.js': EMPTY,
           },
           lodash: {
-            'package.json': stringify({ main: 'v2.js' }),
+            'package.json': stringifyPackageJson({ main: 'v2.js' }),
             'v2.js': EMPTY,
             'v2-specific-file.js': EMPTY,
           },
@@ -296,7 +296,7 @@ describe('request resolver', () => {
         project: {
           third_party: {
             koa: {
-              'package.json': stringify({ main: 'main-index' }),
+              'package.json': stringifyPackageJson({ main: 'main-index' }),
               'main-index.js': EMPTY,
             },
           },
@@ -319,7 +319,7 @@ describe('request resolver', () => {
     it('prefers "browser" over "main" when loading a package.json', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -332,7 +332,7 @@ describe('request resolver', () => {
     it('uses "browser" if "main" was not defined', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ browser: 'file.js' }),
+          'package.json': stringifyPackageJson({ browser: 'file.js' }),
           'file.js': EMPTY,
         },
       });
@@ -344,7 +344,7 @@ describe('request resolver', () => {
     it('prefers "main" when resolution "target" is set to "node"', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -357,7 +357,7 @@ describe('request resolver', () => {
     it('prefers "browser" when resolution "target" is set to "browser" (also default)', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },

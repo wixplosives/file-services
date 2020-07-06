@@ -108,8 +108,8 @@ describe('commonjs module system', () => {
 
   it('allows requiring json modules', () => {
     const fs = createMemoryFs({
-      'index.js': `module.exports = require('./package.json')`,
-      'package.json': `{ "name": "test" }`,
+      'index.js': `module.exports = require('./data.json')`,
+      'data.json': `{ "name": "test" }`,
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 

@@ -1,3 +1,4 @@
+import type { PackageJson } from 'type-fest';
 import type { RequestResolver, IRequestResolverOptions } from './types';
 
 const defaultTarget = 'browser';
@@ -41,7 +42,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function* resolveAsDirectory(requestPath: string) {
     const packageJsonPath = join(requestPath, 'package.json');
-    const packageJson = safeReadJsonFileSync(packageJsonPath) as Record<string, unknown> | undefined;
+    const packageJson = safeReadJsonFileSync(packageJsonPath) as PackageJson;
     const mainField = packageJson?.main;
     const browserField = packageJson?.browser;
 
