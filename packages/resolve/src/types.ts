@@ -23,6 +23,12 @@ export interface IRequestResolverOptions {
    * in `package.json`.
    */
   target?: 'node' | 'browser';
+
+  /**
+   * Cache for `realpathSync` results.
+   * If not provided, resolver will create an internal Map (still caches).
+   */
+  realpathCache?: Map<string, string>;
 }
 
 export interface IResolutionOutput {
@@ -49,4 +55,5 @@ export interface IResolutionFileSystem {
   fileExistsSync(path: string): boolean;
   directoryExistsSync(path: string): boolean;
   readFileSync(path: string, encoding: 'utf8'): string;
+  realpathSync(path: string): string;
 }

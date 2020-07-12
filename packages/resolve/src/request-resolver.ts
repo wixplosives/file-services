@@ -8,16 +8,17 @@ const isRelative = (request: string) => request.startsWith('./') || request.star
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
-    fs: { fileExistsSync, directoryExistsSync, readFileSync, dirname, join, resolve, isAbsolute },
+    fs: { fileExistsSync, directoryExistsSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     target = defaultTarget,
+    realpathCache = new Map<string, string>(),
   } = options;
 
   return (contextPath, request) => {
     for (const resolvedFile of requestCandidates(contextPath, request)) {
       if (fileExistsSync(resolvedFile)) {
-        return { resolvedFile };
+        return { resolvedFile: safeRealpathSync(resolvedFile) };
       }
     }
     return undefined;
@@ -87,6 +88,21 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       yield currentPath;
       lastPath = currentPath;
       currentPath = dirname(currentPath);
+    }
+  }
+
+  function safeRealpathSync(request: string): string {
+    try {
+      const cachedRealpath = realpathCache.get(request);
+      if (cachedRealpath !== undefined) {
+        return cachedRealpath;
+      } else {
+        const actualPath = realpathSync(request);
+        realpathCache.set(request, actualPath);
+        return actualPath;
+      }
+    } catch {
+      return request;
     }
   }
 
