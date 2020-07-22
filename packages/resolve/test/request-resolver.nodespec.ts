@@ -12,4 +12,20 @@ describe('request resolver node integration', () => {
 
     expect(resolveRequest(__dirname, requestViaLink)).to.be.resolvedTo(require.resolve(requestViaLink));
   });
+
+  it('returns symlink path if realpathSync throws', () => {
+    const resolveRequest = createRequestResolver({
+      fs: {
+        ...fs,
+        realpathSync: () => {
+          throw new Error(`always throws`);
+        },
+      },
+    });
+    const requestViaLink = '@file-services/resolve/package.json';
+    const monorepoRoot = fs.dirname(require.resolve('../../../package.json'));
+    const expectedPath = fs.join(monorepoRoot, 'node_modules', requestViaLink);
+
+    expect(resolveRequest(__dirname, requestViaLink)).to.be.resolvedTo(expectedPath);
+  });
 });
