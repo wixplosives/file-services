@@ -36,32 +36,32 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function* fileRequestPaths(requestPath: string) {
-    yield requestPath;
+  function* fileRequestPaths(filePath: string) {
+    yield filePath;
     for (const ext of extensions) {
-      yield requestPath + ext;
+      yield filePath + ext;
     }
   }
 
-  function* directoryRequestPaths(requestPath: string) {
-    if (!directoryExistsSync(requestPath)) {
+  function* directoryRequestPaths(directoryPath: string) {
+    if (!directoryExistsSync(directoryPath)) {
       return;
     }
-    const packageJsonPath = join(requestPath, 'package.json');
+    const packageJsonPath = join(directoryPath, 'package.json');
     const packageJson = safeReadJsonFileSync(packageJsonPath) as PackageJson;
     const mainField = packageJson?.main;
     const browserField = packageJson?.browser;
 
     if (target === 'browser' && typeof browserField === 'string') {
-      const targetPath = join(requestPath, browserField);
+      const targetPath = join(directoryPath, browserField);
       yield* fileRequestPaths(targetPath);
       yield* fileRequestPaths(join(targetPath, 'index'));
     } else if (typeof mainField === 'string') {
-      const targetPath = join(requestPath, mainField);
+      const targetPath = join(directoryPath, mainField);
       yield* fileRequestPaths(targetPath);
       yield* fileRequestPaths(join(targetPath, 'index'));
     } else {
-      yield* fileRequestPaths(join(requestPath, 'index'));
+      yield* fileRequestPaths(join(directoryPath, 'index'));
     }
   }
 
