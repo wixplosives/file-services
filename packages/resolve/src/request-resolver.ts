@@ -15,33 +15,35 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     realpathCache = new Map<string, string>(),
   } = options;
 
-  return (contextPath, request) => {
-    for (const resolvedFile of requestCandidates(contextPath, request)) {
+  return requestResolver;
+
+  function requestResolver(contextPath: string, request: string) {
+    for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
       if (fileExistsSync(resolvedFile)) {
-        return { resolvedFile: safeRealpathSync(resolvedFile) };
+        return { resolvedFile: cachedRealpathSync(resolvedFile) };
       }
     }
     return undefined;
-  };
+  }
 
-  function* requestCandidates(contextPath: string, request: string) {
+  function* nodeRequestPaths(contextPath: string, request: string) {
     if (isRelative(request) || isAbsolute(request)) {
       const requestPath = resolve(contextPath, request);
-      yield* resolveAsFile(requestPath);
-      yield* resolveAsDirectory(requestPath);
+      yield* fileRequestPaths(requestPath);
+      yield* directoryRequestPaths(requestPath);
     } else {
-      yield* resolveAsPackage(contextPath, request);
+      yield* packageRequestPaths(contextPath, request);
     }
   }
 
-  function* resolveAsFile(requestPath: string) {
+  function* fileRequestPaths(requestPath: string) {
     yield requestPath;
     for (const ext of extensions) {
       yield requestPath + ext;
     }
   }
 
-  function* resolveAsDirectory(requestPath: string) {
+  function* directoryRequestPaths(requestPath: string) {
     if (!directoryExistsSync(requestPath)) {
       return;
     }
@@ -52,37 +54,37 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     if (target === 'browser' && typeof browserField === 'string') {
       const targetPath = join(requestPath, browserField);
-      yield* resolveAsFile(targetPath);
-      yield* resolveAsFile(join(targetPath, 'index'));
+      yield* fileRequestPaths(targetPath);
+      yield* fileRequestPaths(join(targetPath, 'index'));
     } else if (typeof mainField === 'string') {
       const targetPath = join(requestPath, mainField);
-      yield* resolveAsFile(targetPath);
-      yield* resolveAsFile(join(targetPath, 'index'));
+      yield* fileRequestPaths(targetPath);
+      yield* fileRequestPaths(join(targetPath, 'index'));
     } else {
-      yield* resolveAsFile(join(requestPath, 'index'));
+      yield* fileRequestPaths(join(requestPath, 'index'));
     }
   }
 
-  function* resolveAsPackage(initialPath: string, request: string) {
+  function* packageRequestPaths(initialPath: string, request: string) {
     for (const packagesPath of packageRootsToPaths(initialPath)) {
       if (!directoryExistsSync(packagesPath)) {
         continue;
       }
       const requestInPackages = join(packagesPath, request);
-      yield* resolveAsFile(requestInPackages);
-      yield* resolveAsDirectory(requestInPackages);
+      yield* fileRequestPaths(requestInPackages);
+      yield* directoryRequestPaths(requestInPackages);
     }
   }
 
   function* packageRootsToPaths(initialPath: string) {
-    for (const directoryPath of pathChainToTopLevel(initialPath)) {
+    for (const directoryPath of pathChainToRoot(initialPath)) {
       for (const packageRoot of packageRoots) {
         yield join(directoryPath, packageRoot);
       }
     }
   }
 
-  function* pathChainToTopLevel(currentPath: string) {
+  function* pathChainToRoot(currentPath: string) {
     let lastPath: string | undefined;
     while (lastPath !== currentPath) {
       yield currentPath;
@@ -91,7 +93,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function safeRealpathSync(request: string): string {
+  function cachedRealpathSync(request: string): string {
     try {
       const cachedRealpath = realpathCache.get(request);
       if (cachedRealpath !== undefined) {
@@ -106,13 +108,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
+  /** @returns parsed json value, or `undefined` if read/parse fails */
   function safeReadJsonFileSync(filePath: string): unknown {
-    let parsedValue: unknown = undefined;
     try {
-      parsedValue = JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+      return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
     } catch {
-      /**/
+      return undefined;
     }
-    return parsedValue;
   }
 }
