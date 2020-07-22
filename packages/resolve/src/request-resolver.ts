@@ -93,18 +93,19 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function cachedRealpathSync(request: string): string {
+  function cachedRealpathSync(itemPath: string): string {
     try {
-      const cachedRealpath = realpathCache.get(request);
+      const cachedRealpath = realpathCache.get(itemPath);
       if (cachedRealpath !== undefined) {
         return cachedRealpath;
       } else {
-        const actualPath = realpathSync(request);
-        realpathCache.set(request, actualPath);
+        const actualPath = realpathSync(itemPath);
+        realpathCache.set(itemPath, actualPath);
         return actualPath;
       }
     } catch {
-      return request;
+      realpathCache.set(itemPath, itemPath);
+      return itemPath;
     }
   }
 
