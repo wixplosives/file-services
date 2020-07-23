@@ -1,11 +1,5 @@
 import { platform } from 'os';
-import {
-  syncBaseFsContract,
-  asyncBaseFsContract,
-  asyncFsContract,
-  syncFsContract,
-  syncUtilsContract,
-} from '@file-services/test-kit';
+import { syncBaseFsContract, asyncBaseFsContract, asyncFsContract, syncFsContract } from '@file-services/test-kit';
 import { createTempDirectory } from 'create-temp-directory';
 import { createNodeFs } from '../src';
 
@@ -37,5 +31,4 @@ describe('Node File System Implementation', () => {
 
   asyncFsContract(testProvider);
   syncFsContract(testProvider);
-  syncUtilsContract(testProvider);
 });
