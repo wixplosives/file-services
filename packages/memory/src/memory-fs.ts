@@ -225,8 +225,10 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentPath = posixPath.dirname(resolvedPath);
     const parentNode = getNode(parentPath);
 
-    if (!parentNode || parentNode.type !== 'dir') {
+    if (!parentNode) {
       throw createFsError(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`, 'ENOENT');
+    } else if (parentNode.type !== 'dir') {
+      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_IS_FILE}`, 'ENOTDIR');
     } else if (parentPath === resolvedPath) {
       throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`, 'EEXIST');
     }

@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import { createMemoryFs } from '@file-services/memory';
 import { createDependencyResolver, createRequestResolver } from '../src';
 
-chai.use(sinonChai)
+chai.use(sinonChai);
 
 describe('dependency resolver', () => {
   // three sample files in the same /src directory
@@ -79,7 +79,7 @@ describe('dependency resolver', () => {
     });
 
     // file with two requests to the same target
-    resolveRequest.resetHistory()
+    resolveRequest.resetHistory();
     expect(resolveDependencies(fourthFilePath)).to.eql({
       [fourthFilePath]: {
         [requestFirstFile]: firstFilePath,

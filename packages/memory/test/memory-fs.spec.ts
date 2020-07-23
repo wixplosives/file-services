@@ -1,4 +1,10 @@
-import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit';
+import {
+  syncBaseFsContract,
+  asyncBaseFsContract,
+  syncFsContract,
+  asyncFsContract,
+  syncUtilsContract,
+} from '@file-services/test-kit';
 import { createMemoryFs } from '../src';
 import { expect } from 'chai';
 import { sleep } from 'promise-assist';
@@ -16,6 +22,7 @@ describe('In-memory File System Implementation', () => {
   asyncBaseFsContract(testProvider);
   syncFsContract(testProvider);
   asyncFsContract(testProvider);
+  syncUtilsContract(testProvider);
 
   describe('path.resolve', () => {
     it('resolves non-absolute paths relative to root /', () => {
