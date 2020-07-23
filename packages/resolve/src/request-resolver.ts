@@ -5,6 +5,16 @@ const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
 const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
+const PACKAGE_JSON = 'package.json';
+
+export interface ResolvedPackageJson {
+  filePath: string;
+  directoryPath: string;
+  mainPath?: string;
+  browserMappings?: {
+    [from: string]: string | false;
+  };
+}
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
@@ -17,13 +27,35 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   return requestResolver;
 
-  function requestResolver(contextPath: string, request: string) {
+  function requestResolver(contextPath: string, originalRequest: string) {
+    let request: string | false = originalRequest;
+    if (target === 'browser') {
+      const fromPackageJson = findUpPackageJson(contextPath);
+      const remappedRequest = fromPackageJson?.browserMappings?.[originalRequest];
+      if (remappedRequest !== undefined) {
+        request = remappedRequest;
+        if (request === false) {
+          return { resolvedFile: request };
+        }
+      }
+    }
+
     for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
       if (fileExistsSync(resolvedFile)) {
+        if (target === 'browser') {
+          const toPackageJson = findUpPackageJson(dirname(resolvedFile));
+          const remappedRequest = toPackageJson?.browserMappings?.[resolvedFile];
+          if (remappedRequest !== undefined) {
+            return {
+              resolvedFile: remappedRequest === false ? remappedRequest : cachedRealpathSync(remappedRequest),
+            };
+          }
+        }
+
         return { resolvedFile: cachedRealpathSync(resolvedFile) };
       }
     }
-    return undefined;
+    return { resolvedFile: undefined };
   }
 
   function* nodeRequestPaths(contextPath: string, request: string) {
@@ -43,23 +75,20 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
+  function* fileOrDirIndexRequestPaths(targetPath: string) {
+    yield* fileRequestPaths(targetPath);
+    yield* fileRequestPaths(join(targetPath, 'index'));
+  }
+
   function* directoryRequestPaths(directoryPath: string) {
     if (!directoryExistsSync(directoryPath)) {
       return;
     }
-    const packageJsonPath = join(directoryPath, 'package.json');
-    const packageJson = safeReadJsonFileSync(packageJsonPath) as PackageJson;
-    const mainField = packageJson?.main;
-    const browserField = packageJson?.browser;
+    const resolvedPackageJson = loadPackageJsonFrom(directoryPath);
+    const mainPath = resolvedPackageJson?.mainPath;
 
-    if (target === 'browser' && typeof browserField === 'string') {
-      const targetPath = join(directoryPath, browserField);
-      yield* fileRequestPaths(targetPath);
-      yield* fileRequestPaths(join(targetPath, 'index'));
-    } else if (typeof mainField === 'string') {
-      const targetPath = join(directoryPath, mainField);
-      yield* fileRequestPaths(targetPath);
-      yield* fileRequestPaths(join(targetPath, 'index'));
+    if (mainPath !== undefined) {
+      yield* fileOrDirIndexRequestPaths(join(directoryPath, mainPath));
     } else {
       yield* fileRequestPaths(join(directoryPath, 'index'));
     }
@@ -77,20 +106,74 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* packageRootsToPaths(initialPath: string) {
-    for (const directoryPath of pathChainToRoot(initialPath)) {
-      for (const packageRoot of packageRoots) {
+    for (const packageRoot of packageRoots) {
+      for (const directoryPath of pathChainToRoot(initialPath)) {
         yield join(directoryPath, packageRoot);
       }
     }
   }
 
-  function* pathChainToRoot(currentPath: string) {
-    let lastPath: string | undefined;
-    while (lastPath !== currentPath) {
-      yield currentPath;
-      lastPath = currentPath;
-      currentPath = dirname(currentPath);
+  function findUpPackageJson(initialPath: string): ResolvedPackageJson | undefined {
+    for (const directoryPath of pathChainToRoot(initialPath)) {
+      const resolvedPackageJson = loadPackageJsonFrom(directoryPath);
+      if (resolvedPackageJson) {
+        return resolvedPackageJson;
+      }
     }
+    return undefined;
+  }
+
+  function loadPackageJsonFrom(directoryPath: string): ResolvedPackageJson | undefined {
+    const packageJsonPath = join(directoryPath, PACKAGE_JSON);
+    const packageJson = safeReadJsonFileSync(packageJsonPath) as PackageJson | null | undefined;
+    if (typeof packageJson !== 'object' || packageJson === null) {
+      return undefined;
+    }
+    const mainPath = packageJsonTarget(packageJson);
+
+    const { browser } = packageJson;
+    let browserMappings: Record<string, string | false> | undefined = undefined;
+    if (target === 'browser' && typeof browser === 'object' && browser !== null) {
+      browserMappings = Object.create(null) as Record<string, string | false>;
+      for (const [from, to] of Object.entries(browser)) {
+        const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
+        if (resolvedFrom) {
+          const resolvedTo = resolveRemappedRequest(directoryPath, to);
+          if (resolvedTo !== undefined) {
+            browserMappings[resolvedFrom] = resolvedTo;
+          }
+        }
+      }
+    }
+
+    return {
+      filePath: packageJsonPath,
+      directoryPath,
+      mainPath,
+      browserMappings,
+    };
+  }
+
+  function resolveRemappedRequest(directoryPath: string, to: string | false): string | false | undefined {
+    if (to === false) {
+      return to;
+    } else if (typeof to === 'string') {
+      if (isRelative(to)) {
+        return resolveRelative(join(directoryPath, to));
+      } else {
+        return to;
+      }
+    }
+    return undefined;
+  }
+
+  function resolveRelative(request: string) {
+    for (const filePath of fileOrDirIndexRequestPaths(request)) {
+      if (fileExistsSync(filePath)) {
+        return filePath;
+      }
+    }
+    return undefined;
   }
 
   function cachedRealpathSync(itemPath: string): string {
@@ -106,6 +189,23 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     } catch {
       realpathCache.set(itemPath, itemPath);
       return itemPath;
+    }
+  }
+
+  function packageJsonTarget({ main, browser }: PackageJson): string | undefined {
+    if (target === 'browser' && typeof browser === 'string') {
+      return browser;
+    } else {
+      return typeof main === 'string' ? main : undefined;
+    }
+  }
+
+  function* pathChainToRoot(currentPath: string) {
+    let lastPath: string | undefined;
+    while (lastPath !== currentPath) {
+      yield currentPath;
+      lastPath = currentPath;
+      currentPath = dirname(currentPath);
     }
   }
 

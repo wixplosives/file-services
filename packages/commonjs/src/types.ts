@@ -19,7 +19,7 @@ export interface ICommonJsModuleSystem {
    *
    * @returns resolved path, or `undefined` if cannot resolve.
    */
-  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | undefined;
+  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
 }
 
 export interface IModule {

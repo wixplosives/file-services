@@ -166,6 +166,9 @@ describe('request resolver', () => {
           'package.json': stringifyPackageJson({ main: '' }),
           'index.js': EMPTY,
         },
+        missing_main: {
+          'package.json': stringifyPackageJson({ main: './missing' }),
+        },
         invalid_json: {
           'package.json': '#invalid json#',
           'index.js': EMPTY,
@@ -187,6 +190,7 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './preferred')).to.be.resolvedTo('/preferred/preferred.js');
       expect(resolveRequest('/', './dot_main')).to.be.resolvedTo('/dot_main/index.js');
       expect(resolveRequest('/', './empty_main')).to.be.resolvedTo('/empty_main/index.js');
+      expect(resolveRequest('/', './missing_main')).to.be.resolvedTo(undefined);
       expect(resolveRequest('/', './invalid_json')).to.be.resolvedTo('/invalid_json/index.js');
       expect(resolveRequest('/', './invalid_json_no_index')).to.be.resolvedTo(undefined);
       expect(resolveRequest('/', './no_main')).to.be.resolvedTo('/no_main/index.js');
@@ -321,7 +325,7 @@ describe('request resolver', () => {
     });
   });
 
-  describe('browser field', () => {
+  describe('browser field (string)', () => {
     it('prefers "browser" over "main" when loading a package.json', () => {
       const fs = createMemoryFs({
         lodash: {
@@ -389,6 +393,98 @@ describe('request resolver', () => {
 
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser/index.js');
       expect(resolveRequest('/', './another-package')).to.be.resolvedTo(undefined);
+    });
+  });
+
+  describe('browser field (object)', () => {
+    it('supports remapping files within the same project', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { './file': './file-browser' } }),
+        'file.js': EMPTY,
+        'file-browser.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './file')).to.be.resolvedTo('/file-browser.js');
+    });
+
+    it('supports remapping of package to package', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { fs: 'browser-fs' } }),
+        node_modules: {
+          'browser-fs': {
+            'package.json': stringifyPackageJson({ main: './file.js' }),
+            'file.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'fs')).to.be.resolvedTo('/node_modules/browser-fs/file.js');
+    });
+
+    it('supports remapping of package to false (empty object)', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { fs: false } }),
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'fs')).to.be.resolvedTo(false);
+    });
+
+    it('supports remapping of a local file to false (empty object)', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { './some-file.js': false } }),
+        'some-file.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './some-file')).to.be.resolvedTo(false);
+    });
+
+    it('supports remapping of package to a relative file', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { fs: './browser-fs' } }),
+        'browser-fs.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'fs')).to.be.resolvedTo('/browser-fs.js');
+    });
+
+    it('supports packages remapping their entrypoint', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          'some-package': {
+            'package.json': stringifyPackageJson({ main: './file.js', browser: { './file': './file-browser' } }),
+            'file.js': EMPTY,
+            'file-browser.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'some-package')).to.be.resolvedTo('/node_modules/some-package/file-browser.js');
+      expect(resolveRequest('/', 'some-package/file')).to.be.resolvedTo('/node_modules/some-package/file-browser.js');
+      expect(resolveRequest('/node_modules/some-package', './file')).to.be.resolvedTo(
+        '/node_modules/some-package/file-browser.js'
+      );
+    });
+
+    it('ignores re-mapping when source/target are missing/invalid', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({
+          browser: {
+            './file': (123 as unknown) as string,
+            './missing-source': './missing-target',
+            './another-missing': './file',
+          },
+        }),
+        'file.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.js');
     });
   });
 });

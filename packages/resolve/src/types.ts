@@ -32,7 +32,7 @@ export interface IRequestResolverOptions {
 }
 
 export interface IResolutionOutput {
-  resolvedFile: string;
+  resolvedFile?: string | false;
 }
 
 /**
@@ -41,7 +41,7 @@ export interface IResolutionOutput {
  * @param contextPath directory in which the request is being made
  * @param request actual request, relative or absolute
  */
-export type RequestResolver = (contextPath: string, request: string) => IResolutionOutput | undefined;
+export type RequestResolver = (contextPath: string, request: string) => IResolutionOutput;
 
 /**
  * Required fs APIs for request resolution.
