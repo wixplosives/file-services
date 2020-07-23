@@ -73,9 +73,15 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     try {
       mkdirSync(directoryPath);
     } catch (e) {
-      if (e && ((e as NodeJS.ErrnoException).code === 'EEXIST' || (e as NodeJS.ErrnoException).code === 'EISDIR')) {
+      if (directoryExistsSync(directoryPath)) {
         return;
       }
+
+      // Propagate the error if it's not caused by missing the parent dir.
+      if (!e || (e as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw e;
+      }
+
       const parentPath = dirname(directoryPath);
       if (parentPath === directoryPath) {
         throw e;
@@ -84,7 +90,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       try {
         mkdirSync(directoryPath);
       } catch (e) {
-        if (!e || ((e as NodeJS.ErrnoException).code !== 'EEXIST' && (e as NodeJS.ErrnoException).code !== 'EISDIR')) {
+        if (!directoryExistsSync(directoryPath)) {
           throw e;
         }
       }
