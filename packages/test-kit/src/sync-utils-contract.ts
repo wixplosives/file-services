@@ -25,9 +25,8 @@ export function syncUtilsContract(testProvider: () => Promise<ITestInput<IFileSy
         fs.populateDirectorySync(tempDirectoryPath, { animals: { mammals: { 'vesper-bat.txt': '🦇' } } });
         fs.ensureDirectorySync(fs.join(tempDirectoryPath, 'animals', 'mammals'));
 
-        expect(
-          fs.readFileSync(fs.join(tempDirectoryPath, 'animals', 'mammals', 'vesper-bat.txt'), { encoding: 'utf-8' })
-        ).to.equal('🦇');
+        const filePath = fs.join(tempDirectoryPath, 'animals', 'mammals', 'vesper-bat.txt');
+        expect(fs.readFileSync(filePath, 'utf8')).to.equal('🦇');
       });
 
       it(`throws when attempting to overwrite existing file`, () => {
