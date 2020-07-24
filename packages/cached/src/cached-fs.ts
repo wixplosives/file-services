@@ -90,13 +90,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         return fs.unlinkSync(filePath);
       },
       writeFile: function writeFile(filePath: string, ...args: [string, CallbackFnVoid]) {
-        filePath = fs.resolve(filePath);
-        invalidateAbsolute(filePath);
+        invalidateAbsolute(fs.resolve(filePath));
         return fs.writeFile(filePath, ...args);
       } as IFileSystem['writeFile'],
       writeFileSync(filePath, ...args) {
-        filePath = fs.resolve(filePath);
-        invalidateAbsolute(filePath);
+        invalidateAbsolute(fs.resolve(filePath));
         return fs.writeFileSync(filePath, ...args);
       },
       statSync(path) {
@@ -178,8 +176,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         return promises.unlink(filePath);
       },
       writeFile(filePath, ...args) {
-        filePath = fs.resolve(filePath);
-        invalidateAbsolute(filePath);
+        invalidateAbsolute(fs.resolve(filePath));
         return promises.writeFile(filePath, ...args);
       },
       async stat(path: string) {
