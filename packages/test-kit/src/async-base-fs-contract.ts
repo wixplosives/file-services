@@ -311,7 +311,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
         await writeFile(filePath, SAMPLE_CONTENT);
 
-        await expect(mkdir(join(filePath, 'dir'))).to.be.rejectedWith('ENOTDIR');
+        await expect(mkdir(join(filePath, 'dir'))).to.be.rejectedWith(/ENOTDIR|ENOENT/); // posix / windows
       });
     });
 

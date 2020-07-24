@@ -227,8 +227,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         fs.writeFileSync(filePath, SAMPLE_CONTENT);
         const expectedToFail = () => fs.mkdirSync(fs.join(filePath, 'dir'));
-
-        expect(expectedToFail).to.throw('ENOTDIR');
+  
+        expect(expectedToFail).to.throw(/ENOTDIR|ENOENT/); // posix / windows
       });
     });
 
