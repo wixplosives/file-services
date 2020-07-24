@@ -77,7 +77,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         return;
       }
 
-      // Propagate the error if it's not caused by missing the parent dir.
+      // Propagate the error, unless it's caused by missing the parent dir (ENOENT).
       if (!e || (e as NodeJS.ErrnoException).code !== 'ENOENT') {
         throw e;
       }
@@ -86,6 +86,13 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       if (parentPath === directoryPath) {
         throw e;
       }
+
+      // Windows also throws ENOENT when trying to create a directory inside of a file,
+      // unlike Mac/Linux that throw ENOTDIR.
+      if (fileExistsSync(parentPath)) {
+        throw e;
+      }
+
       ensureDirectorySync(parentPath);
       try {
         mkdirSync(directoryPath);

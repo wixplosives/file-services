@@ -354,7 +354,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
           fs.populateDirectorySync(tempDirectoryPath, { 'bat.txt': '🦇' });
           const dirPath = fs.join(tempDirectoryPath, 'bat.txt', 'habitat');
 
-          expect(() => fs.ensureDirectorySync(dirPath)).to.throw('ENOTDIR');
+          expect(() => fs.ensureDirectorySync(dirPath)).to.throw(/ENOTDIR|ENOENT/); // posix / windows
         });
 
         it('handles special paths gracefully', () => {
