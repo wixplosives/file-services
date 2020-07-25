@@ -74,8 +74,16 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       mkdirSync(directoryPath);
     } catch (e) {
       const code = (e as NodeJS.ErrnoException)?.code;
-      if (code === 'EISDIR' || (code === 'EEXIST' && statSync(directoryPath).isDirectory())) {
+      if (code === 'EISDIR') {
         return;
+      } else if (code === 'EEXIST') {
+        if (directoryExistsSync(directoryPath)) {
+          return;
+        } else {
+          throw e;
+        }
+      } else if (code === 'ENOTDIR' || !code) {
+        throw e;
       }
 
       const parentPath = dirname(directoryPath);
@@ -88,8 +96,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         mkdirSync(directoryPath);
       } catch (e) {
         const code = (e as NodeJS.ErrnoException)?.code;
-        const isDirectoryExistsError =
-          code === 'EISDIR' || (code === 'EEXIST' && statSync(directoryPath).isDirectory());
+        const isDirectoryExistsError = code === 'EISDIR' || (code === 'EEXIST' && directoryExistsSync(directoryPath));
         if (!isDirectoryExistsError) {
           throw e;
         }
@@ -263,9 +270,18 @@ export function createExtendedFileSystemPromiseActions(
       await mkdir(directoryPath);
     } catch (e) {
       const code = (e as NodeJS.ErrnoException)?.code;
-      if (code === 'EISDIR' || (code === 'EEXIST' && (await stat(directoryPath)).isDirectory())) {
+      if (code === 'EISDIR') {
         return;
+      } else if (code === 'EEXIST') {
+        if (await directoryExists(directoryPath)) {
+          return;
+        } else {
+          throw e;
+        }
+      } else if (code === 'ENOTDIR' || !code) {
+        throw e;
       }
+
       const parentPath = dirname(directoryPath);
       if (parentPath === directoryPath) {
         throw e;
@@ -277,7 +293,7 @@ export function createExtendedFileSystemPromiseActions(
       } catch (e) {
         const code = (e as NodeJS.ErrnoException)?.code;
         const isDirectoryExistsError =
-          code === 'EISDIR' || (code === 'EEXIST' && (await stat(directoryPath)).isDirectory());
+          code === 'EISDIR' || (code === 'EEXIST' && (await directoryExists(directoryPath)));
         if (!isDirectoryExistsError) {
           throw e;
         }

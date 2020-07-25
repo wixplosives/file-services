@@ -350,7 +350,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         fs.writeFileSync(filePath, '🦇');
 
         const directoryPath = fs.join(filePath, 'some-directory');
-        expect(() => fs.ensureDirectorySync(directoryPath)).to.throw('EEXIST'); // posix / windows
+        expect(() => fs.ensureDirectorySync(directoryPath)).to.throw(/ENOTDIR|EEXIST/);
       });
 
       it('handles special paths gracefully', () => {

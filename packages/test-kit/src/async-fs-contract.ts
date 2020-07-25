@@ -352,7 +352,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
         await fs.promises.writeFile(filePath, '🦇');
 
         const directoryPath = fs.join(filePath, 'some-directory');
-        await expect(fs.promises.ensureDirectory(directoryPath)).to.eventually.be.rejectedWith('EEXIST');
+        await expect(fs.promises.ensureDirectory(directoryPath)).to.eventually.be.rejectedWith(/ENOTDIR|EEXIST/);
       });
     });
   });
