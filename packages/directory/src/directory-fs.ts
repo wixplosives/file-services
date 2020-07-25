@@ -99,8 +99,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       lstat(path) {
         return promises.lstat(resolveFullPath(path));
       },
-      mkdir(path) {
-        return promises.mkdir(resolveFullPath(path));
+      mkdir(path, ...args) {
+        return promises.mkdir(resolveFullPath(path), ...args);
       },
       readdir: function readdir(path: string, ...args: [{ withFileTypes: true }]) {
         return promises.readdir(resolveFullPath(path), ...args);
@@ -141,8 +141,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     lstatSync(path) {
       return fs.lstatSync(resolveFullPath(path));
     },
-    mkdirSync(path) {
-      return fs.mkdirSync(resolveFullPath(path));
+    mkdirSync(path, ...args) {
+      return fs.mkdirSync(resolveFullPath(path), ...args);
     },
     readdirSync: function readdirSync(path: string, ...args: []) {
       return fs.readdirSync(resolveFullPath(path), ...args);
@@ -182,9 +182,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     lstat(path, callback) {
       fs.lstat(resolveFullPath(path), callback);
     },
-    mkdir(path, callback) {
-      fs.mkdir(resolveFullPath(path), callback);
-    },
+    mkdir: function mkdir(path: string, ...args: [CallbackFnVoid]) {
+      fs.mkdir(resolveFullPath(path), ...args);
+    } as IBaseFileSystemCallbackActions['mkdir'],
     readdir: function readdir(path: string, ...args: [CallbackFn<string[]>]) {
       return fs.readdir(resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['readdir'],

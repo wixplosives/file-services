@@ -71,7 +71,7 @@ export interface IBaseFileSystemSyncActions {
   /**
    * Create a new directory.
    */
-  mkdirSync(directoryPath: string): void;
+  mkdirSync(directoryPath: string, options?: { recursive?: boolean }): void;
 
   /**
    * Delete an existing directory.
