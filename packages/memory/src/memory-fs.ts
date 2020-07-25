@@ -129,9 +129,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const fileNode = getNode(resolvedPath);
 
     if (!fileNode) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_FILE}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
     } else if (fileNode.type === 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`, 'EISDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
 
     return fileNode.contents;
@@ -143,7 +143,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentNode = getNode(parentPath);
 
     if (!parentNode || parentNode.type !== 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
     }
 
     const fileName = posixPath.basename(resolvedPath);
@@ -166,7 +166,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       fileNode.contents = fileContent;
       emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(fileNode) });
     } else {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`, 'EISDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
   }
 
@@ -176,7 +176,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentNode = getNode(parentPath);
 
     if (!parentNode || parentNode.type !== 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_FILE}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
     }
 
     const fileName = posixPath.basename(resolvedPath);
@@ -184,9 +184,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const fileNode = parentNode.contents.get(lowerCaseFileName);
 
     if (!fileNode) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_FILE}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
     } else if (fileNode.type === 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`, 'EISDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
 
     parentNode.contents.delete(lowerCaseFileName);
@@ -209,9 +209,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const directoryNode = getNode(resolvedPath);
 
     if (!directoryNode) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
     } else if (directoryNode.type === 'file') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_IS_FILE}`, 'ENOTDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
     }
     const childNodes = Array.from(directoryNode.contents.values());
 
@@ -226,11 +226,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentNode = getNode(parentPath);
 
     if (!parentNode) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
     } else if (parentNode.type !== 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_IS_FILE}`, 'ENOTDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
     } else if (parentPath === resolvedPath) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`, 'EEXIST');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
     }
 
     const directoryName = posixPath.basename(resolvedPath);
@@ -238,7 +238,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const currentNode = parentNode.contents.get(lowerCaseDirectoryName);
 
     if (currentNode) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`, 'EEXIST');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
     }
 
     const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName);
@@ -253,7 +253,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentNode = getNode(parentPath);
 
     if (!parentNode || parentNode.type !== 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
     }
 
     const directoryName = posixPath.basename(resolvedPath);
@@ -261,9 +261,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const directoryNode = parentNode.contents.get(lowerCaseDirectoryName);
 
     if (!directoryNode || directoryNode.type !== 'dir') {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
     } else if (directoryNode.contents.size > 0) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`, 'ENOTEMPTY');
+      throw createFsError(resolvedPath, FsErrorCodes.DIRECTORY_NOT_EMPTY, 'ENOTEMPTY');
     }
 
     parentNode.contents.delete(lowerCaseDirectoryName);
@@ -278,7 +278,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const resolvedPath = resolvePath(nodePath);
     const node = getNode(resolvedPath);
     if (!node) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
     const { birthtime, mtime } = node;
     const isFile = node.type === 'file' ? returnsTrue : returnsFalse;
@@ -292,7 +292,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const resolvedPath = resolvePath(nodePath);
     const node = getNode(resolvedPath);
     if (!node) {
-      throw createFsError(`${resolvedPath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
     return resolvedPath;
   }
@@ -304,7 +304,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const sourceParentNode = getNode(sourceParentPath);
 
     if (!sourceParentNode || sourceParentNode.type !== 'dir') {
-      throw createFsError(`${resolvedSourcePath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`, 'ENOENT');
+      throw createFsError(resolvedSourcePath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
     }
 
     const sourceName = posixPath.basename(resolvedSourcePath);
@@ -312,14 +312,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const sourceNode = sourceParentNode.contents.get(lowerCaseSourceName);
 
     if (!sourceNode) {
-      throw createFsError(`${resolvedSourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedSourcePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
 
     const destinationParentPath = posixPath.dirname(resolvedDestinationPath);
     const destinationParentNode = getNode(destinationParentPath);
 
     if (!destinationParentNode || destinationParentNode.type !== 'dir') {
-      throw createFsError(`${resolvedDestinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`, 'ENOENT');
+      throw createFsError(resolvedDestinationPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
     }
 
     const destinationName = posixPath.basename(resolvedDestinationPath);
@@ -329,10 +329,10 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     if (destinationNode) {
       if (destinationNode.type === 'dir') {
         if (destinationNode.contents.size > 0) {
-          throw createFsError(`${resolvedDestinationPath} ${FsErrorCodes.DIRECTORY_NOT_EMPTY}`, 'ENOTEMPTY');
+          throw createFsError(resolvedDestinationPath, FsErrorCodes.DIRECTORY_NOT_EMPTY, 'ENOTEMPTY');
         }
       } else {
-        throw createFsError(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`, 'EEXIST');
+        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
       }
     }
 
@@ -351,18 +351,18 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const sourceFileNode = getNode(resolvedSourcePath);
 
     if (!sourceFileNode) {
-      throw createFsError(`${resolvedSourcePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`, 'ENOENT');
+      throw createFsError(resolvedSourcePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
 
     if (sourceFileNode.type !== 'file') {
-      throw createFsError(`${resolvedSourcePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`, 'EISDIR');
+      throw createFsError(resolvedSourcePath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
 
     const destParentPath = posixPath.dirname(resolvedDestinationPath);
     const destParentNode = getNode(destParentPath);
 
     if (!destParentNode || destParentNode.type !== 'dir') {
-      throw createFsError(`${resolvedDestinationPath} ${FsErrorCodes.CONTAINING_NOT_EXISTS}`, 'ENOENT');
+      throw createFsError(resolvedDestinationPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
     }
 
     const targetName = posixPath.basename(resolvedDestinationPath);
@@ -373,11 +373,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL);
 
       if (!shouldOverride) {
-        throw createFsError(`${resolvedDestinationPath} ${FsErrorCodes.PATH_ALREADY_EXISTS}`, 'EEXIST');
+        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
       }
 
       if (destinationFileNode.type !== 'file') {
-        throw createFsError(`${resolvedDestinationPath} ${FsErrorCodes.PATH_IS_DIRECTORY}`, 'EISDIR');
+        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
       }
     }
 
@@ -434,8 +434,13 @@ function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode): IFileS
   };
 }
 
-function createFsError(message: string, code: 'ENOENT' | 'EEXIST' | 'EISDIR' | 'ENOTDIR' | 'ENOTEMPTY'): Error {
-  const error = new Error(message);
+function createFsError(
+  path: string,
+  message: FsErrorCodes,
+  code: 'ENOENT' | 'EEXIST' | 'EISDIR' | 'ENOTDIR' | 'ENOTEMPTY'
+): Error {
+  const error = new Error(`${path} ${message}`);
+  (error as Error & { path: string }).path = path;
   (error as Error & { code: string }).code = code;
   throw error;
 }
