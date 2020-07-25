@@ -74,6 +74,7 @@ export interface IBaseFileSystemCallbackActions {
    * Create a directory.
    */
   mkdir(filePath: string, callback: CallbackFnVoid): void;
+  mkdir(filePath: string, options: { recursive?: boolean }, callback: CallbackFnVoid): void;
 
   /**
    * Delete a directory.
@@ -154,7 +155,7 @@ export interface IBaseFileSystemPromiseActions {
   /**
    * Create a directory.
    */
-  mkdir(directoryPath: string): Promise<void>;
+  mkdir(directoryPath: string, options?: { recursive?: boolean }): Promise<void>;
 
   /**
    * Delete a directory.

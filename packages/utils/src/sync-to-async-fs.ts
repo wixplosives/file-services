@@ -24,8 +24,8 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         return syncFs.readdirSync(...args);
       } as IBaseFileSystemPromiseActions['readdir'],
 
-      async mkdir(directoryPath) {
-        return syncFs.mkdirSync(directoryPath);
+      async mkdir(directoryPath, ...args) {
+        return syncFs.mkdirSync(directoryPath, ...args);
       },
 
       async rmdir(directoryPath) {
@@ -68,7 +68,7 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
     copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync['copyFile'],
     unlink: callbackify(syncFs.unlinkSync),
     readdir: callbackify(syncFs.readdirSync) as IBaseFileSystemAsync['readdir'],
-    mkdir: callbackify(syncFs.mkdirSync),
+    mkdir: callbackify(syncFs.mkdirSync) as IBaseFileSystemAsync['mkdir'],
     rmdir: callbackify(syncFs.rmdirSync),
     stat: callbackify(syncFs.statSync),
     lstat: callbackify(syncFs.lstatSync),

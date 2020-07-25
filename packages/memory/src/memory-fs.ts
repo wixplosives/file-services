@@ -220,17 +220,27 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       : childNodes.map(({ name }) => name);
   }
 
-  function mkdirSync(directoryPath: string): void {
+  function mkdirSync(directoryPath: string, options?: { recursive?: boolean }): void {
     const resolvedPath = resolvePath(directoryPath);
     const parentPath = posixPath.dirname(resolvedPath);
-    const parentNode = getNode(parentPath);
+    let parentNode = getNode(parentPath);
+    const recursive = options?.recursive;
 
     if (!parentNode) {
-      throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+      if (recursive) {
+        mkdirSync(parentPath, options);
+        parentNode = getNode(parentPath) as IFsMemDirectoryNode;
+      } else {
+        throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+      }
     } else if (parentNode.type !== 'dir') {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
     } else if (parentPath === resolvedPath) {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+      if (recursive) {
+        return;
+      } else {
+        throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+      }
     }
 
     const directoryName = posixPath.basename(resolvedPath);
@@ -238,6 +248,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const currentNode = parentNode.contents.get(lowerCaseDirectoryName);
 
     if (currentNode) {
+      if (recursive && currentNode.type === 'dir') {
+        return;
+      }
       throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
     }
 
