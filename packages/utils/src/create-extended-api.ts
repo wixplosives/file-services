@@ -73,13 +73,9 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     try {
       mkdirSync(directoryPath);
     } catch (e) {
-      if (directoryExistsSync(directoryPath)) {
+      const code = (e as NodeJS.ErrnoException)?.code;
+      if (code === 'EISDIR' || (code === 'EEXIST' && statSync(directoryPath).isDirectory())) {
         return;
-      }
-
-      // Propagate the error, unless it's caused by missing the parent dir (ENOENT).
-      if (!e || (e as NodeJS.ErrnoException).code !== 'ENOENT') {
-        throw e;
       }
 
       const parentPath = dirname(directoryPath);
@@ -87,17 +83,14 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         throw e;
       }
 
-      // Windows also throws ENOENT when trying to create a directory inside of a file,
-      // unlike Mac/Linux that throw ENOTDIR.
-      if (fileExistsSync(parentPath)) {
-        throw e;
-      }
-
       ensureDirectorySync(parentPath);
       try {
         mkdirSync(directoryPath);
       } catch (e) {
-        if (!directoryExistsSync(directoryPath)) {
+        const code = (e as NodeJS.ErrnoException)?.code;
+        const isDirectoryExistsError =
+          code === 'EISDIR' || (code === 'EEXIST' && statSync(directoryPath).isDirectory());
+        if (!isDirectoryExistsError) {
           throw e;
         }
       }
@@ -269,18 +262,23 @@ export function createExtendedFileSystemPromiseActions(
     try {
       await mkdir(directoryPath);
     } catch (e) {
-      if (e && ((e as NodeJS.ErrnoException).code === 'EEXIST' || (e as NodeJS.ErrnoException).code === 'EISDIR')) {
+      const code = (e as NodeJS.ErrnoException)?.code;
+      if (code === 'EISDIR' || (code === 'EEXIST' && (await stat(directoryPath)).isDirectory())) {
         return;
       }
       const parentPath = dirname(directoryPath);
       if (parentPath === directoryPath) {
         throw e;
       }
+
       await ensureDirectory(parentPath);
       try {
         await mkdir(directoryPath);
       } catch (e) {
-        if (!e || ((e as NodeJS.ErrnoException).code !== 'EEXIST' && (e as NodeJS.ErrnoException).code !== 'EISDIR')) {
+        const code = (e as NodeJS.ErrnoException)?.code;
+        const isDirectoryExistsError =
+          code === 'EISDIR' || (code === 'EEXIST' && (await stat(directoryPath)).isDirectory());
+        if (!isDirectoryExistsError) {
           throw e;
         }
       }

@@ -1,6 +1,9 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import type { IFileSystemAsync } from '@file-services/types';
 import type { ITestInput } from './types';
+
+chai.use(chaiAsPromised);
 
 const SAMPLE_CONTENT = 'content';
 
@@ -314,6 +317,42 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
           'file in deep folder'
         );
         expect(await fs.promises.directoryExists(fs.join(destinationPath, 'empty/inside'))).to.eql(true);
+      });
+    });
+
+    describe('ensureDirectory', () => {
+      it(`creates intermediate directories`, async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, 'animals', 'mammals', 'chiroptera');
+
+        await fs.promises.ensureDirectory(directoryPath);
+
+        expect(await fs.promises.directoryExists(directoryPath)).to.equal(true);
+      });
+
+      it(`succeeds if directory already exists`, async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, 'some-directory');
+        await fs.promises.mkdir(directoryPath);
+
+        await expect(fs.promises.ensureDirectory(directoryPath)).to.eventually.become(undefined);
+      });
+
+      it(`throws when target points to an existing file`, async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const filePath = fs.join(tempDirectoryPath, 'bat.txt');
+        await fs.promises.writeFile(filePath, '🦇');
+
+        await expect(fs.promises.ensureDirectory(filePath)).to.eventually.be.rejectedWith('EEXIST');
+      });
+
+      it(`throws when attempting to create a directory inside of a file`, async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const filePath = fs.join(tempDirectoryPath, 'bat.txt');
+        await fs.promises.writeFile(filePath, '🦇');
+
+        const directoryPath = fs.join(filePath, 'some-directory');
+        await expect(fs.promises.ensureDirectory(directoryPath)).to.eventually.be.rejectedWith('EEXIST');
       });
     });
   });
