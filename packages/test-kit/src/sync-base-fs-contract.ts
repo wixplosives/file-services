@@ -219,6 +219,17 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         expect(expectedToFail).to.throw('ENOENT');
       });
+
+      it('fails if creating a directory inside of a file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+
+        fs.writeFileSync(filePath, SAMPLE_CONTENT);
+        const expectedToFail = () => fs.mkdirSync(fs.join(filePath, 'dir'));
+  
+        expect(expectedToFail).to.throw(/ENOTDIR|ENOENT/); // posix / windows
+      });
     });
 
     describe('listing directories', () => {

@@ -297,6 +297,22 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
         await expect(mkdir(directoryPath)).to.be.rejectedWith('ENOENT');
       });
+
+      it('fails if creating a directory inside of a file', async () => {
+        const {
+          tempDirectoryPath,
+          fs: {
+            join,
+            promises: { mkdir, writeFile },
+          },
+        } = testInput;
+
+        const filePath = join(tempDirectoryPath, 'file');
+
+        await writeFile(filePath, SAMPLE_CONTENT);
+
+        await expect(mkdir(join(filePath, 'dir'))).to.be.rejectedWith(/ENOTDIR|ENOENT/); // posix / windows
+      });
     });
 
     describe('listing directories', () => {

@@ -317,5 +317,61 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         expect(fs.directoryExistsSync(fs.join(destinationPath, 'empty/inside'))).to.eql(true);
       });
     });
+
+    describe('Extended API', () => {
+      describe('ensureDirectorySync', () => {
+        it(`creates intermediate directories`, () => {
+          const { fs, tempDirectoryPath } = testInput;
+
+          fs.populateDirectorySync(tempDirectoryPath, { a: {} });
+          const dirPath = fs.join(tempDirectoryPath, 'animals', 'mammals', 'chiroptera');
+          fs.ensureDirectorySync(dirPath);
+
+          expect(fs.directoryExistsSync(dirPath)).to.equal(true);
+        });
+
+        it(`succeeds if directory already exists, preserves its contents`, () => {
+          const { fs, tempDirectoryPath } = testInput;
+          fs.populateDirectorySync(tempDirectoryPath, { animals: { mammals: { 'bat.txt': '🦇' } } });
+          fs.ensureDirectorySync(fs.join(tempDirectoryPath, 'animals', 'mammals'));
+
+          const filePath = fs.join(tempDirectoryPath, 'animals', 'mammals', 'bat.txt');
+          expect(fs.readFileSync(filePath, 'utf8')).to.equal('🦇');
+        });
+
+        it(`throws when attempting to overwrite existing file`, () => {
+          const { fs, tempDirectoryPath } = testInput;
+
+          fs.populateDirectorySync(tempDirectoryPath, { 'bat.txt': '🦇' });
+          const dirPath = fs.join(tempDirectoryPath, 'bat.txt');
+
+          expect(() => fs.ensureDirectorySync(dirPath)).to.throw('EEXIST');
+        });
+
+        it(`throws when attempting to create a directory inside of a file`, () => {
+          const { fs, tempDirectoryPath } = testInput;
+
+          fs.populateDirectorySync(tempDirectoryPath, { 'bat.txt': '🦇' });
+          const dirPath = fs.join(tempDirectoryPath, 'bat.txt', 'habitat');
+
+          expect(() => fs.ensureDirectorySync(dirPath)).to.throw(/ENOTDIR|ENOENT/); // posix / windows
+        });
+
+        it('handles special paths gracefully', () => {
+          const { fs, tempDirectoryPath } = testInput;
+
+          fs.populateDirectorySync(tempDirectoryPath, { animals: {} });
+          const originalCwd = fs.cwd();
+
+          try {
+            fs.chdir(fs.join(tempDirectoryPath, 'animals'));
+            expect(() => fs.ensureDirectorySync('.')).to.not.throw();
+            expect(() => fs.ensureDirectorySync('..')).to.not.throw();
+          } finally {
+            fs.chdir(originalCwd);
+          }
+        });
+      });
+    });
   });
 }
