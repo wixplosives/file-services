@@ -34,7 +34,7 @@ export interface IRequestResolverOptions {
 export interface IResolutionOutput {
   /**
    * `string` - absolute path to resolved file.
-   * `false` - request should receive an empty object during runtime (`"browser"` field in `package.json`).
+   * `false` - request should receive an empty object during runtime (mapped by `"browser"` field in `package.json`).
    * `undefined` - couldn't resolve request.
    */
   resolvedFile?: string | false;
