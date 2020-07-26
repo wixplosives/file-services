@@ -1,7 +1,7 @@
 {
   "name": "@file-services/memory",
   "description": "An in-memory, sync/async, file system implementation.",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -14,9 +14,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/path": "^3.1.0",
-    "@file-services/types": "^3.1.0",
-    "@file-services/utils": "^3.1.0"
+    "@file-services/path": "^3.1.1",
+    "@file-services/types": "^3.1.1",
+    "@file-services/utils": "^3.1.1"
   },
   "files": [
     "cjs",
