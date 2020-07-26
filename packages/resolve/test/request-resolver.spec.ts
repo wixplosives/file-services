@@ -485,6 +485,8 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs });
 
       expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.js');
+      expect(resolveRequest('/', './missing-source')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', './another-missing')).to.be.resolvedTo(undefined);
     });
   });
 });
