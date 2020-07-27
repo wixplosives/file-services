@@ -97,7 +97,10 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         return fs.writeFile(filePath, ...args);
       } as IFileSystem['writeFile'],
       writeFileSync(filePath, ...args) {
-        invalidateAbsolute(fs.resolve(filePath));
+        if (filePath) {
+          filePath = fs.resolve(filePath);
+          invalidateAbsolute(filePath);
+        }
         return fs.writeFileSync(filePath, ...args);
       },
       statSync(path) {
