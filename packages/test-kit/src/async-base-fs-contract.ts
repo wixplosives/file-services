@@ -77,6 +77,16 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
         await expect(writeFile(directoryPath, SAMPLE_CONTENT)).to.be.rejectedWith('EISDIR');
       });
+
+      it('fails if writing to a file without a name', async () => {
+        const {
+          fs: {
+            promises: { writeFile },
+          },
+        } = testInput;
+
+        await expect(writeFile('', SAMPLE_CONTENT)).to.be.rejectedWith('ENOENT');
+      });
     });
 
     describe('reading files', () => {

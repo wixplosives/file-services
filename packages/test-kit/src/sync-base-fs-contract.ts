@@ -57,6 +57,11 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         expect(expectedToFail).to.throw('EISDIR');
       });
+
+      it('fails if writing to a file without a name', () => {
+        const { fs } = testInput;
+        expect(() => fs.writeFileSync('', SAMPLE_CONTENT)).to.throw('ENOENT');
+      });
     });
 
     describe('reading files', () => {

@@ -26,6 +26,13 @@ describe('In-memory File System Implementation', () => {
     });
   });
 
+  describe('creating files', () => {
+    it('fails overwriting the root directory with a file', () => {
+      const fs = createMemoryFs();
+      expect(() => fs.writeFileSync('/', 'test')).to.throw('EISDIR');
+    });
+  });
+
   describe('creating directories', () => {
     it('fails creating the root', async () => {
       const fs = createMemoryFs();

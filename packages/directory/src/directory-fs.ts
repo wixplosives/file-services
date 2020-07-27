@@ -129,7 +129,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         return promises.unlink(resolveFullPath(path));
       },
       writeFile(path, ...args) {
-        return promises.writeFile(resolveFullPath(path), ...args);
+        return promises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
       },
       readlink(path) {
         return promises.readlink(resolveFullPath(path));
@@ -174,7 +174,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.unlinkSync(resolveFullPath(path));
     },
     writeFileSync(path, ...args: [string, WriteFileOptions]) {
-      return fs.writeFileSync(resolveFullPath(path), ...args);
+      return fs.writeFileSync(path === '' ? '' : resolveFullPath(path), ...args);
     },
     copyFile: function copyFile(srcPath: string, destPath: string, ...args: [CallbackFnVoid]) {
       fs.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
@@ -210,7 +210,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.unlink(resolveFullPath(path), callback);
     },
     writeFile: function writeFile(path: string, ...args: [string, CallbackFnVoid]) {
-      return fs.writeFile(resolveFullPath(path), ...args);
+      return fs.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['writeFile'],
     readlink(path, callback) {
       return fs.readlink(resolveFullPath(path), callback);
