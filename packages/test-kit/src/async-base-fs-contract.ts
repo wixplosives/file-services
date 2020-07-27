@@ -307,6 +307,70 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
         await expect(mkdir(directoryPath)).to.be.rejectedWith('ENOENT');
       });
+
+      it('fails if creating a directory inside of a file', async () => {
+        const {
+          tempDirectoryPath,
+          fs: {
+            join,
+            promises: { mkdir, writeFile },
+          },
+        } = testInput;
+
+        const filePath = join(tempDirectoryPath, 'file');
+
+        await writeFile(filePath, SAMPLE_CONTENT);
+
+        await expect(mkdir(join(filePath, 'dir'))).to.be.rejectedWith(/ENOTDIR|ENOENT/); // posix / windows
+      });
+
+      describe('recursively', () => {
+        it('can create an empty directory inside an existing one', async () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const directoryPath = fs.join(tempDirectoryPath, 'new-dir');
+
+          await fs.promises.mkdir(directoryPath, { recursive: true });
+
+          expect((await fs.promises.stat(directoryPath)).isDirectory()).to.equal(true);
+          expect(await fs.promises.readdir(directoryPath)).to.eql([]);
+        });
+
+        it('creates parent directory chain when possible', async () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const directoryPath = fs.join(tempDirectoryPath, 'missing', 'also-missing', 'new-dir');
+
+          await fs.promises.mkdir(directoryPath, { recursive: true });
+
+          expect((await fs.promises.stat(directoryPath)).isDirectory()).to.equal(true);
+          expect(await fs.promises.readdir(directoryPath)).to.eql([]);
+        });
+
+        it('succeeds if creating in a path pointing to an existing directory', async () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const directoryPath = fs.join(tempDirectoryPath, 'dir');
+          await fs.promises.mkdir(directoryPath);
+
+          await expect(fs.promises.mkdir(directoryPath, { recursive: true })).to.eventually.become(undefined);
+        });
+
+        it('fails if creating in a path pointing to an existing file', async () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const filePath = fs.join(tempDirectoryPath, 'file');
+          await fs.promises.writeFile(filePath, SAMPLE_CONTENT);
+
+          await expect(fs.promises.mkdir(filePath, { recursive: true })).to.eventually.be.rejectedWith('EEXIST');
+        });
+
+        it('fails if creating a directory inside of a file', async () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const filePath = fs.join(tempDirectoryPath, 'file');
+          await fs.promises.writeFile(filePath, SAMPLE_CONTENT);
+
+          await expect(fs.promises.mkdir(fs.join(filePath, 'dir'), { recursive: true })).to.eventually.be.rejectedWith(
+            'ENOTDIR'
+          );
+        });
+      });
     });
 
     describe('listing directories', () => {

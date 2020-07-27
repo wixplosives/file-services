@@ -45,15 +45,15 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(destinationPath);
         return fs.copyFileSync(sourcePath, destinationPath, ...args);
       },
-      mkdir(directoryPath, callback) {
+      mkdir: function mkdir(directoryPath: string, ...args: [CallbackFnVoid]) {
         directoryPath = fs.resolve(directoryPath);
         invalidateAbsolute(directoryPath);
-        return fs.mkdir(directoryPath, callback);
-      },
-      mkdirSync(directoryPath) {
+        return fs.mkdir(directoryPath, ...args);
+      } as IFileSystem['mkdir'],
+      mkdirSync(directoryPath, ...args) {
         directoryPath = fs.resolve(directoryPath);
         invalidateAbsolute(directoryPath);
-        return fs.mkdirSync(directoryPath);
+        return fs.mkdirSync(directoryPath, ...args);
       },
       rename(sourcePath, destinationPath, callback) {
         sourcePath = fs.resolve(sourcePath);
@@ -153,10 +153,10 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(destinationPath);
         return promises.copyFile(sourcePath, destinationPath, ...args);
       },
-      mkdir(directoryPath) {
+      mkdir(directoryPath, ...args) {
         directoryPath = fs.resolve(directoryPath);
         invalidateAbsolute(directoryPath);
-        return promises.mkdir(directoryPath);
+        return promises.mkdir(directoryPath, ...args);
       },
       rename(sourcePath, destinationPath) {
         sourcePath = fs.resolve(sourcePath);

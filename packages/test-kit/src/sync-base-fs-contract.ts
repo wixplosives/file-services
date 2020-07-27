@@ -224,6 +224,63 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         expect(expectedToFail).to.throw('ENOENT');
       });
+
+      it('fails if creating a directory inside of a file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+
+        fs.writeFileSync(filePath, SAMPLE_CONTENT);
+        const expectedToFail = () => fs.mkdirSync(fs.join(filePath, 'dir'));
+
+        expect(expectedToFail).to.throw(/ENOTDIR|ENOENT/); // posix / windows
+      });
+
+      describe('recursively', () => {
+        it('can create an empty directory inside an existing one', () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const directoryPath = fs.join(tempDirectoryPath, 'new-dir');
+
+          fs.mkdirSync(directoryPath, { recursive: true });
+
+          expect(fs.statSync(directoryPath).isDirectory()).to.equal(true);
+          expect(fs.readdirSync(directoryPath)).to.eql([]);
+        });
+
+        it('creates parent directory chain when possible', () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const directoryPath = fs.join(tempDirectoryPath, 'missing', 'also-missing', 'new-dir');
+
+          fs.mkdirSync(directoryPath, { recursive: true });
+
+          expect(fs.statSync(directoryPath).isDirectory()).to.equal(true);
+          expect(fs.readdirSync(directoryPath)).to.eql([]);
+        });
+
+        it('succeeds if creating in a path pointing to an existing directory', () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const directoryPath = fs.join(tempDirectoryPath, 'dir');
+          fs.mkdirSync(directoryPath);
+
+          expect(() => fs.mkdirSync(directoryPath, { recursive: true })).to.not.throw();
+        });
+
+        it('fails if creating in a path pointing to an existing file', () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const filePath = fs.join(tempDirectoryPath, 'file');
+          fs.writeFileSync(filePath, SAMPLE_CONTENT);
+
+          expect(() => fs.mkdirSync(filePath, { recursive: true })).to.throw('EEXIST');
+        });
+
+        it('fails if creating a directory inside of a file', () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const filePath = fs.join(tempDirectoryPath, 'file');
+          fs.writeFileSync(filePath, SAMPLE_CONTENT);
+
+          expect(() => fs.mkdirSync(fs.join(filePath, 'dir'), { recursive: true })).to.throw('ENOTDIR');
+        });
+      });
     });
 
     describe('listing directories', () => {

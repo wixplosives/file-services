@@ -73,12 +73,16 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     try {
       mkdirSync(directoryPath);
     } catch (e) {
-      if (directoryExistsSync(directoryPath)) {
+      const code = (e as NodeJS.ErrnoException)?.code;
+      if (code === 'EISDIR') {
         return;
-      }
-
-      // Propagate the error if it's not caused by missing the parent dir.
-      if (!e || (e as NodeJS.ErrnoException).code !== 'ENOENT') {
+      } else if (code === 'EEXIST') {
+        if (directoryExistsSync(directoryPath)) {
+          return;
+        } else {
+          throw e;
+        }
+      } else if (code === 'ENOTDIR' || !code) {
         throw e;
       }
 
@@ -86,11 +90,14 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       if (parentPath === directoryPath) {
         throw e;
       }
+
       ensureDirectorySync(parentPath);
       try {
         mkdirSync(directoryPath);
       } catch (e) {
-        if (!directoryExistsSync(directoryPath)) {
+        const code = (e as NodeJS.ErrnoException)?.code;
+        const isDirectoryExistsError = code === 'EISDIR' || (code === 'EEXIST' && directoryExistsSync(directoryPath));
+        if (!isDirectoryExistsError) {
           throw e;
         }
       }
@@ -262,18 +269,32 @@ export function createExtendedFileSystemPromiseActions(
     try {
       await mkdir(directoryPath);
     } catch (e) {
-      if (e && ((e as NodeJS.ErrnoException).code === 'EEXIST' || (e as NodeJS.ErrnoException).code === 'EISDIR')) {
+      const code = (e as NodeJS.ErrnoException)?.code;
+      if (code === 'EISDIR') {
         return;
+      } else if (code === 'EEXIST') {
+        if (await directoryExists(directoryPath)) {
+          return;
+        } else {
+          throw e;
+        }
+      } else if (code === 'ENOTDIR' || !code) {
+        throw e;
       }
+
       const parentPath = dirname(directoryPath);
       if (parentPath === directoryPath) {
         throw e;
       }
+
       await ensureDirectory(parentPath);
       try {
         await mkdir(directoryPath);
       } catch (e) {
-        if (!e || ((e as NodeJS.ErrnoException).code !== 'EEXIST' && (e as NodeJS.ErrnoException).code !== 'EISDIR')) {
+        const code = (e as NodeJS.ErrnoException)?.code;
+        const isDirectoryExistsError =
+          code === 'EISDIR' || (code === 'EEXIST' && (await directoryExists(directoryPath)));
+        if (!isDirectoryExistsError) {
           throw e;
         }
       }

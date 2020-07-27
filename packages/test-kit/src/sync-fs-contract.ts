@@ -317,5 +317,57 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         expect(fs.directoryExistsSync(fs.join(destinationPath, 'empty/inside'))).to.eql(true);
       });
     });
+
+    describe('ensureDirectorySync', () => {
+      it(`creates intermediate directories`, () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, 'animals', 'mammals', 'chiroptera');
+
+        fs.ensureDirectorySync(directoryPath);
+
+        expect(fs.directoryExistsSync(directoryPath)).to.equal(true);
+      });
+
+      it(`succeeds if directory already exists`, () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, 'some-directory');
+        fs.mkdirSync(directoryPath);
+
+        expect(() => fs.ensureDirectorySync(directoryPath)).to.not.throw();
+      });
+
+      it(`throws when target points to an existing file`, () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const filePath = fs.join(tempDirectoryPath, 'bat.txt');
+        fs.writeFileSync(filePath, '🦇');
+
+        expect(() => fs.ensureDirectorySync(filePath)).to.throw('EEXIST');
+      });
+
+      it(`throws when attempting to create a directory inside of a file`, () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const filePath = fs.join(tempDirectoryPath, 'bat.txt');
+        fs.writeFileSync(filePath, '🦇');
+
+        const directoryPath = fs.join(filePath, 'some-directory');
+        expect(() => fs.ensureDirectorySync(directoryPath)).to.throw(/ENOTDIR|EEXIST/);
+      });
+
+      it('handles special paths gracefully', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, 'some-directory');
+        fs.mkdirSync(directoryPath);
+
+        const originalCwd = fs.cwd();
+        try {
+          fs.chdir(directoryPath); // ensure relative paths below are resolved in relation to directoryPath
+
+          expect(() => fs.ensureDirectorySync('.')).to.not.throw();
+          expect(() => fs.ensureDirectorySync('..')).to.not.throw();
+        } finally {
+          fs.chdir(originalCwd);
+        }
+      });
+    });
   });
 }
