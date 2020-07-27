@@ -23,9 +23,12 @@ export interface IBaseModuleSystemOptions {
   /**
    * Resolve a module request from some context (directory path).
    *
-   * @returns resolved path, or `undefined` if cannot resolve.
+   * @returns
+   * `string` - absolute path to resolved file.
+   * `false` - request should receive an empty object during runtime (mapped by `"browser"` field in `package.json`).
+   * `undefined` - couldn't resolve request.
    */
-  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | undefined;
+  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
@@ -41,7 +44,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     loadedModules,
   };
 
-  function resolveThrow(contextPath: string, request: string, requestOrigin?: string): string {
+  function resolveThrow(contextPath: string, request: string, requestOrigin?: string): string | false {
     const resolvedRequest = resolveFrom(contextPath, request, requestOrigin);
     if (resolvedRequest === undefined) {
       throw new Error(`Cannot resolve "${request}" in ${requestOrigin || contextPath}`);
@@ -53,7 +56,11 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     return requireModule(resolveThrow(contextPath, request, requestOrigin));
   }
 
-  function requireModule(filePath: string): unknown {
+  function requireModule(filePath: string | false): unknown {
+    if (filePath === false) {
+      return {};
+    }
+
     const existingModule = loadedModules.get(filePath);
     if (existingModule) {
       return existingModule.exports;

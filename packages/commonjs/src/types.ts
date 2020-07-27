@@ -17,9 +17,12 @@ export interface ICommonJsModuleSystem {
   /**
    * Resolve a module request from some context (directory path).
    *
-   * @returns resolved path, or `undefined` if cannot resolve.
+   * @returns
+   * `string` - absolute path to resolved file.
+   * `false` - request should receive an empty object during runtime (mapped by `"browser"` field in `package.json`).
+   * `undefined` - couldn't resolve request.
    */
-  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | undefined;
+  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
 }
 
 export interface IModule {

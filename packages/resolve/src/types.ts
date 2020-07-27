@@ -32,7 +32,12 @@ export interface IRequestResolverOptions {
 }
 
 export interface IResolutionOutput {
-  resolvedFile: string;
+  /**
+   * `string` - absolute path to resolved file.
+   * `false` - request should receive an empty object during runtime (mapped by `"browser"` field in `package.json`).
+   * `undefined` - couldn't resolve request.
+   */
+  resolvedFile?: string | false;
 }
 
 /**
@@ -41,7 +46,7 @@ export interface IResolutionOutput {
  * @param contextPath directory in which the request is being made
  * @param request actual request, relative or absolute
  */
-export type RequestResolver = (contextPath: string, request: string) => IResolutionOutput | undefined;
+export type RequestResolver = (contextPath: string, request: string) => IResolutionOutput;
 
 /**
  * Required fs APIs for request resolution.
