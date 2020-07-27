@@ -139,12 +139,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function writeFileSync(filePath: string, fileContent: string): void {
     if (filePath === '') {
-      throw createFsError(`${filePath} ${FsErrorCodes.NO_FILE_OR_DIRECTORY}`, 'ENOENT');
+      throw createFsError(filePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
 
     const resolvedPath = resolvePath(filePath);
     if (resolvedPath === '/') {
-      throw createFsError(`${filePath} ${FsErrorCodes.PATH_IS_DIRECTORY}`, 'EISDIR');
+      throw createFsError(filePath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
 
     const parentPath = posixPath.dirname(resolvedPath);
