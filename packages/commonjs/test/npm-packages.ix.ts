@@ -25,7 +25,15 @@ describe('commonjs module system - integration with existing npm packages', func
     expect(chai.use).to.be.instanceOf(Function);
   });
 
-  // skipped until we resolver support "browser": {}
+  it('evaluates typescript successfully', () => {
+    const { requireFrom } = createCjsModuleSystem({ fs });
+
+    const ts = requireFrom(__dirname, 'typescript') as typeof import('typescript');
+
+    expect(ts.transpileModule).to.be.instanceOf(Function);
+  });
+
+  // skipped until external modules (node apis) can be provided using options
   it.skip('evaluates mocha successfully', () => {
     const { requireFrom } = createCjsModuleSystem({ fs });
 
