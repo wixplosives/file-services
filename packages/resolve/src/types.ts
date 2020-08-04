@@ -29,6 +29,12 @@ export interface IRequestResolverOptions {
    * If not provided, resolver will create an internal Map (still caches).
    */
   realpathCache?: Map<string, string>;
+
+  /**
+   * Cache for `realpathSync` results.
+   * If not provided, resolver will create an internal Map (still caches).
+   */
+  resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
 }
 
 export interface IResolutionOutput {
@@ -61,4 +67,13 @@ export interface IResolutionFileSystem {
   join(...paths: string[]): string;
   resolve(...pathSegments: string[]): string;
   isAbsolute(path: string): boolean;
+}
+
+export interface IResolvedPackageJson {
+  filePath: string;
+  directoryPath: string;
+  mainPath?: string;
+  browserMappings?: {
+    [from: string]: string | false;
+  };
 }
