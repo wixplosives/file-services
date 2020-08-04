@@ -31,7 +31,7 @@ export interface IRequestResolverOptions {
   realpathCache?: Map<string, string>;
 
   /**
-   * Cache for `realpathSync` results.
+   * Cache for resolved packages. Map keys are directoryPaths.
    * If not provided, resolver will create an internal Map (still caches).
    */
   resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
