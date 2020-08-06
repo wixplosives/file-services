@@ -7,7 +7,7 @@ const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
 
-export interface ResolvedPackageJson {
+export interface IResolvedPackageJson {
   filePath: string;
   directoryPath: string;
   mainPath?: string;
@@ -113,7 +113,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function findUpPackageJson(initialPath: string): ResolvedPackageJson | undefined {
+  function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
     for (const directoryPath of pathChainToRoot(initialPath)) {
       const resolvedPackageJson = loadPackageJsonFrom(directoryPath);
       if (resolvedPackageJson) {
@@ -123,9 +123,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     return undefined;
   }
 
-  function loadPackageJsonFrom(directoryPath: string): ResolvedPackageJson | undefined {
+  function loadPackageJsonFrom(directoryPath: string): IResolvedPackageJson | undefined {
     const packageJsonPath = join(directoryPath, PACKAGE_JSON);
-    const packageJson = safeReadJsonFileSync(packageJsonPath) as PackageJson | null | undefined;
+    const packageJson = readJsonFileSyncSafe(packageJsonPath) as PackageJson | null | undefined;
     if (typeof packageJson !== 'object' || packageJson === null) {
       return undefined;
     }
@@ -210,7 +210,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   /** @returns parsed json value, or `undefined` if read/parse fails */
-  function safeReadJsonFileSync(filePath: string): unknown {
+  function readJsonFileSyncSafe(filePath: string): unknown {
     try {
       return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
     } catch {
