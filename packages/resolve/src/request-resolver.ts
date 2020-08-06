@@ -18,7 +18,7 @@ export interface IResolvedPackageJson {
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
-    fs: { fileExistsSync, directoryExistsSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
+    fs: { statSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     target = defaultTarget,
@@ -41,7 +41,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
 
     for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
-      if (fileExistsSync(resolvedFile)) {
+      if (statSyncSafe(resolvedFile)?.isFile()) {
         if (target === 'browser') {
           const toPackageJson = findUpPackageJson(dirname(resolvedFile));
           const remappedRequest = toPackageJson?.browserMappings?.[resolvedFile];
@@ -81,7 +81,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* directoryRequestPaths(directoryPath: string) {
-    if (!directoryExistsSync(directoryPath)) {
+    if (!statSyncSafe(directoryPath)?.isDirectory()) {
       return;
     }
     const resolvedPackageJson = loadPackageJsonFrom(directoryPath);
@@ -96,7 +96,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function* packageRequestPaths(initialPath: string, request: string) {
     for (const packagesPath of packageRootsToPaths(initialPath)) {
-      if (!directoryExistsSync(packagesPath)) {
+      if (!statSyncSafe(packagesPath)?.isDirectory()) {
         continue;
       }
       const requestInPackages = join(packagesPath, request);
@@ -169,7 +169,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function resolveRelative(request: string) {
     for (const filePath of fileOrDirIndexRequestPaths(request)) {
-      if (fileExistsSync(filePath)) {
+      if (statSyncSafe(filePath)?.isFile()) {
         return filePath;
       }
     }
@@ -209,10 +209,17 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  /** @returns parsed json value, or `undefined` if read/parse fails */
   function readJsonFileSyncSafe(filePath: string): unknown {
     try {
       return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+    } catch {
+      return undefined;
+    }
+  }
+
+  function statSyncSafe(path: string) {
+    try {
+      return statSync(path);
     } catch {
       return undefined;
     }
