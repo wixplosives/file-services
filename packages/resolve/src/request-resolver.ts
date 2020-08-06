@@ -17,8 +17,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
   } = options;
 
-  const realpathSyncSafeCached = createCachedFn(realpathSyncSafe, realpathCache);
-  const loadPackageJsonFromCached = createCachedFn(loadPackageJsonFrom, resolvedPacakgesCache);
+  const realpathSyncSafeCached = wrapWithCache(realpathSyncSafe, realpathCache);
+  const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
 
   return requestResolver;
 
@@ -222,7 +222,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 }
 
-function createCachedFn<K, T>(fn: (key: K) => T, cache = new Map<K, T>()) {
+function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: K) => T {
   return (key: K) => {
     if (cache.has(key)) {
       return cache.get(key) as T;
