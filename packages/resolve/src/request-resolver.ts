@@ -1,20 +1,11 @@
 import type { PackageJson } from 'type-fest';
-import type { RequestResolver, IRequestResolverOptions } from './types';
+import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson } from './types';
 
 const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
 const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
-
-export interface IResolvedPackageJson {
-  filePath: string;
-  directoryPath: string;
-  mainPath?: string;
-  browserMappings?: {
-    [from: string]: string | false;
-  };
-}
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
@@ -23,7 +14,11 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     extensions = defaultExtensions,
     target = defaultTarget,
     realpathCache = new Map<string, string>(),
+    resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
   } = options;
+
+  const realpathSyncSafeCached = wrapWithCache(realpathSyncSafe, realpathCache);
+  const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
 
   return requestResolver;
 
@@ -41,19 +36,19 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
 
     for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
-      if (statSyncSafe(resolvedFile)?.isFile()) {
-        if (target === 'browser') {
-          const toPackageJson = findUpPackageJson(dirname(resolvedFile));
-          const remappedRequest = toPackageJson?.browserMappings?.[resolvedFile];
-          if (remappedRequest !== undefined) {
-            return {
-              resolvedFile: remappedRequest === false ? remappedRequest : cachedRealpathSync(remappedRequest),
-            };
-          }
-        }
-
-        return { resolvedFile: cachedRealpathSync(resolvedFile) };
+      if (!statSyncSafe(resolvedFile)?.isFile()) {
+        continue;
       }
+      if (target === 'browser') {
+        const toPackageJson = findUpPackageJson(dirname(resolvedFile));
+        const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
+        if (remappedFilePath !== undefined) {
+          return {
+            resolvedFile: remappedFilePath,
+          };
+        }
+      }
+      return { resolvedFile: realpathSyncSafeCached(resolvedFile) };
     }
     return { resolvedFile: undefined };
   }
@@ -68,6 +63,11 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
+  /**
+   * /path/to/target
+   * /path/to/target.js
+   * /path/to/target.json
+   */
   function* fileRequestPaths(filePath: string) {
     yield filePath;
     for (const ext of extensions) {
@@ -75,6 +75,10 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
+  /**
+   * /path/to/target (+ext)
+   * /path/to/target/index (+ext)
+   */
   function* fileOrDirIndexRequestPaths(targetPath: string) {
     yield* fileRequestPaths(targetPath);
     yield* fileRequestPaths(join(targetPath, 'index'));
@@ -84,7 +88,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     if (!statSyncSafe(directoryPath)?.isDirectory()) {
       return;
     }
-    const resolvedPackageJson = loadPackageJsonFrom(directoryPath);
+    const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
     const mainPath = resolvedPackageJson?.mainPath;
 
     if (mainPath !== undefined) {
@@ -115,7 +119,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
     for (const directoryPath of pathChainToRoot(initialPath)) {
-      const resolvedPackageJson = loadPackageJsonFrom(directoryPath);
+      const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
       if (resolvedPackageJson) {
         return resolvedPackageJson;
       }
@@ -170,24 +174,16 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   function resolveRelative(request: string) {
     for (const filePath of fileOrDirIndexRequestPaths(request)) {
       if (statSyncSafe(filePath)?.isFile()) {
-        return filePath;
+        return realpathSyncSafeCached(filePath);
       }
     }
     return undefined;
   }
 
-  function cachedRealpathSync(itemPath: string): string {
+  function realpathSyncSafe(itemPath: string): string {
     try {
-      const cachedRealpath = realpathCache.get(itemPath);
-      if (cachedRealpath !== undefined) {
-        return cachedRealpath;
-      } else {
-        const actualPath = realpathSync(itemPath);
-        realpathCache.set(itemPath, actualPath);
-        return actualPath;
-      }
+      return realpathSync(itemPath);
     } catch {
-      realpathCache.set(itemPath, itemPath);
       return itemPath;
     }
   }
@@ -224,4 +220,16 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       return undefined;
     }
   }
+}
+
+function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: K) => T {
+  return (key: K) => {
+    if (cache.has(key)) {
+      return cache.get(key) as T;
+    } else {
+      const result = fn(key);
+      cache.set(key, result);
+      return result;
+    }
+  };
 }
