@@ -1,50 +1,39 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import { asyncBaseFsContract, syncBaseFsContract } from '@file-services/test-kit';
 import { createMemoryFs } from '@file-services/memory';
 import { createCachedFs } from '../src';
-import sinon from 'sinon';
 
 chai.use(chaiAsPromised);
 
 describe('createCachedFs', () => {
   const SAMPLE_CONTENT = 'content';
 
-  describe('Caching absolute paths', () => {
-    it('caches statsSync calls', async () => {
+  describe('fs.statsSync', () => {
+    it('caches fs.statsSync', async () => {
       const filePath = '/file';
       const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-
       const statSyncSpy = sinon.spy(memFs, 'statSync');
-
       const fs = createCachedFs(memFs);
 
-      const stats = fs.statSync(filePath);
-      const stats2 = fs.statSync(filePath);
+      const stats = fs.statSync(filePath); // absolute
+      const stats2 = fs.statSync('./file'); // relative
+      const stats3 = fs.statSync('file'); // relative
 
-      expect(stats).to.equal(stats2);
       expect(statSyncSpy.callCount).to.equal(1);
+      expect(stats).to.equal(stats2);
+      expect(stats).to.equal(stats3);
     });
 
     it('caches statsSync calls if file does not exist', async () => {
-      const filePath = '/file';
-      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-
+      const memFs = createMemoryFs();
       const statSyncSpy = sinon.spy(memFs, 'statSync');
-
       const fs = createCachedFs(memFs);
+      const missingFilePath = '/missing-file';
 
-      try {
-        fs.statSync('/no-file');
-      } catch (ex) {
-        // NO-OP
-      }
-      try {
-        fs.statSync('/no-file');
-      } catch (ex) {
-        // NO-OP
-      }
-
+      expect(() => fs.statSync(missingFilePath)).to.throw();
+      expect(() => fs.statSync(missingFilePath)).to.throw();
       expect(statSyncSpy.callCount).to.equal(1);
     });
 
@@ -60,29 +49,19 @@ describe('createCachedFs', () => {
       fs.invalidate(filePath);
       const stats2 = fs.statSync(filePath);
 
-      expect(stats).to.not.equal(stats2);
       expect(statSyncSpy.callCount).to.equal(2);
+      expect(stats).to.not.equal(stats2);
     });
 
     it('allows invalidating cache of non existing file path', async () => {
-      const filePath = '/file';
-      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-
+      const memFs = createMemoryFs();
       const statSyncSpy = sinon.spy(memFs, 'statSync');
-
       const fs = createCachedFs(memFs);
+      const missingFilePath = '/missing-file';
 
-      try {
-        fs.statSync(filePath);
-      } catch (ex) {
-        // NO-OP
-      }
-      fs.invalidate(filePath);
-      try {
-        fs.statSync(filePath);
-      } catch (ex) {
-        // NO-OP
-      }
+      expect(() => fs.statSync(missingFilePath)).to.throw();
+      fs.invalidate(missingFilePath);
+      expect(() => fs.statSync(missingFilePath)).to.throw();
 
       expect(statSyncSpy.callCount).to.equal(2);
     });
@@ -90,25 +69,21 @@ describe('createCachedFs', () => {
     it('allows invalidating cache of all file paths', async () => {
       const filePath = '/file';
       const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-
       const statSyncSpy = sinon.spy(memFs, 'statSync');
-
       const fs = createCachedFs(memFs);
 
       const stats = fs.statSync(filePath);
       fs.invalidateAll();
       const stats2 = fs.statSync(filePath);
 
-      expect(stats).to.not.equal(stats2);
       expect(statSyncSpy.callCount).to.equal(2);
+      expect(stats).to.not.equal(stats2);
     });
 
     it('caches statsSync calls - through fileExists', async () => {
       const filePath = '/file';
       const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-
       const statSyncSpy = sinon.spy(memFs, 'statSync');
-
       const fs = createCachedFs(memFs);
 
       const exists = fs.fileExistsSync(filePath);
@@ -168,9 +143,7 @@ describe('createCachedFs', () => {
       }
 
       try {
-        await new Promise((res, rej) =>
-          fs.stat('/no-file', (error, value) => (error ? rej(error) : res(value)))
-        ).catch();
+        await new Promise((res, rej) => fs.stat('/no-file', (error, value) => (error ? rej(error) : res(value))));
       } catch (ex) {
         // NO-OP
       }
@@ -181,17 +154,14 @@ describe('createCachedFs', () => {
     it('caches promises.stat calls', async () => {
       const filePath = '/file';
       const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
-
       const statSpy = sinon.spy(memFs.promises, 'stat');
-
       const fs = createCachedFs(memFs);
 
       const stats = await fs.promises.stat(filePath);
-
       const stats2 = await fs.promises.stat(filePath);
 
-      expect(stats).to.equal(stats2);
       expect(statSpy.callCount).to.equal(1);
+      expect(stats).to.equal(stats2);
     });
 
     it('caches promises.stat calls - non-existing files', async () => {
@@ -501,7 +471,7 @@ describe('createCachedFs', () => {
 
   const testProvider = async () => {
     const fs = createCachedFs(createMemoryFs());
-    fs.watchService.addGlobalListener((ev) => fs.invalidate(ev.path));
+    fs.watchService.addGlobalListener(({ path }) => fs.invalidate(path));
     return {
       fs,
       dispose: async () => undefined,
