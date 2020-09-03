@@ -181,10 +181,14 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function realpathSyncSafe(itemPath: string): string {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return realpathSync(itemPath);
     } catch {
       return itemPath;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
@@ -206,18 +210,26 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function readJsonFileSyncSafe(filePath: string): unknown {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
     } catch {
       return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
   function statSyncSafe(path: string) {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return statSync(path);
     } catch {
       return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 }

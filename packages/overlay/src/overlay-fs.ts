@@ -44,10 +44,14 @@ export function createOverlayFs(
     readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]): string | Buffer {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
+        const { stackTraceLimit } = Error;
         try {
+          Error.stackTraceLimit = 0;
           return upperFs.readFileSync(resolvedUpperPath, ...args);
         } catch {
           /**/
+        } finally {
+          Error.stackTraceLimit = stackTraceLimit;
         }
       }
       return lowerFs.readFileSync(resolvedLowerPath, ...args);
@@ -55,10 +59,14 @@ export function createOverlayFs(
     statSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
+        const { stackTraceLimit } = Error;
         try {
+          Error.stackTraceLimit = 0;
           return upperFs.statSync(resolvedUpperPath);
         } catch {
           /**/
+        } finally {
+          Error.stackTraceLimit = stackTraceLimit;
         }
       }
       return lowerFs.statSync(resolvedLowerPath);
@@ -66,10 +74,14 @@ export function createOverlayFs(
     lstatSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
+        const { stackTraceLimit } = Error;
         try {
+          Error.stackTraceLimit = 0;
           return upperFs.lstatSync(resolvedUpperPath);
         } catch {
           /**/
+        } finally {
+          Error.stackTraceLimit = stackTraceLimit;
         }
       }
       return lowerFs.lstatSync(resolvedLowerPath);
@@ -77,10 +89,14 @@ export function createOverlayFs(
     realpathSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
+        const { stackTraceLimit } = Error;
         try {
+          Error.stackTraceLimit = 0;
           return lowerFs.join(baseDirectoryPath, upperFs.realpathSync(resolvedUpperPath));
         } catch {
           /**/
+        } finally {
+          Error.stackTraceLimit = stackTraceLimit;
         }
       }
       return lowerFs.realpathSync(resolvedLowerPath);
@@ -88,10 +104,14 @@ export function createOverlayFs(
     readlinkSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
+        const { stackTraceLimit } = Error;
         try {
+          Error.stackTraceLimit = 0;
           return upperFs.readlinkSync(resolvedUpperPath);
         } catch {
           /**/
+        } finally {
+          Error.stackTraceLimit = stackTraceLimit;
         }
       }
       return lowerFs.readlinkSync(resolvedLowerPath);
@@ -99,7 +119,9 @@ export function createOverlayFs(
     readdirSync: ((path: string, ...args: [{ withFileTypes: false }]) => {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
+        const { stackTraceLimit } = Error;
         try {
+          Error.stackTraceLimit = 0;
           const resInUpper = upperFs.readdirSync(resolvedUpperPath, ...args);
           try {
             return [...lowerFs.readdirSync(resolvedLowerPath, ...args), ...resInUpper];
@@ -108,6 +130,8 @@ export function createOverlayFs(
           }
         } catch {
           /**/
+        } finally {
+          Error.stackTraceLimit = stackTraceLimit;
         }
       }
       return lowerFs.readdirSync(resolvedLowerPath, ...args);
