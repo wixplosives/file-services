@@ -132,18 +132,17 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           } else if (cachedStats.kind === 'success') {
             callback(undefined, cachedStats.stats);
           }
-          return;
-        }
-        fs.stat(path, (error, stats) => {
-          if (error) {
-            statsCache.set(cacheKey, { kind: 'failure', error });
-          } else if (stats) {
-            statsCache.set(cacheKey, { kind: 'success', stats });
-          }
+        } else {
+          fs.stat(path, (error, stats) => {
+            if (error) {
+              statsCache.set(cacheKey, { kind: 'failure', error });
+            } else if (stats) {
+              statsCache.set(cacheKey, { kind: 'success', stats });
+            }
 
-          callback(error, stats);
-          return;
-        });
+            callback(error, stats);
+          });
+        }
       },
     }),
     invalidate(path) {
