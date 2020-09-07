@@ -25,12 +25,6 @@ export interface IRequestResolverOptions {
   target?: 'node' | 'browser';
 
   /**
-   * Cache for `realpathSync` results.
-   * If not provided, resolver will create an internal Map (still caches).
-   */
-  realpathCache?: Map<string, string>;
-
-  /**
    * Cache for resolved packages. Map keys are directoryPaths.
    * If not provided, resolver will create an internal Map (still caches).
    */
