@@ -185,6 +185,22 @@ describe('commonjs module system', () => {
     expect(requireModule('/src/a.js')).to.eql('custom package');
   });
 
+  it('allows injecting pre-evaluated modules directly to the module system', () => {
+    const fs = createMemoryFs({
+      src: {
+        'a.js': `module.exports = require('some-package')`,
+      },
+    });
+
+    const { requireModule, requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+
+    loadedModules.set('some-package', { id: 'some-package', filename: 'some-package', exports: sampleObject });
+
+    expect(requireModule('some-package')).to.eql(sampleObject);
+    expect(requireFrom('/', 'some-package')).to.eql(sampleObject);
+    expect(requireModule('/src/a.js')).to.eql(sampleObject);
+  });
+
   it('throws when file does not exist', () => {
     const fs = createMemoryFs();
     const { requireModule } = createCjsModuleSystem({ fs });
