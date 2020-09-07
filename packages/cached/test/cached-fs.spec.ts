@@ -105,6 +105,18 @@ describe('createCachedFs', () => {
 
       expect(statSpy.callCount).to.equal(1);
     });
+
+    it('rebinds extended api to the cached base functions', () => {
+      const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
+      const statSpy = sinon.spy(memFs, 'statSync');
+      const fs = createCachedFs(memFs);
+
+      expect(fs.fileExistsSync('/file')).to.equal(true);
+      expect(fs.fileExistsSync('/file')).to.equal(true);
+      expect(fs.fileExistsSync('./file')).to.equal(true);
+      expect(fs.fileExistsSync('file')).to.equal(true);
+      expect(statSpy.callCount).to.equal(1);
+    });
   });
 
   describe('cache invalidation', () => {
