@@ -977,14 +977,14 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
-"@ts-tools/build@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-2.1.0.tgz#471cf044cbafbb7e3e8cf2773c207d5237b2b1f8"
-  integrity sha512-k97My+U3Z52oFGQa13D7r77b1HAuEXZce7Vb6EuKgwKWCmonEffRaHgYBVV2ggWEaBnv24hLaLb4Hlgz//xBAQ==
+"@ts-tools/build@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@ts-tools/build/-/build-2.1.1.tgz#6580c0ed5aea8ee8de93d43f40929fcba211f3a5"
+  integrity sha512-uuyXyYMa5BBbZoOddoBQPd+keLUjBR+V7unYAv/cjkCKwahbCAHTlvm2EIXIVafFyMJ9Egit4D9kohE3Q8j8fw==
   dependencies:
-    "@ts-tools/transpile" "^2.1.0"
+    "@ts-tools/transpile" "^2.1.1"
     chalk "^4.1.0"
-    commander "^6.0.0"
+    commander "^6.1.0"
 
 "@ts-tools/node@^2.1.0":
   version "2.1.0"
@@ -994,10 +994,10 @@
     "@ts-tools/transpile" "^2.1.0"
     source-map-support "^0.5.19"
 
-"@ts-tools/transpile@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.1.0.tgz#e4204340f1f6ed786711a26b7222d38d7ac260c7"
-  integrity sha512-sr5QQhb0BbcnzDfFWAq8XwJRm/N1VcZQ0rbKi+aZLtFffg0SHtLP2guTeupAVDsRki6sYKC/M+jVh6JqhaWomw==
+"@ts-tools/transpile@^2.1.0", "@ts-tools/transpile@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@ts-tools/transpile/-/transpile-2.1.1.tgz#f2448013cdfc2944055d0446a568da97b93c6a3e"
+  integrity sha512-kuhuOlvexcF2UBkmnr+Ir8yhInzJtItiuUxLEgYKQ6odVsD1w7N1n9B0Eqxj9ZT53rhYWUzZEzMWalh9l34EPQ==
 
 "@ts-tools/webpack-loader@^2.1.0":
   version "2.1.0"
@@ -2355,7 +2355,7 @@ commander@^4.1.1:
   resolved "https://registry.yarnpkg.com/commander/-/commander-4.1.1.tgz#9fd602bd936294e9e9ef46a3f4d6964044b18068"
   integrity sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==
 
-commander@^6.0.0:
+commander@^6.0.0, commander@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-6.1.0.tgz#f8d722b78103141006b66f4c7ba1e97315ba75bc"
   integrity sha512-wl7PNrYWd2y5mp1OK/LhTlv8Ff4kQJQRXXAvF+uU/TPNiVJUxZLRYGj/B0y/lPGAVcSbJqH2Za/cvHmrPMC8mA==
