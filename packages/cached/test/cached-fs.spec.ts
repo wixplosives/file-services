@@ -106,6 +106,54 @@ describe('createCachedFs', () => {
       expect(statSpy.callCount).to.equal(1);
     });
 
+    it('caches fs.realpathSync for existing files', async () => {
+      const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
+      const realpathSpy = sinon.spy(memFs, 'realpathSync');
+      const fs = createCachedFs(memFs);
+
+      const actualPath = fs.realpathSync('/file');
+      const actualPath2 = fs.realpathSync('/file');
+      const actualPath3 = fs.realpathSync('./file');
+      const actualPath4 = fs.realpathSync('file');
+
+      expect(realpathSpy.callCount).to.equal(1);
+      expect(actualPath).to.equal(actualPath2);
+      expect(actualPath).to.equal(actualPath3);
+      expect(actualPath).to.equal(actualPath4);
+    });
+
+    it('caches fs.realpath for existing files', async () => {
+      const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
+      const realpathSpy = sinon.spy(memFs, 'realpath');
+      const fs = createCachedFs(memFs);
+
+      const actualPath = await new Promise((res, rej) => fs.realpath('/file', (e, p) => (e ? rej(e) : res(p))));
+      const actualPath2 = await new Promise((res, rej) => fs.realpath('/file', (e, p) => (e ? rej(e) : res(p))));
+      const actualPath3 = await new Promise((res, rej) => fs.realpath('./file', (e, p) => (e ? rej(e) : res(p))));
+      const actualPath4 = await new Promise((res, rej) => fs.realpath('file', (e, p) => (e ? rej(e) : res(p))));
+
+      expect(realpathSpy.callCount).to.equal(1);
+      expect(actualPath).to.equal(actualPath2);
+      expect(actualPath).to.equal(actualPath3);
+      expect(actualPath).to.equal(actualPath4);
+    });
+
+    it('caches fs.promises.realpath for existing files', async () => {
+      const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
+      const realpathSpy = sinon.spy(memFs.promises, 'realpath');
+      const fs = createCachedFs(memFs);
+
+      const actualPath = await fs.promises.realpath('/file');
+      const actualPath2 = await fs.promises.realpath('/file');
+      const actualPath3 = await fs.promises.realpath('./file');
+      const actualPath4 = await fs.promises.realpath('file');
+
+      expect(realpathSpy.callCount).to.equal(1);
+      expect(actualPath).to.equal(actualPath2);
+      expect(actualPath).to.equal(actualPath3);
+      expect(actualPath).to.equal(actualPath4);
+    });
+
     it('rebinds extended api to the cached base functions', () => {
       const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
       const statSpy = sinon.spy(memFs, 'statSync');
