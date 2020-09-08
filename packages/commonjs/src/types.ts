@@ -7,12 +7,12 @@ export interface ICommonJsModuleSystem {
   /**
    * Require a module using an absolute file path.
    */
-  requireModule(filePath: string): unknown;
+  requireModule: (moduleId: string | false) => unknown;
 
   /**
    * Require a module from some context (directory path).
    */
-  requireFrom(contextPath: string, request: string): unknown;
+  requireFrom: (contextPath: string, request: string) => unknown;
 
   /**
    * Resolve a module request from some context (directory path).
@@ -22,7 +22,7 @@ export interface ICommonJsModuleSystem {
    * `false` - request should receive an empty object during runtime (mapped by `"browser"` field in `package.json`).
    * `undefined` - couldn't resolve request.
    */
-  resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
+  resolveFrom: (contextPath: string, request: string, requestOrigin?: string) => string | false | undefined;
 }
 
 export interface IModule {
