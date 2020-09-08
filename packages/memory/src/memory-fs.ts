@@ -379,6 +379,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       }
     }
   }
+
   function copyFileSync(sourcePath: string, destinationPath: string, flags = 0): void {
     const resolvedSourcePath = resolvePath(sourcePath);
     const resolvedDestinationPath = resolvePath(destinationPath);
