@@ -147,21 +147,23 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     const resolvedPath = resolvePath(filePath);
-    if (resolvedPath === '/') {
-      throw createFsError(filePath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
-    }
+    const existingNode = nodeMap.get(resolvedPath);
+    if (existingNode) {
+      if (existingNode.type === 'dir') {
+        throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+      }
+      existingNode.mtime = new Date();
+      existingNode.contents = fileContent;
+      emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(existingNode) });
+    } else {
+      const parentPath = posixPath.dirname(resolvedPath);
+      const parentNode = nodeMap.get(parentPath);
 
-    const parentPath = posixPath.dirname(resolvedPath);
-    const parentNode = nodeMap.get(parentPath);
+      if (!parentNode || parentNode.type !== 'dir') {
+        throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+      }
 
-    if (!parentNode || parentNode.type !== 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
-    }
-
-    const fileName = posixPath.basename(resolvedPath);
-    const fileNode = parentNode.contents.get(fileName);
-
-    if (!fileNode) {
+      const fileName = posixPath.basename(resolvedPath);
       const currentDate = new Date();
       const newFileNode: IFsMemFileNode = {
         type: 'file',
@@ -173,12 +175,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       parentNode.contents.set(fileName, newFileNode);
       nodeMap.set(resolvedPath, newFileNode);
       emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newFileNode) });
-    } else if (fileNode.type === 'file') {
-      fileNode.mtime = new Date();
-      fileNode.contents = fileContent;
-      emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(fileNode) });
-    } else {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
   }
 
