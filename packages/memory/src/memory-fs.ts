@@ -60,8 +60,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   const pathListeners = new SetMultiMap<string, WatchEventListener>();
   const globalListeners = new Set<WatchEventListener>();
   const nodeMap = new Map<string, IFsMemFileNode | IFsMemDirectoryNode | undefined>();
-  nodeMap.set('/', root);
-  nodeMap.set('', root);
+  nodeMap.set(posixPath.sep, root);
 
   let workingDirectoryPath: string = posixPath.sep;
   return {
