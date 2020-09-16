@@ -1,10 +1,9 @@
-import { promisify } from 'util';
 import { join } from 'path';
-import { stat as statCb, watch, FSWatcher } from 'fs';
+import { promises as fsPromises, watch, FSWatcher } from 'fs';
 import type { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types';
 import { SetMultiMap } from '@file-services/utils';
 
-const stat = promisify(statCb);
+const { stat } = fsPromises;
 
 export interface INodeWatchServiceOptions {
   /**

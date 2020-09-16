@@ -44,8 +44,7 @@ describe('dependency resolver', () => {
     },
     resolveRequest(filePath, request) {
       // the node resolver requires directory path, not the origin file path
-      const { resolvedFile } = resolveRequest(fs.dirname(filePath), request);
-      return typeof resolvedFile === 'string' ? resolvedFile : undefined;
+      return resolveRequest(fs.dirname(filePath), request).resolvedFile;
     },
   });
 

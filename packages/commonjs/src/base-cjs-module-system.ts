@@ -53,6 +53,11 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
   }
 
   function requireFrom(contextPath: string, request: string, requestOrigin?: string): unknown {
+    const existingModule = loadedModules.get(request);
+    if (existingModule) {
+      return existingModule.exports;
+    }
+
     return requireModule(resolveThrow(contextPath, request, requestOrigin));
   }
 
