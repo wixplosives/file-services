@@ -955,7 +955,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         const stats = await stat(sourceFilePath);
         expect(stats.isSymbolicLink()).to.equal(false);
         expect(stats.isFile()).to.equal(true);
-        expect(stats.birthtime).to.equal(realStats.birthtime);
+        expect(stats.birthtime.getTime()).to.equal(realStats.birthtime.getTime());
       });
 
       it('linking breaks after target file is deleted, but stmlink remains', async () => {

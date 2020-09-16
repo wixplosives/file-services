@@ -134,6 +134,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       readlink(path) {
         return promises.readlink(resolveFullPath(path));
       },
+      symlink(target, path, type) {
+        return promises.symlink(resolveFullPath(target), resolveFullPath(path), type);
+      },
     },
     copyFileSync(src, dest, ...args) {
       return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...args);
@@ -214,6 +217,12 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     } as IBaseFileSystemCallbackActions['writeFile'],
     readlink(path, callback) {
       return fs.readlink(resolveFullPath(path), callback);
+    },
+    symlink(target, path, type, callback) {
+      return fs.symlink(resolveFullPath(target), resolveFullPath(path), type, callback);
+    },
+    symlinkSync(target, path, type) {
+      return fs.symlinkSync(resolveFullPath(target), resolveFullPath(path), type);
     },
   };
 
