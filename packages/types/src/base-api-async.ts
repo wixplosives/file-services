@@ -114,6 +114,11 @@ export interface IBaseFileSystemCallbackActions {
    * Read value of a symbolic link.
    */
   readlink(path: string, callback: CallbackFn<string>): void;
+
+  /**
+   * Creates a symbolink link for `target` at `path`. default type is 'file'
+   */
+  symlink(target: string, path: string, type: 'dir' | 'file' | 'junction' | undefined, callback: CallbackFnVoid): void;
 }
 
 export interface IBaseFileSystemPromiseActions {
@@ -195,4 +200,9 @@ export interface IBaseFileSystemPromiseActions {
    * Read value of a symbolic link.
    */
   readlink(path: string): Promise<string>;
+
+  /**
+   * Creates a symbolink link for `target` at `path`. default type is 'file'
+   */
+  symlink(target: string, path: string, type?: 'dir' | 'file' | 'junction'): Promise<void>;
 }

@@ -17,6 +17,8 @@ import type {
   IBaseMemFileSystemSync,
   IFsMemFileNode,
   IFsMemDirectoryNode,
+  IFsMemSymlinkNode,
+  IFsMemNodeType,
 } from './types';
 
 const posixPath = path.posix;
@@ -97,19 +99,18 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     chdir,
     copyFileSync,
     existsSync,
-    lstatSync: statSync, // links are not implemented yet
+    lstatSync, // links are not implemented yet
     mkdirSync,
     readdirSync,
     readFileSync: readFileSync as IBaseFileSystemSyncActions['readFileSync'],
     realpathSync,
-    readlinkSync: () => {
-      throw new Error('links are not implemented yet');
-    },
+    readlinkSync,
     renameSync,
     rmdirSync,
     statSync,
     unlinkSync,
     writeFileSync,
+    symlinkSync,
   };
 
   function resolvePath(...pathSegments: string[]): string {
@@ -132,6 +133,61 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
     } else if (fileNode.type === 'dir') {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+    } else if (fileNode.type === 'symlink') {
+      return readlinkSync(fileNode.path);
+    }
+
+    return fileNode.contents;
+  }
+
+  function symlinkSync(target: string, path: string) {
+    const resolvedTarget = resolvePath(target);
+    const node = getNode(target);
+
+    if (!node) {
+      throw createFsError(resolvedTarget, FsErrorCodes.NO_FILE, 'ENOENT');
+    }
+
+    const resolvedPath = resolvePath(path);
+    if (getNode(resolvedPath)) {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+    }
+
+    const parentPath = posixPath.dirname(path);
+    const parentNode = getNode(parentPath);
+    if (!parentNode) {
+      throw createFsError(parentPath, FsErrorCodes.NO_FILE, 'EEXIST');
+    }
+    if (parentNode.type === 'file') {
+      throw createFsError(parentPath, FsErrorCodes.PATH_IS_FILE, 'EISDIR');
+    } else if (parentNode.type === 'symlink') {
+      /** not possible to get here, since we "follow links" */
+      throw createFsError(parentPath, FsErrorCodes.PATH_IS_SYMBOLIC_LINK, 'EISDIR');
+    }
+
+    const currentDate = new Date(Date.now());
+    const fileName = posixPath.basename(resolvedPath);
+    const symbolNode: IFsMemSymlinkNode = {
+      birthtime: currentDate,
+      mtime: currentDate,
+      type: 'symlink',
+      path: resolvedTarget,
+      name: fileName,
+    };
+
+    parentNode.contents.set(fileName, symbolNode);
+  }
+
+  function readlinkSync(filePath: string): string {
+    const resolvedPath = resolvePath(filePath);
+    const fileNode = getNode(resolvedPath);
+
+    if (!fileNode) {
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
+    } else if (fileNode.type === 'dir') {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+    } else if (fileNode.type === 'symlink') {
+      return readlinkSync(fileNode.path);
     }
 
     return fileNode.contents;
@@ -220,6 +276,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
     } else if (directoryNode.type === 'file') {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
+    } else if (directoryNode.type === 'symlink') {
+      /** this option is not possible because getNode was called with followSymlinks = true */
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_SYMBOLIC_LINK, 'ENOTDIR');
     }
     const childNodes = Array.from(directoryNode.contents.values());
 
@@ -304,18 +363,46 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const { birthtime, mtime } = node;
     const isFile = node.type === 'file' ? returnsTrue : returnsFalse;
     const isDirectory = node.type === 'dir' ? returnsTrue : returnsFalse;
-    const isSymbolicLink = returnsFalse;
+    const isSymbolicLink = node.type === 'symlink' ? returnsTrue : returnsFalse;
+
+    return { isFile, isDirectory, isSymbolicLink, birthtime, mtime };
+  }
+
+  function lstatSync(nodePath: string): IFileSystemStats {
+    const resolvedPath = resolvePath(nodePath);
+    const node = getNode(resolvedPath, false);
+    if (!node) {
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+    }
+    const { birthtime, mtime } = node;
+    const isFile = node.type === 'file' ? returnsTrue : returnsFalse;
+    const isDirectory = node.type === 'dir' ? returnsTrue : returnsFalse;
+    const isSymbolicLink = node.type === 'symlink' ? returnsTrue : returnsFalse;
 
     return { isFile, isDirectory, isSymbolicLink, birthtime, mtime };
   }
 
   function realpathSync(nodePath: string): string {
     const resolvedPath = resolvePath(nodePath);
-    const node = getNode(resolvedPath);
+    const node = getNode(resolvedPath, false);
     if (!node) {
       throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
+
+    if (node.type === 'symlink') {
+      const { path } = getRealNode(node);
+      return path;
+    }
     return resolvedPath;
+  }
+
+  function getRealNode(node: IFsMemSymlinkNode): { node: IFsMemDirectoryNode | IFsMemFileNode | null; path: string } {
+    const resolvedLink = getNode(node.path);
+    if (resolvedLink?.type === 'symlink') {
+      return getRealNode(resolvedLink);
+    }
+
+    return { node: resolvedLink as IFsMemDirectoryNode | IFsMemFileNode | null, path: node.path };
   }
 
   function renameSync(sourcePath: string, destinationPath: string): void {
@@ -408,13 +495,28 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(newFileNode) });
   }
 
-  function getNode(resolvedPath: string): IFsMemFileNode | IFsMemDirectoryNode | null {
+  function getNode(resolvedPath: string, followSymlinks = true): IFsMemNodeType | null {
     const splitPath = resolvedPath.split(posixPath.sep);
 
-    return splitPath.reduce((fsNode: IFsMemDirectoryNode | IFsMemFileNode | null, depthName: string) => {
-      return depthName === ''
-        ? fsNode
-        : (fsNode && fsNode.type === 'dir' && fsNode.contents.get(depthName.toLowerCase())) || null;
+    return splitPath.reduce((fsNode: IFsMemNodeType | null, depthName: string) => {
+      if (depthName === '') {
+        if (fsNode?.type === 'symlink' && followSymlinks) {
+          return getRealNode(fsNode).node;
+        }
+        return fsNode;
+      }
+
+      if (fsNode?.type === 'dir') {
+        const node = fsNode.contents.get(depthName.toLowerCase()) as IFsMemNodeType | null;
+        if (node?.type === 'symlink' && followSymlinks) {
+          return getRealNode(node).node;
+        }
+        return node;
+      } else if (fsNode?.type === 'symlink' && followSymlinks) {
+        return getRealNode(fsNode).node;
+      }
+
+      return null;
     }, root);
   }
 
@@ -445,13 +547,13 @@ function createMemDirectory(name: string): IFsMemDirectoryNode {
 const returnsTrue = () => true;
 const returnsFalse = () => false;
 
-function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode): IFileSystemStats {
+function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode): IFileSystemStats {
   return {
     birthtime: node.birthtime,
     mtime: node.mtime,
     isFile: node.type === 'file' ? returnsTrue : returnsFalse,
     isDirectory: node.type === 'dir' ? returnsTrue : returnsFalse,
-    isSymbolicLink: returnsFalse,
+    isSymbolicLink: node.type === 'symlink' ? returnsTrue : returnsFalse,
   };
 }
 

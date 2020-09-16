@@ -14,9 +14,9 @@ describe('In-memory File System Implementation', () => {
 
   syncBaseFsContract(testProvider);
   asyncBaseFsContract(testProvider);
+
   syncFsContract(testProvider);
   asyncFsContract(testProvider);
-
   describe('path.resolve', () => {
     it('resolves non-absolute paths relative to root /', () => {
       const fs = createMemoryFs();

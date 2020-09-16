@@ -111,4 +111,9 @@ export interface IBaseFileSystemSyncActions {
    * Read value of a symbolic link.
    */
   readlinkSync(path: string): string;
+
+  /**
+   * Creates a symbolink link for `target` at `path`. default type is 'file'
+   */
+  symlinkSync(target: string, path: string, type?: 'dir' | 'file' | 'junction'): void;
 }

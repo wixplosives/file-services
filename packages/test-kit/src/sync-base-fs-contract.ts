@@ -644,5 +644,145 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         expect(() => fs.copyFileSync(sourceFilePath, targetPath, FileSystemConstants.COPYFILE_EXCL)).to.throw('EEXIST');
       });
     });
+
+    describe('symlinks', () => {
+      const SOURCE_FILE_NAME = 'file.txt';
+      const SYMBOL_FILE_NAME = 'symbol.txt';
+
+      it('creates a link to a file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+
+        const sourceFilePath = fs.join(tempDirectoryPath, SYMBOL_FILE_NAME);
+
+        fs.symlinkSync(targetFilePath, sourceFilePath);
+        const fileContens = fs.readFileSync(sourceFilePath, 'utf8');
+        expect(fileContens).to.eq(SAMPLE_CONTENT);
+      });
+
+      it('creates a link to a directory', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+
+        const dirPath = fs.join(tempDirectoryPath, 'dir');
+        const symDirPath = fs.join(tempDirectoryPath, 'sym');
+
+        fs.mkdirSync(dirPath);
+        fs.copyFileSync(targetFilePath, fs.join(dirPath, SOURCE_FILE_NAME));
+
+        fs.symlinkSync(dirPath, symDirPath, 'junction');
+        const fileContens = fs.readFileSync(fs.join(symDirPath, SOURCE_FILE_NAME), 'utf8');
+        expect(fileContens).to.eq(SAMPLE_CONTENT);
+      });
+
+      it('retrieves link stats', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+
+        const sourceFilePath = fs.join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        fs.symlinkSync(targetFilePath, sourceFilePath);
+        const stats = fs.lstatSync(sourceFilePath);
+        expect(stats.isSymbolicLink()).to.equal(true);
+      });
+
+      it('retrieves real file stats trough symlink', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+        const realStats = fs.statSync(targetFilePath);
+
+        const sourceFilePath = fs.join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        fs.symlinkSync(targetFilePath, sourceFilePath);
+        const stats = fs.statSync(sourceFilePath);
+        expect(stats.isSymbolicLink()).to.equal(false);
+        expect(stats.isFile()).to.equal(true);
+        expect(stats.birthtime).to.equal(realStats.birthtime);
+      });
+
+      it('linking breaks after target file is deleted, but stmlink remains', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+        const symbolFilePath = fs.join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        fs.symlinkSync(targetFilePath, symbolFilePath, 'file');
+        fs.unlinkSync(targetFilePath);
+        const stats = fs.lstatSync(symbolFilePath);
+        expect(stats.isSymbolicLink()).to.eq(true);
+        expect(() => fs.statSync(symbolFilePath)).to.throw('ENOENT');
+      });
+
+      it('fails linking to a directory in a non existing path', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+
+        const dirPath = fs.join(tempDirectoryPath, 'dir');
+        const symDirPath = fs.join(tempDirectoryPath, 'sym', 'another');
+
+        fs.mkdirSync(dirPath);
+        fs.copyFileSync(targetFilePath, fs.join(dirPath, SOURCE_FILE_NAME));
+
+        expect(() => fs.symlinkSync(dirPath, symDirPath, 'junction')).to.throw('ENOENT');
+      });
+
+      it('fails linking to a file in a non existing path', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+
+        const path = fs.join(tempDirectoryPath, 'inner', SYMBOL_FILE_NAME);
+        expect(() => fs.symlinkSync(targetFilePath, path)).to.throw('ENOENT');
+      });
+
+      it('fails linking a file to an existing file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+
+        const path = fs.join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        fs.writeFileSync(path, SAMPLE_CONTENT);
+
+        expect(() => fs.symlinkSync(targetFilePath, path)).to.throw('EEXIST');
+      });
+
+      it('links a file to an existing directory', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        const dirPath = fs.join(tempDirectoryPath, 'dir');
+
+        fs.mkdirSync(dirPath);
+        fs.symlinkSync(dirPath, targetFilePath, 'junction');
+
+        expect(fs.lstatSync(targetFilePath).isSymbolicLink()).to.eq(true);
+        expect(fs.statSync(targetFilePath).isSymbolicLink()).to.eq(false);
+        expect(fs.statSync(targetFilePath).isDirectory()).to.eq(true);
+      });
+
+      it('fails linking a directory to an existing directory', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const dirPath = fs.join(tempDirectoryPath, 'dir');
+        const linkedPath = fs.join(tempDirectoryPath, 'link');
+
+        fs.mkdirSync(dirPath);
+        fs.mkdirSync(linkedPath);
+
+        expect(() => fs.symlinkSync(dirPath, linkedPath, 'junction')).to.throw('EEXIST');
+      });
+
+      it('fails linking a directory to an existing file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+
+        const dirPath = fs.join(tempDirectoryPath, 'dir');
+
+        fs.mkdirSync(dirPath);
+
+        expect(() => fs.symlinkSync(dirPath, targetFilePath, 'junction')).to.throw('EEXIST');
+      });
+    });
   });
 }

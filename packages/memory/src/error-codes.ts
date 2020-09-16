@@ -4,6 +4,7 @@ export enum FsErrorCodes {
   NO_FILE_OR_DIRECTORY = 'ENOENT: no such file or directory',
 
   PATH_IS_FILE = 'ENOTDIR: path points to a file',
+  PATH_IS_SYMBOLIC_LINK = 'ENOTDIR: path points to a symbolyc link',
   PATH_IS_DIRECTORY = 'EISDIR: path points to a directory',
 
   CONTAINING_NOT_EXISTS = 'ENOENT: containing directory does not exist',

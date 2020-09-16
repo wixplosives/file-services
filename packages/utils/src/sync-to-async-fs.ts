@@ -59,6 +59,9 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
       async readlink(path) {
         return syncFs.readlinkSync(path);
       },
+      async symlink(target, path, type) {
+        return syncFs.symlinkSync(target, path, type);
+      },
     },
     exists(nodePath, callback) {
       callback(syncFs.existsSync(nodePath));
@@ -75,5 +78,6 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
     realpath: callbackify(syncFs.realpathSync),
     rename: callbackify(syncFs.renameSync),
     readlink: callbackify(syncFs.readlinkSync),
+    symlink: callbackify(syncFs.symlinkSync),
   };
 }

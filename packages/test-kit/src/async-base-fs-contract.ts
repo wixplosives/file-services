@@ -884,5 +884,184 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         );
       });
     });
+
+    describe('symlinks', () => {
+      const SOURCE_FILE_NAME = 'file.txt';
+      const SYMBOL_FILE_NAME = 'symbol.txt';
+
+      it('creates a link to a file', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const { writeFile, symlink, readFile } = promises;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await writeFile(targetFilePath, SAMPLE_CONTENT);
+
+        const sourceFilePath = join(tempDirectoryPath, SYMBOL_FILE_NAME);
+
+        await symlink(targetFilePath, sourceFilePath);
+        const fileContens = await readFile(sourceFilePath, 'utf8');
+        expect(fileContens).to.eq(SAMPLE_CONTENT);
+      });
+
+      it('creates a link to a directory', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const { writeFile, readFile, mkdir, copyFile, symlink } = promises;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await writeFile(targetFilePath, SAMPLE_CONTENT);
+
+        const dirPath = join(tempDirectoryPath, 'dir');
+        const symDirPath = join(tempDirectoryPath, 'sym');
+
+        await mkdir(dirPath);
+        await copyFile(targetFilePath, join(dirPath, SOURCE_FILE_NAME));
+
+        await symlink(dirPath, symDirPath, 'junction');
+        const fileContens = await readFile(join(symDirPath, SOURCE_FILE_NAME), 'utf8');
+        expect(fileContens).to.eq(SAMPLE_CONTENT);
+      });
+
+      it('retrieves link stats', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const { writeFile, symlink, lstat } = promises;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await writeFile(targetFilePath, SAMPLE_CONTENT);
+
+        const sourceFilePath = join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        await symlink(targetFilePath, sourceFilePath);
+        const stats = await lstat(sourceFilePath);
+        expect(stats.isSymbolicLink()).to.equal(true);
+      });
+
+      it('retrieves real file stats trough symlink', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const { stat, writeFile, symlink } = promises;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await writeFile(targetFilePath, SAMPLE_CONTENT);
+        const realStats = await stat(targetFilePath);
+
+        const sourceFilePath = join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        await symlink(targetFilePath, sourceFilePath);
+        const stats = await stat(sourceFilePath);
+        expect(stats.isSymbolicLink()).to.equal(false);
+        expect(stats.isFile()).to.equal(true);
+        expect(stats.birthtime).to.equal(realStats.birthtime);
+      });
+
+      it('linking breaks after target file is deleted, but stmlink remains', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        promises;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
+        const symbolFilePath = join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        await promises.symlink(targetFilePath, symbolFilePath, 'file');
+        await promises.unlink(targetFilePath);
+        const lstats = await promises.lstat(symbolFilePath);
+        expect(lstats.isSymbolicLink()).to.eq(true);
+        await expect(promises.stat(symbolFilePath)).to.eventually.be.rejectedWith('ENOENT');
+      });
+
+      it('fails linking to a directory in a non existing path', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
+
+        const dirPath = join(tempDirectoryPath, 'dir');
+        const symDirPath = join(tempDirectoryPath, 'sym', 'another');
+
+        await promises.mkdir(dirPath);
+        await promises.copyFile(targetFilePath, join(dirPath, SOURCE_FILE_NAME));
+
+        await expect(promises.symlink(dirPath, symDirPath, 'junction')).to.eventually.be.rejectedWith('ENOENT');
+      });
+
+      it('fails linking to a file in a non existing path', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+
+        const path = join(tempDirectoryPath, 'inner', SYMBOL_FILE_NAME);
+        await expect(promises.symlink(targetFilePath, path)).to.eventually.be.rejectedWith('ENOENT');
+      });
+
+      it('fails linking a file to an existing file', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
+
+        const path = join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        await promises.writeFile(path, SAMPLE_CONTENT);
+
+        await expect(promises.symlink(targetFilePath, path)).to.eventually.be.rejectedWith('EEXIST');
+      });
+
+      it('links a file to an existing directory', async () => {
+        const {
+          fs: { join, promises },
+          tempDirectoryPath,
+        } = testInput;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        const dirPath = join(tempDirectoryPath, 'dir');
+
+        await promises.mkdir(dirPath);
+        await promises.symlink(dirPath, targetFilePath, 'junction');
+        const stats = await promises.stat(targetFilePath);
+        const lstats = await promises.lstat(targetFilePath);
+        expect(lstats.isSymbolicLink()).to.eq(true);
+        expect(stats.isSymbolicLink()).to.eq(false);
+        expect(stats.isDirectory()).to.eq(true);
+      });
+
+      it('fails linking a directory to an existing directory', async () => {
+        const {
+          fs: { join, promises },
+          tempDirectoryPath,
+        } = testInput;
+
+        const dirPath = join(tempDirectoryPath, 'dir');
+        const linkedPath = join(tempDirectoryPath, 'link');
+
+        await promises.mkdir(dirPath);
+        await promises.mkdir(linkedPath);
+
+        await expect(promises.symlink(dirPath, linkedPath, 'junction')).to.eventually.be.rejectedWith('EEXIST');
+      });
+
+      it('fails linking a directory to an existing file', async () => {
+        const {
+          fs: { join, promises },
+          tempDirectoryPath,
+        } = testInput;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
+
+        const dirPath = join(tempDirectoryPath, 'dir');
+
+        await promises.mkdir(dirPath);
+
+        await expect(promises.symlink(dirPath, targetFilePath, 'junction')).to.eventually.be.rejectedWith('EEXIST');
+      });
+    });
   });
 }
