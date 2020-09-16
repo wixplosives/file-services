@@ -102,7 +102,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     chdir,
     copyFileSync,
     existsSync,
-    lstatSync, // links are not implemented yet
+    lstatSync,
     mkdirSync,
     readdirSync,
     readFileSync: readFileSync as IBaseFileSystemSyncActions['readFileSync'],
@@ -391,7 +391,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function getLinkedNode(path: string) {
     const pathsStack: string[] = [];
-    for (const [nodePath, basename] of traverseFileUp(path)) {
+    for (const nodePath of traverseFileUp(path)) {
       const node = nodeMap.get(nodePath);
       if (node) {
         if (node.type === 'symlink') {
@@ -403,7 +403,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         }
         return getNode(node, nodePath, pathsStack);
       } else {
-        pathsStack.push(basename);
+        pathsStack.push(posixPath.basename(nodePath));
       }
     }
     throw createFsError(path, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
@@ -421,9 +421,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   }
 
   function* traverseFileUp(path: string) {
-    while (path !== root.name) {
-      const basename = posixPath.basename(path);
-      yield [path, basename];
+    while (path !== posixPath.sep) {
+      yield path;
       const dir = posixPath.dirname(path);
       path = dir;
     }
