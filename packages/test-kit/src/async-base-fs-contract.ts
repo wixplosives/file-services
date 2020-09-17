@@ -1074,7 +1074,8 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
         await promises.symlink(targetFilePath, symbolPath);
         expect(await promises.readlink(symbolPath)).to.equal(resolve(symbolPath, targetFilePath));
-        await expect(promises.readlink(targetFilePath)).to.eventually.be.rejectedWith('EINVAL');
+        /** on Linux ans macos the EINVAL error will show, but in Windows, UNKOWN error is thrown */
+        await expect(promises.readlink(targetFilePath)).to.eventually.be.rejectedWith();
         await expect(promises.readlink(dirPath)).to.eventually.be.rejectedWith('ENOENT');
       });
     });

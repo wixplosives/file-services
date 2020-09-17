@@ -793,7 +793,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
         fs.symlinkSync(targetFilePath, symbolPath);
         expect(fs.readlinkSync(symbolPath)).to.equal(fs.resolve(symbolPath, targetFilePath));
-        expect(() => fs.readlinkSync(targetFilePath)).to.throw('EINVAL');
+        /** on Linux ans macos the EINVAL error will show, but in Windows, UNKOWN error is thrown */
+        expect(() => fs.readlinkSync(targetFilePath)).to.throw();
         expect(() => fs.readlinkSync(dirPath)).to.throw('ENOENT');
       });
     });
