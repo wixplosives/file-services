@@ -529,7 +529,7 @@ function createMemDirectory(name: string): IFsMemDirectoryNode {
 const returnsTrue = () => true;
 const returnsFalse = () => false;
 
-function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode): IFileSystemStats {
+function createStatsFromNode(node: IFsMemNodeType): IFileSystemStats {
   return {
     birthtime: node.birthtime,
     mtime: node.mtime,
