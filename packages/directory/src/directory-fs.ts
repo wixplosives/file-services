@@ -24,7 +24,7 @@ const posixPath = path.posix;
  * @param directoryPath the directory path to scope to
  */
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
-  const { watchService, promises, join, relative, sep, resolve } = fs;
+  const { watchService, promises, join, relative, sep } = fs;
 
   let workingDirectoryPath: string = posixPath.sep;
 
@@ -132,9 +132,15 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         return promises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
       },
       async readlink(path) {
-        const pathToTarget = await promises.readlink(resolveFullPath(path));
-        const resolvedTarget = resolve(directoryPath, pathToTarget);
-        return resolveScopedPath(relative(directoryPath, resolvedTarget));
+        const resolvedLinkPath = posixPath.resolve(path);
+        const unscopedLinkPath = resolveFullPath(path);
+        const relativeUnscopedTarget = await promises.readlink(unscopedLinkPath);
+        const scopedTargetPath = relative(unscopedLinkPath, relativeUnscopedTarget);
+        const absoluteScopedTargetPath = resolveScopedPath(scopedTargetPath);
+        const relativeScopedTargetPath = relative(posixPath.dirname(resolvedLinkPath), absoluteScopedTargetPath);
+        return relativeScopedTargetPath.startsWith('../')
+          ? relativeScopedTargetPath
+          : resolveScopedPath(relativeScopedTargetPath);
       },
       symlink(target, path, type) {
         return promises.symlink(resolveFullPath(target), resolveFullPath(path), type);
@@ -161,9 +167,15 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return relativePath.startsWith('../') ? relativePath : resolveScopedPath(relativePath);
     },
     readlinkSync(path) {
-      const pathToTarget = fs.readlinkSync(resolveFullPath(path));
-      const resolvedTarget = resolve(directoryPath, pathToTarget);
-      return resolveScopedPath(relative(directoryPath, resolvedTarget));
+      const resolvedLinkPath = posixPath.resolve(path);
+      const unscopedLinkPath = resolveFullPath(path);
+      const relativeUnscopedTarget = fs.readlinkSync(unscopedLinkPath);
+      const scopedTargetPath = relative(unscopedLinkPath, relativeUnscopedTarget);
+      const absoluteScopedTargetPath = resolveScopedPath(scopedTargetPath);
+      const relativeScopedTargetPath = relative(posixPath.dirname(resolvedLinkPath), absoluteScopedTargetPath);
+      return relativeScopedTargetPath.startsWith('../')
+        ? relativeScopedTargetPath
+        : resolveScopedPath(relativeScopedTargetPath);
     },
     renameSync(srcPath, destPath) {
       return fs.renameSync(resolveFullPath(srcPath), resolveFullPath(destPath));
@@ -220,9 +232,16 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['writeFile'],
     readlink(path, callback) {
-      return fs.readlink(resolveFullPath(path), function (e, path) {
-        const resolvedTarget = resolve(directoryPath, path);
-        callback(e, path ? resolveScopedPath(relative(directoryPath, resolvedTarget)) : path);
+      const unscopedLinkPath = resolveFullPath(path);
+      return fs.readlink(unscopedLinkPath, function (e, relativeUnscopedTarget) {
+        const resolvedLinkPath = posixPath.resolve(path);
+        const scopedTargetPath = relative(unscopedLinkPath, relativeUnscopedTarget);
+        const absoluteScopedTargetPath = resolveScopedPath(scopedTargetPath);
+        const relativeScopedTargetPath = relative(posixPath.dirname(resolvedLinkPath), absoluteScopedTargetPath);
+        const resolvedPath = relativeScopedTargetPath.startsWith('../')
+          ? relativeScopedTargetPath
+          : resolveScopedPath(relativeScopedTargetPath);
+        callback(e, resolvedPath);
       });
     },
     symlink(target, path, type, callback) {
