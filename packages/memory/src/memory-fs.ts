@@ -100,7 +100,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     chdir,
     copyFileSync,
     existsSync,
-    lstatSync, // links are not implemented yet
+    lstatSync,
     mkdirSync,
     readdirSync,
     readFileSync: readFileSync as IBaseFileSystemSyncActions['readFileSync'],
