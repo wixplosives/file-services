@@ -216,7 +216,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['writeFile'],
     readlink(path, callback) {
-      return fs.readlink(resolveFullPath(path), (e, path) => callback(e, relative(directoryPath, path)));
+      return fs.readlink(resolveFullPath(path), function (e, path) {
+        callback(e, path ? relative(directoryPath, path) : path);
+      });
     },
     symlink(target, path, type, callback) {
       return fs.symlink(resolveFullPath(target), resolveFullPath(path), type, callback);
