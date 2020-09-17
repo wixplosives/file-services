@@ -50,10 +50,14 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   } = baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return statFn(filePath).isFile();
     } catch {
       return false;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
@@ -62,10 +66,14 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   }
 
   function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return statFn(directoryPath).isDirectory();
     } catch {
       return false;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 

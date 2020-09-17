@@ -51,7 +51,9 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     const files: string[] = [];
     const directories: string[] = [];
 
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       const dirEntries = readdirSync(path);
       for (const entryName of dirEntries) {
         const entryStats = statSync(join(path, entryName));
@@ -66,16 +68,22 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
       }
     } catch {
       /* */
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
 
     return { files, directories };
   }
 
   function realpath(path: string): string {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return realpathSync(path);
     } catch (e) {
       return path;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
@@ -99,17 +107,25 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     fileExists: fileExistsSync,
     directoryExists: directoryExistsSync,
     readFile(filePath) {
+      const { stackTraceLimit } = Error;
       try {
+        Error.stackTraceLimit = 0;
         return readFileSync(filePath, 'utf8');
       } catch {
         return undefined;
+      } finally {
+        Error.stackTraceLimit = stackTraceLimit;
       }
     },
     getScriptVersion(filePath) {
+      const { stackTraceLimit } = Error;
       try {
+        Error.stackTraceLimit = 0;
         return `${statSync(filePath).mtime.getTime()}`;
       } catch {
         return `${Date.now()}`;
+      } finally {
+        Error.stackTraceLimit = stackTraceLimit;
       }
     },
     useCaseSensitiveFileNames: caseSensitive,

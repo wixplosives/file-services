@@ -36,9 +36,9 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
   const { resolver = createRequestResolver({ fs }) } = options;
 
   return createBaseCjsModuleSystem({
-    processEnv,
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
-    dirname,
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
+    dirname,
+    processEnv,
   });
 }

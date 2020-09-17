@@ -16,21 +16,26 @@ export interface ICachedFileSystem extends IFileSystem {
   invalidateAll(): void;
 }
 
-export interface ISuccessCacheResult {
+interface ISuccessCacheResult<T> {
   kind: 'success';
-  stats: IFileSystemStats;
+  value: T;
 }
 
-export interface IFailureCacheResult {
+interface IFailureCacheResult {
   kind: 'failure';
   error: Error;
 }
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
-  const statsCache = new Map<string, ISuccessCacheResult | IFailureCacheResult>();
+  const statsCache = new Map<string, ISuccessCacheResult<IFileSystemStats> | IFailureCacheResult>();
+  const realpathCache = new Map<string, string>();
   const { promises } = fs;
-  const invalidateAbsolute = (absolutePath: string) => statsCache.delete(getCanonicalPath(absolutePath));
+  const invalidateAbsolute = (absolutePath: string) => {
+    const cachePath = getCanonicalPath(absolutePath);
+    realpathCache.delete(cachePath);
+    statsCache.delete(cachePath);
+  };
 
   return {
     ...createFileSystem({
@@ -111,11 +116,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           if (cachedStats.kind === 'failure') {
             throw cachedStats.error;
           }
-          return cachedStats.stats;
+          return cachedStats.value;
         }
         try {
           const stats = fs.statSync(path);
-          statsCache.set(cacheKey, { kind: 'success', stats });
+          statsCache.set(cacheKey, { kind: 'success', value: stats });
           return stats;
         } catch (e) {
           statsCache.set(cacheKey, { kind: 'failure', error: e as Error });
@@ -130,20 +135,45 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           if (cachedStats.kind === 'failure') {
             (callback as (e: Error) => void)(cachedStats.error);
           } else if (cachedStats.kind === 'success') {
-            callback(undefined, cachedStats.stats);
+            callback(undefined, cachedStats.value);
           }
-          return;
-        }
-        fs.stat(path, (error, stats) => {
-          if (error) {
-            statsCache.set(cacheKey, { kind: 'failure', error });
-          } else if (stats) {
-            statsCache.set(cacheKey, { kind: 'success', stats });
-          }
+        } else {
+          fs.stat(path, (error, stats) => {
+            if (error) {
+              statsCache.set(cacheKey, { kind: 'failure', error });
+            } else {
+              statsCache.set(cacheKey, { kind: 'success', value: stats });
+            }
 
-          callback(error, stats);
-          return;
-        });
+            callback(error, stats);
+          });
+        }
+      },
+      realpathSync(path) {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedActualPath = realpathCache.get(cacheKey);
+        if (cachedActualPath !== undefined) {
+          return cachedActualPath;
+        }
+        const actualPath = fs.realpathSync(path);
+        realpathCache.set(cacheKey, actualPath);
+        return actualPath;
+      },
+      realpath(path, callback) {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedActualPath = realpathCache.get(cacheKey);
+        if (cachedActualPath !== undefined) {
+          callback(undefined, cachedActualPath);
+        } else {
+          fs.realpath(path, (error, actualPath) => {
+            if (!error) {
+              realpathCache.set(cacheKey, actualPath);
+            }
+            callback(error, actualPath);
+          });
+        }
       },
     }),
     invalidate(path) {
@@ -154,6 +184,17 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     },
     promises: {
       ...promises,
+      async realpath(path) {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedActualPath = realpathCache.get(cacheKey);
+        if (cachedActualPath !== undefined) {
+          return cachedActualPath;
+        }
+        const actualPath = await promises.realpath(path);
+        realpathCache.set(cacheKey, actualPath);
+        return actualPath;
+      },
       copyFile(sourcePath, destinationPath, ...args) {
         destinationPath = fs.resolve(destinationPath);
         invalidateAbsolute(destinationPath);
@@ -196,11 +237,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           if (cachedStats.kind === 'failure') {
             throw cachedStats.error;
           }
-          return cachedStats.stats;
+          return cachedStats.value;
         }
         try {
           const stats = await promises.stat(path);
-          statsCache.set(cacheKey, { kind: 'success', stats });
+          statsCache.set(cacheKey, { kind: 'success', value: stats });
           return stats;
         } catch (e) {
           statsCache.set(cacheKey, { kind: 'failure', error: e as Error });

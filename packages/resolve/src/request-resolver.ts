@@ -13,11 +13,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     target = defaultTarget,
-    realpathCache = new Map<string, string>(),
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
   } = options;
 
-  const realpathSyncSafeCached = wrapWithCache(realpathSyncSafe, realpathCache);
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
 
   return requestResolver;
@@ -48,7 +46,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           };
         }
       }
-      return { resolvedFile: realpathSyncSafeCached(resolvedFile) };
+      return { resolvedFile: realpathSyncSafe(resolvedFile) };
     }
     return { resolvedFile: undefined };
   }
@@ -174,17 +172,21 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   function resolveRelative(request: string) {
     for (const filePath of fileOrDirIndexRequestPaths(request)) {
       if (statSyncSafe(filePath)?.isFile()) {
-        return realpathSyncSafeCached(filePath);
+        return realpathSyncSafe(filePath);
       }
     }
     return undefined;
   }
 
   function realpathSyncSafe(itemPath: string): string {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return realpathSync(itemPath);
     } catch {
       return itemPath;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
@@ -206,18 +208,26 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function readJsonFileSyncSafe(filePath: string): unknown {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
     } catch {
       return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
   function statSyncSafe(path: string) {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return statSync(path);
     } catch {
       return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 }
