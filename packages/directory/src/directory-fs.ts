@@ -131,8 +131,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       writeFile(path, ...args) {
         return promises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
       },
-      readlink(path) {
-        return promises.readlink(resolveFullPath(path));
+      async readlink(path) {
+        return relative(directoryPath, await promises.readlink(resolveFullPath(path)));
       },
       symlink(target, path, type) {
         return promises.symlink(resolveFullPath(target), resolveFullPath(path), type);
@@ -159,7 +159,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return relativePath.startsWith('../') ? relativePath : resolveScopedPath(relativePath);
     },
     readlinkSync(path) {
-      return fs.readlinkSync(resolveFullPath(path));
+      return relative(directoryPath, fs.readlinkSync(resolveFullPath(path)));
     },
     renameSync(srcPath, destPath) {
       return fs.renameSync(resolveFullPath(srcPath), resolveFullPath(destPath));
@@ -216,7 +216,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['writeFile'],
     readlink(path, callback) {
-      return fs.readlink(resolveFullPath(path), callback);
+      return fs.readlink(resolveFullPath(path), (e, path) => callback(e, relative(directoryPath, path)));
     },
     symlink(target, path, type, callback) {
       return fs.symlink(resolveFullPath(target), resolveFullPath(path), type, callback);
