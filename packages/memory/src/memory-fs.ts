@@ -340,7 +340,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function statSync(nodePath: string): IFileSystemStats {
     const resolvedPath = resolvePath(nodePath);
-    const node = getNode(resolvedPath, true);
+    const node = getNode(resolvedPath);
     if (!node) {
       throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
