@@ -699,7 +699,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         const stats = fs.statSync(sourceFilePath);
         expect(stats.isSymbolicLink()).to.equal(false);
         expect(stats.isFile()).to.equal(true);
-        expect(stats.birthtime).to.equal(realStats.birthtime);
+        expect(stats.birthtime.getTime()).to.equal(realStats.birthtime.getTime());
       });
 
       it('linking breaks after target file is deleted, but stmlink remains', () => {
@@ -782,6 +782,18 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         fs.mkdirSync(dirPath);
 
         expect(() => fs.symlinkSync(dirPath, targetFilePath, 'junction')).to.throw('EEXIST');
+      });
+
+      it('read links properly', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
+        const symbolPath = fs.join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        const dirPath = fs.join(tempDirectoryPath, 'dir');
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+        fs.symlinkSync(targetFilePath, symbolPath);
+        expect(fs.readlinkSync(symbolPath)).to.equal(fs.relative(symbolPath, targetFilePath));
+        expect(() => fs.readlinkSync(targetFilePath)).to.throw('EINVAL');
+        expect(() => fs.readlinkSync(dirPath)).to.throw('ENOENT');
       });
     });
   });

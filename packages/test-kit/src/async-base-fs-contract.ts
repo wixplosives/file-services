@@ -955,7 +955,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         const stats = await stat(sourceFilePath);
         expect(stats.isSymbolicLink()).to.equal(false);
         expect(stats.isFile()).to.equal(true);
-        expect(stats.birthtime).to.equal(realStats.birthtime);
+        expect(stats.birthtime.getTime()).to.equal(realStats.birthtime.getTime());
       });
 
       it('linking breaks after target file is deleted, but stmlink remains', async () => {
@@ -1061,6 +1061,21 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         await promises.mkdir(dirPath);
 
         await expect(promises.symlink(dirPath, targetFilePath, 'junction')).to.eventually.be.rejectedWith('EEXIST');
+      });
+
+      it('read links properly', async () => {
+        const {
+          fs: { promises, join, relative },
+          tempDirectoryPath,
+        } = testInput;
+        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
+        const symbolPath = join(tempDirectoryPath, SYMBOL_FILE_NAME);
+        const dirPath = join(tempDirectoryPath, 'dir');
+        await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
+        await promises.symlink(targetFilePath, symbolPath);
+        expect(await promises.readlink(symbolPath)).to.equal(relative(symbolPath, targetFilePath));
+        await expect(promises.readlink(targetFilePath)).to.eventually.be.rejectedWith('EINVAL');
+        await expect(promises.readlink(dirPath)).to.eventually.be.rejectedWith('ENOENT');
       });
     });
   });

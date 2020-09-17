@@ -180,17 +180,17 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function readlinkSync(filePath: string): string {
     const resolvedPath = resolvePath(filePath);
-    const fileNode = getNode(resolvedPath);
+    const fileNode = getNode(resolvedPath, false);
 
     if (!fileNode) {
       throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
     } else if (fileNode.type === 'dir') {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
-    } else if (fileNode.type === 'symlink') {
-      return readlinkSync(fileNode.path);
+    } else if (fileNode.type === 'file') {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_INVALID, 'EINVAL');
     }
 
-    return fileNode.contents;
+    return posixPath.relative(resolvedPath, fileNode.path);
   }
 
   function writeFileSync(filePath: string, fileContent: string): void {
@@ -560,7 +560,7 @@ function createStatsFromNode(node: IFsMemFileNode | IFsMemDirectoryNode | IFsMem
 function createFsError(
   path: string,
   message: FsErrorCodes,
-  code: 'ENOENT' | 'EEXIST' | 'EISDIR' | 'ENOTDIR' | 'ENOTEMPTY'
+  code: 'ENOENT' | 'EEXIST' | 'EISDIR' | 'ENOTDIR' | 'ENOTEMPTY' | 'EINVAL'
 ): Error {
   const error = new Error(`${path} ${message}`);
   (error as Error & { path: string }).path = path;
