@@ -24,7 +24,7 @@ const posixPath = path.posix;
  * @param directoryPath the directory path to scope to
  */
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
-  const { watchService, promises, join, relative, sep } = fs;
+  const { watchService, promises, join, relative, sep, resolve } = fs;
 
   let workingDirectoryPath: string = posixPath.sep;
 
@@ -132,7 +132,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
         return promises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
       },
       async readlink(path) {
-        return resolveScopedPath(relative(directoryPath, await promises.readlink(resolveFullPath(path))));
+        const pathToTarget = await promises.readlink(resolveFullPath(path));
+        const resolvedTarget = resolve(directoryPath, pathToTarget);
+        return resolveScopedPath(relative(directoryPath, resolvedTarget));
       },
       symlink(target, path, type) {
         return promises.symlink(resolveFullPath(target), resolveFullPath(path), type);
@@ -159,7 +161,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return relativePath.startsWith('../') ? relativePath : resolveScopedPath(relativePath);
     },
     readlinkSync(path) {
-      return resolveScopedPath(relative(directoryPath, fs.readlinkSync(resolveFullPath(path))));
+      const pathToTarget = fs.readlinkSync(resolveFullPath(path));
+      const resolvedTarget = resolve(directoryPath, pathToTarget);
+      return resolveScopedPath(relative(directoryPath, resolvedTarget));
     },
     renameSync(srcPath, destPath) {
       return fs.renameSync(resolveFullPath(srcPath), resolveFullPath(destPath));
@@ -217,7 +221,8 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     } as IBaseFileSystemCallbackActions['writeFile'],
     readlink(path, callback) {
       return fs.readlink(resolveFullPath(path), function (e, path) {
-        callback(e, path ? resolveScopedPath(relative(directoryPath, path)) : path);
+        const resolvedTarget = resolve(directoryPath, path);
+        callback(e, path ? resolveScopedPath(relative(directoryPath, resolvedTarget)) : path);
       });
     },
     symlink(target, path, type, callback) {
