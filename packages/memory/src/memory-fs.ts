@@ -186,7 +186,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_INVALID, 'EINVAL');
     }
 
-    return posixPath.relative(resolvedPath, fileNode.path);
+    return posixPath.resolve(filePath, fileNode.path);
   }
 
   function writeFileSync(filePath: string, fileContent: string): void {

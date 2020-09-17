@@ -663,18 +663,19 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
       it('creates a link to a directory', () => {
         const { fs, tempDirectoryPath } = testInput;
-        const targetFilePath = fs.join(tempDirectoryPath, SOURCE_FILE_NAME);
-        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
-
         const dirPath = fs.join(tempDirectoryPath, 'dir');
         const symDirPath = fs.join(tempDirectoryPath, 'sym');
-
+        const innerFolderPath = fs.join('dir', 'inner-dir');
         fs.mkdirSync(dirPath);
-        fs.copyFileSync(targetFilePath, fs.join(dirPath, SOURCE_FILE_NAME));
+        fs.mkdirSync(fs.join(tempDirectoryPath, innerFolderPath));
+        fs.writeFileSync(fs.join(dirPath, SOURCE_FILE_NAME), SAMPLE_CONTENT);
+        fs.writeFileSync(fs.join(tempDirectoryPath, innerFolderPath, SOURCE_FILE_NAME), SAMPLE_CONTENT);
 
         fs.symlinkSync(dirPath, symDirPath, 'junction');
         const fileContens = fs.readFileSync(fs.join(symDirPath, SOURCE_FILE_NAME), 'utf8');
+        const innerFileContens = fs.readFileSync(fs.join(symDirPath, 'inner-dir', SOURCE_FILE_NAME), 'utf8');
         expect(fileContens).to.eq(SAMPLE_CONTENT);
+        expect(innerFileContens).to.eq(SAMPLE_CONTENT);
       });
 
       it('retrieves link stats', () => {
@@ -791,7 +792,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         const dirPath = fs.join(tempDirectoryPath, 'dir');
         fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
         fs.symlinkSync(targetFilePath, symbolPath);
-        expect(fs.readlinkSync(symbolPath)).to.equal(fs.relative(symbolPath, targetFilePath));
+        expect(fs.readlinkSync(symbolPath)).to.equal(fs.resolve(symbolPath, targetFilePath));
         expect(() => fs.readlinkSync(targetFilePath)).to.throw('EINVAL');
         expect(() => fs.readlinkSync(dirPath)).to.throw('ENOENT');
       });

@@ -910,19 +910,19 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
           fs: { promises, join },
           tempDirectoryPath,
         } = testInput;
-        const { writeFile, readFile, mkdir, copyFile, symlink } = promises;
-        const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
-        await writeFile(targetFilePath, SAMPLE_CONTENT);
-
         const dirPath = join(tempDirectoryPath, 'dir');
         const symDirPath = join(tempDirectoryPath, 'sym');
+        const innerFolderPath = join('dir', 'inner-dir');
+        await promises.mkdir(dirPath);
+        await promises.mkdir(join(tempDirectoryPath, innerFolderPath));
+        await promises.writeFile(join(dirPath, SOURCE_FILE_NAME), SAMPLE_CONTENT);
+        await promises.writeFile(join(tempDirectoryPath, innerFolderPath, SOURCE_FILE_NAME), SAMPLE_CONTENT);
 
-        await mkdir(dirPath);
-        await copyFile(targetFilePath, join(dirPath, SOURCE_FILE_NAME));
-
-        await symlink(dirPath, symDirPath, 'junction');
-        const fileContens = await readFile(join(symDirPath, SOURCE_FILE_NAME), 'utf8');
+        await promises.symlink(dirPath, symDirPath, 'junction');
+        const fileContens = await promises.readFile(join(symDirPath, SOURCE_FILE_NAME), 'utf8');
+        const innerFileContens = await promises.readFile(join(symDirPath, 'inner-dir', SOURCE_FILE_NAME), 'utf8');
         expect(fileContens).to.eq(SAMPLE_CONTENT);
+        expect(innerFileContens).to.eq(SAMPLE_CONTENT);
       });
 
       it('retrieves link stats', async () => {
@@ -1065,7 +1065,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
       it('read links properly', async () => {
         const {
-          fs: { promises, join, relative },
+          fs: { promises, join, resolve },
           tempDirectoryPath,
         } = testInput;
         const targetFilePath = join(tempDirectoryPath, SOURCE_FILE_NAME);
@@ -1073,7 +1073,7 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         const dirPath = join(tempDirectoryPath, 'dir');
         await promises.writeFile(targetFilePath, SAMPLE_CONTENT);
         await promises.symlink(targetFilePath, symbolPath);
-        expect(await promises.readlink(symbolPath)).to.equal(relative(symbolPath, targetFilePath));
+        expect(await promises.readlink(symbolPath)).to.equal(resolve(symbolPath, targetFilePath));
         await expect(promises.readlink(targetFilePath)).to.eventually.be.rejectedWith('EINVAL');
         await expect(promises.readlink(dirPath)).to.eventually.be.rejectedWith('ENOENT');
       });
