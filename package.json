@@ -52,7 +52,7 @@
     "tsconfig-paths-webpack-plugin": "^3.3.0",
     "type-fest": "^0.16.0",
     "typescript": "~4.0.2",
-    "webpack": "^4.44.1"
+    "webpack": "^4.44.2"
   },
   "license": "MIT",
   "prettier": {
