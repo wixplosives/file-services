@@ -45,7 +45,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "rimraf": "^3.0.2",
-    "sass": "^1.26.10",
+    "sass": "^1.26.11",
     "sinon": "^9.0.3",
     "sinon-chai": "^3.5.0",
     "tsconfig-paths": "^3.9.0",
