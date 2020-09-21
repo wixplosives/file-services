@@ -683,16 +683,20 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         const dirPath = fs.join(tempDirectoryPath, 'dir');
         const symDirPath = fs.join(tempDirectoryPath, 'sym');
         const innerFolderPath = fs.join('dir', 'inner-dir');
+        const sourceFilePath = fs.join(dirPath, SOURCE_FILE_NAME);
+        const innerSourcePath = fs.join(tempDirectoryPath, innerFolderPath, SOURCE_FILE_NAME);
+
         fs.mkdirSync(dirPath);
         fs.mkdirSync(fs.join(tempDirectoryPath, innerFolderPath));
-        fs.writeFileSync(fs.join(dirPath, SOURCE_FILE_NAME), SAMPLE_CONTENT);
-        fs.writeFileSync(fs.join(tempDirectoryPath, innerFolderPath, SOURCE_FILE_NAME), SAMPLE_CONTENT);
+        fs.writeFileSync(sourceFilePath, SAMPLE_CONTENT);
+        fs.writeFileSync(innerSourcePath, SAMPLE_CONTENT);
 
         fs.symlinkSync(dirPath, symDirPath, 'junction');
+
         const fileContens = fs.realpathSync(fs.join(symDirPath, SOURCE_FILE_NAME));
         const innerFileContens = fs.realpathSync(fs.join(symDirPath, 'inner-dir', SOURCE_FILE_NAME));
-        expect(fileContens).to.eq(fs.join(dirPath, SOURCE_FILE_NAME));
-        expect(innerFileContens).to.eq(fs.join(tempDirectoryPath, innerFolderPath, SOURCE_FILE_NAME));
+        expect(fileContens).to.eq(sourceFilePath);
+        expect(innerFileContens).to.eq(innerSourcePath);
       });
 
       it('retrieves link stats', () => {
