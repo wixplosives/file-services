@@ -368,16 +368,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function realpathSync(nodePath: string): string {
     const resolvedPath = resolvePath(nodePath);
-    const node = getNode(resolvedPath, false);
-    if (!node) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+    let path = nodePath;
+    for (const [node, depthPath] of getNodeResolutionTree(resolvedPath)) {
+      if (!node) {
+        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      }
+      path = depthPath;
     }
-
-    if (node.type === 'symlink') {
-      const { path } = getRealNode(node);
-      return path;
-    }
-    return resolvedPath;
+    return path;
   }
 
   function getRealNode(node: IFsMemSymlinkNode): { node: IFsMemNodeType | undefined; path: string } {
@@ -483,23 +481,41 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   function getNode(nodePath: string, followSymlinks?: false): IFsMemNodeType | undefined;
   function getNode(nodePath: string, followSymlinks = true): IFsMemNodeType | undefined {
     let currentNode: IFsMemNodeType | undefined = root;
+    for (const [node] of getNodeResolutionTree(nodePath)) {
+      currentNode = node;
+      if (node?.type === 'symlink' && !followSymlinks) {
+        break;
+      }
+    }
+    return currentNode;
+  }
+
+  function* getNodeResolutionTree(nodePath: string): Generator<[node: IFsMemNodeType | undefined, path: string]> {
+    let currentNode: IFsMemNodeType | undefined = root;
+    let resolvedNodePath = posixPath.sep;
 
     for (const depthName of nodePath.split(posixPath.sep)) {
       if (!currentNode) {
         break;
       } else if (depthName === '') {
-        if (currentNode.type === 'symlink' && followSymlinks) {
-          currentNode = getRealNode(currentNode).node;
-        }
         continue;
       } else if (currentNode.type === 'dir') {
-        const childNode = currentNode.contents.get(depthName);
-        currentNode = childNode?.type === 'symlink' && followSymlinks ? getRealNode(childNode).node : childNode;
+        currentNode = currentNode.contents.get(depthName);
+        resolvedNodePath = posixPath.join(resolvedNodePath, depthName);
+      } else if (currentNode.type === 'symlink') {
+        const { node, path } = getRealNode(currentNode);
+        currentNode = node?.type === 'dir' ? node.contents.get(depthName) : node;
+        resolvedNodePath = path;
       } else {
         currentNode = undefined;
       }
+      yield [currentNode, resolvedNodePath];
     }
-    return currentNode;
+    if (currentNode?.type === 'symlink') {
+      const { node, path } = getRealNode(currentNode);
+      currentNode = node;
+      yield [currentNode, path];
+    }
   }
 
   function emitWatchEvent(watchEvent: IWatchEvent): void {
