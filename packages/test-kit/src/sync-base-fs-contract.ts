@@ -679,7 +679,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
       });
 
       it('retrieves real path of symlinks properly', () => {
-        const { fs, tempDirectoryPath } = testInput;
+        const { fs, tempDirectoryPath: tempPath } = testInput;
+        const tempDirectoryPath = fs.realpathSync(tempPath);
         const dirPath = fs.join(tempDirectoryPath, 'dir');
         const symDirPath = fs.join(tempDirectoryPath, 'sym');
         const innerFolderPath = fs.join('dir', 'inner-dir');

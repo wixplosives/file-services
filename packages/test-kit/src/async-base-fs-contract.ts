@@ -928,8 +928,9 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
       it('retrieves real path of symlinks properly', async () => {
         const {
           fs: { promises, join },
-          tempDirectoryPath,
+          tempDirectoryPath: tempPath,
         } = testInput;
+        const tempDirectoryPath = await promises.realpath(tempPath);
         const dirPath = join(tempDirectoryPath, 'dir');
         const symDirPath = join(tempDirectoryPath, 'sym');
         const innerFolderPath = join('dir', 'inner-dir');
