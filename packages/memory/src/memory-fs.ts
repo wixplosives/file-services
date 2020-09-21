@@ -504,8 +504,13 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         resolvedNodePath = posixPath.join(resolvedNodePath, depthName);
       } else if (currentNode.type === 'symlink') {
         const { node, path } = getRealNode(currentNode);
-        currentNode = node?.type === 'dir' ? node.contents.get(depthName) : node;
-        resolvedNodePath = path;
+        if (node?.type === 'dir') {
+          currentNode = node.contents.get(depthName);
+          resolvedNodePath = posixPath.join(path, depthName);
+        } else {
+          resolvedNodePath = path;
+          currentNode = node;
+        }
       } else {
         currentNode = undefined;
       }

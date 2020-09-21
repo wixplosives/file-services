@@ -925,6 +925,29 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         expect(innerFileContens).to.eq(SAMPLE_CONTENT);
       });
 
+      it('retrieves real path of symlinks properly', async () => {
+        const {
+          fs: { promises, join },
+          tempDirectoryPath,
+        } = testInput;
+        const dirPath = join(tempDirectoryPath, 'dir');
+        const symDirPath = join(tempDirectoryPath, 'sym');
+        const innerFolderPath = join('dir', 'inner-dir');
+        const sourceFilePath = join(dirPath, SOURCE_FILE_NAME);
+        const innerSourcePath = join(tempDirectoryPath, innerFolderPath, SOURCE_FILE_NAME);
+
+        await promises.mkdir(dirPath);
+        await promises.mkdir(join(tempDirectoryPath, innerFolderPath));
+        await promises.writeFile(sourceFilePath, SAMPLE_CONTENT);
+        await promises.writeFile(innerSourcePath, SAMPLE_CONTENT);
+
+        await promises.symlink(dirPath, symDirPath, 'junction');
+        const realPath = await promises.realpath(join(symDirPath, SOURCE_FILE_NAME));
+        const innerRealPath = await promises.realpath(join(symDirPath, 'inner-dir', SOURCE_FILE_NAME));
+        expect(realPath).to.eq(sourceFilePath);
+        expect(innerRealPath).to.eq(join(innerSourcePath));
+      });
+
       it('retrieves link stats', async () => {
         const {
           fs: { promises, join },
