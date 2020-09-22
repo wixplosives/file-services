@@ -786,8 +786,9 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
       it('fails creating a link over an existing directory', () => {
         const { fs, tempDirectoryPath } = testInput;
         const targetPath = fs.join(tempDirectoryPath, TARGET_NAME);
-        fs.writeFileSync(targetPath, SAMPLE_CONTENT);
         const linkPath = fs.join(tempDirectoryPath, LINK_NAME);
+
+        fs.mkdirSync(targetPath);
         fs.mkdirSync(linkPath);
 
         expect(() => fs.symlinkSync(targetPath, linkPath, 'junction')).to.throw('EEXIST');
