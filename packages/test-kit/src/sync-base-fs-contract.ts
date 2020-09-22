@@ -790,7 +790,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         const linkPath = fs.join(tempDirectoryPath, LINK_NAME);
         fs.mkdirSync(linkPath);
 
-        expect(() => fs.symlinkSync(targetPath, linkPath)).to.throw('EEXIST');
+        expect(() => fs.symlinkSync(targetPath, linkPath, 'junction')).to.throw('EEXIST');
       });
     });
   });
