@@ -84,6 +84,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(directoryPath);
         return fs.rmdirSync(directoryPath);
       },
+      symlinkSync(target, path, type) {
+        path = fs.resolve(path);
+        invalidateAbsolute(path);
+        return fs.symlinkSync(target, path, type);
+      },
       unlink(filePath, callback) {
         filePath = fs.resolve(filePath);
         invalidateAbsolute(filePath);
@@ -247,6 +252,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           statsCache.set(cacheKey, { kind: 'failure', error: e as Error });
           throw e;
         }
+      },
+      symlink(target, path, type) {
+        path = fs.resolve(path);
+        invalidateAbsolute(path);
+        return promises.symlink(target, path, type);
       },
     },
   };
