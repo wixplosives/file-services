@@ -1,7 +1,7 @@
 {
   "name": "@file-services/directory",
   "description": "A file system wrapper that adds directory scoping to any `IFileSystem` implementation.",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
@@ -14,9 +14,9 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@file-services/path": "^4.0.0",
-    "@file-services/types": "^4.0.0",
-    "@file-services/utils": "^4.0.0"
+    "@file-services/path": "^4.1.0",
+    "@file-services/types": "^4.1.0",
+    "@file-services/utils": "^4.1.0"
   },
   "files": [
     "cjs",
