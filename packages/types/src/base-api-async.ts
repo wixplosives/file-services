@@ -195,4 +195,9 @@ export interface IBaseFileSystemPromiseActions {
    * Read value of a symbolic link.
    */
   readlink(path: string): Promise<string>;
+
+  /**
+   * Creates a symbolic link for `target` at `path`. default type is 'file'.
+   */
+  symlink(target: string, path: string, type?: 'dir' | 'file' | 'junction'): Promise<void>;
 }

@@ -18,11 +18,13 @@ export interface IBaseMemFileSystemSync extends IBaseFileSystemSync {
 }
 
 export interface IFsMemNode {
-  type: 'file' | 'dir';
+  type: 'file' | 'dir' | 'symlink';
   name: string;
   birthtime: Date;
   mtime: Date;
 }
+
+export type IFsMemNodeType = IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode;
 
 export interface IFsMemFileNode extends IFsMemNode {
   type: 'file';
@@ -31,5 +33,10 @@ export interface IFsMemFileNode extends IFsMemNode {
 
 export interface IFsMemDirectoryNode extends IFsMemNode {
   type: 'dir';
-  contents: Map<string, IFsMemDirectoryNode | IFsMemFileNode>;
+  contents: Map<string, IFsMemNodeType>;
+}
+
+export interface IFsMemSymlinkNode extends IFsMemNode {
+  type: 'symlink';
+  target: string;
 }
