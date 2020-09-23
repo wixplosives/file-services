@@ -24,9 +24,9 @@ const posixPath = path.posix;
  * @param directoryPath the directory path to scope to
  */
 export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFileSystem {
-  const { watchService, promises, join, relative } = fs;
+  const { watchService, promises: fsPromises, join, relative, isAbsolute } = fs;
 
-  let workingDirectoryPath: string = posixPath.sep;
+  let workingDirectoryPath = '/';
 
   function resolveScopedPath(...pathSegments: string[]): string {
     return posixPath.resolve(workingDirectoryPath, ...pathSegments);
@@ -39,12 +39,12 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
   /** Tries to scope `unscopedPath`. If outside `directoryPath`, returns `undefined`. */
   function scopePath(unscopedPath: string) {
     const relativePath = relative(directoryPath, unscopedPath);
-    if (fs.isAbsolute(relativePath)) {
+    if (isAbsolute(relativePath)) {
       // can happen on win32, where unscopedPath is on a different drive
       return undefined;
     }
     const relativePosixPath = relativePath.replace(/\\/g, '/');
-    return !relativePosixPath.startsWith('../') ? resolveScopedPath(relativePosixPath) : undefined;
+    return !relativePosixPath.startsWith('../') ? posixPath.join('/', relativePosixPath) : undefined;
   }
 
   const scopedListeners: WeakMap<WatchEventListener, WatchEventListener> = new WeakMap();
@@ -104,56 +104,56 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     },
     promises: {
       copyFile(srcPath, destPath, ...args) {
-        return promises.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
+        return fsPromises.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
       },
       lstat(path) {
-        return promises.lstat(resolveFullPath(path));
+        return fsPromises.lstat(resolveFullPath(path));
       },
       mkdir(path, ...args) {
-        return promises.mkdir(resolveFullPath(path), ...args);
+        return fsPromises.mkdir(resolveFullPath(path), ...args);
       },
       readdir: function readdir(path: string, ...args: [{ withFileTypes: true }]) {
-        return promises.readdir(resolveFullPath(path), ...args);
+        return fsPromises.readdir(resolveFullPath(path), ...args);
       } as IBaseFileSystemPromiseActions['readdir'],
       readFile: function readFile(path: string, ...args: [ReadFileOptions]) {
-        return promises.readFile(resolveFullPath(path), ...args);
+        return fsPromises.readFile(resolveFullPath(path), ...args);
       } as IBaseFileSystemPromiseActions['readFile'],
       async realpath(path) {
-        const scopedOriginalPath = resolveScopedPath(path);
-        const unscopedPath = join(directoryPath, scopedOriginalPath);
-        const actualPath = await fs.promises.realpath(unscopedPath);
-        return scopePath(actualPath) ?? scopedOriginalPath;
+        const resolvedPath = resolveScopedPath(path);
+        const unscopedPath = join(directoryPath, resolvedPath);
+        const unscopedActualPath = await fsPromises.realpath(unscopedPath);
+        return scopePath(unscopedActualPath) ?? resolvedPath;
       },
       async readlink(path) {
-        const scopedPath = resolveScopedPath(path);
-        const unscopedPath = join(directoryPath, scopedPath);
-        const target = await fs.promises.readlink(unscopedPath);
-        return fs.isAbsolute(target) ? scopePath(target) ?? scopedPath : target;
+        const resolvedPath = resolveScopedPath(path);
+        const unscopedPath = join(directoryPath, resolvedPath);
+        const target = await fsPromises.readlink(unscopedPath);
+        return isAbsolute(target) ? scopePath(target) ?? resolvedPath : target;
       },
       rename(srcPath, destPath) {
-        return promises.rename(resolveFullPath(srcPath), resolveFullPath(destPath));
+        return fsPromises.rename(resolveFullPath(srcPath), resolveFullPath(destPath));
       },
       rmdir(path) {
-        return promises.rmdir(resolveFullPath(path));
+        return fsPromises.rmdir(resolveFullPath(path));
       },
       exists(path) {
-        return promises.exists(resolveFullPath(path));
+        return fsPromises.exists(resolveFullPath(path));
       },
       stat(path) {
-        return promises.stat(resolveFullPath(path));
+        return fsPromises.stat(resolveFullPath(path));
       },
       symlink(target, path, type) {
-        return promises.symlink(
+        return fsPromises.symlink(
           posixPath.isAbsolute(target) ? resolveFullPath(target) : target,
           resolveFullPath(path),
           type
         );
       },
       unlink(path) {
-        return promises.unlink(resolveFullPath(path));
+        return fsPromises.unlink(resolveFullPath(path));
       },
       writeFile(path, ...args) {
-        return promises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
+        return fsPromises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
       },
     },
     copyFileSync(src, dest, ...args) {
@@ -172,16 +172,16 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.readFileSync(resolveFullPath(path), ...args);
     } as IBaseFileSystemSyncActions['readFileSync'],
     realpathSync(path) {
-      const scopedOriginalPath = resolveScopedPath(path);
-      const unscopedPath = join(directoryPath, scopedOriginalPath);
-      const actualPath = fs.realpathSync(unscopedPath);
-      return scopePath(actualPath) ?? scopedOriginalPath;
+      const resolvedPath = resolveScopedPath(path);
+      const unscopedPath = join(directoryPath, resolvedPath);
+      const unscopedActualPath = fs.realpathSync(unscopedPath);
+      return scopePath(unscopedActualPath) ?? resolvedPath;
     },
     readlinkSync(path) {
-      const scopedPath = resolveScopedPath(path);
-      const unscopedPath = join(directoryPath, scopedPath);
+      const resolvedPath = resolveScopedPath(path);
+      const unscopedPath = join(directoryPath, resolvedPath);
       const target = fs.readlinkSync(unscopedPath);
-      return fs.isAbsolute(target) ? scopePath(target) ?? scopedPath : target;
+      return isAbsolute(target) ? scopePath(target) ?? resolvedPath : target;
     },
     renameSync(srcPath, destPath) {
       return fs.renameSync(resolveFullPath(srcPath), resolveFullPath(destPath));
@@ -224,25 +224,25 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       return fs.readFile(resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['readFile'],
     realpath(path, callback) {
-      const scopedOriginalPath = resolveScopedPath(path);
-      const unscopedPath = join(directoryPath, scopedOriginalPath);
+      const resolvedPath = resolveScopedPath(path);
+      const unscopedPath = join(directoryPath, resolvedPath);
 
-      fs.realpath(unscopedPath, (e, actualPath) => {
+      fs.realpath(unscopedPath, (e, unscopedActualPath) => {
         if (e) {
-          callback(e, actualPath);
+          callback(e, unscopedActualPath);
         } else {
-          callback(e, scopePath(actualPath) ?? scopedOriginalPath);
+          callback(e, scopePath(unscopedActualPath) ?? resolvedPath);
         }
       });
     },
     readlink(path, callback) {
-      const scopedPath = resolveScopedPath(path);
-      const unscopedPath = join(directoryPath, scopedPath);
+      const resolvedPath = resolveScopedPath(path);
+      const unscopedPath = join(directoryPath, resolvedPath);
       fs.readlink(unscopedPath, (e, target) => {
         if (e) {
           callback(e, target);
         } else {
-          callback(e, fs.isAbsolute(target) ? scopePath(target) ?? scopedPath : target);
+          callback(e, isAbsolute(target) ? scopePath(target) ?? resolvedPath : target);
         }
       });
     },
