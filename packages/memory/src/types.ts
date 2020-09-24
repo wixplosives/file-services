@@ -3,6 +3,7 @@ import type {
   IBaseFileSystemAsync,
   IFileSystemAsync,
   IFileSystemSync,
+  IFileSystemStats,
 } from '@file-services/types';
 
 export interface IMemFileSystem extends IFileSystemSync, IFileSystemAsync {
@@ -20,8 +21,7 @@ export interface IBaseMemFileSystemSync extends IBaseFileSystemSync {
 export interface IFsMemNode {
   type: 'file' | 'dir' | 'symlink';
   name: string;
-  birthtime: Date;
-  mtime: Date;
+  stats: IFileSystemStats;
 }
 
 export type IFsMemNodeType = IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode;

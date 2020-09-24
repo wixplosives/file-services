@@ -150,9 +150,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       if (existingNode.type === 'dir') {
         throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
       }
-      existingNode.mtime = new Date();
+      existingNode.stats = { ...existingNode.stats, mtime: new Date() };
       existingNode.contents = fileContent;
-      emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(existingNode) });
+      emitWatchEvent({ path: resolvedPath, stats: existingNode.stats });
     } else {
       const parentPath = posixPath.dirname(resolvedPath);
       const parentNode = getNode(parentPath);
@@ -166,12 +166,17 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       const newFileNode: IFsMemFileNode = {
         type: 'file',
         name: fileName,
-        birthtime: currentDate,
-        mtime: currentDate,
+        stats: {
+          birthtime: currentDate,
+          mtime: currentDate,
+          isFile: returnsTrue,
+          isDirectory: returnsFalse,
+          isSymbolicLink: returnsFalse,
+        },
         contents: fileContent,
       };
       parentNode.contents.set(fileName, newFileNode);
-      emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newFileNode) });
+      emitWatchEvent({ path: resolvedPath, stats: newFileNode.stats });
     }
   }
 
@@ -220,7 +225,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const childNodes = Array.from(directoryNode.contents.values());
 
     return !!options && typeof options === 'object' && options.withFileTypes
-      ? childNodes.map((node) => ({ name: node.name, ...createStatsFromNode(node) }))
+      ? childNodes.map((node) => ({ name: node.name, ...node.stats }))
       : childNodes.map(({ name }) => name);
   }
 
@@ -259,7 +264,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName);
     parentNode.contents.set(directoryName, newDirNode);
-    emitWatchEvent({ path: resolvedPath, stats: createStatsFromNode(newDirNode) });
+    emitWatchEvent({ path: resolvedPath, stats: newDirNode.stats });
   }
 
   function rmdirSync(directoryPath: string): void {
@@ -294,7 +299,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     if (!node) {
       throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
-    return createStatsFromNode(node);
+    return node.stats;
   }
 
   function lstatSync(nodePath: string): IFileSystemStats {
@@ -303,7 +308,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     if (!node) {
       throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
-    return createStatsFromNode(node);
+    return node.stats;
   }
 
   function realpathSync(nodePath: string): string {
@@ -369,11 +374,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     sourceParentNode.contents.delete(sourceName);
     sourceNode.name = destinationName;
-    sourceNode.mtime = new Date();
+    sourceNode.stats = { ...sourceNode.stats, mtime: new Date() };
     destinationParentNode.contents.set(destinationName, sourceNode);
 
     emitWatchEvent({ path: resolvedSourcePath, stats: null });
-    emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(sourceNode) });
+    emitWatchEvent({ path: resolvedDestinationPath, stats: sourceNode.stats });
   }
 
   function copyFileSync(sourcePath: string, destinationPath: string, flags = 0): void {
@@ -411,10 +416,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       }
     }
 
-    const newFileNode: IFsMemFileNode = { ...sourceFileNode, name: targetName, mtime: new Date() };
+    const newFileNode: IFsMemFileNode = {
+      ...sourceFileNode,
+      name: targetName,
+      stats: { ...sourceFileNode.stats, mtime: new Date() },
+    };
     destParentNode.contents.set(targetName, newFileNode);
 
-    emitWatchEvent({ path: resolvedDestinationPath, stats: createStatsFromNode(newFileNode) });
+    emitWatchEvent({ path: resolvedDestinationPath, stats: newFileNode.stats });
   }
 
   function symlinkSync(target: string, linkPath: string) {
@@ -436,14 +445,19 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const fileName = posixPath.basename(resolvedLinkPath);
     const symlinkNode: IFsMemSymlinkNode = {
       type: 'symlink',
-      birthtime: currentDate,
-      mtime: currentDate,
+      stats: {
+        birthtime: currentDate,
+        mtime: currentDate,
+        isFile: returnsFalse,
+        isDirectory: returnsFalse,
+        isSymbolicLink: returnsTrue,
+      },
       target,
       name: fileName,
     };
 
     parentNode.contents.set(fileName, symlinkNode);
-    emitWatchEvent({ path: resolvedLinkPath, stats: createStatsFromNode(symlinkNode) });
+    emitWatchEvent({ path: resolvedLinkPath, stats: symlinkNode.stats });
   }
 
   function getNode(nodePath: string): IFsMemFileNode | IFsMemDirectoryNode | undefined {
@@ -497,23 +511,18 @@ function createMemDirectory(name: string): IFsMemDirectoryNode {
     type: 'dir',
     name,
     contents: new Map<string, IFsMemNodeType>(),
-    birthtime: currentDate,
-    mtime: currentDate,
+    stats: {
+      birthtime: currentDate,
+      mtime: currentDate,
+      isFile: returnsFalse,
+      isDirectory: returnsTrue,
+      isSymbolicLink: returnsFalse,
+    },
   };
 }
 
 const returnsTrue = () => true;
 const returnsFalse = () => false;
-
-function createStatsFromNode(node: IFsMemNodeType): IFileSystemStats {
-  return {
-    birthtime: node.birthtime,
-    mtime: node.mtime,
-    isFile: node.type === 'file' ? returnsTrue : returnsFalse,
-    isDirectory: node.type === 'dir' ? returnsTrue : returnsFalse,
-    isSymbolicLink: node.type === 'symlink' ? returnsTrue : returnsFalse,
-  };
-}
 
 function createFsError(
   path: string,
