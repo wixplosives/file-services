@@ -4,6 +4,7 @@ import type {
   IFileSystemAsync,
   IFileSystemSync,
   IFileSystemStats,
+  IDirectoryEntry,
 } from '@file-services/types';
 
 export interface IMemFileSystem extends IFileSystemSync, IFileSystemAsync {
@@ -18,10 +19,11 @@ export interface IBaseMemFileSystemSync extends IBaseFileSystemSync {
   root: IFsMemDirectoryNode;
 }
 
+export interface IFsMemStatsEntry extends IFileSystemStats, IDirectoryEntry {}
+
 export interface IFsMemNode {
   type: 'file' | 'dir' | 'symlink';
-  name: string;
-  stats: IFileSystemStats;
+  entry: IFsMemStatsEntry;
 }
 
 export type IFsMemNodeType = IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode;
