@@ -1,7 +1,7 @@
 {
   "name": "@file-services/test-kit",
   "description": "File system test-kit, containing contracts and validators.",
-  "version": "4.1.0",
+  "version": "4.1.2",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "types": "esm/index.d.ts",
