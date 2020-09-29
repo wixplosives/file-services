@@ -321,7 +321,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       if (depthName === '') {
         continue;
       }
-      if (node?.type === 'dir') {
+      if (node.type === 'dir') {
         node = node.contents.get(depthName);
         currentPath = posixPath.join(currentPath, depthName);
         while (node?.type === 'symlink') {
@@ -487,13 +487,13 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     for (const depthName of nodePath.split(posixPath.sep)) {
       if (!node) {
         break;
+      } 
+      if (depthName === '') {
+        continue;
       }
       while (node?.type === 'symlink') {
         currentPath = posixPath.resolve(posixPath.dirname(currentPath), node.target);
         node = getRawNode(currentPath);
-      }
-      if (depthName === '') {
-        continue;
       }
       if (node?.type === 'dir') {
         node = node.contents.get(depthName);
