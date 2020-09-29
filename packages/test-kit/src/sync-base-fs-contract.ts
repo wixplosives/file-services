@@ -742,8 +742,8 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         fs.symlinkSync(targetPath, linkPath);
         fs.symlinkSync(linkPath, linkToLinkPath);
 
-        expect(fs.realpathSync(linkPath)).to.equal(fs.realpathSync(targetPath));
-        expect(fs.realpathSync(linkToLinkPath)).to.equal(fs.realpathSync(targetPath));
+        expect(fs.realpathSync(linkPath)).to.equal(targetPath);
+        expect(fs.realpathSync(linkToLinkPath)).to.equal(targetPath);
       });
 
       it('keeps relative links relative', () => {
