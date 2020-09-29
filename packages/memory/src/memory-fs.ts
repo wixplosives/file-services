@@ -311,16 +311,31 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   }
 
   function realpathSync(nodePath: string): string {
-    let actualPath = resolvePath(nodePath);
-    let node = getRawNode(actualPath);
-    while (node?.type === 'symlink') {
-      actualPath = posixPath.resolve(posixPath.dirname(actualPath), node.target);
-      node = getRawNode(actualPath);
+    const resolvedPath = resolvePath(nodePath);
+    let currentPath = '/';
+    let node: IFsMemNodeType | undefined = root;
+    for (const depthName of resolvedPath.split(posixPath.sep)) {
+      if (!node) {
+        break;
+      }
+      if (depthName === '') {
+        continue;
+      }
+      if (node?.type === 'dir') {
+        node = node.contents.get(depthName);
+        currentPath = posixPath.join(currentPath, depthName);
+        while (node?.type === 'symlink') {
+          currentPath = posixPath.resolve(posixPath.dirname(currentPath), node.target);
+          node = getRawNode(currentPath);
+        }
+      } else {
+        node = undefined;
+      }
     }
     if (!node) {
-      throw createFsError(actualPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
-    return actualPath;
+    return currentPath;
   }
 
   function readlinkSync(nodePath: string): string {
@@ -467,20 +482,22 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   }
 
   function getRawNode(nodePath: string): IFsMemNodeType | undefined {
+    let currentPath = '/';
     let node: IFsMemNodeType | undefined = root;
     for (const depthName of nodePath.split(posixPath.sep)) {
       if (!node) {
         break;
       }
       while (node?.type === 'symlink') {
-        nodePath = posixPath.resolve(posixPath.dirname(nodePath), node.target);
-        node = getRawNode(nodePath);
+        currentPath = posixPath.resolve(posixPath.dirname(currentPath), node.target);
+        node = getRawNode(currentPath);
       }
       if (depthName === '') {
         continue;
       }
       if (node?.type === 'dir') {
         node = node.contents.get(depthName);
+        currentPath = posixPath.join(currentPath, depthName);
       } else {
         node = undefined;
       }

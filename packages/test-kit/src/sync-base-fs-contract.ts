@@ -746,6 +746,28 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         expect(fs.realpathSync(linkToLinkPath)).to.equal(targetPath);
       });
 
+      it('resolves the real path of a file inside a linked directory', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const targetDirectoryPath = fs.join(tempDirectoryPath, 'target-dir');
+        fs.mkdirSync(targetDirectoryPath);
+        const targetFilePath = fs.join(targetDirectoryPath, TARGET_NAME);
+        fs.writeFileSync(targetFilePath, SAMPLE_CONTENT);
+        const linkedDirectoryPath = fs.join(tempDirectoryPath, LINK_NAME);
+
+        fs.symlinkSync(targetDirectoryPath, linkedDirectoryPath, 'junction');
+
+        expect(fs.realpathSync(linkedDirectoryPath)).to.equal(targetDirectoryPath);
+        expect(fs.realpathSync(fs.join(linkedDirectoryPath, TARGET_NAME))).to.equal(targetFilePath);
+
+        const anotherDirectoryPath = fs.join(tempDirectoryPath, 'another-dir');
+        fs.mkdirSync(anotherDirectoryPath);
+        const linkToLinkPath = fs.join(anotherDirectoryPath, `${LINK_NAME}2`);
+
+        fs.symlinkSync(`../${LINK_NAME}`, linkToLinkPath, 'junction');
+        expect(fs.realpathSync(fs.join(linkToLinkPath, TARGET_NAME))).to.equal(targetFilePath);
+      });
+
       it('keeps relative links relative', () => {
         const { fs, tempDirectoryPath } = testInput;
         const targetPath = fs.join(tempDirectoryPath, TARGET_NAME);
