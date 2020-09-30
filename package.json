@@ -50,7 +50,7 @@
     "sinon-chai": "^3.5.0",
     "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "type-fest": "^0.16.0",
+    "type-fest": "^0.17.0",
     "typescript": "~4.0.3",
     "webpack": "^4.44.2"
   },
