@@ -440,6 +440,7 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs });
 
       expect(resolveRequest('/', './some-file')).to.be.resolvedTo(false);
+      expect(resolveRequest('/', './some-file').originalFilePath).to.equal('/some-file.js');
     });
 
     it('supports remapping of package to a relative file', () => {

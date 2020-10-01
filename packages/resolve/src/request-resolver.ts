@@ -1,5 +1,5 @@
 import type { PackageJson } from 'type-fest';
-import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson } from './types';
+import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types';
 
 const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
@@ -20,7 +20,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   return requestResolver;
 
-  function requestResolver(contextPath: string, originalRequest: string) {
+  function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
     let request: string | false = originalRequest;
     if (target === 'browser') {
       const fromPackageJson = findUpPackageJson(contextPath);
@@ -43,6 +43,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         if (remappedFilePath !== undefined) {
           return {
             resolvedFile: remappedFilePath,
+            originalFilePath: resolvedFile,
           };
         }
       }

@@ -38,6 +38,12 @@ export interface IResolutionOutput {
    * `undefined` - couldn't resolve request.
    */
   resolvedFile?: string | false;
+
+  /**
+   * When an internal package request is re-mapped to `false`, this will point to the original
+   * filePath this request pointed to.
+   */
+  originalFilePath?: string;
 }
 
 /**
