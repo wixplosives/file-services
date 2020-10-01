@@ -96,6 +96,26 @@ describe('commonjs module system', () => {
     expect(requireModule(sampleFilePath)).to.eql(processEnv);
   });
 
+  it('allows specifying a custom process.cwd()', () => {
+    const fs = createMemoryFs({
+      [sampleFilePath]: `module.exports = process.cwd()`,
+    });
+    const cwd = () => '/abc';
+    const { requireModule } = createCjsModuleSystem({ fs, cwd });
+
+    expect(requireModule(sampleFilePath)).to.eql('/abc');
+  });
+
+  it('mocks process.on(...)', () => {
+    const fs = createMemoryFs({
+      [sampleFilePath]: `process.on('uncaughtException', console.error)
+      module.exports = 123`,
+    });
+    const { requireModule } = createCjsModuleSystem({ fs });
+
+    expect(requireModule(sampleFilePath)).to.eql(123);
+  });
+
   it('allows requiring other js modules', () => {
     const fs = createMemoryFs({
       'index.js': `module.exports = require('./numeric')`,

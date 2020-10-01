@@ -1,5 +1,9 @@
+import os from 'os';
+import readline from 'readline';
+import stream from 'stream';
 import { expect } from 'chai';
 import fs from '@file-services/node';
+import path from '@file-services/path';
 import { createCjsModuleSystem } from '../src';
 
 describe('commonjs module system - integration with existing npm packages', function () {
@@ -25,6 +29,14 @@ describe('commonjs module system - integration with existing npm packages', func
     expect(chai.use).to.be.instanceOf(Function);
   });
 
+  it('evaluates postcss successfully', () => {
+    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
+    const postcss = requireFrom(__dirname, 'postcss') as typeof import('postcss');
+
+    expect(postcss.parse).to.be.instanceOf(Function);
+  });
+
   it('evaluates typescript successfully', () => {
     const { requireFrom } = createCjsModuleSystem({ fs });
 
@@ -33,19 +45,22 @@ describe('commonjs module system - integration with existing npm packages', func
     expect(ts.transpileModule).to.be.instanceOf(Function);
   });
 
-  // skipped until external modules (node apis) can be provided using options
-  it.skip('evaluates mocha successfully', () => {
-    const { requireFrom } = createCjsModuleSystem({ fs });
+  it('evaluates mocha successfully', () => {
+    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
+    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
+    const browserMocha = requireFrom(__dirname, 'mocha') as typeof mocha;
 
-    const mocha = requireFrom(__dirname, 'mocha') as typeof import('mocha');
-
-    expect(mocha.setup).to.be.instanceOf(Function);
-    expect(mocha.run).to.be.instanceOf(Function);
+    expect(browserMocha.setup).to.be.instanceOf(Function);
   });
 
-  // skipped until external modules (node apis) can be provided using options
-  it.skip('evaluates sass successfully', () => {
-    const { requireFrom } = createCjsModuleSystem({ fs });
+  it('evaluates sass successfully', () => {
+    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
+    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
+    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
+    loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
+    loadedModules.set('readline', { filename: 'readline', id: 'readline', exports: readline });
 
     const sass = requireFrom(__dirname, 'sass') as typeof import('sass');
 

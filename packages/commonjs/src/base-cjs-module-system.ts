@@ -3,6 +3,13 @@ import { envGlobal } from './global-this';
 
 export interface IBaseModuleSystemOptions {
   /**
+   * Exposed to modules as `process.cwd`.
+   *
+   * @default () => '/'
+   */
+  cwd?: () => string;
+
+  /**
    * Exposed to modules as `process.env`.
    *
    * @default { NODE_ENV: 'development' }
@@ -32,10 +39,15 @@ export interface IBaseModuleSystemOptions {
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, processEnv = { NODE_ENV: 'development' } } = options;
+  const { resolveFrom, dirname, readFileSync, processEnv = { NODE_ENV: 'development' }, cwd = () => '/' } = options;
 
+  const noop = () => undefined;
   const loadedModules = new Map<string, IModule>();
-  const globalProcess = { env: processEnv };
+  const globalProcess = {
+    on: noop,
+    cwd: cwd,
+    env: processEnv,
+  };
 
   return {
     requireModule,

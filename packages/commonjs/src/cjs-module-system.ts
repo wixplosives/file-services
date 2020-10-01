@@ -5,6 +5,13 @@ import { createBaseCjsModuleSystem } from './base-cjs-module-system';
 
 export interface IModuleSystemOptions {
   /**
+   * Exposed to modules as `process.cwd`.
+   *
+   * @default () => '/'
+   */
+  cwd?: () => string;
+
+  /**
    * Exposed to modules as `process.env`.
    *
    * @default { NODE_ENV: 'development' }
@@ -30,7 +37,7 @@ export interface IModuleSystemOptions {
 }
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
-  const { fs, processEnv = { NODE_ENV: 'development' } } = options;
+  const { fs, processEnv = { NODE_ENV: 'development' }, cwd } = options;
   const { dirname, readFileSync } = fs;
 
   const { resolver = createRequestResolver({ fs }) } = options;
@@ -40,5 +47,6 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     dirname,
     processEnv,
+    cwd: cwd ?? fs.cwd,
   });
 }
