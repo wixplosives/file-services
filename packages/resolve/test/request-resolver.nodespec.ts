@@ -1,6 +1,6 @@
 import chai, { expect } from 'chai';
 import fs from '@file-services/node';
-import { createRequestResolver } from '../src';
+import { createRequestResolver } from '@file-services/resolve';
 import { resolutionMatchers } from './resolution-matchers';
 
 chai.use(resolutionMatchers);
@@ -23,9 +23,6 @@ describe('request resolver node integration', () => {
       },
     });
     const requestViaLink = '@file-services/resolve/package.json';
-    const monorepoRoot = fs.dirname(require.resolve('../../../package.json'));
-    const expectedPath = fs.join(monorepoRoot, 'node_modules', requestViaLink);
-
-    expect(resolveRequest(__dirname, requestViaLink)).to.be.resolvedTo(expectedPath);
+    expect(resolveRequest(__dirname, requestViaLink).resolvedFile).to.include(fs.join('node_modules', requestViaLink));
   });
 });

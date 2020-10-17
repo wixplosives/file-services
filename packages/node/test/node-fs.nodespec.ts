@@ -1,9 +1,11 @@
 import { platform } from 'os';
 import { syncBaseFsContract, asyncBaseFsContract, asyncFsContract, syncFsContract } from '@file-services/test-kit';
 import { createTempDirectory } from 'create-temp-directory';
-import { createNodeFs } from '../src';
+import { createNodeFs } from '@file-services/node';
 
-describe('Node File System Implementation', () => {
+describe('Node File System Implementation', function () {
+  this.timeout(10_000);
+
   const fs = createNodeFs({ watchOptions: { debounceWait: 500 } });
   const { watchService } = fs;
 

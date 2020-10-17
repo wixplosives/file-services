@@ -2,7 +2,7 @@ import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { asyncBaseFsContract, syncBaseFsContract } from '@file-services/test-kit';
 import { createMemoryFs } from '@file-services/memory';
-import { createDirectoryFs } from '../src';
+import { createDirectoryFs } from '@file-services/directory';
 
 chai.use(chaiAsPromised);
 

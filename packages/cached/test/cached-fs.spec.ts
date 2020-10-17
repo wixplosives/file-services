@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 import sinon from 'sinon';
 import { asyncBaseFsContract, syncBaseFsContract } from '@file-services/test-kit';
 import { createMemoryFs } from '@file-services/memory';
-import { createCachedFs } from '../src';
+import { createCachedFs } from '@file-services/cached';
 
 chai.use(chaiAsPromised);
 

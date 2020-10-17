@@ -1,7 +1,7 @@
-import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit';
-import { createMemoryFs } from '../src';
 import { expect } from 'chai';
 import { sleep } from 'promise-assist';
+import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit';
+import { createMemoryFs } from '@file-services/memory';
 
 describe('In-memory File System Implementation', () => {
   const testProvider = async () => {

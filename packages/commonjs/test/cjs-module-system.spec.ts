@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
-import { createCjsModuleSystem } from '../src';
+import { createCjsModuleSystem } from '@file-services/commonjs';
 
 describe('commonjs module system', () => {
   const sampleString = 'named';

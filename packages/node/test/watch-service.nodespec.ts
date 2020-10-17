@@ -1,10 +1,9 @@
-import { join } from 'path';
+import { sleep } from 'promise-assist';
 import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
 import type { IWatchService } from '@file-services/types';
-import { sleep } from 'promise-assist';
 import { WatchEventsValidator } from '@file-services/test-kit';
+import { NodeWatchService, nodeFs } from '@file-services/node';
 
-import { NodeWatchService, nodeFs } from '../src';
 const { writeFile, stat, mkdir, rmdir } = nodeFs.promises;
 
 const debounceWait = 500;
@@ -31,7 +30,7 @@ describe('Node Watch Service', function () {
       validator = new WatchEventsValidator(watchService);
 
       tempDir = await createTempDirectory();
-      testFilePath = join(tempDir.path, 'test-file');
+      testFilePath = nodeFs.join(tempDir.path, 'test-file');
 
       await writeFile(testFilePath, SAMPLE_CONTENT);
       await watchService.watchPath(testFilePath);
@@ -72,7 +71,7 @@ describe('Node Watch Service', function () {
       validator = new WatchEventsValidator(watchService);
 
       tempDir = await createTempDirectory();
-      testDirectoryPath = join(tempDir.path, 'test-directory');
+      testDirectoryPath = nodeFs.join(tempDir.path, 'test-directory');
       await mkdir(testDirectoryPath);
     });
 
@@ -96,9 +95,9 @@ describe('Node Watch Service', function () {
       validator = new WatchEventsValidator(watchService);
 
       tempDir = await createTempDirectory();
-      testDirectoryPath = join(tempDir.path, 'test-directory');
+      testDirectoryPath = nodeFs.join(tempDir.path, 'test-directory');
       await mkdir(testDirectoryPath);
-      testFilePath = join(testDirectoryPath, 'test-file');
+      testFilePath = nodeFs.join(testDirectoryPath, 'test-file');
       await writeFile(testFilePath, SAMPLE_CONTENT);
     });
 

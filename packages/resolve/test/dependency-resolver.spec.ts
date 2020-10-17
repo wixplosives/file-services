@@ -2,7 +2,7 @@ import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { createMemoryFs } from '@file-services/memory';
-import { createDependencyResolver, createRequestResolver } from '../src';
+import { createDependencyResolver, createRequestResolver } from '@file-services/resolve';
 
 chai.use(sinonChai);
 

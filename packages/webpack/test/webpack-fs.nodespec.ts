@@ -2,10 +2,12 @@ import { expect } from 'chai';
 import webpack from 'webpack';
 import { nodeFs } from '@file-services/node';
 import { createMemoryFs } from '@file-services/memory';
-import { createWebpackFs } from '@file-services/webpack';
 import { createOverlayFs } from '@file-services/overlay';
+import { createWebpackFs } from '@file-services/webpack';
 
-describe('createWebpackFs', () => {
+describe('createWebpackFs', function () {
+  this.timeout(10_000);
+
   it('allows bundling from and to memory file system', async () => {
     const memFs = createMemoryFs({
       src: {
@@ -27,15 +29,9 @@ describe('createWebpackFs', () => {
     compiler.inputFileSystem = webpackFs;
     compiler.outputFileSystem = webpackFs;
 
-    const webpackStats = await new Promise<webpack.Stats>((res, rej) => {
-      compiler.run((e, stats) => {
-        if (e) {
-          rej(e);
-        } else {
-          res(stats);
-        }
-      });
-    });
+    const webpackStats = await new Promise<webpack.Stats>((res, rej) =>
+      compiler.run((e, stats) => (e ? rej(e) : res(stats)))
+    );
 
     expect(webpackStats.hasWarnings() || webpackStats.hasErrors(), webpackStats.toString()).to.equal(false);
     expect(memFs.fileExistsSync(memFs.resolve('dist', 'main.js')), 'bundle exists').to.equal(true);
@@ -62,15 +58,9 @@ describe('createWebpackFs', () => {
     compiler.inputFileSystem = webpackFs;
     compiler.outputFileSystem = createWebpackFs(memFs);
 
-    const webpackStats = await new Promise<webpack.Stats>((res, rej) => {
-      compiler.run((e, stats) => {
-        if (e) {
-          rej(e);
-        } else {
-          res(stats);
-        }
-      });
-    });
+    const webpackStats = await new Promise<webpack.Stats>((res, rej) =>
+      compiler.run((e, stats) => (e ? rej(e) : res(stats)))
+    );
 
     expect(webpackStats.hasWarnings() || webpackStats.hasErrors(), webpackStats.toString()).to.equal(false);
     expect(memFs.fileExistsSync(memFs.resolve('dist', 'main.js')), 'bundle exists').to.equal(true);

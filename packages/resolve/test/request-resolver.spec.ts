@@ -1,8 +1,8 @@
 import chai, { expect } from 'chai';
-import { createMemoryFs } from '@file-services/memory';
-import { createRequestResolver } from '../src';
-import { resolutionMatchers } from './resolution-matchers';
 import type { PackageJson } from 'type-fest';
+import { createMemoryFs } from '@file-services/memory';
+import { createRequestResolver } from '@file-services/resolve';
+import { resolutionMatchers } from './resolution-matchers';
 
 chai.use(resolutionMatchers);
 const stringifyPackageJson = (packageJson: PackageJson) => JSON.stringify(packageJson);

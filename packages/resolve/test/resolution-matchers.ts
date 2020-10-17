@@ -1,4 +1,4 @@
-import type { IResolutionOutput } from '../src';
+import type { IResolutionOutput } from '@file-services/resolve';
 
 export const resolutionMatchers: Chai.ChaiPlugin = (chai, util) => {
   chai.Assertion.addMethod('resolvedTo', function (expectedFilePath: string | false | undefined) {
