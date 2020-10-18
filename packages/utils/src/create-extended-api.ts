@@ -145,7 +145,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   }
 
   function findFilesSync(rootDirectory: string, options: IWalkOptions = {}, filePaths: string[] = []): string[] {
-    const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
+    const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 
     for (const nodeName of readdirSync(rootDirectory)) {
       const nodePath = join(rootDirectory, nodeName);
@@ -158,10 +158,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
           findFilesSync(nodePath, options, filePaths);
         }
       } catch (e) {
-        if (printErrors) {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
+        /**/
       }
     }
 
@@ -344,7 +341,7 @@ export function createExtendedFileSystemPromiseActions(
     options: IWalkOptions = {},
     filePaths: string[] = []
   ): Promise<string[]> {
-    const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
+    const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 
     for (const nodeName of await readdir(rootDirectory)) {
       const nodePath = join(rootDirectory, nodeName);
@@ -357,10 +354,7 @@ export function createExtendedFileSystemPromiseActions(
           await findFiles(nodePath, options, filePaths);
         }
       } catch (e) {
-        if (printErrors) {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
+        /**/
       }
     }
 
