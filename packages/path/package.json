@@ -3,7 +3,6 @@
   "description": "Node's `path` implementation, ready for the web.",
   "version": "4.1.0",
   "main": "index.js",
-  "types": "index.d.ts",
   "browser": "browser-path.js",
   "dependencies": {
     "@file-services/types": "^4.1.0"

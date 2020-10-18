@@ -2,21 +2,16 @@
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
   "version": "4.1.2",
-  "main": "cjs/index.js",
-  "types": "cjs/index.d.ts",
-  "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "test": "mocha \"test/**/*.nodespec.ts?(x)\"",
-    "prepack": "yarn build"
-  },
+  "main": "dist/index.js",
   "dependencies": {
     "@file-services/types": "^4.1.0",
     "@file-services/utils": "^4.1.0"
   },
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "engines": {
     "node": ">=10.12.0"

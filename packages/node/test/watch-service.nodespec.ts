@@ -10,7 +10,7 @@ const debounceWait = 500;
 const SAMPLE_CONTENT = `sample file content`;
 
 describe('Node Watch Service', function () {
-  this.timeout(10000); // override mocha's 2s timeout to 10s
+  this.timeout(10_000);
 
   let tempDir: ITempDirectory;
   let watchService: IWatchService;
