@@ -3,7 +3,6 @@
   "description": "Common file system interfaces",
   "version": "4.1.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "!dist/test",

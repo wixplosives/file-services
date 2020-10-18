@@ -3,7 +3,6 @@
   "description": "Node.js file system implementation.",
   "version": "4.1.2",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "dependencies": {
     "@file-services/types": "^4.1.0",
     "@file-services/utils": "^4.1.0"

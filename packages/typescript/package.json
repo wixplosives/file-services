@@ -3,7 +3,6 @@
   "description": "Helpers for creation of TypeScript hosts",
   "version": "4.1.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "peerDependencies": {
     "typescript": ">=2.8.0"
   },

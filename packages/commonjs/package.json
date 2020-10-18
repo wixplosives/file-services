@@ -3,7 +3,6 @@
   "description": "Isomorphic, fs-agnostic implementation of the Node commonjs module system.",
   "version": "4.2.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "dependencies": {
     "@file-services/resolve": "^4.2.0",
     "@file-services/types": "^4.1.0"

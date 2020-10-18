@@ -3,7 +3,6 @@
   "description": "File system test-kit, containing contracts and validators.",
   "version": "4.1.2",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "dependencies": {
     "@file-services/types": "^4.1.0",
     "chai": "^4.2.0",
