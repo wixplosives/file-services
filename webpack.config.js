@@ -1,23 +1,13 @@
-const { join } = require('path');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-
+/** @type {import('webpack').Configuration} */
 module.exports = {
-  // root of the monorepo, so that paths in output will be clickable
-  context: __dirname,
-
-  // works great. with the default 'eval', imports are not mapped.
-  devtool: 'source-map',
-
-  resolve: {
-    extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
-    plugins: [new TsconfigPathsPlugin({ configFile: join(__dirname, 'tsconfig.json') })],
-  },
-
+  context: __dirname, // so paths in output will be clickable
+  devtool: 'source-map', // works great (unlike default "eval", where imports are not mapped)
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        loader: '@ts-tools/webpack-loader',
+        test: /\.js$/,
+        enforce: 'pre',
+        loader: 'source-map-loader',
       },
     ],
   },

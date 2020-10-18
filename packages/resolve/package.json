@@ -2,21 +2,13 @@
   "name": "@file-services/resolve",
   "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
   "version": "4.2.0",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "esm/index.d.ts",
-  "scripts": {
-    "clean": "rimraf ./cjs ./esm",
-    "build": "ts-build ./src --cjs --esm",
-    "test": "run-p test:node test:browser",
-    "test:node": "mocha \"test/**/*.{spec,nodespec}.ts?(x)\"",
-    "test:browser": "mocha-pup \"test/**/*.spec.ts?(x)\"",
-    "prepack": "yarn build"
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "cjs",
-    "esm",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/resolve",

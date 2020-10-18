@@ -81,7 +81,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     try {
       mkdirSync(directoryPath);
     } catch (e) {
-      const code = (e as NodeJS.ErrnoException)?.code;
+      const code = (e as { code?: string })?.code;
       if (code === 'EISDIR') {
         return;
       } else if (code === 'EEXIST') {
@@ -103,7 +103,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       try {
         mkdirSync(directoryPath);
       } catch (e) {
-        const code = (e as NodeJS.ErrnoException)?.code;
+        const code = (e as { code?: string })?.code;
         const isDirectoryExistsError = code === 'EISDIR' || (code === 'EEXIST' && directoryExistsSync(directoryPath));
         if (!isDirectoryExistsError) {
           throw e;
@@ -274,7 +274,7 @@ export function createExtendedFileSystemPromiseActions(
     try {
       await mkdir(directoryPath);
     } catch (e) {
-      const code = (e as NodeJS.ErrnoException)?.code;
+      const code = (e as { code?: string })?.code;
       if (code === 'EISDIR') {
         return;
       } else if (code === 'EEXIST') {
@@ -296,7 +296,7 @@ export function createExtendedFileSystemPromiseActions(
       try {
         await mkdir(directoryPath);
       } catch (e) {
-        const code = (e as NodeJS.ErrnoException)?.code;
+        const code = (e as { code?: string })?.code;
         const isDirectoryExistsError =
           code === 'EISDIR' || (code === 'EEXIST' && (await directoryExists(directoryPath)));
         if (!isDirectoryExistsError) {
