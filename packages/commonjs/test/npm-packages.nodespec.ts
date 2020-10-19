@@ -1,10 +1,13 @@
 import os from 'os';
 import readline from 'readline';
+import tty from 'tty';
 import stream from 'stream';
+import url from 'url';
 import { expect } from 'chai';
 import fs from '@file-services/node';
 import path from '@file-services/path';
 import { createCjsModuleSystem } from '@file-services/commonjs';
+import { createRequestResolver } from '@file-services/resolve';
 
 describe('commonjs module system - integration with existing npm packages', function () {
   this.timeout(10_000); // 10s
@@ -38,7 +41,8 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates typescript successfully', () => {
-    const { requireFrom } = createCjsModuleSystem({ fs });
+    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
 
     const ts = requireFrom(__dirname, 'typescript') as typeof import('typescript');
 
@@ -46,19 +50,25 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates mocha successfully', () => {
-    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    const { requireFrom, loadedModules } = createCjsModuleSystem({
+      fs,
+      resolver: createRequestResolver({ fs, target: 'node' }),
+    });
     loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
     loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
-    const browserMocha = requireFrom(__dirname, 'mocha') as typeof mocha;
+    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
+    loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
+    loadedModules.set('tty', { filename: 'tty', id: 'tty', exports: tty });
+    const mocha = requireFrom(__dirname, 'mocha') as typeof import('mocha');
 
-    expect(browserMocha.setup).to.be.instanceOf(Function);
+    expect(mocha.reporters).to.be.an('object');
   });
 
-  // somehow messes up fs, causing other tests to fail in repo-wide test-run
-  it.skip('evaluates sass successfully', () => {
+  it('evaluates sass successfully', () => {
     const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
     loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
+    loadedModules.set('url', { filename: 'url', id: 'url', exports: url });
     loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
     loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
     loadedModules.set('readline', { filename: 'readline', id: 'readline', exports: readline });

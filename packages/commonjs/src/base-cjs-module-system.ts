@@ -1,20 +1,11 @@
-import type { IModule, ModuleEvalFn, ICommonJsModuleSystem } from './types';
+import type { IModule, ICommonJsModuleSystem } from './types';
 import { envGlobal } from './global-this';
 
 export interface IBaseModuleSystemOptions {
   /**
-   * Exposed to modules as `process.cwd`.
-   *
-   * @default () => '/'
+   * Exposed to modules as globals.
    */
-  cwd?: () => string;
-
-  /**
-   * Exposed to modules as `process.env`.
-   *
-   * @default { NODE_ENV: 'development' }
-   */
-  processEnv?: Record<string, string | undefined>;
+  globals?: Record<string, unknown>;
 
   /**
    * @returns textual contents of `filePath`.
@@ -39,15 +30,9 @@ export interface IBaseModuleSystemOptions {
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, processEnv = { NODE_ENV: 'development' }, cwd = () => '/' } = options;
+  const { resolveFrom, dirname, readFileSync, globals } = options;
 
-  const noop = () => undefined;
   const loadedModules = new Map<string, IModule>();
-  const globalProcess = {
-    on: noop,
-    cwd: cwd,
-    env: processEnv,
-  };
 
   return {
     requireModule,
@@ -93,17 +78,25 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       loadedModules.set(filePath, newModule);
       return newModule.exports;
     }
-
-    const moduleFn = eval(
-      `(function (module, exports, __filename, __dirname, process, require, global){${fileContents}\n})`
-    ) as ModuleEvalFn;
-
-    loadedModules.set(filePath, newModule);
     const requireFromContext = (request: string) => requireFrom(contextPath, request, filePath);
     requireFromContext.resolve = (request: string) => resolveThrow(contextPath, request, filePath);
+    const moduleArguments = {
+      module: newModule,
+      exports: newModule.exports,
+      __filename: filePath,
+      __dirname: contextPath,
+      require: requireFromContext,
+      global: envGlobal,
+      ...globals,
+    };
+    const moduleFn = eval(`(function (${Object.keys(moduleArguments).join(', ')}){${fileContents}\n})`) as (
+      ...args: unknown[]
+    ) => void;
+
+    loadedModules.set(filePath, newModule);
 
     try {
-      moduleFn(newModule, newModule.exports, filePath, contextPath, globalProcess, requireFromContext, envGlobal);
+      moduleFn(...Object.values(moduleArguments));
     } catch (e) {
       loadedModules.delete(filePath);
       throw e;

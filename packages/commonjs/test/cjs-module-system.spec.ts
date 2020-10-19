@@ -73,45 +73,11 @@ describe('commonjs module system', () => {
     expect(requireModule(sampleFilePath)).to.eql(fs.dirname(sampleFilePath));
   });
 
-  it('exposes process.env with NODE_ENV === "development"', () => {
+  it('injects provided globals', () => {
     const fs = createMemoryFs({
-      [sampleFilePath]: `module.exports = process.env.NODE_ENV`,
+      [sampleFilePath]: `module.exports = injectedValue`,
     });
-    const { requireModule } = createCjsModuleSystem({ fs });
-
-    expect(requireModule(sampleFilePath)).to.eql('development');
-  });
-
-  it('allows specifying a custom process.env record', () => {
-    const fs = createMemoryFs({
-      [sampleFilePath]: `module.exports = {...process.env }`,
-    });
-    const processEnv = {
-      NODE_ENV: 'production',
-      ENV_FLAG: 'some-value',
-    };
-
-    const { requireModule } = createCjsModuleSystem({ fs, processEnv });
-
-    expect(requireModule(sampleFilePath)).to.eql(processEnv);
-  });
-
-  it('allows specifying a custom process.cwd()', () => {
-    const fs = createMemoryFs({
-      [sampleFilePath]: `module.exports = process.cwd()`,
-    });
-    const cwd = () => '/abc';
-    const { requireModule } = createCjsModuleSystem({ fs, cwd });
-
-    expect(requireModule(sampleFilePath)).to.eql('/abc');
-  });
-
-  it('mocks process.on(...)', () => {
-    const fs = createMemoryFs({
-      [sampleFilePath]: `process.on('uncaughtException', console.error)
-      module.exports = 123`,
-    });
-    const { requireModule } = createCjsModuleSystem({ fs });
+    const { requireModule } = createCjsModuleSystem({ fs, globals: { injectedValue: 123 } });
 
     expect(requireModule(sampleFilePath)).to.eql(123);
   });

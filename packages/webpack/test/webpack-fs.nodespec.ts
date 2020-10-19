@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import webpack from 'webpack';
-import { nodeFs } from '@file-services/node';
+import nodeFs from '@file-services/node';
 import { createMemoryFs } from '@file-services/memory';
 import { createOverlayFs } from '@file-services/overlay';
 import { createWebpackFs } from '@file-services/webpack';

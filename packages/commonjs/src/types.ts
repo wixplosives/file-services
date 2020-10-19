@@ -41,15 +41,3 @@ export interface IModule {
    */
   exports: unknown;
 }
-
-export type ModuleEvalFn = (
-  module: IModule,
-  exports: unknown,
-  __filename: string,
-  __dirname: string,
-  process: {
-    env: Record<string, string | undefined>;
-  },
-  require: (request: string) => unknown,
-  global: unknown
-) => void;
