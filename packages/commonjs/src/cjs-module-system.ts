@@ -5,18 +5,9 @@ import { createBaseCjsModuleSystem } from './base-cjs-module-system';
 
 export interface IModuleSystemOptions {
   /**
-   * Exposed to modules as `process.cwd`.
-   *
-   * @default () => '/'
+   * Exposed to modules as globals.
    */
-  cwd?: () => string;
-
-  /**
-   * Exposed to modules as `process.env`.
-   *
-   * @default { NODE_ENV: 'development' }
-   */
-  processEnv?: Record<string, string | undefined>;
+  globals?: Record<string, unknown>;
 
   /**
    * Sync file system to use when reading files
@@ -37,7 +28,7 @@ export interface IModuleSystemOptions {
 }
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
-  const { fs, processEnv = { NODE_ENV: 'development' }, cwd } = options;
+  const { fs, globals } = options;
   const { dirname, readFileSync } = fs;
 
   const { resolver = createRequestResolver({ fs }) } = options;
@@ -46,7 +37,6 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     dirname,
-    processEnv,
-    cwd: cwd ?? fs.cwd,
+    globals,
   });
 }
