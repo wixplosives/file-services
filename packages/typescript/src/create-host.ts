@@ -173,3 +173,9 @@ export function createLanguageServiceHost(
     useCaseSensitiveFileNames: () => useCaseSensitiveFileNames,
   };
 }
+
+// to avoid having to include @types/node
+interface TracedErrorConstructor extends ErrorConstructor {
+  stackTraceLimit?: number;
+}
+declare let Error: TracedErrorConstructor;

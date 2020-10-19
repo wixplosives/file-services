@@ -244,3 +244,9 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
     }
   };
 }
+
+// to avoid having to include @types/node
+interface TracedErrorConstructor extends ErrorConstructor {
+  stackTraceLimit?: number;
+}
+declare let Error: TracedErrorConstructor;
