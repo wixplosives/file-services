@@ -31,7 +31,7 @@
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^1.1.1",
     "eslint": "^7.11.0",
-    "eslint-config-prettier": "^6.13.0",
+    "eslint-config-prettier": "^6.14.0",
     "eslint-plugin-no-only-tests": "^2.4.0",
     "lerna": "^3.22.1",
     "mocha": "^8.2.0",
