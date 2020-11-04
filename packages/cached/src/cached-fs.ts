@@ -68,16 +68,26 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(directoryPath);
         return fs.mkdirSync(directoryPath);
       },
-      readFile: function readFile(path: string, callback: CallbackFn<string | Buffer>) {
+      readFile: function readFile(
+        path: string,
+        options: string | { encoding?: string | null; flag?: string } | undefined | null | CallbackFn<Buffer>,
+        callback?: CallbackFn<string> | CallbackFn<Buffer> | CallbackFn<string | Buffer>
+      ) {
         path = fs.resolve(path);
         const cacheKey = getCanonicalPath(path);
         const cachedContent = contentCache.get(cacheKey);
+        const callbackFunc = callback ? callback : (options as CallbackFn<Buffer>);
+
+        const encoding = typeof options === 'object' ? options?.encoding : undefined;
+        const encode = (val: string | Buffer) => (encoding ? val.toString(encoding) : val.toString());
+
         if (cachedContent) {
-          return callback(undefined, cachedContent);
+          return callbackFunc(undefined, encode(cachedContent));
         } else {
           return fs.readFile(path, (error, value) => {
-            contentCache.set(cacheKey, value);
-            callback(error, value);
+            const encodedValue = encode(value);
+            contentCache.set(cacheKey, encodedValue);
+            callbackFunc(error, encodedValue);
           });
         }
       } as IBaseFileSystemCallbackActions['readFile'],
