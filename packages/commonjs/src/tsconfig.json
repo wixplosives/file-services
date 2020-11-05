@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist"
+  },
+  "references": [
+    {
+      "path": "../../resolve/src"
+    },
+    {
+      "path": "../../types/src"
+    }
+  ]
+}

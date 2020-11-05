@@ -1,79 +1,252 @@
-import { RequestResolver, IResolutionOutput, IRequestResolverOptions } from './types';
+import type { PackageJson } from 'type-fest';
+import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types';
 
+const defaultTarget = 'browser';
+const defaultPackageRoots = ['node_modules'];
+const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
+const PACKAGE_JSON = 'package.json';
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
-    fs: { fileExistsSync, readFileSync, dirname, join, resolve, isAbsolute, basename },
-    packageRoots = ['node_modules'],
-    extensions = ['.js', '.json'],
-    target = 'browser',
+    fs: { statSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
+    packageRoots = defaultPackageRoots,
+    extensions = defaultExtensions,
+    target = defaultTarget,
+    resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
   } = options;
 
-  return resolveRequest;
+  const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
 
-  function resolveRequest(contextPath: string, request: string): IResolutionOutput | undefined {
+  return requestResolver;
+
+  function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
+    let request: string | false = originalRequest;
+    if (target === 'browser') {
+      const fromPackageJson = findUpPackageJson(contextPath);
+      const remappedRequest = fromPackageJson?.browserMappings?.[originalRequest];
+      if (remappedRequest !== undefined) {
+        request = remappedRequest;
+        if (request === false) {
+          return { resolvedFile: request };
+        }
+      }
+    }
+
+    for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
+      if (!statSyncSafe(resolvedFile)?.isFile()) {
+        continue;
+      }
+      if (target === 'browser') {
+        const toPackageJson = findUpPackageJson(dirname(resolvedFile));
+        const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
+        if (remappedFilePath !== undefined) {
+          return {
+            resolvedFile: remappedFilePath,
+            originalFilePath: resolvedFile,
+          };
+        }
+      }
+      return { resolvedFile: realpathSyncSafe(resolvedFile) };
+    }
+    return { resolvedFile: undefined };
+  }
+
+  function* nodeRequestPaths(contextPath: string, request: string) {
     if (isRelative(request) || isAbsolute(request)) {
       const requestPath = resolve(contextPath, request);
-      return resolveAsFile(requestPath) || resolveAsDirectory(requestPath);
+      yield* fileRequestPaths(requestPath);
+      yield* directoryRequestPaths(requestPath);
     } else {
-      return resolveAsPackage(contextPath, request);
+      yield* packageRequestPaths(contextPath, request);
     }
   }
 
-  function resolveAsFile(requestPath: string): IResolutionOutput | undefined {
-    if (fileExistsSync(requestPath)) {
-      return { resolvedFile: requestPath };
+  /**
+   * /path/to/target
+   * /path/to/target.js
+   * /path/to/target.json
+   */
+  function* fileRequestPaths(filePath: string) {
+    yield filePath;
+    for (const ext of extensions) {
+      yield filePath + ext;
+    }
+  }
+
+  /**
+   * /path/to/target (+ext)
+   * /path/to/target/index (+ext)
+   */
+  function* fileOrDirIndexRequestPaths(targetPath: string) {
+    yield* fileRequestPaths(targetPath);
+    yield* fileRequestPaths(join(targetPath, 'index'));
+  }
+
+  function* directoryRequestPaths(directoryPath: string) {
+    if (!statSyncSafe(directoryPath)?.isDirectory()) {
+      return;
+    }
+    const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
+    const mainPath = resolvedPackageJson?.mainPath;
+
+    if (mainPath !== undefined) {
+      yield* fileOrDirIndexRequestPaths(join(directoryPath, mainPath));
     } else {
-      for (const ext of extensions) {
-        const pathWithExt = requestPath + ext;
-        if (fileExistsSync(pathWithExt)) {
-          return { resolvedFile: pathWithExt };
-        }
-      }
+      yield* fileRequestPaths(join(directoryPath, 'index'));
     }
-    return undefined;
   }
 
-  function resolveAsDirectory(requestPath: string): IResolutionOutput | undefined {
-    const packageJsonPath = join(requestPath, 'package.json');
-    if (fileExistsSync(packageJsonPath)) {
-      try {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-        const browserField = packageJson && packageJson.browser;
-        const mainField = packageJson && packageJson.main;
-        if (target === 'browser' && typeof browserField === 'string') {
-          const targetPath = join(requestPath, browserField);
-          return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'));
-        } else if (typeof mainField === 'string') {
-          const targetPath = join(requestPath, mainField);
-          return resolveAsFile(targetPath) || resolveAsFile(join(targetPath, 'index'));
-        }
-      } catch {
-        /* we don't reject, just return undefined */
+  function* packageRequestPaths(initialPath: string, request: string) {
+    for (const packagesPath of packageRootsToPaths(initialPath)) {
+      if (!statSyncSafe(packagesPath)?.isDirectory()) {
+        continue;
       }
+      const requestInPackages = join(packagesPath, request);
+      yield* fileRequestPaths(requestInPackages);
+      yield* directoryRequestPaths(requestInPackages);
     }
-    return resolveAsFile(join(requestPath, 'index'));
   }
 
-  function resolveAsPackage(initialPath: string, request: string): IResolutionOutput | undefined {
+  function* packageRootsToPaths(initialPath: string) {
     for (const packageRoot of packageRoots) {
-      let currentPath = initialPath;
-      let lastPath: string | undefined;
-      while (lastPath !== currentPath) {
-        const isPackagesRoot = basename(currentPath) === packageRoot;
-        const packagesPath = isPackagesRoot ? currentPath : resolve(currentPath, packageRoot);
-        const requestInPackages = join(packagesPath, request);
-        const resolved = resolveAsFile(requestInPackages) || resolveAsDirectory(requestInPackages);
-        if (resolved) {
-          return resolved;
-        }
-        lastPath = currentPath;
+      for (const directoryPath of pathChainToRoot(initialPath)) {
+        yield join(directoryPath, packageRoot);
+      }
+    }
+  }
 
-        // if in /some/path/node_modules, jump directly to /some/node_modules (dirname twice)
-        currentPath = isPackagesRoot ? dirname(dirname(currentPath)) : dirname(currentPath);
+  function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
+    for (const directoryPath of pathChainToRoot(initialPath)) {
+      const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
+      if (resolvedPackageJson) {
+        return resolvedPackageJson;
       }
     }
     return undefined;
+  }
+
+  function loadPackageJsonFrom(directoryPath: string): IResolvedPackageJson | undefined {
+    const packageJsonPath = join(directoryPath, PACKAGE_JSON);
+    const packageJson = readJsonFileSyncSafe(packageJsonPath) as PackageJson | null | undefined;
+    if (typeof packageJson !== 'object' || packageJson === null) {
+      return undefined;
+    }
+    const mainPath = packageJsonTarget(packageJson);
+
+    const { browser } = packageJson;
+    let browserMappings: Record<string, string | false> | undefined = undefined;
+    if (target === 'browser' && typeof browser === 'object' && browser !== null) {
+      browserMappings = Object.create(null) as Record<string, string | false>;
+      for (const [from, to] of Object.entries(browser)) {
+        const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
+        if (resolvedFrom) {
+          const resolvedTo = resolveRemappedRequest(directoryPath, to);
+          if (resolvedTo !== undefined) {
+            browserMappings[resolvedFrom] = resolvedTo;
+          }
+        }
+      }
+    }
+
+    return {
+      filePath: packageJsonPath,
+      directoryPath,
+      mainPath,
+      browserMappings,
+    };
+  }
+
+  function resolveRemappedRequest(directoryPath: string, to: string | false): string | false | undefined {
+    if (to === false) {
+      return to;
+    } else if (typeof to === 'string') {
+      if (isRelative(to)) {
+        return resolveRelative(join(directoryPath, to));
+      } else {
+        return to;
+      }
+    }
+    return undefined;
+  }
+
+  function resolveRelative(request: string) {
+    for (const filePath of fileOrDirIndexRequestPaths(request)) {
+      if (statSyncSafe(filePath)?.isFile()) {
+        return realpathSyncSafe(filePath);
+      }
+    }
+    return undefined;
+  }
+
+  function realpathSyncSafe(itemPath: string): string {
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return realpathSync(itemPath);
+    } catch {
+      return itemPath;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
+  }
+
+  function packageJsonTarget({ main, browser }: PackageJson): string | undefined {
+    if (target === 'browser' && typeof browser === 'string') {
+      return browser;
+    } else {
+      return typeof main === 'string' ? main : undefined;
+    }
+  }
+
+  function* pathChainToRoot(currentPath: string) {
+    let lastPath: string | undefined;
+    while (lastPath !== currentPath) {
+      yield currentPath;
+      lastPath = currentPath;
+      currentPath = dirname(currentPath);
+    }
+  }
+
+  function readJsonFileSyncSafe(filePath: string): unknown {
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+    } catch {
+      return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
+  }
+
+  function statSyncSafe(path: string) {
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return statSync(path);
+    } catch {
+      return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
   }
 }
+
+function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: K) => T {
+  return (key: K) => {
+    if (cache.has(key)) {
+      return cache.get(key) as T;
+    } else {
+      const result = fn(key);
+      cache.set(key, result);
+      return result;
+    }
+  };
+}
+
+// to avoid having to include @types/node
+interface TracedErrorConstructor extends ErrorConstructor {
+  stackTraceLimit?: number;
+}
+declare let Error: TracedErrorConstructor;

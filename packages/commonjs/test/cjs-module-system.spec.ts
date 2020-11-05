@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
-import { createCjsModuleSystem } from '../src';
+import { createCjsModuleSystem } from '@file-services/commonjs';
 
 describe('commonjs module system', () => {
   const sampleString = 'named';
@@ -73,27 +73,13 @@ describe('commonjs module system', () => {
     expect(requireModule(sampleFilePath)).to.eql(fs.dirname(sampleFilePath));
   });
 
-  it('exposes process.env with NODE_ENV === "development"', () => {
+  it('injects provided globals', () => {
     const fs = createMemoryFs({
-      [sampleFilePath]: `module.exports = process.env.NODE_ENV`,
+      [sampleFilePath]: `module.exports = injectedValue`,
     });
-    const { requireModule } = createCjsModuleSystem({ fs });
+    const { requireModule } = createCjsModuleSystem({ fs, globals: { injectedValue: 123 } });
 
-    expect(requireModule(sampleFilePath)).to.eql('development');
-  });
-
-  it('allows specifying a custom process.env record', () => {
-    const fs = createMemoryFs({
-      [sampleFilePath]: `module.exports = {...process.env }`,
-    });
-    const processEnv = {
-      NODE_ENV: 'production',
-      ENV_FLAG: 'some-value',
-    };
-
-    const { requireModule } = createCjsModuleSystem({ fs, processEnv });
-
-    expect(requireModule(sampleFilePath)).to.eql(processEnv);
+    expect(requireModule(sampleFilePath)).to.eql(123);
   });
 
   it('allows requiring other js modules', () => {
@@ -108,8 +94,8 @@ describe('commonjs module system', () => {
 
   it('allows requiring json modules', () => {
     const fs = createMemoryFs({
-      'index.js': `module.exports = require('./package.json')`,
-      'package.json': `{ "name": "test" }`,
+      'index.js': `module.exports = require('./data.json')`,
+      'data.json': `{ "name": "test" }`,
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 
@@ -176,12 +162,29 @@ describe('commonjs module system', () => {
       },
     });
 
-    const resolver = (_contextPath: string, request: string) =>
-      request === 'some-package' ? { resolvedFile: '/src/package.js' } : undefined;
+    const resolver = (_contextPath: string, request: string) => ({
+      resolvedFile: request === 'some-package' ? '/src/package.js' : undefined,
+    });
 
     const { requireModule } = createCjsModuleSystem({ fs, resolver });
 
     expect(requireModule('/src/a.js')).to.eql('custom package');
+  });
+
+  it('allows injecting pre-evaluated modules directly to the module system', () => {
+    const fs = createMemoryFs({
+      src: {
+        'a.js': `module.exports = require('some-package')`,
+      },
+    });
+
+    const { requireModule, requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+
+    loadedModules.set('some-package', { id: 'some-package', filename: 'some-package', exports: sampleObject });
+
+    expect(requireModule('some-package')).to.eql(sampleObject);
+    expect(requireFrom('/', 'some-package')).to.eql(sampleObject);
+    expect(requireModule('/src/a.js')).to.eql(sampleObject);
   });
 
   it('throws when file does not exist', () => {
@@ -195,9 +198,10 @@ describe('commonjs module system', () => {
     const fs = createMemoryFs({
       [sampleFilePath]: `module.exports = require('missing')`,
     });
-    const { requireModule } = createCjsModuleSystem({ fs });
+    const { requireModule, requireFrom } = createCjsModuleSystem({ fs });
 
     expect(() => requireModule(sampleFilePath)).to.throw(`Cannot resolve "missing" in ${sampleFilePath}`);
+    expect(() => requireFrom(fs.cwd(), 'missing')).to.throw(`Cannot resolve "missing" in ${fs.cwd()}`);
   });
 
   it('throws evaluation-time errors', () => {

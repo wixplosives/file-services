@@ -1,5 +1,5 @@
-import { IBaseFileSystemSync } from './base-api-sync';
-import { IBaseFileSystemAsync } from './base-api-async';
+import type { IBaseFileSystemSync } from './base-api-sync';
+import type { IBaseFileSystemAsync } from './base-api-async';
 
 export * from './base-api-sync';
 export * from './base-api-async';

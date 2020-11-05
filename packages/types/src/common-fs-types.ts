@@ -114,14 +114,6 @@ export interface IFileSystemDescriptor {
 
 export interface IWalkOptions {
   /**
-   * Print errors using `console.error` when the walking operation
-   * encounters such.
-   *
-   * @default false
-   */
-  printErrors?: boolean;
-
-  /**
    * Optional file filtering function that receives a file descriptor and returns
    * whether it should be included in the result.
    *

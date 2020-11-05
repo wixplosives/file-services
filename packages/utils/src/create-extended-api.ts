@@ -1,4 +1,4 @@
-import {
+import type {
   IBaseFileSystemAsync,
   IBaseFileSystemSync,
   IFileSystemAsync,
@@ -50,22 +50,30 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   } = baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return statFn(filePath).isFile();
     } catch {
       return false;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
   function readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown {
-    return JSON.parse(readFileSync(filePath, options || 'utf8'));
+    return JSON.parse(readFileSync(filePath, options || 'utf8')) as unknown;
   }
 
   function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
+    const { stackTraceLimit } = Error;
     try {
+      Error.stackTraceLimit = 0;
       return statFn(directoryPath).isDirectory();
     } catch {
       return false;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
   }
 
@@ -73,18 +81,31 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     try {
       mkdirSync(directoryPath);
     } catch (e) {
-      if (e && (e.code === 'EEXIST' || e.code === 'EISDIR')) {
+      const code = (e as { code?: string })?.code;
+      if (code === 'EISDIR') {
         return;
+      } else if (code === 'EEXIST') {
+        if (directoryExistsSync(directoryPath)) {
+          return;
+        } else {
+          throw e;
+        }
+      } else if (code === 'ENOTDIR' || !code) {
+        throw e;
       }
+
       const parentPath = dirname(directoryPath);
       if (parentPath === directoryPath) {
         throw e;
       }
+
       ensureDirectorySync(parentPath);
       try {
         mkdirSync(directoryPath);
       } catch (e) {
-        if (!e || (e.code !== 'EEXIST' && e.code !== 'EISDIR')) {
+        const code = (e as { code?: string })?.code;
+        const isDirectoryExistsError = code === 'EISDIR' || (code === 'EEXIST' && directoryExistsSync(directoryPath));
+        if (!isDirectoryExistsError) {
           throw e;
         }
       }
@@ -124,7 +145,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   }
 
   function findFilesSync(rootDirectory: string, options: IWalkOptions = {}, filePaths: string[] = []): string[] {
-    const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
+    const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 
     for (const nodeName of readdirSync(rootDirectory)) {
       const nodePath = join(rootDirectory, nodeName);
@@ -137,10 +158,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
           findFilesSync(nodePath, options, filePaths);
         }
       } catch (e) {
-        if (printErrors) {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
+        /**/
       }
     }
 
@@ -249,25 +267,39 @@ export function createExtendedFileSystemPromiseActions(
     filePath: string,
     options?: BufferEncoding | { encoding: BufferEncoding } | null
   ): Promise<unknown> {
-    return JSON.parse(await readFile(filePath, options || 'utf8'));
+    return JSON.parse(await readFile(filePath, options || 'utf8')) as unknown;
   }
 
   async function ensureDirectory(directoryPath: string): Promise<void> {
     try {
       await mkdir(directoryPath);
     } catch (e) {
-      if (e && (e.code === 'EEXIST' || e.code === 'EISDIR')) {
+      const code = (e as { code?: string })?.code;
+      if (code === 'EISDIR') {
         return;
+      } else if (code === 'EEXIST') {
+        if (await directoryExists(directoryPath)) {
+          return;
+        } else {
+          throw e;
+        }
+      } else if (code === 'ENOTDIR' || !code) {
+        throw e;
       }
+
       const parentPath = dirname(directoryPath);
       if (parentPath === directoryPath) {
         throw e;
       }
+
       await ensureDirectory(parentPath);
       try {
         await mkdir(directoryPath);
       } catch (e) {
-        if (!e || (e.code !== 'EEXIST' && e.code !== 'EISDIR')) {
+        const code = (e as { code?: string })?.code;
+        const isDirectoryExistsError =
+          code === 'EISDIR' || (code === 'EEXIST' && (await directoryExists(directoryPath)));
+        if (!isDirectoryExistsError) {
           throw e;
         }
       }
@@ -309,7 +341,7 @@ export function createExtendedFileSystemPromiseActions(
     options: IWalkOptions = {},
     filePaths: string[] = []
   ): Promise<string[]> {
-    const { filterFile = returnsTrue, filterDirectory = returnsTrue, printErrors } = options;
+    const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 
     for (const nodeName of await readdir(rootDirectory)) {
       const nodePath = join(rootDirectory, nodeName);
@@ -322,10 +354,7 @@ export function createExtendedFileSystemPromiseActions(
           await findFiles(nodePath, options, filePaths);
         }
       } catch (e) {
-        if (printErrors) {
-          // eslint-disable-next-line no-console
-          console.error(e);
-        }
+        /**/
       }
     }
 
@@ -391,3 +420,9 @@ export function createExtendedFileSystemPromiseActions(
     readJsonFile,
   };
 }
+
+// to avoid having to include @types/node
+interface TracedErrorConstructor extends ErrorConstructor {
+  stackTraceLimit?: number;
+}
+declare let Error: TracedErrorConstructor;

@@ -1,24 +1,16 @@
 {
   "name": "@file-services/webpack",
   "description": "Helpers for creation of webpack-compatible file systems.",
-  "version": "2.2.0",
-  "main": "cjs/index.js",
-  "module": "esm/index.js",
-  "types": "esm/index.d.ts",
-  "scripts": {
-    "clean": "rimraf ./cjs ./esm",
-    "build": "ts-build ./src --cjs --esm",
-    "test": "yarn test:node",
-    "test:node": "mocha \"test/**/*.spec.ts?(x)\" --timeout 10000",
-    "prepack": "yarn build"
-  },
+  "version": "4.1.0",
+  "main": "dist/index.js",
   "dependencies": {
-    "@file-services/types": "^2.2.0"
+    "@file-services/types": "^4.1.0"
   },
   "files": [
-    "cjs",
-    "esm",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/webpack",

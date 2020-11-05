@@ -1,12 +1,17 @@
-import { expect } from 'chai';
-import { createDependencyResolver, createRequestResolver } from '../src';
+import chai, { expect } from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import { createMemoryFs } from '@file-services/memory';
+import { createDependencyResolver, createRequestResolver } from '@file-services/resolve';
+
+chai.use(sinonChai);
 
 describe('dependency resolver', () => {
   // three sample files in the same /src directory
   const firstFilePath = '/src/first-file.js';
   const secondFilePath = '/src/second-file.js';
   const thirdFilePath = '/src/third-file.js';
+  const fourthFilePath = '/src/fourth-file.js';
 
   // node-like requests to be resolved by our node resolver below
   const requestFirstFile = './first-file';
@@ -14,30 +19,32 @@ describe('dependency resolver', () => {
   const requestThirdFile = './third-file';
   const requestMissingFile = './missing-file';
 
-  // first -> second -> third -> (recursive back to first)
-  //       |         -> missing
-  //       -> third  -> (recursive back to first)
+  // first  -> second -> third -> (recursive back to first)
+  //        |         -> missing
+  //        -> third  -> (recursive back to first)
+  //
+  // fourth -> first (requested twice) -> ...
   //
   // we stringify the requests, and later parse them in our naive test extractor
   const fs = createMemoryFs({
     [firstFilePath]: JSON.stringify([requestSecondFile, requestThirdFile]),
     [secondFilePath]: JSON.stringify([requestThirdFile, requestMissingFile]),
     [thirdFilePath]: JSON.stringify([requestFirstFile]),
+    [fourthFilePath]: JSON.stringify([requestFirstFile, requestFirstFile]),
   });
 
   // using our cross-module node-like resolver
-  const resolveRequest = createRequestResolver({ fs });
+  const resolveRequest = sinon.spy(createRequestResolver({ fs }));
 
   // actual dependency resolver used in tests below.
   const resolveDependencies = createDependencyResolver({
     extractRequests(filePath) {
       // the requests were saved as the stringified content
-      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      return JSON.parse(fs.readFileSync(filePath, 'utf8')) as string[];
     },
     resolveRequest(filePath, request) {
       // the node resolver requires directory path, not the origin file path
-      const resolved = resolveRequest(fs.dirname(filePath), request);
-      return resolved && resolved.resolvedFile;
+      return resolveRequest(fs.dirname(filePath), request).resolvedFile;
     },
   });
 
@@ -58,7 +65,7 @@ describe('dependency resolver', () => {
       },
     });
 
-    // array of both files
+    // record of both files
     expect(resolveDependencies([firstFilePath, secondFilePath])).to.eql({
       [firstFilePath]: {
         [requestSecondFile]: secondFilePath,
@@ -69,6 +76,15 @@ describe('dependency resolver', () => {
         [requestMissingFile]: undefined,
       },
     });
+
+    // file with two requests to the same target
+    resolveRequest.resetHistory();
+    expect(resolveDependencies(fourthFilePath)).to.eql({
+      [fourthFilePath]: {
+        [requestFirstFile]: firstFilePath,
+      },
+    });
+    expect(resolveRequest).to.have.callCount(1);
   });
 
   it('follows request chain when deep is set to true', () => {

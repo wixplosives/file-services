@@ -5,6 +5,7 @@ export enum FsErrorCodes {
 
   PATH_IS_FILE = 'ENOTDIR: path points to a file',
   PATH_IS_DIRECTORY = 'EISDIR: path points to a directory',
+  PATH_IS_INVALID = 'EINVAL: invalid argument',
 
   CONTAINING_NOT_EXISTS = 'ENOENT: containing directory does not exist',
   DIRECTORY_NOT_EMPTY = 'ENOTEMPTY: directory is not empty',

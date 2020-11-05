@@ -1,11 +1,11 @@
 import chai, { expect } from 'chai';
+import type { PackageJson } from 'type-fest';
 import { createMemoryFs } from '@file-services/memory';
-import { createRequestResolver } from '../src';
+import { createRequestResolver } from '@file-services/resolve';
 import { resolutionMatchers } from './resolution-matchers';
 
-const { stringify } = JSON;
 chai.use(resolutionMatchers);
-
+const stringifyPackageJson = (packageJson: PackageJson) => JSON.stringify(packageJson);
 const EMPTY = '';
 
 describe('request resolver', () => {
@@ -138,33 +138,36 @@ describe('request resolver', () => {
     it('resolves requests to a folder if it contains a package.json with a main', () => {
       const fs = createMemoryFs({
         with_ext: {
-          'package.json': stringify({ main: 'entry.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js' }),
           'entry.js': EMPTY,
         },
         without_ext: {
-          'package.json': stringify({ main: 'main_file' }),
+          'package.json': stringifyPackageJson({ main: 'main_file' }),
           'main_file.js': EMPTY,
         },
         to_inner_folder: {
           inner: { 'index.js': EMPTY },
-          'package.json': stringify({ main: 'inner' }),
+          'package.json': stringifyPackageJson({ main: 'inner' }),
         },
         to_file_in_folder: {
           inner: { 'file.js': EMPTY },
-          'package.json': stringify({ main: 'inner/file.js' }),
+          'package.json': stringifyPackageJson({ main: 'inner/file.js' }),
         },
         preferred: {
-          'package.json': stringify({ main: 'preferred.js' }),
+          'package.json': stringifyPackageJson({ main: 'preferred.js' }),
           'preferred.js': 'will be picked over index',
           'index.js': EMPTY,
         },
         dot_main: {
-          'package.json': stringify({ main: '.' }),
+          'package.json': stringifyPackageJson({ main: '.' }),
           'index.js': EMPTY,
         },
         empty_main: {
-          'package.json': stringify({ main: '' }),
+          'package.json': stringifyPackageJson({ main: '' }),
           'index.js': EMPTY,
+        },
+        missing_main: {
+          'package.json': stringifyPackageJson({ main: './missing' }),
         },
         invalid_json: {
           'package.json': '#invalid json#',
@@ -174,7 +177,7 @@ describe('request resolver', () => {
           'package.json': '#invalid json#',
         },
         no_main: {
-          'package.json': stringify({}),
+          'package.json': stringifyPackageJson({}),
           'index.js': EMPTY,
         },
       });
@@ -187,6 +190,7 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './preferred')).to.be.resolvedTo('/preferred/preferred.js');
       expect(resolveRequest('/', './dot_main')).to.be.resolvedTo('/dot_main/index.js');
       expect(resolveRequest('/', './empty_main')).to.be.resolvedTo('/empty_main/index.js');
+      expect(resolveRequest('/', './missing_main')).to.be.resolvedTo(undefined);
       expect(resolveRequest('/', './invalid_json')).to.be.resolvedTo('/invalid_json/index.js');
       expect(resolveRequest('/', './invalid_json_no_index')).to.be.resolvedTo(undefined);
       expect(resolveRequest('/', './no_main')).to.be.resolvedTo('/no_main/index.js');
@@ -198,17 +202,20 @@ describe('request resolver', () => {
       const fs = createMemoryFs({
         node_modules: {
           express: {
-            'package.json': stringify({ main: 'main.js' }),
+            'package.json': stringifyPackageJson({ main: 'main.js' }),
             'main.js': EMPTY,
             'another_entry.js': EMPTY,
           },
           lodash: {
-            'package.json': stringify({ main: 'some-index' }),
+            'package.json': stringifyPackageJson({ main: 'some-index' }),
             'some-index.js': EMPTY,
             'test-utils': {
               'index.js': EMPTY,
               'util1.js': EMPTY,
             },
+          },
+          'missing-main': {
+            'package.json': stringifyPackageJson({ main: 'main.js' }),
           },
           'just-a-file.js': EMPTY,
         },
@@ -216,6 +223,9 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs });
 
       expect(resolveRequest('/', 'express')).to.be.resolvedTo('/node_modules/express/main.js');
+
+      expect(resolveRequest('/', 'not-existing')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', 'missing-main')).to.be.resolvedTo(undefined);
 
       // alternative entry point
       expect(resolveRequest('/', 'express/another_entry')).to.be.resolvedTo('/node_modules/express/another_entry.js');
@@ -240,15 +250,15 @@ describe('request resolver', () => {
           express: {
             node_modules: {
               lodash: {
-                'package.json': stringify({ main: 'v1.js' }),
+                'package.json': stringifyPackageJson({ main: 'v1.js' }),
                 'v1.js': EMPTY,
               },
             },
-            'package.json': stringify({ main: 'main.js' }),
+            'package.json': stringifyPackageJson({ main: 'main.js' }),
             'main.js': EMPTY,
           },
           lodash: {
-            'package.json': stringify({ main: 'v2.js' }),
+            'package.json': stringifyPackageJson({ main: 'v2.js' }),
             'v2.js': EMPTY,
             'v2-specific-file.js': EMPTY,
           },
@@ -296,7 +306,7 @@ describe('request resolver', () => {
         project: {
           third_party: {
             koa: {
-              'package.json': stringify({ main: 'main-index' }),
+              'package.json': stringifyPackageJson({ main: 'main-index' }),
               'main-index.js': EMPTY,
             },
           },
@@ -315,11 +325,11 @@ describe('request resolver', () => {
     });
   });
 
-  describe('browser field', () => {
+  describe('browser field (string)', () => {
     it('prefers "browser" over "main" when loading a package.json', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -332,7 +342,7 @@ describe('request resolver', () => {
     it('uses "browser" if "main" was not defined', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ browser: 'file.js' }),
+          'package.json': stringifyPackageJson({ browser: 'file.js' }),
           'file.js': EMPTY,
         },
       });
@@ -344,7 +354,7 @@ describe('request resolver', () => {
     it('prefers "main" when resolution "target" is set to "node"', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -357,7 +367,7 @@ describe('request resolver', () => {
     it('prefers "browser" when resolution "target" is set to "browser" (also default)', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringify({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -365,6 +375,119 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs, target: 'browser' });
 
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('resolves "browser" which points to a folder with an index file', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          browser: { 'index.js': EMPTY },
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser' }),
+          'entry.js': EMPTY,
+        },
+        'another-package': {
+          browser: {},
+          'package.json': stringifyPackageJson({ browser: './browser' }),
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser/index.js');
+      expect(resolveRequest('/', './another-package')).to.be.resolvedTo(undefined);
+    });
+  });
+
+  describe('browser field (object)', () => {
+    it('supports remapping files within the same project', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { './file': './file-browser' } }),
+        'file.js': EMPTY,
+        'file-browser.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './file')).to.be.resolvedTo('/file-browser.js');
+    });
+
+    it('supports remapping of package to package', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { fs: 'browser-fs' } }),
+        node_modules: {
+          'browser-fs': {
+            'package.json': stringifyPackageJson({ main: './file.js' }),
+            'file.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'fs')).to.be.resolvedTo('/node_modules/browser-fs/file.js');
+    });
+
+    it('supports remapping of package to false (empty object)', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { fs: false } }),
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'fs')).to.be.resolvedTo(false);
+    });
+
+    it('supports remapping of a local file to false (empty object)', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { './some-file.js': false } }),
+        'some-file.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './some-file')).to.be.resolvedTo(false);
+      expect(resolveRequest('/', './some-file').originalFilePath).to.equal('/some-file.js');
+    });
+
+    it('supports remapping of package to a relative file', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ browser: { fs: './browser-fs' } }),
+        'browser-fs.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'fs')).to.be.resolvedTo('/browser-fs.js');
+    });
+
+    it('supports packages remapping their entrypoint', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          'some-package': {
+            'package.json': stringifyPackageJson({ main: './file.js', browser: { './file': './file-browser' } }),
+            'file.js': EMPTY,
+            'file-browser.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'some-package')).to.be.resolvedTo('/node_modules/some-package/file-browser.js');
+      expect(resolveRequest('/', 'some-package/file')).to.be.resolvedTo('/node_modules/some-package/file-browser.js');
+      expect(resolveRequest('/node_modules/some-package', './file')).to.be.resolvedTo(
+        '/node_modules/some-package/file-browser.js'
+      );
+    });
+
+    it('ignores re-mapping when source/target are missing/invalid', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({
+          browser: {
+            './file': (123 as unknown) as string,
+            './missing-source': './missing-target',
+            './another-missing': './file',
+          },
+        }),
+        'file.js': EMPTY,
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.js');
+      expect(resolveRequest('/', './missing-source')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', './another-missing')).to.be.resolvedTo(undefined);
     });
   });
 });

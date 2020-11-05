@@ -1,17 +1,13 @@
 {
   "name": "@file-services/types",
   "description": "Common file system interfaces",
-  "version": "2.2.0",
-  "main": "cjs/index.js",
-  "types": "cjs/index.d.ts",
-  "scripts": {
-    "clean": "rimraf ./cjs",
-    "build": "ts-build ./src --cjs",
-    "prepack": "yarn build"
-  },
+  "version": "4.1.0",
+  "main": "dist/index.js",
   "files": [
-    "cjs",
-    "src"
+    "dist",
+    "!dist/test",
+    "src",
+    "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "license": "MIT",
   "repository": "https://github.com/wixplosives/file-services/tree/master/packages/types",

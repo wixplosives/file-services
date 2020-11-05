@@ -1,17 +1,16 @@
-import { join } from 'path';
-import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
-import { IWatchService } from '@file-services/types';
 import { sleep } from 'promise-assist';
+import { createTempDirectory, ITempDirectory } from 'create-temp-directory';
+import type { IWatchService } from '@file-services/types';
 import { WatchEventsValidator } from '@file-services/test-kit';
+import { NodeWatchService, nodeFs } from '@file-services/node';
 
-import { NodeWatchService, nodeFs } from '../src';
 const { writeFile, stat, mkdir, rmdir } = nodeFs.promises;
 
 const debounceWait = 500;
 const SAMPLE_CONTENT = `sample file content`;
 
 describe('Node Watch Service', function () {
-  this.timeout(10000); // override mocha's 2s timeout to 10s
+  this.timeout(10_000);
 
   let tempDir: ITempDirectory;
   let watchService: IWatchService;
@@ -31,7 +30,7 @@ describe('Node Watch Service', function () {
       validator = new WatchEventsValidator(watchService);
 
       tempDir = await createTempDirectory();
-      testFilePath = join(tempDir.path, 'test-file');
+      testFilePath = nodeFs.join(tempDir.path, 'test-file');
 
       await writeFile(testFilePath, SAMPLE_CONTENT);
       await watchService.watchPath(testFilePath);
@@ -72,7 +71,7 @@ describe('Node Watch Service', function () {
       validator = new WatchEventsValidator(watchService);
 
       tempDir = await createTempDirectory();
-      testDirectoryPath = join(tempDir.path, 'test-directory');
+      testDirectoryPath = nodeFs.join(tempDir.path, 'test-directory');
       await mkdir(testDirectoryPath);
     });
 
@@ -96,9 +95,9 @@ describe('Node Watch Service', function () {
       validator = new WatchEventsValidator(watchService);
 
       tempDir = await createTempDirectory();
-      testDirectoryPath = join(tempDir.path, 'test-directory');
+      testDirectoryPath = nodeFs.join(tempDir.path, 'test-directory');
       await mkdir(testDirectoryPath);
-      testFilePath = join(testDirectoryPath, 'test-file');
+      testFilePath = nodeFs.join(testDirectoryPath, 'test-file');
       await writeFile(testFilePath, SAMPLE_CONTENT);
     });
 

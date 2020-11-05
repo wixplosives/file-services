@@ -1,7 +1,7 @@
-import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit';
-import { createMemoryFs } from '../src';
 import { expect } from 'chai';
 import { sleep } from 'promise-assist';
+import { syncBaseFsContract, asyncBaseFsContract, syncFsContract, asyncFsContract } from '@file-services/test-kit';
+import { createMemoryFs } from '@file-services/memory';
 
 describe('In-memory File System Implementation', () => {
   const testProvider = async () => {
@@ -23,6 +23,13 @@ describe('In-memory File System Implementation', () => {
 
       expect(fs.resolve('test')).to.equal('/test');
       expect(fs.resolve('some/deep/path')).to.equal('/some/deep/path');
+    });
+  });
+
+  describe('creating files', () => {
+    it('fails overwriting the root directory with a file', () => {
+      const fs = createMemoryFs();
+      expect(() => fs.writeFileSync('/', 'test')).to.throw('EISDIR');
     });
   });
 

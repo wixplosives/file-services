@@ -1,4 +1,11 @@
-import { IBaseFileSystemSync, IBaseFileSystemAsync, IFileSystemAsync, IFileSystemSync } from '@file-services/types';
+import type {
+  IBaseFileSystemSync,
+  IBaseFileSystemAsync,
+  IFileSystemAsync,
+  IFileSystemSync,
+  IFileSystemStats,
+  IDirectoryEntry,
+} from '@file-services/types';
 
 export interface IMemFileSystem extends IFileSystemSync, IFileSystemAsync {
   root: IFsMemDirectoryNode;
@@ -12,12 +19,14 @@ export interface IBaseMemFileSystemSync extends IBaseFileSystemSync {
   root: IFsMemDirectoryNode;
 }
 
+export interface IFsMemStatsEntry extends IFileSystemStats, IDirectoryEntry {}
+
 export interface IFsMemNode {
-  type: 'file' | 'dir';
-  name: string;
-  birthtime: Date;
-  mtime: Date;
+  type: 'file' | 'dir' | 'symlink';
+  entry: IFsMemStatsEntry;
 }
+
+export type IFsMemNodeType = IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode;
 
 export interface IFsMemFileNode extends IFsMemNode {
   type: 'file';
@@ -26,5 +35,10 @@ export interface IFsMemFileNode extends IFsMemNode {
 
 export interface IFsMemDirectoryNode extends IFsMemNode {
   type: 'dir';
-  contents: Map<string, IFsMemDirectoryNode | IFsMemFileNode>;
+  contents: Map<string, IFsMemNodeType>;
+}
+
+export interface IFsMemSymlinkNode extends IFsMemNode {
+  type: 'symlink';
+  target: string;
 }

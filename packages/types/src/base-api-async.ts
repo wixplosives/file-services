@@ -1,4 +1,4 @@
-import {
+import type {
   IFileSystemStats,
   BufferEncoding,
   CallbackFnVoid,
@@ -7,8 +7,8 @@ import {
   ReadFileOptions,
   IDirectoryEntry,
 } from './common-fs-types';
-import { IFileSystemPath } from './path';
-import { IWatchService } from './watch-api';
+import type { IFileSystemPath } from './path';
+import type { IWatchService } from './watch-api';
 
 /**
  * ASYNC-only base file system.
@@ -74,6 +74,7 @@ export interface IBaseFileSystemCallbackActions {
    * Create a directory.
    */
   mkdir(filePath: string, callback: CallbackFnVoid): void;
+  mkdir(filePath: string, options: { recursive?: boolean }, callback: CallbackFnVoid): void;
 
   /**
    * Delete a directory.
@@ -154,7 +155,7 @@ export interface IBaseFileSystemPromiseActions {
   /**
    * Create a directory.
    */
-  mkdir(directoryPath: string): Promise<void>;
+  mkdir(directoryPath: string, options?: { recursive?: boolean }): Promise<void>;
 
   /**
    * Delete a directory.
@@ -194,4 +195,9 @@ export interface IBaseFileSystemPromiseActions {
    * Read value of a symbolic link.
    */
   readlink(path: string): Promise<string>;
+
+  /**
+   * Creates a symbolic link for `target` at `path`. default type is 'file'.
+   */
+  symlink(target: string, path: string, type?: 'dir' | 'file' | 'junction'): Promise<void>;
 }

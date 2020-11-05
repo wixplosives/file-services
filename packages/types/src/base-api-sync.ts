@@ -1,12 +1,12 @@
-import {
+import type {
   IFileSystemStats,
   BufferEncoding,
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
 } from './common-fs-types';
-import { IFileSystemPath } from './path';
-import { IWatchService } from './watch-api';
+import type { IFileSystemPath } from './path';
+import type { IWatchService } from './watch-api';
 
 /**
  * SYNC-only base file system.
@@ -71,7 +71,7 @@ export interface IBaseFileSystemSyncActions {
   /**
    * Create a new directory.
    */
-  mkdirSync(directoryPath: string): void;
+  mkdirSync(directoryPath: string, options?: { recursive?: boolean }): void;
 
   /**
    * Delete an existing directory.
@@ -111,4 +111,9 @@ export interface IBaseFileSystemSyncActions {
    * Read value of a symbolic link.
    */
   readlinkSync(path: string): string;
+
+  /**
+   * Creates a symbolic link for `target` at `path`. default type is 'file'.
+   */
+  symlinkSync(target: string, path: string, type?: 'dir' | 'file' | 'junction'): void;
 }
