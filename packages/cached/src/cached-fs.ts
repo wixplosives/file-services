@@ -32,9 +32,17 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const realpathCache = new Map<string, string>();
   const { promises } = fs;
   const invalidateAbsolute = (absolutePath: string) => {
-    const cachePath = getCanonicalPath(absolutePath);
-    realpathCache.delete(cachePath);
-    statsCache.delete(cachePath);
+    const cachePathPrefix = getCanonicalPath(absolutePath);
+    for (const key of realpathCache.keys()) {
+      if (key.startsWith(cachePathPrefix)) {
+        realpathCache.delete(key);
+      }
+    }
+    for (const key of statsCache.keys()) {
+      if (key.startsWith(cachePathPrefix)) {
+        statsCache.delete(key);
+      }
+    }
   };
 
   return {

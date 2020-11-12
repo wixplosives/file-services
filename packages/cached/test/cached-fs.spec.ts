@@ -233,6 +233,31 @@ describe('createCachedFs', () => {
       expect(promiseStatSpy.callCount).to.equal(1);
       expect(stats).to.not.equal(stats2);
     });
+
+    it('invalidating a directory should invalate its entire contents recusively', async () => {
+      const dirPath = '/dir';
+      const fileName = 'file';
+      const filePath = `${dirPath}/${fileName}`;
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+      const statSyncSpy = sinon.spy(memFs, 'statSync');
+      const statSpy = sinon.spy(memFs, 'stat');
+      const promiseStatSpy = sinon.spy(memFs.promises, 'stat');
+      const fs = createCachedFs(memFs);
+
+      fs.statSync(filePath);
+      await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
+      await fs.promises.stat(filePath);
+
+      fs.invalidate(dirPath);
+
+      fs.statSync(filePath);
+      await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
+      await fs.promises.stat(filePath);
+
+      expect(statSyncSpy.callCount).to.equal(2);
+      expect(statSpy.callCount).to.equal(0);
+      expect(promiseStatSpy.callCount).to.equal(0);
+    });
   });
 
   const testProvider = async () => {
