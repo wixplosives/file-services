@@ -234,7 +234,7 @@ describe('createCachedFs', () => {
       expect(stats).to.not.equal(stats2);
     });
 
-    it('invalidating a directory should invalate its entire contents recusively', async () => {
+    it('deep invalidation should invalidate all the keys starting with the invalidation path', async () => {
       const dirPath = '/dir';
       const fileName = 'file';
       const filePath = `${dirPath}/${fileName}`;
