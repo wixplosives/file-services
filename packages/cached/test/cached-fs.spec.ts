@@ -248,7 +248,7 @@ describe('createCachedFs', () => {
       await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
       await fs.promises.stat(filePath);
 
-      fs.invalidate(dirPath);
+      fs.invalidate(dirPath, true);
 
       fs.statSync(filePath);
       await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
