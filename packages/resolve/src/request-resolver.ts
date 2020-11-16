@@ -4,7 +4,8 @@ import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IR
 const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
 const defaultExtensions = ['.js', '.json'];
-const isRelative = (request: string) => request.startsWith('./') || request.startsWith('../');
+const isRelative = (request: string) =>
+  request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
