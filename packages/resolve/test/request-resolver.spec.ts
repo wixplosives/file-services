@@ -133,6 +133,8 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './src')).to.be.resolvedTo('/src/index.js');
       expect(resolveRequest('/', './data')).to.be.resolvedTo('/data/index.json');
       expect(resolveRequest('/', './typed')).to.be.resolvedTo('/typed/index.ts');
+      expect(resolveRequest('/src', '.')).to.be.resolvedTo('/src/index.js');
+      expect(resolveRequest('/src/inside', '..')).to.be.resolvedTo('/src/index.js');
     });
 
     it('resolves requests to a folder if it contains a package.json with a main', () => {
