@@ -36,18 +36,18 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     realpathCache.delete(cachePath);
     statsCache.delete(cachePath);
   };
-  const invalidateAbsolutePrefix = (absolutePath: string) => {
+  const invalidateAbsoluteByPrefix = (absolutePath: string) => {
     const prefix = getCanonicalPath(absolutePath);
-    realpathCache.forEach((_, key) => {
+    for (const key of realpathCache.keys()) {
       if (key.startsWith(prefix)) {
         realpathCache.delete(key);
       }
-    });
-    statsCache.forEach((_, key) => {
+    }
+    for (const key of statsCache.keys()) {
       if (key.startsWith(prefix)) {
         statsCache.delete(key);
       }
-    });
+    }
   };
 
   return {
@@ -196,7 +196,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     }),
     invalidate(path, deep = false) {
       if (deep) {
-        return invalidateAbsolutePrefix(fs.resolve(path));
+        return invalidateAbsoluteByPrefix(fs.resolve(path));
       } else {
         return invalidateAbsolute(fs.resolve(path));
       }
