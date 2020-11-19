@@ -1,9 +1,10 @@
-import type webpack from 'webpack';
-import type { IFileSystem, CallbackFn } from '@file-services/types';
+import type { IFileSystem, CallbackFn, CallbackFnVoid } from '@file-services/types';
 
-export interface IWebpackFileSystem extends webpack.InputFileSystem, webpack.OutputFileSystem {
+export interface IWebpackFileSystem extends IFileSystem {
   readJson(filePath: string, callback: CallbackFn<unknown>): void;
   readJsonSync(filePath: string): unknown;
+  purge(): void;
+  mkdirp(path: string, callback: CallbackFnVoid): void;
 }
 
 export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
