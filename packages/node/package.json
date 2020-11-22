@@ -1,11 +1,11 @@
 {
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
-  "version": "4.1.2",
+  "version": "5.0.0",
   "main": "dist/index.js",
   "dependencies": {
-    "@file-services/types": "^4.1.0",
-    "@file-services/utils": "^4.1.0"
+    "@file-services/types": "^5.0.0",
+    "@file-services/utils": "^5.0.0"
   },
   "files": [
     "dist",

@@ -1,12 +1,12 @@
 {
   "name": "@file-services/directory",
   "description": "A file system wrapper that adds directory scoping to any `IFileSystem` implementation.",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "main": "dist/index.js",
   "dependencies": {
-    "@file-services/path": "^4.1.0",
-    "@file-services/types": "^4.1.0",
-    "@file-services/utils": "^4.1.0"
+    "@file-services/path": "^5.0.0",
+    "@file-services/types": "^5.0.0",
+    "@file-services/utils": "^5.0.0"
   },
   "files": [
     "dist",
