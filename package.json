@@ -11,7 +11,7 @@
     "pretest": "yarn build && yarn lint",
     "test": "yarn test:node && yarn test:browser",
     "test:node": "mocha \"./packages/*/dist/test/*.{spec,nodespec}.js\" --enable-source-maps --parallel",
-    "test:browser": "mocha-pup \"packages/*/dist/**/*.spec.js\""
+    "test:browser": "mocha-pup \"packages/*/dist/test/**/*.spec.js\""
   },
   "devDependencies": {
     "@types/chai": "^4.2.14",
