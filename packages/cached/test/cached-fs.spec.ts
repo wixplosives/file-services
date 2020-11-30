@@ -280,7 +280,7 @@ describe('createCachedFs', () => {
     expect(statSyncSpy.callCount).to.equal(1);
   });
 
-  it('should invalidate the entire fs when passing /', async () => {
+  it('should invalidate the entire fs when passing slash', async () => {
     const memFs = createMemoryFs({
       dir: { file: SAMPLE_CONTENT },
       dir2: { file: SAMPLE_CONTENT },
