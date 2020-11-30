@@ -195,11 +195,11 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
       },
     }),
     invalidate(path, deep = false) {
+      const pathToInvalidate = fs.resolve(path);
       if (deep) {
-        return invalidateAbsoluteByPrefix(fs.resolve(path));
-      } else {
-        return invalidateAbsolute(fs.resolve(path));
+        invalidateAbsoluteByPrefix(fs.join(pathToInvalidate, '/'));
       }
+      return invalidateAbsolute(pathToInvalidate);
     },
     invalidateAll() {
       statsCache.clear();
