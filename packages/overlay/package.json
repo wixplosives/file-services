@@ -1,7 +1,7 @@
 {
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:node && yarn test:browser",

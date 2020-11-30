@@ -1,7 +1,7 @@
 {
   "name": "@file-services/webpack",
   "description": "Helpers for creation of webpack-compatible file systems.",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:node",
