@@ -9,7 +9,7 @@ export interface ICachedFileSystem extends IFileSystem {
    *
    * @param path the file path to clear from the cache
    */
-  invalidate(path: string): void;
+  invalidate(path: string, deep?: boolean): void;
   /**
    * invalidates all files
    */
@@ -35,6 +35,19 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     const cachePath = getCanonicalPath(absolutePath);
     realpathCache.delete(cachePath);
     statsCache.delete(cachePath);
+  };
+  const invalidateAbsoluteByPrefix = (absolutePath: string) => {
+    const prefix = getCanonicalPath(absolutePath);
+    for (const key of realpathCache.keys()) {
+      if (key.startsWith(prefix)) {
+        realpathCache.delete(key);
+      }
+    }
+    for (const key of statsCache.keys()) {
+      if (key.startsWith(prefix)) {
+        statsCache.delete(key);
+      }
+    }
   };
 
   return {
@@ -181,8 +194,12 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         }
       },
     }),
-    invalidate(path) {
-      return invalidateAbsolute(fs.resolve(path));
+    invalidate(path, deep = false) {
+      const pathToInvalidate = fs.resolve(path);
+      if (deep) {
+        invalidateAbsoluteByPrefix(fs.join(pathToInvalidate, fs.sep));
+      }
+      return invalidateAbsolute(pathToInvalidate);
     },
     invalidateAll() {
       statsCache.clear();
