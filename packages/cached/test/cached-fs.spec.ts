@@ -268,24 +268,35 @@ describe('createCachedFs', () => {
     const filePath = memFs.join('dir2', 'file');
 
     const statSyncSpy = sinon.spy(memFs, 'statSync');
-    const statSpy = sinon.spy(memFs, 'stat');
-    const promiseStatSpy = sinon.spy(memFs.promises, 'stat');
     const fs = createCachedFs(memFs);
 
     fs.statSync(filePath);
-    await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
-    await fs.promises.stat(filePath);
 
     // Not the dir I'm stating!
     fs.invalidate('dir', true);
 
     fs.statSync(filePath);
-    await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
-    await fs.promises.stat(filePath);
 
     expect(statSyncSpy.callCount).to.equal(1);
-    expect(statSpy.callCount).to.equal(0);
-    expect(promiseStatSpy.callCount).to.equal(0);
+  });
+
+  it('should invalidate the entire fs when passing /', async () => {
+    const memFs = createMemoryFs({
+      dir: { file: SAMPLE_CONTENT },
+      dir2: { file: SAMPLE_CONTENT },
+    });
+    const filePath = memFs.join('dir2', 'file');
+
+    const statSyncSpy = sinon.spy(memFs, 'statSync');
+    const fs = createCachedFs(memFs);
+
+    fs.statSync(filePath);
+
+    fs.invalidate('/', true);
+
+    fs.statSync(filePath);
+
+    expect(statSyncSpy.callCount).to.equal(2);
   });
 
   const testProvider = async () => {
