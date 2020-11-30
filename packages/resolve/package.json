@@ -1,8 +1,13 @@
 {
   "name": "@file-services/resolve",
   "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
-  "version": "4.2.0",
+  "version": "5.0.0",
   "main": "dist/index.js",
+  "scripts": {
+    "test": "yarn test:node && yarn test:browser",
+    "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\" --enable-source-maps --parallel",
+    "test:browser": "mocha-pup \"./dist/test/**/*.spec.js\""
+  },
   "files": [
     "dist",
     "!dist/test",
