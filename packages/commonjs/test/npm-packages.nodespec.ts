@@ -1,3 +1,4 @@
+import util from 'util';
 import os from 'os';
 import readline from 'readline';
 import tty from 'tty';
@@ -35,6 +36,7 @@ describe('commonjs module system - integration with existing npm packages', func
   it('evaluates postcss successfully', () => {
     const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
     loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
+    loadedModules.set('url', { filename: 'url', id: 'url', exports: url });
     const postcss = requireFrom(__dirname, 'postcss') as typeof import('postcss');
 
     expect(postcss.parse).to.be.instanceOf(Function);
@@ -59,6 +61,8 @@ describe('commonjs module system - integration with existing npm packages', func
     loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
     loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
     loadedModules.set('tty', { filename: 'tty', id: 'tty', exports: tty });
+    loadedModules.set('util', { filename: 'util', id: 'util', exports: util });
+    loadedModules.set('url', { filename: 'url', id: 'url', exports: url });
     const mocha = requireFrom(__dirname, 'mocha') as typeof import('mocha');
 
     expect(mocha.reporters).to.be.an('object');
@@ -72,6 +76,7 @@ describe('commonjs module system - integration with existing npm packages', func
     loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
     loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
     loadedModules.set('readline', { filename: 'readline', id: 'readline', exports: readline });
+    loadedModules.set('util', { filename: 'util', id: 'util', exports: util });
 
     const sass = requireFrom(__dirname, 'sass') as typeof import('sass');
 
