@@ -8,7 +8,7 @@ Isomorphic, fs-agnostic implementation of the Node resolution algorithm.
 Implements the following behaviors:
 
 - https://nodejs.org/api/modules.html#modules_all_together
-- https://github.com/defunctzombie/package-browser-field-spec ("basic" section)
+- https://github.com/defunctzombie/package-browser-field-spec
 
 ## Getting started
 
