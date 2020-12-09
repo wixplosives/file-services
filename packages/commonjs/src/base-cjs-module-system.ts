@@ -89,9 +89,9 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       global: envGlobal,
       ...globals,
     };
-    const moduleFn = eval(`(function (${Object.keys(moduleArguments).join(', ')}){${fileContents}\n})`) as (
-      ...args: unknown[]
-    ) => void;
+    const moduleFn = eval(
+      `(function (${Object.keys(moduleArguments).join(', ')}){${fileContents}\n//# sourceURL=${filePath}\n})`
+    ) as (...args: unknown[]) => void;
 
     loadedModules.set(filePath, newModule);
 
