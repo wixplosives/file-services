@@ -27,7 +27,7 @@ const fs = createMemoryFs({
 
 const moduleSystem = createCjsModuleSystem({ fs });
 
-const evaluated = moduleSystem.require('/some-folder/index.js');
+const evaluated = moduleSystem.requireModule('/some-folder/index.js');
 // evaluated === 'exported value'
 ```
 
