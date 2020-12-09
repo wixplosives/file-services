@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:node && yarn test:browser",
-    "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\" --enable-source-maps --parallel",
+    "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\"",
     "test:browser": "mocha-pup \"./dist/test/**/*.spec.js\""
   },
   "files": [
