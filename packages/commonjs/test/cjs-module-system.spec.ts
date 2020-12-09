@@ -210,7 +210,17 @@ describe('commonjs module system', () => {
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 
-    expect(() => requireModule(sampleFilePath)).to.throw(`Thanos is coming!`);
+    let caughtError: unknown = undefined;
+    expect(() => {
+      try {
+        requireModule(sampleFilePath);
+      } catch (e) {
+        caughtError = e;
+        throw e;
+      }
+    }).to.throw(`Thanos is coming!`);
+
+    expect((caughtError as Error)?.stack).to.include(sampleFilePath);
   });
 
   it('does not cache module if code parsing failed', () => {
