@@ -1,7 +1,7 @@
 {
   "name": "@file-services/cached",
   "description": "A file system wrapper that adds cache to any `IFileSystem` implementation.",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:node && yarn test:browser",
@@ -9,8 +9,8 @@
     "test:browser": "mocha-pup \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/types": "^5.0.0",
-    "@file-services/utils": "^5.0.0"
+    "@file-services/types": "^5.2.0",
+    "@file-services/utils": "^5.2.0"
   },
   "files": [
     "dist",
