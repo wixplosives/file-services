@@ -4,7 +4,6 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
-  TypedArray,
 } from './common-fs-types';
 import type { IFileSystemPath } from './path';
 import type { IWatchService } from './watch-api';
@@ -53,7 +52,7 @@ export interface IBaseFileSystemSyncActions {
    * Write data to a file, replacing the file if already exists.
    * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
    */
-  writeFileSync(path: string, data: string | TypedArray | DataView, options?: WriteFileOptions): void;
+  writeFileSync(path: string, data: string | Uint8Array, options?: WriteFileOptions): void;
 
   /**
    * Delete a name and possibly the file it refers to.

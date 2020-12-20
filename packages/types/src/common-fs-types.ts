@@ -10,19 +10,6 @@ export type BufferEncoding =
   | 'binary'
   | 'hex';
 
-export type TypedArray =
-  | Uint8Array
-  | Uint8ClampedArray
-  | Uint16Array
-  | Uint32Array
-  | Int8Array
-  | Int16Array
-  | Int32Array
-  // | BigUint64Array
-  // | BigInt64Array
-  | Float32Array
-  | Float64Array;
-
 // use global augmentation so that users without @types/node will have a partial Buffer interface
 declare global {
   interface Buffer {

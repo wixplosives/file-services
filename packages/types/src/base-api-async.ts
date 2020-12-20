@@ -6,7 +6,6 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
-  TypedArray,
 } from './common-fs-types';
 import type { IFileSystemPath } from './path';
 import type { IWatchService } from './watch-api';
@@ -52,13 +51,8 @@ export interface IBaseFileSystemCallbackActions {
    * Write data to a file, replacing the file if already exists.
    * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
    */
-  writeFile(
-    path: string,
-    data: string | TypedArray | DataView,
-    options: WriteFileOptions,
-    callback: CallbackFnVoid
-  ): void;
-  writeFile(path: string, data: string | TypedArray | DataView, callback: CallbackFnVoid): void;
+  writeFile(path: string, data: string | Uint8Array, options: WriteFileOptions, callback: CallbackFnVoid): void;
+  writeFile(path: string, data: string | Uint8Array, callback: CallbackFnVoid): void;
 
   /**
    * Delete a name and possibly the file it refers to.
@@ -142,7 +136,7 @@ export interface IBaseFileSystemPromiseActions {
    * Write data to a file, replacing the file if already exists.
    * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
    */
-  writeFile(path: string, data: string | TypedArray | DataView, options?: WriteFileOptions): Promise<void>;
+  writeFile(path: string, data: string | Uint8Array, options?: WriteFileOptions): Promise<void>;
 
   /**
    * Delete a name and possibly the file it refers to.
