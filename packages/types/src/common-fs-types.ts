@@ -1,4 +1,27 @@
-export type BufferEncoding = 'ascii' | 'utf8' | 'utf16le' | 'ucs2' | 'base64' | 'latin1' | 'binary' | 'hex';
+export type BufferEncoding =
+  | 'ascii'
+  | 'utf8'
+  | 'utf-8'
+  | 'utf16le'
+  | 'ucs2'
+  | 'ucs-2'
+  | 'base64'
+  | 'latin1'
+  | 'binary'
+  | 'hex';
+
+export type TypedArray =
+  | Uint8Array
+  | Uint8ClampedArray
+  | Uint16Array
+  | Uint32Array
+  | Int8Array
+  | Int16Array
+  | Int32Array
+  // | BigUint64Array
+  // | BigInt64Array
+  | Float32Array
+  | Float64Array;
 
 // use global augmentation so that users without @types/node will have a partial Buffer interface
 declare global {
@@ -7,17 +30,25 @@ declare global {
   }
 }
 
-export type CallbackFn<T> = (error: Error | null | undefined, value: T) => void;
+export type CallbackFn<T> = (error: Error | null, value: T) => void;
 export type CallbackFnVoid = (error?: Error | null) => void;
-export type ErrorCallbackFn = (error: Error) => void;
 
 export type WriteFileOptions =
-  | { encoding?: string | null; mode?: number | string; flag?: string }
-  | string
-  | null
-  | undefined;
+  | {
+      encoding?: BufferEncoding | null;
+      mode?: number | string;
+      flag?: string;
+    }
+  | BufferEncoding
+  | null;
 
-export type ReadFileOptions = { encoding?: string | null; flag?: string } | string | null | undefined;
+export type ReadFileOptions =
+  | {
+      encoding?: BufferEncoding | null;
+      flag?: string;
+    }
+  | BufferEncoding
+  | null;
 
 export enum FileSystemConstants {
   /**

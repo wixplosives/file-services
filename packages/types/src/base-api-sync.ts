@@ -4,6 +4,7 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
+  TypedArray,
 } from './common-fs-types';
 import type { IFileSystemPath } from './path';
 import type { IWatchService } from './watch-api';
@@ -46,13 +47,13 @@ export interface IBaseFileSystemSyncActions {
    */
   readFileSync(path: string, options?: { encoding?: null; flag?: string } | null): Buffer;
   readFileSync(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): string;
-  readFileSync(path: string, options: ReadFileOptions): string | Buffer;
+  readFileSync(path: string, options?: ReadFileOptions): string | Buffer;
 
   /**
    * Write data to a file, replacing the file if already exists.
    * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
    */
-  writeFileSync(path: string, data: string | Buffer, options?: WriteFileOptions): void;
+  writeFileSync(path: string, data: string | TypedArray | DataView, options?: WriteFileOptions): void;
 
   /**
    * Delete a name and possibly the file it refers to.
@@ -71,7 +72,7 @@ export interface IBaseFileSystemSyncActions {
   /**
    * Create a new directory.
    */
-  mkdirSync(directoryPath: string, options?: { recursive?: boolean }): void;
+  mkdirSync(directoryPath: string, options?: { recursive?: boolean }): string | undefined;
 
   /**
    * Delete an existing directory.

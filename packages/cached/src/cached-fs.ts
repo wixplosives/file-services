@@ -153,7 +153,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           if (cachedStats.kind === 'failure') {
             (callback as (e: Error) => void)(cachedStats.error);
           } else if (cachedStats.kind === 'success') {
-            callback(undefined, cachedStats.value);
+            callback(null, cachedStats.value);
           }
         } else {
           fs.stat(path, (error, stats) => {
@@ -183,7 +183,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         const cacheKey = getCanonicalPath(path);
         const cachedActualPath = realpathCache.get(cacheKey);
         if (cachedActualPath !== undefined) {
-          callback(undefined, cachedActualPath);
+          callback(null, cachedActualPath);
         } else {
           fs.realpath(path, (error, actualPath) => {
             if (!error) {

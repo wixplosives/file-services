@@ -101,7 +101,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     copyFileSync,
     existsSync,
     lstatSync,
-    mkdirSync,
+    mkdirSync: mkdirSync as IBaseFileSystemSyncActions['mkdirSync'],
     readdirSync,
     readFileSync: readFileSync as IBaseFileSystemSyncActions['readFileSync'],
     realpathSync,
@@ -487,7 +487,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     for (const depthName of nodePath.split(posixPath.sep)) {
       if (!node) {
         break;
-      } 
+      }
       if (depthName === '') {
         continue;
       }

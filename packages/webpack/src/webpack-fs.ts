@@ -19,12 +19,12 @@ export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
     readJsonSync: readJsonFileSync,
     readJson(filePath, callback) {
       readJsonFile(filePath)
-        .then((value) => callback(undefined, value))
+        .then((value) => callback(null, value))
         .catch((e) => callback(e, undefined));
     },
     mkdirp(directoryPath, callback) {
       ensureDirectory(directoryPath)
-        .then(() => callback(undefined))
+        .then(() => callback(null))
         .catch(callback);
     },
     async purge() {

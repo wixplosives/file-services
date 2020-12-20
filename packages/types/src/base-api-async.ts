@@ -6,6 +6,7 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
+  TypedArray,
 } from './common-fs-types';
 import type { IFileSystemPath } from './path';
 import type { IWatchService } from './watch-api';
@@ -44,15 +45,20 @@ export interface IBaseFileSystemCallbackActions {
     options: { encoding: BufferEncoding; flag?: string } | BufferEncoding,
     callback: CallbackFn<string>
   ): void;
-  readFile(path: string, options: ReadFileOptions, callback: CallbackFn<string | Buffer>): void;
+  readFile(path: string, options: ReadFileOptions | undefined, callback: CallbackFn<string | Buffer>): void;
   readFile(path: string, callback: CallbackFn<Buffer>): void;
 
   /**
    * Write data to a file, replacing the file if already exists.
    * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
    */
-  writeFile(path: string, data: string | Buffer, options: WriteFileOptions, callback: CallbackFnVoid): void;
-  writeFile(path: string, data: string | Buffer, callback: CallbackFnVoid): void;
+  writeFile(
+    path: string,
+    data: string | TypedArray | DataView,
+    options: WriteFileOptions,
+    callback: CallbackFnVoid
+  ): void;
+  writeFile(path: string, data: string | TypedArray | DataView, callback: CallbackFnVoid): void;
 
   /**
    * Delete a name and possibly the file it refers to.
@@ -130,13 +136,13 @@ export interface IBaseFileSystemPromiseActions {
    */
   readFile(path: string, options?: { encoding?: null; flag?: string } | null): Promise<Buffer>;
   readFile(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): Promise<string>;
-  readFile(path: string, options: ReadFileOptions): Promise<string | Buffer>;
+  readFile(path: string, options?: ReadFileOptions): Promise<string | Buffer>;
 
   /**
    * Write data to a file, replacing the file if already exists.
    * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
    */
-  writeFile(path: string, data: string | Buffer, options?: WriteFileOptions): Promise<void>;
+  writeFile(path: string, data: string | TypedArray | DataView, options?: WriteFileOptions): Promise<void>;
 
   /**
    * Delete a name and possibly the file it refers to.
@@ -155,7 +161,7 @@ export interface IBaseFileSystemPromiseActions {
   /**
    * Create a directory.
    */
-  mkdir(directoryPath: string, options?: { recursive?: boolean }): Promise<void>;
+  mkdir(directoryPath: string, options?: { recursive?: boolean }): Promise<string | undefined>;
 
   /**
    * Delete a directory.

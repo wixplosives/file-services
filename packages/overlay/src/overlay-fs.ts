@@ -6,6 +6,7 @@ import type {
   CallbackFn,
   ReadFileOptions,
   IDirectoryEntry,
+  BufferEncoding,
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
@@ -238,7 +239,7 @@ export function createOverlayFs(
     },
     readFile(
       path: string,
-      options: string | { encoding?: string | null; flag?: string } | undefined | null | CallbackFn<Buffer>,
+      options?: ReadFileOptions | CallbackFn<Buffer>,
       callback?: CallbackFn<string> | CallbackFn<Buffer> | CallbackFn<string | Buffer>
     ): void {
       if (typeof options === 'function') {
@@ -251,13 +252,13 @@ export function createOverlayFs(
       if (resolvedUpperPath !== undefined) {
         upperFs.readFile(resolvedUpperPath, options, (upperError, upperValue) => {
           if (upperError) {
-            lowerFs.readFile(resolvedLowerPath, options as string, callback as CallbackFn<Buffer | string>);
+            lowerFs.readFile(resolvedLowerPath, options as BufferEncoding, callback as CallbackFn<string | Buffer>);
           } else {
-            (callback as CallbackFn<Buffer | string>)(upperError, upperValue);
+            (callback as CallbackFn<string | Buffer>)(upperError, upperValue);
           }
         });
       } else {
-        lowerFs.readFile(resolvedLowerPath, options, callback as CallbackFn<Buffer | string>);
+        lowerFs.readFile(resolvedLowerPath, options, callback as CallbackFn<string | Buffer>);
       }
     },
     stat(path, callback) {

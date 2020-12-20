@@ -220,7 +220,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     readdir: function readdir(path: string, ...args: [CallbackFn<string[]>]) {
       return fs.readdir(resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['readdir'],
-    readFile: function readFile(path: string, ...args: [string, CallbackFn<string | Buffer>]) {
+    readFile: function readFile(path: string, ...args: [ReadFileOptions, CallbackFn<string | Buffer>]) {
       return fs.readFile(resolveFullPath(path), ...args);
     } as IBaseFileSystemCallbackActions['readFile'],
     realpath(path, callback) {

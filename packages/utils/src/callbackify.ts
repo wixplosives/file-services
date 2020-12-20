@@ -1,4 +1,4 @@
-import type { CallbackFn, ErrorCallbackFn } from '@file-services/types';
+import type { CallbackFn, CallbackFnVoid } from '@file-services/types';
 
 // ugly types until https://github.com/Microsoft/TypeScript/issues/5453 is resolved
 export function callbackify<T1, TResult>(fn: (arg1: T1) => TResult): (arg1: T1, callback: CallbackFn<TResult>) => void;
@@ -28,9 +28,9 @@ export function callbackify<F extends (...args: unknown[]) => unknown>(fn: F): u
     }
     try {
       const result = fn(...args);
-      callback(undefined, result);
+      callback(null, result);
     } catch (e) {
-      (callback as ErrorCallbackFn)(e);
+      (callback as CallbackFnVoid)(e);
     }
   }) as unknown;
 }
