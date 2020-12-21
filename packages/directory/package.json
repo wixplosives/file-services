@@ -1,7 +1,7 @@
 {
   "name": "@file-services/directory",
   "description": "A file system wrapper that adds directory scoping to any `IFileSystem` implementation.",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:node && yarn test:browser",
@@ -9,9 +9,9 @@
     "test:browser": "mocha-pup \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/path": "^5.2.0",
-    "@file-services/types": "^5.2.0",
-    "@file-services/utils": "^5.2.0"
+    "@file-services/path": "^5.2.1",
+    "@file-services/types": "^5.2.1",
+    "@file-services/utils": "^5.2.1"
   },
   "files": [
     "dist",

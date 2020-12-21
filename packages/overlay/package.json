@@ -1,7 +1,7 @@
 {
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "main": "dist/index.js",
   "scripts": {
     "test": "yarn test:node && yarn test:browser",
@@ -9,8 +9,8 @@
     "test:browser": "mocha-pup \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/types": "^5.2.0",
-    "@file-services/utils": "^5.2.0"
+    "@file-services/types": "^5.2.1",
+    "@file-services/utils": "^5.2.1"
   },
   "files": [
     "dist",
