@@ -30,7 +30,8 @@ describe('createWebpackFs', function () {
     compiler.outputFileSystem = webpackFs;
 
     const webpackStats = await new Promise<webpack.Stats>((res, rej) =>
-      compiler.run((e, stats) => (e ? rej(e) : res(stats)))
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      compiler.run((e, stats) => (e ? rej(e) : res(stats!)))
     );
 
     expect(webpackStats.hasWarnings() || webpackStats.hasErrors(), webpackStats.toString()).to.equal(false);
@@ -59,7 +60,8 @@ describe('createWebpackFs', function () {
     compiler.outputFileSystem = createWebpackFs(memFs);
 
     const webpackStats = await new Promise<webpack.Stats>((res, rej) =>
-      compiler.run((e, stats) => (e ? rej(e) : res(stats)))
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      compiler.run((e, stats) => (e ? rej(e) : res(stats!)))
     );
 
     expect(webpackStats.hasWarnings() || webpackStats.hasErrors(), webpackStats.toString()).to.equal(false);
