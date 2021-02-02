@@ -327,6 +327,114 @@ describe('request resolver', () => {
     });
   });
 
+  describe('links', () => {
+    it('should not add linkedFrom key when no link in request', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          real_module: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: 'real_module' }),
+          },
+        },
+        packages: {
+          package_a: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/a' }),
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({ fs });
+
+      const resolvedRequest = resolveRequest('/packages/package_a/file.js', 'real_module/file');
+      expect(resolvedRequest).to.be.resolvedTo('/node_modules/real_module/file.js');
+      expect(resolvedRequest.linkedFrom).to.eql(undefined);
+    });
+    it('should follow links in node_modules, and flag them as dir', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          '@workspace': {},
+        },
+        packages: {
+          package_a: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/a' }),
+          },
+          package_b: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/b' }),
+          },
+        },
+      });
+      // Top level links via node modules
+      fs.symlinkSync('/packages/package_a', '/node_modules/@workspace/a', 'dir');
+      fs.symlinkSync('/packages/package_b', '/node_modules/@workspace/b', 'dir');
+
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/packages/package_a/file.js', '@workspace/b/file'))
+        .to.be.resolvedTo('/packages/package_b/file.js')
+        .to.be.linkedFrom({ path: '/node_modules/@workspace/b', target: '/packages/package_b', type: 'dir' });
+    });
+    it('should follow multi step links, and flag them appropriatly', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          '@workspace': {},
+        },
+        packages: {
+          package_b: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/b' }),
+          },
+          package_c: {
+            node_modules: {
+              '@workspace': {},
+            },
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/c' }),
+          },
+        },
+      });
+      // Top level links via node modules
+      fs.symlinkSync('/packages/package_a', '/node_modules/@workspace/a', 'dir');
+      fs.symlinkSync('/packages/package_b', '/node_modules/@workspace/b', 'dir');
+
+      // Links from packages node modules to top level node modules-
+      fs.symlinkSync('/node_modules/@workspace/b', '/packages/package_c/node_modules/@workspace/b', 'dir');
+
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/packages/package_c/file.js', '@workspace/b/file'))
+        .to.be.resolvedTo('/packages/package_b/file.js')
+        .to.be.linkedFrom({
+          path: '/packages/package_c/node_modules/@workspace/b',
+          target: '/packages/package_b',
+          type: 'dir',
+        });
+    });
+    it('should follow file links', () => {
+      const fs = createMemoryFs({
+        packages: {
+          package_a: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/a' }),
+          },
+          package_b: {
+            'file.js': EMPTY,
+            'package.json': stringifyPackageJson({ name: '@workspace/b' }),
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({ fs });
+      fs.symlinkSync('/packages/package_b/file.js', 'packages/package_a/link', 'file');
+
+      expect(resolveRequest('/packages/package_a', './link'))
+        .to.be.resolvedTo('/packages/package_b/file.js')
+        .to.be.linkedFrom({ path: '/packages/package_a/link', target: '/packages/package_b/file.js ', type: 'file' });
+    });
+  });
+
   describe('browser field (string)', () => {
     it('prefers "browser" over "main" when loading a package.json', () => {
       const fs = createMemoryFs({

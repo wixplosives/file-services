@@ -10,7 +10,7 @@ const PACKAGE_JSON = 'package.json';
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
-    fs: { statSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
+    fs: { statSync, lstatSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     target = defaultTarget,
@@ -48,7 +48,23 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           };
         }
       }
-      return { resolvedFile: realpathSyncSafe(resolvedFile) };
+      const realPath = realpathSyncSafe(resolvedFile);
+      if (realPath !== resolvedFile) {
+        // There was a link somewhere, let's find it
+        for (const linkPath of pathChainToRoot(resolvedFile)) {
+          if (lstatSyncSafe(linkPath)?.isSymbolicLink()) {
+            return {
+              resolvedFile: realPath,
+              linkedFrom: {
+                path: linkPath,
+                target: realpathSyncSafe(linkPath),
+                type: statSyncSafe(linkPath)?.isFile() ? 'file' : 'dir',
+              },
+            };
+          }
+        }
+      }
+      return { resolvedFile: realPath };
     }
     return { resolvedFile: undefined };
   }
@@ -226,6 +242,18 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     try {
       Error.stackTraceLimit = 0;
       return statSync(path);
+    } catch {
+      return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
+  }
+
+  function lstatSyncSafe(path: string) {
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return lstatSync(path);
     } catch {
       return undefined;
     } finally {
