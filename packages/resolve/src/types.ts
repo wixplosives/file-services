@@ -48,11 +48,7 @@ export interface IResolutionOutput {
   /**
    * When resolved file is resolved ia a link, information about the link will be in this key
    */
-  linkedFrom?: {
-    path: string;
-    target: string;
-    type: 'dir' | 'file';
-  };
+  linkedFrom?: string;
 }
 
 /**
@@ -69,9 +65,6 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
  */
 export interface IResolutionFileSystem {
   statSync(path: string): { isFile(): boolean; isDirectory(): boolean; birthtime: Date; mtime: Date };
-  lstatSync(
-    path: string
-  ): { isFile(): boolean; isDirectory(): boolean; isSymbolicLink(): boolean; birthtime: Date; mtime: Date };
   readFileSync(path: string, encoding: 'utf8'): string;
   realpathSync(path: string): string;
 

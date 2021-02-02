@@ -347,10 +347,9 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs });
 
       const resolvedRequest = resolveRequest('/packages/package_a/file.js', 'real_module/file');
-      expect(resolvedRequest).to.be.resolvedTo('/node_modules/real_module/file.js');
-      expect(resolvedRequest.linkedFrom).to.eql(undefined);
+      expect(resolvedRequest).to.be.resolvedTo('/node_modules/real_module/file.js').to.be.linkedFrom(undefined);
     });
-    it('should follow links in node_modules, and flag them as dir', () => {
+    it('should follow links in node_modules', () => {
       const fs = createMemoryFs({
         node_modules: {
           '@workspace': {},
@@ -374,9 +373,9 @@ describe('request resolver', () => {
 
       expect(resolveRequest('/packages/package_a/file.js', '@workspace/b/file'))
         .to.be.resolvedTo('/packages/package_b/file.js')
-        .to.be.linkedFrom({ path: '/node_modules/@workspace/b', target: '/packages/package_b', type: 'dir' });
+        .to.be.linkedFrom('/node_modules/@workspace/b/file.js');
     });
-    it('should follow multi step links, and flag them appropriatly', () => {
+    it('should follow multi step links', () => {
       const fs = createMemoryFs({
         node_modules: {
           '@workspace': {},
@@ -406,11 +405,7 @@ describe('request resolver', () => {
 
       expect(resolveRequest('/packages/package_c/file.js', '@workspace/b/file'))
         .to.be.resolvedTo('/packages/package_b/file.js')
-        .to.be.linkedFrom({
-          path: '/packages/package_c/node_modules/@workspace/b',
-          target: '/packages/package_b',
-          type: 'dir',
-        });
+        .to.be.linkedFrom('/packages/package_c/node_modules/@workspace/b/file.js');
     });
     it('should follow file links', () => {
       const fs = createMemoryFs({
@@ -431,7 +426,7 @@ describe('request resolver', () => {
 
       expect(resolveRequest('/packages/package_a', './link'))
         .to.be.resolvedTo('/packages/package_b/file.js')
-        .to.be.linkedFrom({ path: '/packages/package_a/link', target: '/packages/package_b/file.js ', type: 'file' });
+        .to.be.linkedFrom('/packages/package_a/link');
     });
   });
 
