@@ -428,6 +428,38 @@ describe('request resolver', () => {
         .to.be.resolvedTo('/packages/package_b/file.js')
         .to.be.linkedFrom('/packages/package_a/link');
     });
+
+    it('provides the browser path when linking via browser target', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          browser: { 'index.js': EMPTY },
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: 'file.js' }),
+          'entry.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, target: 'browser' });
+      fs.symlinkSync('/lodash/browser/index.js', '/lodash/file.js', 'file');
+
+      expect(resolveRequest('/', './lodash'))
+        .to.be.resolvedTo('/lodash/browser/index.js')
+        .to.be.linkedFrom('/lodash/file.js');
+    });
+
+    it('provides the browser path when linking via browser target for directories', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          browser: { 'index.js': EMPTY },
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './linkedtobrowser' }),
+          'entry.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, target: 'browser' });
+      fs.symlinkSync('/lodash/browser/', '/lodash/linkedtobrowser/', 'dir');
+
+      expect(resolveRequest('/', './lodash'))
+        .to.be.resolvedTo('/lodash/browser/index.js')
+        .to.be.linkedFrom('/lodash/linkedtobrowser/index.js');
+    });
   });
 
   describe('browser field (string)', () => {
