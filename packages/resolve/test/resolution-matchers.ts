@@ -31,8 +31,12 @@ export const resolutionMatchers: Chai.ChaiPlugin = (chai, util) => {
 
     this.assert(
       linkedFrom === expectedLinkedFrom,
-      `Expected request to be linked from ${expectedLinkedFrom}`,
-      `Expected request not to be linked from ${expectedLinkedFrom}`,
+      expectedLinkedFrom
+        ? `Expected request to be linked from ${expectedLinkedFrom}`
+        : `Expected linked from to have been undefined but was ${linkedFrom || 'undefined'}`,
+      expectedLinkedFrom
+        ? `Expected request not to be linked from ${expectedLinkedFrom}`
+        : `Expected linked from not to have been undefined but was ${linkedFrom || 'undefined'}`,
       JSON.stringify(expectedLinkedFrom, null, 2),
       JSON.stringify(linkedFrom, null, 2)
     );
