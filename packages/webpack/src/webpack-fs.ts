@@ -4,7 +4,19 @@ import type { IFileSystem, CallbackFnVoid } from '@file-services/types';
 export type WebpackInputFileSystem = webpack.Compiler['inputFileSystem'];
 export type WebpackOutputFileSystem = webpack.Compiler['outputFileSystem'];
 
+export interface IWebpackDirent {
+  isFile: () => boolean;
+  isDirectory: () => boolean;
+  isBlockDevice: () => boolean;
+  isCharacterDevice: () => boolean;
+  isSymbolicLink: () => boolean;
+  isFIFO: () => boolean;
+  isSocket: () => boolean;
+  name: string | Buffer;
+}
+
 export interface IWebpackFileSystem extends WebpackInputFileSystem, WebpackOutputFileSystem {
+  readdir: (path: string, callback: (arg0?: Error, arg1?: (string | Buffer)[] | IWebpackDirent[]) => void) => void;
   readJsonSync(filePath: string): unknown;
   mkdirp(path: string, callback: CallbackFnVoid): void;
 }
