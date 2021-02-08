@@ -48,7 +48,7 @@
     "type-fest": "^0.20.2",
     "typescript": "~4.1.3",
     "util": "^0.12.3",
-    "webpack": "^5.21.1"
+    "webpack": "^5.21.2"
   },
   "license": "MIT",
   "prettier": {
