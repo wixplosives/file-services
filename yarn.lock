@@ -5722,10 +5722,10 @@ pkg-dir@^3.0.0:
   dependencies:
     find-up "^3.0.0"
 
-playwright-chromium@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.8.0.tgz#5e68b07ee27e5fe132f758c40a5ee37a0e501288"
-  integrity sha512-DMyWmFPXkW0Tm5yBx2pV3m5F8qBSk29+DuZd21liwnG8qNZX43zEY1QpsS51zWPYFgi+nHkRr343GycyAoSUzQ==
+playwright-chromium@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/playwright-chromium/-/playwright-chromium-1.8.1.tgz#f6cb3f4bdea5aaaa078a1c80b68be210cc65190b"
+  integrity sha512-IR+gMC7DIPSSnYEmpqAD+Y09w2ptYIGOx4EIRIneTdfGUxRNNPFv8m8MU7wlM6XBl2aMhWCGqg4NFzJh5A+zzQ==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -5741,9 +5741,9 @@ playwright-chromium@^1.8.0:
     ws "^7.3.1"
 
 playwright-core@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.8.0.tgz#3c2e8c52d21a032e68f2cdda91d107d9e6b79498"
-  integrity sha512-3FDiIMabIkamEOPqdjHrPA1puIElx3iYIaln1k5G8ZyGRubmPE9AijHyTXYqkavgteUp+Kb8QOeE13nlnQ++Fg==
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.8.1.tgz#53a5c8eba41f3bde83a98bf9b2723478f57092a7"
+  integrity sha512-OysNL+mNSpjqvs1dlymBTxv0GZhGwTbuv+KBnPfhzXQZCpzhzin01y/JNtfopT4P8T8awrglEP9hynOZ/H7OeQ==
   dependencies:
     commander "^6.1.0"
     debug "^4.1.1"
@@ -7232,10 +7232,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@~4.1.4:
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.4.tgz#f058636e2f4f83f94ddaae07b20fd5e14598432f"
-  integrity sha512-+Uru0t8qIRgjuCpiSPpfGuhHecMllk5Zsazj5LZvVsEStEjmIRRBZe+jHjGQvsgS7M1wONy2PQXd67EMyV6acg==
+typescript@~4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.1.5.tgz#123a3b214aaff3be32926f0d8f1f6e704eb89a72"
+  integrity sha512-6OSu9PTIzmn9TCDiovULTnET6BgXtDYL4Gg4szY+cGsc3JP1dQL8qvE8kShTRx1NIw4Q9IBHlwODjkjWEtMUyA==
 
 uglify-js@^3.1.4:
   version "3.12.7"
