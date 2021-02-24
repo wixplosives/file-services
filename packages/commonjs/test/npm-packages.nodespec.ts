@@ -44,6 +44,7 @@ describe('commonjs module system - integration with existing npm packages', func
 
   it('evaluates typescript successfully', () => {
     const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
     loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
 
     const ts = requireFrom(__dirname, 'typescript') as typeof import('typescript');
