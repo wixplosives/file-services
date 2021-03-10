@@ -50,32 +50,21 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
   function getFileSystemEntries(path: string): { files: string[]; directories: string[] } {
     const files: string[] = [];
     const directories: string[] = [];
-
-    const { stackTraceLimit } = Error;
-    try {
-      Error.stackTraceLimit = 0;
-      const dirEntries = readdirSync(path);
-      for (const entryName of dirEntries) {
-        const entryStats = statSync(join(path, entryName));
-        if (!entryStats) {
-          continue;
-        }
-        if (entryStats.isFile()) {
-          files.push(entryName);
-        } else if (entryStats.isDirectory()) {
-          directories.push(entryName);
-        }
+    for (const entryName of readdirSync(path)) {
+      const entryStats = statSync(join(path, entryName), { throwIfNoEntry: false });
+      if (!entryStats) {
+        continue;
       }
-    } catch {
-      /* */
-    } finally {
-      Error.stackTraceLimit = stackTraceLimit;
+      if (entryStats.isFile()) {
+        files.push(entryName);
+      } else if (entryStats.isDirectory()) {
+        directories.push(entryName);
+      }
     }
-
     return { files, directories };
   }
 
-  function realpath(path: string): string {
+  function realpathSyncSafe(path: string): string {
     const { stackTraceLimit } = Error;
     try {
       Error.stackTraceLimit = 0;
@@ -98,7 +87,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         rootDir,
         depth,
         getFileSystemEntries,
-        realpath
+        realpathSyncSafe
       );
     },
     getDirectories(path) {
@@ -118,21 +107,13 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
       }
     },
     getScriptVersion(filePath) {
-      const { stackTraceLimit } = Error;
-      try {
-        Error.stackTraceLimit = 0;
-        return `${statSync(filePath).mtime.getTime()}`;
-      } catch {
-        return `${Date.now()}`;
-      } finally {
-        Error.stackTraceLimit = stackTraceLimit;
-      }
+      return `${statSync(filePath, { throwIfNoEntry: false })?.mtime.getTime() ?? Date.now()}`;
     },
     useCaseSensitiveFileNames: caseSensitive,
     getCanonicalFileName: caseSensitive ? identity : toLowerCase,
     getCurrentDirectory: cwd,
     getNewLine: defaultGetNewLine,
-    realpath,
+    realpath: realpathSyncSafe,
     dirname,
     normalize,
     join,
