@@ -51,9 +51,5 @@
     "webpack": "^5.24.4"
   },
   "license": "MIT",
-  "prettier": {
-    "printWidth": 120,
-    "singleQuote": true
-  },
   "private": true
 }
