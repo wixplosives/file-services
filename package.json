@@ -24,8 +24,8 @@
     "@types/sass": "^1.16.0",
     "@types/sinon": "^9.0.11",
     "@types/sinon-chai": "^3.2.5",
-    "@typescript-eslint/eslint-plugin": "^4.17.0",
-    "@typescript-eslint/parser": "^4.17.0",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^1.1.1",
@@ -48,7 +48,7 @@
     "type-fest": "^0.21.3",
     "typescript": "~4.2.3",
     "util": "^0.12.3",
-    "webpack": "^5.25.0"
+    "webpack": "^5.26.0"
   },
   "license": "MIT",
   "private": true
