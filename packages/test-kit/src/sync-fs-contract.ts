@@ -22,7 +22,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         expect(fs.fileExistsSync(filePath)).to.equal(true);
       });
 
-      it('returns false is path does not exist', () => {
+      it('returns false if path does not exist', () => {
         const { fs, tempDirectoryPath } = testInput;
 
         const filePath = fs.join(tempDirectoryPath, 'non-existing-file');
@@ -30,7 +30,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         expect(fs.fileExistsSync(filePath)).to.equal(false);
       });
 
-      it('returns false is path points to a directory', () => {
+      it('returns false if path points to a directory', () => {
         const { fs, tempDirectoryPath } = testInput;
 
         const directoryPath = fs.join(tempDirectoryPath, 'dir');
@@ -52,7 +52,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         expect(fs.directoryExistsSync(directoryPath)).to.equal(true);
       });
 
-      it('returns false is path does not exist', () => {
+      it('returns false if path does not exist', () => {
         const { fs, tempDirectoryPath } = testInput;
 
         const filePath = fs.join(tempDirectoryPath, 'non-existing-directory');
@@ -60,7 +60,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         expect(fs.directoryExistsSync(filePath)).to.equal(false);
       });
 
-      it('returns false is path points to a file', () => {
+      it('returns false if path points to a file', () => {
         const { fs, tempDirectoryPath } = testInput;
 
         const filePath = fs.join(tempDirectoryPath, 'file');
