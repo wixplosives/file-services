@@ -65,7 +65,7 @@ export interface IBaseFileSystemCallbackActions {
   readdir(directoryPath: string, callback: CallbackFn<string[]>): void;
   readdir(
     directoryPath: string,
-    options: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null | undefined,
+    options: { encoding: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null | undefined,
     callback: CallbackFn<string[]>
   ): void;
   readdir(directoryPath: string, options: { withFileTypes: true }, callback: CallbackFn<IDirectoryEntry[]>): void;

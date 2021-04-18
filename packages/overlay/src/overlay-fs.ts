@@ -117,7 +117,7 @@ export function createOverlayFs(
       }
       return lowerFs.readlinkSync(resolvedLowerPath);
     },
-    readdirSync: ((path: string, ...args: [{ withFileTypes: false }]) => {
+    readdirSync: ((path: string, ...args: [{ withFileTypes: true }]) => {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
         const { stackTraceLimit } = Error;

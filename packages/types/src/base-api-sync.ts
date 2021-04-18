@@ -64,7 +64,7 @@ export interface IBaseFileSystemSyncActions {
    */
   readdirSync(
     directoryPath: string,
-    options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    options?: { encoding: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
   ): string[];
   readdirSync(directoryPath: string, options: { withFileTypes: true }): IDirectoryEntry[];
 
