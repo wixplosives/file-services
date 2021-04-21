@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import type { IFileSystemAsync } from '@file-services/types';
-import type { ITestInput } from './types';
+import type { ITestInput } from './types.js';
 
 chai.use(chaiAsPromised);
 

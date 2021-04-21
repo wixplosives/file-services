@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai';
 import fs from '@file-services/node';
 import { createRequestResolver } from '@file-services/resolve';
-import { resolutionMatchers } from './resolution-matchers';
+import { resolutionMatchers } from './resolution-matchers.js';
 
 chai.use(resolutionMatchers);
 

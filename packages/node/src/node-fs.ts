@@ -5,7 +5,7 @@ import { promisify } from 'util';
 
 import { createFileSystem } from '@file-services/utils';
 import type { IBaseFileSystem, IFileSystem, IFileSystemPath } from '@file-services/types';
-import { NodeWatchService, INodeWatchServiceOptions } from './watch-service';
+import { NodeWatchService, INodeWatchServiceOptions } from './watch-service.js';
 
 const caseSensitive = !fs.existsSync(__filename.toUpperCase());
 

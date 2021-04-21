@@ -1,3 +1,3 @@
-export * from './base-cjs-module-system';
-export * from './cjs-module-system';
-export * from './types';
+export * from './base-cjs-module-system.js';
+export * from './cjs-module-system.js';
+export * from './types.js';

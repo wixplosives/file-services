@@ -1,8 +1,8 @@
-import type { IBaseFileSystemSync } from './base-api-sync';
-import type { IBaseFileSystemAsync } from './base-api-async';
+import type { IBaseFileSystemSync } from './base-api-sync.js';
+import type { IBaseFileSystemAsync } from './base-api-async.js';
 
-export * from './base-api-sync';
-export * from './base-api-async';
+export * from './base-api-sync.js';
+export * from './base-api-async.js';
 
 /**
  * SYNC and ASYNC base file system.

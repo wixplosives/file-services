@@ -1,5 +1,5 @@
-import type { IModule, ICommonJsModuleSystem } from './types';
-import { envGlobal } from './global-this';
+import type { IModule, ICommonJsModuleSystem } from './types.js';
+import { envGlobal } from './global-this.js';
 
 export interface IBaseModuleSystemOptions {
   /**

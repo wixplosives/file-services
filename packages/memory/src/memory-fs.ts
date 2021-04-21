@@ -10,7 +10,7 @@ import {
   IDirectoryEntry,
   IBaseFileSystemSyncActions,
 } from '@file-services/types';
-import { FsErrorCodes } from './error-codes';
+import { FsErrorCodes } from './error-codes.js';
 import type {
   IMemFileSystem,
   IBaseMemFileSystem,
@@ -19,7 +19,7 @@ import type {
   IFsMemDirectoryNode,
   IFsMemNodeType,
   IFsMemSymlinkNode,
-} from './types';
+} from './types.js';
 
 const posixPath = path.posix;
 

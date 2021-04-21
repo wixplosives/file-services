@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { IFileSystemSync } from '@file-services/types';
-import type { ITestInput } from './types';
+import type { ITestInput } from './types.js';
 
 const SAMPLE_CONTENT = 'content';
 

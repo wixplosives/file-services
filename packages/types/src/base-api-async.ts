@@ -6,9 +6,9 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
-} from './common-fs-types';
-import type { IFileSystemPath } from './path';
-import type { IWatchService } from './watch-api';
+} from './common-fs-types.js';
+import type { IFileSystemPath } from './path.js';
+import type { IWatchService } from './watch-api.js';
 
 /**
  * ASYNC-only base file system.

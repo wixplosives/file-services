@@ -1,5 +1,5 @@
 import type { PackageJson } from 'type-fest';
-import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types';
+import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types.js';
 
 const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
