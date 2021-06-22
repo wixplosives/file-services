@@ -395,6 +395,26 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         expect(directoryContents).to.contain('camelCasedName');
       });
 
+      it('lists directory entries', async () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        await fs.promises.mkdir(fs.join(tempDirectoryPath, 'dir'));
+        await fs.promises.writeFile(fs.join(tempDirectoryPath, 'file'), SAMPLE_CONTENT);
+
+        const directoryContents = await fs.promises.readdir(tempDirectoryPath, { withFileTypes: true });
+
+        expect(directoryContents).to.have.lengthOf(2);
+        const [firstItem, secondItem] = directoryContents;
+
+        expect(firstItem?.name).to.equal('dir');
+        expect(firstItem?.isDirectory()).to.equal(true);
+        expect(firstItem?.isFile()).to.equal(false);
+
+        expect(secondItem?.name).to.equal('file');
+        expect(secondItem?.isDirectory()).to.equal(false);
+        expect(secondItem?.isFile()).to.equal(true);
+      });
+
       it('fails if listing a non-existing directory', async () => {
         const {
           tempDirectoryPath,
