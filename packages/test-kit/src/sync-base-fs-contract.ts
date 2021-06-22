@@ -300,6 +300,26 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         expect(directoryContents).to.contain('camelCasedName');
       });
 
+      it('lists directory entries', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        fs.mkdirSync(fs.join(tempDirectoryPath, 'dir'));
+        fs.writeFileSync(fs.join(tempDirectoryPath, 'file'), SAMPLE_CONTENT);
+
+        const directoryContents = fs.readdirSync(tempDirectoryPath, { withFileTypes: true });
+
+        expect(directoryContents).to.have.lengthOf(2);
+        const [firstItem, secondItem] = directoryContents;
+
+        expect(firstItem?.name).to.equal('dir');
+        expect(firstItem?.isDirectory()).to.equal(true);
+        expect(firstItem?.isFile()).to.equal(false);
+
+        expect(secondItem?.name).to.equal('file');
+        expect(secondItem?.isDirectory()).to.equal(false);
+        expect(secondItem?.isFile()).to.equal(true);
+      });
+
       it('fails if listing a non-existing directory', () => {
         const { fs, tempDirectoryPath } = testInput;
 
