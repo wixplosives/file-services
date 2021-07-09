@@ -14,7 +14,7 @@
     "test:browser": "mocha-play \"packages/*/dist/test/**/*.spec.js\""
   },
   "devDependencies": {
-    "@types/chai": "^4.2.20",
+    "@types/chai": "^4.2.21",
     "@types/chai-as-promised": "^7.1.4",
     "@types/mocha": "^8.2.3",
     "@types/node": "14",
