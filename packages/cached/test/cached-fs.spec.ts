@@ -167,6 +167,133 @@ describe('createCachedFs', () => {
     });
   });
 
+  describe('Cached readFile', () => {
+    it('caches readFileSync calls', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSyncSpy = sinon.spy(memFs, 'readFileSync');
+
+      const fs = createCachedFs(memFs);
+
+      const content = fs.readFileSync(filePath);
+      const content2 = fs.readFileSync(filePath);
+
+      expect(content).to.equal(content2);
+      expect(readFileSyncSpy.callCount).to.equal(1);
+    });
+
+    it('Not caching readFileSync calls if file does not exist', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSyncSpy = sinon.spy(memFs, 'readFileSync');
+
+      const fs = createCachedFs(memFs);
+
+      try {
+        fs.readFileSync('/no-file');
+      } catch (ex) {
+        // NO-OP
+      }
+      try {
+        fs.readFileSync('/no-file');
+      } catch (ex) {
+        // NO-OP
+      }
+
+      expect(readFileSyncSpy.callCount).to.equal(2);
+    });
+
+    it('allows invalidating cache of file path', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSyncSpy = sinon.spy(memFs, 'readFileSync');
+
+      const fs = createCachedFs(memFs);
+
+      fs.readFileSync(filePath);
+      fs.invalidate(filePath);
+      fs.readFileSync(filePath);
+
+      expect(readFileSyncSpy.callCount).to.equal(2);
+    });
+
+    it('allows invalidating cache of non existing file path', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSyncSpy = sinon.spy(memFs, 'readFileSync');
+
+      const fs = createCachedFs(memFs);
+
+      try {
+        fs.readFileSync(filePath);
+      } catch (ex) {
+        // NO-OP
+      }
+      fs.invalidate(filePath);
+      try {
+        fs.readFileSync(filePath);
+      } catch (ex) {
+        // NO-OP
+      }
+
+      expect(readFileSyncSpy.callCount).to.equal(2);
+    });
+
+    it('allows invalidating cache of all file paths', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSyncSpy = sinon.spy(memFs, 'readFileSync');
+
+      const fs = createCachedFs(memFs);
+
+      fs.readFileSync(filePath);
+      fs.invalidateAll();
+      fs.readFileSync(filePath);
+
+      expect(readFileSyncSpy.callCount).to.equal(2);
+    });
+
+    it('caches readfile (callback-style) calls - file exists', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSpy = sinon.spy(memFs, 'readFile');
+
+      const fs = createCachedFs(memFs);
+
+      const content = await new Promise((res, rej) =>
+        fs.readFile(filePath, (error, value) => (error ? rej(error) : res(value)))
+      );
+
+      const content2 = await new Promise((res, rej) =>
+        fs.readFile(filePath, (error, value) => (error ? rej(error) : res(value)))
+      );
+
+      expect(content).to.equal(content2);
+      expect(readFileSpy.callCount).to.equal(1);
+    });
+
+    it('not cachng readfile (callback-style) calls - if file does not exist', async () => {
+      const filePath = '/file';
+      const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
+
+      const readFileSpy = sinon.spy(memFs, 'readFile');
+
+      const fs = createCachedFs(memFs);
+
+      await new Promise((res) => fs.readFile('/no-file', res));
+
+      await new Promise((res) => fs.readFile('/no-file', res));
+
+      expect(readFileSpy.callCount).to.equal(2);
+    });
+  });
+
   describe('cache invalidation', () => {
     it('allows invalidating cache for existing files', async () => {
       const filePath = '/file';

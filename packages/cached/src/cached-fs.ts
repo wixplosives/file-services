@@ -1,5 +1,7 @@
 import type { IFileSystem, IFileSystemStats, CallbackFnVoid } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
+import { CallbackFn, ReadFileOptions } from '../../types/src/common-fs-types';
+import { IBaseFileSystemCallbackActions } from '../../types/src/base-api-async';
 
 const identity = (val: string) => val;
 const toLowerCase = (val: string) => val.toLowerCase();
@@ -28,6 +30,7 @@ interface IFailureCacheResult {
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
+  const contentCache = new Map<string, Buffer | string>();
   const statsCache = new Map<string, ISuccessCacheResult<IFileSystemStats> | IFailureCacheResult>();
   const realpathCache = new Map<string, string>();
   const { promises } = fs;
@@ -73,6 +76,41 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(directoryPath);
         return fs.mkdirSync(directoryPath, ...args);
       },
+      readFile: function readFile(
+        path: string,
+        options: string | { encoding?: string | null; flag?: string } | undefined | null | CallbackFn<Buffer>,
+        callback?: CallbackFn<string> | CallbackFn<Buffer> | CallbackFn<string | Buffer>
+      ) {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedContent = contentCache.get(cacheKey);
+        const callbackFunc = callback ? callback : (options as CallbackFn<Buffer>);
+
+        const encoding = typeof options === 'object' ? options?.encoding : undefined;
+        const encode = (val: string | Buffer) => (encoding ? val.toString(encoding) : val.toString());
+
+        if (cachedContent) {
+          return callbackFunc(undefined, encode(cachedContent));
+        } else {
+          return fs.readFile(path, (error, value) => {
+            const encodedValue = encode(value);
+            contentCache.set(cacheKey, encodedValue);
+            callbackFunc(error, encodedValue);
+          });
+        }
+      } as IBaseFileSystemCallbackActions['readFile'],
+      readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]): string | Buffer {
+        path = fs.resolve(path);
+        const cacheKey = getCanonicalPath(path);
+        const cachedContent = contentCache.get(cacheKey);
+        if (cachedContent) {
+          return cachedContent;
+        }
+
+        const content = fs.readFileSync(path, ...args);
+        contentCache.set(cacheKey, content);
+        return content;
+      } as IBaseFileSystemSyncActions['readFileSync'],
       rename(sourcePath, destinationPath, callback) {
         sourcePath = fs.resolve(sourcePath);
         destinationPath = fs.resolve(destinationPath);
@@ -203,6 +241,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
     },
     invalidateAll() {
       statsCache.clear();
+      contentCache.clear();
     },
     promises: {
       ...promises,
