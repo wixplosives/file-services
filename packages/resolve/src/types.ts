@@ -44,6 +44,11 @@ export interface IResolutionOutput {
    * filePath this request pointed to.
    */
   originalFilePath?: string;
+
+  /**
+   * When resolved file is resolved ia a link, information about the link will be in this key
+   */
+  linkedFrom?: string;
 }
 
 /**

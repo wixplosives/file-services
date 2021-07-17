@@ -48,7 +48,14 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           };
         }
       }
-      return { resolvedFile: realpathSyncSafe(resolvedFile) };
+      const realPath = realpathSyncSafe(resolvedFile);
+      if (realPath !== resolvedFile) {
+        return {
+          resolvedFile: realPath,
+          linkedFrom: resolvedFile,
+        };
+      }
+      return { resolvedFile: realPath };
     }
     return { resolvedFile: undefined };
   }
