@@ -5,6 +5,11 @@ export interface ICommonJsModuleSystem {
   loadedModules: Map<string, IModule>;
 
   /**
+   * Exposed to modules as globals.
+   */
+  globals: Record<string, unknown>;
+
+  /**
    * Require a module using an absolute file path.
    */
   requireModule: (moduleId: string | false) => unknown;

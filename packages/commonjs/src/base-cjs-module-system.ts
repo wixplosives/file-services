@@ -30,7 +30,7 @@ export interface IBaseModuleSystemOptions {
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals } = options;
+  const { resolveFrom, dirname, readFileSync, globals = {} } = options;
 
   const loadedModules = new Map<string, IModule>();
 
@@ -39,6 +39,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     requireFrom,
     resolveFrom,
     loadedModules,
+    globals,
   };
 
   function resolveThrow(contextPath: string, request: string, requestOrigin?: string): string | false {

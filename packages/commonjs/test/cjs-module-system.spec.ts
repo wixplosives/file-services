@@ -82,6 +82,16 @@ describe('commonjs module system', () => {
     expect(requireModule(sampleFilePath)).to.eql(123);
   });
 
+  it('injects provided globals post creation', () => {
+    const fs = createMemoryFs({
+      [sampleFilePath]: `module.exports = injectedValue`,
+    });
+    const { requireModule, globals } = createCjsModuleSystem({ fs });
+    globals['injectedValue'] = 123;
+
+    expect(requireModule(sampleFilePath)).to.eql(123);
+  });
+
   it('allows requiring other js modules', () => {
     const fs = createMemoryFs({
       'index.js': `module.exports = require('./numeric')`,
