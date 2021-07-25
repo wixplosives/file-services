@@ -478,7 +478,7 @@ describe('request resolver', () => {
       const fs = createMemoryFs({
         'package.json': stringifyPackageJson({
           browser: {
-            './file': (123 as unknown) as string,
+            './file': 123 as unknown as string,
             './missing-source': './missing-target',
             './another-missing': './file',
           },

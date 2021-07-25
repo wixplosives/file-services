@@ -63,7 +63,7 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
     copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync['copyFile'],
     unlink: callbackify(syncFs.unlinkSync),
     readdir: callbackify(syncFs.readdirSync) as IBaseFileSystemAsync['readdir'],
-    mkdir: (callbackify(syncFs.mkdirSync) as unknown) as IBaseFileSystemAsync['mkdir'],
+    mkdir: callbackify(syncFs.mkdirSync) as unknown as IBaseFileSystemAsync['mkdir'],
     rmdir: callbackify(syncFs.rmdirSync),
     stat: callbackify(syncFs.statSync),
     lstat: callbackify(syncFs.lstatSync),
@@ -80,7 +80,7 @@ function callbackify<T extends unknown[], R>(fn: (...args: [...T]) => R) {
       throw new Error('callback is not a function');
     }
     try {
-      const result = fn(...((args as unknown) as [...T]));
+      const result = fn(...(args as unknown as [...T]));
       callback(null, result);
     } catch (e) {
       (callback as CallbackFnVoid)(e);

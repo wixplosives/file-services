@@ -35,7 +35,7 @@ export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
   };
 
   return {
-    ...((fsNoCircular as unknown) as IWebpackFileSystem),
+    ...(fsNoCircular as unknown as IWebpackFileSystem),
     readJsonSync: readJsonFileSync,
     readJson(filePath, callback) {
       readJsonFile(filePath)
