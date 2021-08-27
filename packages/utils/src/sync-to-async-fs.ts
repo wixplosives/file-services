@@ -83,7 +83,7 @@ function callbackify<T extends unknown[], R>(fn: (...args: [...T]) => R) {
       const result = fn(...(args as unknown as [...T]));
       callback(null, result);
     } catch (e) {
-      (callback as CallbackFnVoid)(e);
+      (callback as CallbackFnVoid)(e as Error | undefined | null);
     }
   };
 }
