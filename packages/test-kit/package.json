@@ -1,10 +1,10 @@
 {
   "name": "@file-services/test-kit",
   "description": "File system test-kit, containing contracts and validators.",
-  "version": "5.3.1",
+  "version": "5.4.0",
   "main": "dist/index.js",
   "dependencies": {
-    "@file-services/types": "^5.3.1",
+    "@file-services/types": "^5.4.0",
     "chai": "^4.3.4",
     "promise-assist": "^1.3.0"
   },
