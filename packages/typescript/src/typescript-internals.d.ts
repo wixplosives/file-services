@@ -4,14 +4,15 @@ declare module 'typescript' {
   // needed for custom readDirectory
   export function matchFiles(
     path: string,
-    extensions: ReadonlyArray<string> | undefined,
-    excludes: ReadonlyArray<string> | undefined,
-    includes: ReadonlyArray<string> | undefined,
+    extensions: readonly string[] | undefined,
+    excludes: readonly string[] | undefined,
+    includes: readonly string[] | undefined,
     useCaseSensitiveFileNames: boolean,
     currentDirectory: string,
     depth: number | undefined,
     getFileSystemEntries: (path: string) => FileSystemEntries,
-    realpath: (path: string) => string
+    realpath: (path: string) => string,
+    directoryExists: (path: string) => boolean
   ): string[];
 
   // used by matchFiles above
