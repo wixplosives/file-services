@@ -1,7 +1,7 @@
 {
   "name": "@file-services/path",
   "description": "Node's `path` implementation, ready for the web.",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "main": "index.js",
   "browser": {
     "./index.js": "./browser-path.js"
