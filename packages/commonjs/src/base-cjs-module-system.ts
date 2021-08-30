@@ -81,23 +81,32 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     }
     const requireFromContext = (request: string) => requireFrom(contextPath, request, filePath);
     requireFromContext.resolve = (request: string) => resolveThrow(contextPath, request, filePath);
-    const moduleArguments = {
+
+    const moduleBuiltins = {
       module: newModule,
       exports: newModule.exports,
       __filename: filePath,
       __dirname: contextPath,
       require: requireFromContext,
+    };
+
+    const injectedGlobals = {
       global: envGlobal,
       ...globals,
     };
-    const moduleFn = eval(
-      `(function (${Object.keys(moduleArguments).join(', ')}){${fileContents}\n//# sourceURL=${filePath}\n})`
-    ) as (...args: unknown[]) => void;
+
+    const fnArgs = Object.keys(moduleBuiltins).join(', ');
+    const globalsArgs = Object.keys(injectedGlobals).join(', ');
+    const moduleSource = `${fileContents}\n//# sourceURL=${filePath}\n`;
+    const globalFn = eval(`(function (${globalsArgs}){ return (function (${fnArgs}){${moduleSource}}); })`) as (
+      ...args: unknown[]
+    ) => (...args: unknown[]) => void;
 
     loadedModules.set(filePath, newModule);
 
     try {
-      moduleFn(...Object.values(moduleArguments));
+      const moduleFn = globalFn(...Object.values(injectedGlobals));
+      moduleFn(...Object.values(moduleBuiltins));
     } catch (e) {
       loadedModules.delete(filePath);
       throw e;

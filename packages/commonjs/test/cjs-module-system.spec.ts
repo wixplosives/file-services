@@ -82,6 +82,33 @@ describe('commonjs module system', () => {
     expect(requireModule(sampleFilePath)).to.eql(123);
   });
 
+  it('allows local const declarations to take precedence over injected global', () => {
+    const fs = createMemoryFs({
+      [sampleFilePath]: `const injectedValue = 456;
+module.exports = injectedValue`,
+    });
+    const { requireModule } = createCjsModuleSystem({ fs, globals: { injectedValue: 123 } });
+
+    expect(requireModule(sampleFilePath)).to.eql(456);
+  });
+
+  it('disallows const declarations to override module builtins', () => {
+    const fs = createMemoryFs({
+      'module.js': `const module = 123;`,
+      'exports.js': `const exports = 123;`,
+      '__filename.js': `const __filename = 123;`,
+      '__dirname.js': `const __dirname = 123;`,
+      'require.js': `const require = 123;`,
+    });
+    const { requireModule } = createCjsModuleSystem({ fs });
+
+    expect(() => requireModule('/module.js')).to.throw(`Identifier 'module' has already been declared`);
+    expect(() => requireModule('/exports.js')).to.throw(`Identifier 'exports' has already been declared`);
+    expect(() => requireModule('/__filename.js')).to.throw(`Identifier '__filename' has already been declared`);
+    expect(() => requireModule('/__dirname.js')).to.throw(`Identifier '__dirname' has already been declared`);
+    expect(() => requireModule('/require.js')).to.throw(`Identifier 'require' has already been declared`);
+  });
+
   it('injects provided globals post creation', () => {
     const fs = createMemoryFs({
       [sampleFilePath]: `module.exports = injectedValue`,
@@ -162,6 +189,16 @@ describe('commonjs module system', () => {
     const { requireModule } = createCjsModuleSystem({ fs });
 
     expect(requireModule(sampleFilePath)).to.equal('object');
+  });
+
+  it('allows overriding "global" using local decalarations', () => {
+    const fs = createMemoryFs({
+      [sampleFilePath]: `const global = 123;
+module.exports = global;`,
+    });
+    const { requireModule } = createCjsModuleSystem({ fs });
+
+    expect(requireModule(sampleFilePath)).to.equal(123);
   });
 
   it('allows resolving modules using a custom resolver', () => {
