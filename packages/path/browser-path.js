@@ -8,7 +8,7 @@ const CHAR_BACKWARD_SLASH = 92; /* \ */
 const CHAR_COLON = 58; /* : */
 const CHAR_QUESTION_MARK = 63; /* ? */
 
-const process = {
+const _process = {
   cwd: function () {
     return '/';
   },
@@ -136,14 +136,14 @@ const win32 = {
           continue;
         }
       } else if (resolvedDevice.length === 0) {
-        path = process.cwd();
+        path = _process.cwd();
       } else {
         // Windows has the concept of drive-specific current working
         // directories. If we've resolved a drive letter but not yet an
         // absolute path, get cwd for that drive, or the process cwd if
         // the drive cwd is not available. We're sure the device is not
         // a UNC path at this points, because UNC paths are always absolute.
-        path = process.env[`=${resolvedDevice}`] || process.cwd();
+        path = _process.env[`=${resolvedDevice}`] || _process.cwd();
 
         // Verify that a cwd was found and that it actually points
         // to our drive. If not, default to the drive's root.
@@ -919,7 +919,7 @@ const posix = {
     let resolvedAbsolute = false;
 
     for (let i = args.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-      const path = i >= 0 ? args[i] : process.cwd();
+      const path = i >= 0 ? args[i] : _process.cwd();
 
       validateString(path, 'path');
 
@@ -1288,4 +1288,4 @@ posix.posix = win32.posix = posix;
 win32._makeLong = win32.toNamespacedPath;
 posix._makeLong = posix.toNamespacedPath;
 
-module.exports = process.platform === 'win32' ? win32 : posix;
+module.exports = _process.platform === 'win32' ? win32 : posix;
