@@ -51,31 +51,21 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     const files: string[] = [];
     const directories: string[] = [];
 
-    const { stackTraceLimit } = Error;
     try {
-      Error.stackTraceLimit = 0;
-      const dirEntries = readdirSync(path);
-      for (const entryName of dirEntries) {
-        const entryStats = statSync(join(path, entryName));
-        if (!entryStats) {
-          continue;
-        }
-        if (entryStats.isFile()) {
-          files.push(entryName);
-        } else if (entryStats.isDirectory()) {
-          directories.push(entryName);
+      for (const entry of readdirSync(path, { withFileTypes: true })) {
+        if (entry.isFile()) {
+          files.push(entry.name);
+        } else if (entry.isDirectory()) {
+          directories.push(entry.name);
         }
       }
     } catch {
       /* */
-    } finally {
-      Error.stackTraceLimit = stackTraceLimit;
     }
-
     return { files, directories };
   }
 
-  function realpath(path: string): string {
+  function realpathSyncSafe(path: string): string {
     const { stackTraceLimit } = Error;
     try {
       Error.stackTraceLimit = 0;
@@ -98,7 +88,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         rootDir,
         depth,
         getFileSystemEntries,
-        realpath,
+        realpathSyncSafe,
         directoryExistsSync
       );
     },
@@ -133,7 +123,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     getCanonicalFileName: caseSensitive ? identity : toLowerCase,
     getCurrentDirectory: cwd,
     getNewLine: defaultGetNewLine,
-    realpath,
+    realpath: realpathSyncSafe,
     dirname,
     normalize,
     join,
