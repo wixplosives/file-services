@@ -33,12 +33,12 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
       async exists(nodePath) {
         return syncFs.existsSync(nodePath);
       },
-      async stat(nodePath) {
-        return syncFs.statSync(nodePath);
-      },
-      async lstat(nodePath) {
-        return syncFs.lstatSync(nodePath);
-      },
+      stat: async function stat(...args: [string]) {
+        return syncFs.statSync(...args);
+      } as IBaseFileSystemPromiseActions['stat'],
+      lstat: async function lstat(...args: [string]) {
+        return syncFs.lstatSync(...args);
+      } as IBaseFileSystemPromiseActions['lstat'],
       async realpath(nodePath) {
         return syncFs.realpathSync(nodePath);
       },
@@ -65,8 +65,8 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
     readdir: callbackify(syncFs.readdirSync) as IBaseFileSystemAsync['readdir'],
     mkdir: callbackify(syncFs.mkdirSync) as unknown as IBaseFileSystemAsync['mkdir'],
     rmdir: callbackify(syncFs.rmdirSync),
-    stat: callbackify(syncFs.statSync),
-    lstat: callbackify(syncFs.lstatSync),
+    stat: (callbackify(syncFs.statSync) as unknown) as IBaseFileSystemAsync['stat'],
+    lstat: (callbackify(syncFs.lstatSync) as unknown) as IBaseFileSystemAsync['lstat'],
     realpath: callbackify(syncFs.realpathSync),
     rename: callbackify(syncFs.renameSync),
     readlink: callbackify(syncFs.readlinkSync),
