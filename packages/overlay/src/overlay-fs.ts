@@ -7,6 +7,7 @@ import type {
   ReadFileOptions,
   IDirectoryEntry,
   BufferEncoding,
+  StatOptions,
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
@@ -57,36 +58,34 @@ export function createOverlayFs(
       }
       return lowerFs.readFileSync(resolvedLowerPath, ...args);
     } as IBaseFileSystemSyncActions['readFileSync'],
-    statSync(path) {
+    statSync: function (path: string, ...args: [StatOptions]) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
-        const { stackTraceLimit } = Error;
         try {
-          Error.stackTraceLimit = 0;
-          return upperFs.statSync(resolvedUpperPath);
+          const stats = upperFs.statSync(resolvedUpperPath, ...args);
+          if (stats) {
+            return stats;
+          }
         } catch {
           /**/
-        } finally {
-          Error.stackTraceLimit = stackTraceLimit;
         }
       }
-      return lowerFs.statSync(resolvedLowerPath);
-    },
-    lstatSync(path) {
+      return lowerFs.statSync(resolvedLowerPath, ...args);
+    } as IBaseFileSystemSyncActions['statSync'],
+    lstatSync: function lstatSync(path: string, ...args: [StatOptions]) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
-        const { stackTraceLimit } = Error;
         try {
-          Error.stackTraceLimit = 0;
-          return upperFs.lstatSync(resolvedUpperPath);
+          const stats = upperFs.lstatSync(resolvedUpperPath, ...args);
+          if (stats) {
+            return stats;
+          }
         } catch {
           /**/
-        } finally {
-          Error.stackTraceLimit = stackTraceLimit;
         }
       }
-      return lowerFs.lstatSync(resolvedLowerPath);
-    },
+      return lowerFs.lstatSync(resolvedLowerPath, ...args);
+    } as IBaseFileSystemSyncActions['lstatSync'],
     realpathSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
@@ -159,28 +158,34 @@ export function createOverlayFs(
       }
       return lowerPromises.readFile(resolvedLowerPath, ...args);
     } as IBaseFileSystemPromiseActions['readFile'],
-    async stat(path) {
+    stat: async function stat(path: string, ...args: [StatOptions]) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
         try {
-          return await upperPromises.stat(resolvedUpperPath);
+          const stats = await upperPromises.stat(resolvedUpperPath, ...args);
+          if (stats) {
+            return stats;
+          }
         } catch {
           /**/
         }
       }
-      return lowerPromises.stat(resolvedLowerPath);
-    },
-    async lstat(path) {
+      return lowerPromises.stat(resolvedLowerPath, ...args);
+    } as IBaseFileSystemPromiseActions['stat'],
+    lstat: async function lstat(path: string, ...args: [StatOptions]) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
         try {
-          return await upperPromises.lstat(resolvedUpperPath);
+          const stats = await upperPromises.lstat(resolvedUpperPath, ...args);
+          if (stats) {
+            return stats;
+          }
         } catch {
           /**/
         }
       }
-      return lowerPromises.lstat(resolvedLowerPath);
-    },
+      return lowerPromises.lstat(resolvedLowerPath, ...args);
+    } as IBaseFileSystemPromiseActions['lstat'],
     async realpath(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {

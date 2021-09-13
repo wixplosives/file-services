@@ -109,15 +109,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
       }
     },
     getScriptVersion(filePath) {
-      const { stackTraceLimit } = Error;
-      try {
-        Error.stackTraceLimit = 0;
-        return `${statSync(filePath).mtime.getTime()}`;
-      } catch {
-        return `${Date.now()}`;
-      } finally {
-        Error.stackTraceLimit = stackTraceLimit;
-      }
+      return `${statSync(filePath, { throwIfNoEntry: false })?.mtime.getTime() ?? Date.now()}`;
     },
     useCaseSensitiveFileNames: caseSensitive,
     getCanonicalFileName: caseSensitive ? identity : toLowerCase,
