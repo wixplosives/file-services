@@ -28,18 +28,13 @@ interface IFailureCacheResult {
 
 export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
-  const statsCache = new Map<string, ISuccessCacheResult<IFileSystemStats | undefined> | IFailureCacheResult>();
+  const statsCache = new Map<string, ISuccessCacheResult<IFileSystemStats> | IFailureCacheResult>();
   const realpathCache = new Map<string, string>();
-  const { promises, delimiter } = fs;
-
-  const suffixTrue = delimiter + 'true';
-  const suffixFalse = delimiter + 'false';
-
+  const { promises } = fs;
   const invalidateAbsolute = (absolutePath: string) => {
     const cachePath = getCanonicalPath(absolutePath);
     realpathCache.delete(cachePath);
-    statsCache.delete(cachePath + suffixTrue);
-    statsCache.delete(cachePath + suffixFalse);
+    statsCache.delete(cachePath);
   };
   const invalidateAbsoluteByPrefix = (absolutePath: string) => {
     const prefix = getCanonicalPath(absolutePath);
@@ -131,21 +126,20 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         }
         return fs.writeFileSync(filePath, ...args);
       },
-      statSync(path, options) {
+      statSync(path) {
         path = fs.resolve(path);
-        const throwIfNoEntry = options?.throwIfNoEntry ?? true;
-        const cacheKey = getCanonicalPath(path) + (throwIfNoEntry ? suffixTrue : suffixFalse);
+        const cacheKey = getCanonicalPath(path);
         const cachedStats = statsCache.get(cacheKey);
         if (cachedStats) {
           if (cachedStats.kind === 'failure') {
             throw cachedStats.error;
           }
-          return cachedStats.value as IFileSystemStats;
+          return cachedStats.value;
         }
         try {
-          const stats = fs.statSync(path, options);
+          const stats = fs.statSync(path);
           statsCache.set(cacheKey, { kind: 'success', value: stats });
-          return stats as IFileSystemStats;
+          return stats;
         } catch (e) {
           statsCache.set(cacheKey, { kind: 'failure', error: e as Error });
           throw e;
@@ -153,15 +147,13 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
       },
       stat(path, callback) {
         path = fs.resolve(path);
-        // callback version has own error handling mechanism, so always true suffix
-        const cacheKey = getCanonicalPath(path) + suffixTrue;
+        const cacheKey = getCanonicalPath(path);
         const cachedStats = statsCache.get(cacheKey);
         if (cachedStats) {
           if (cachedStats.kind === 'failure') {
             (callback as (e: Error) => void)(cachedStats.error);
           } else if (cachedStats.kind === 'success') {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            callback(null, cachedStats.value!);
+            callback(null, cachedStats.value);
           }
         } else {
           fs.stat(path, (error, stats) => {
@@ -259,21 +251,20 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         }
         return promises.writeFile(filePath, ...args);
       },
-      async stat(path, options) {
+      async stat(path: string) {
         path = fs.resolve(path);
-        const throwIfNoEntry = options?.throwIfNoEntry ?? true;
-        const cacheKey = getCanonicalPath(path) + (throwIfNoEntry ? suffixTrue : suffixFalse);
+        const cacheKey = getCanonicalPath(path);
         const cachedStats = statsCache.get(cacheKey);
         if (cachedStats) {
           if (cachedStats.kind === 'failure') {
             throw cachedStats.error;
           }
-          return cachedStats.value as IFileSystemStats;
+          return cachedStats.value;
         }
         try {
-          const stats = await promises.stat(path, options);
+          const stats = await promises.stat(path);
           statsCache.set(cacheKey, { kind: 'success', value: stats });
-          return stats as IFileSystemStats;
+          return stats;
         } catch (e) {
           statsCache.set(cacheKey, { kind: 'failure', error: e as Error });
           throw e;

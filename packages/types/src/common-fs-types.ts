@@ -20,14 +20,6 @@ declare global {
 export type CallbackFn<T> = (error: Error | null, value: T) => void;
 export type CallbackFnVoid = (error?: Error | null) => void;
 
-export interface StatOptions {
-  /**
-   * Whether an exception will be thrown if no file system entry exists, rather than returning `undefined`.
-   * @default true
-   */
-  throwIfNoEntry?: boolean;
-}
-
 export type WriteFileOptions =
   | {
       encoding?: BufferEncoding | null;

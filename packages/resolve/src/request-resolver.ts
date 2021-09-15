@@ -7,7 +7,6 @@ const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) =>
   request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
-const statsNoThrowOptions = { throwIfNoEntry: false } as const;
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
@@ -36,7 +35,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
 
     for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
-      if (!statSync(resolvedFile, statsNoThrowOptions)?.isFile()) {
+      if (!statSyncSafe(resolvedFile)?.isFile()) {
         continue;
       }
       if (target === 'browser') {
@@ -86,7 +85,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* directoryRequestPaths(directoryPath: string) {
-    if (!statSync(directoryPath, statsNoThrowOptions)?.isDirectory()) {
+    if (!statSyncSafe(directoryPath)?.isDirectory()) {
       return;
     }
     const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
@@ -101,7 +100,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function* packageRequestPaths(initialPath: string, request: string) {
     for (const packagesPath of packageRootsToPaths(initialPath)) {
-      if (!statSync(packagesPath, statsNoThrowOptions)?.isDirectory()) {
+      if (!statSyncSafe(packagesPath)?.isDirectory()) {
         continue;
       }
       const requestInPackages = join(packagesPath, request);
@@ -174,7 +173,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function resolveRelative(request: string) {
     for (const filePath of fileOrDirIndexRequestPaths(request)) {
-      if (statSync(filePath, statsNoThrowOptions)?.isFile()) {
+      if (statSyncSafe(filePath)?.isFile()) {
         return realpathSyncSafe(filePath);
       }
     }
@@ -215,6 +214,18 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     try {
       Error.stackTraceLimit = 0;
       return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+    } catch {
+      return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
+  }
+
+  function statSyncSafe(path: string) {
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return statSync(path);
     } catch {
       return undefined;
     } finally {

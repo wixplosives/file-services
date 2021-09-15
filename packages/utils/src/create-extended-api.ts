@@ -50,15 +50,31 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   } = baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
-      return !!statFn(filePath, { throwIfNoEntry: false })?.isFile();
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return statFn(filePath).isFile();
+    } catch {
+      return false;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
     }
+  }
 
   function readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown {
     return JSON.parse(readFileSync(filePath, options || 'utf8')) as unknown;
   }
 
   function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
-    return !!statFn(directoryPath, { throwIfNoEntry: false })?.isDirectory();
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return statFn(directoryPath).isDirectory();
+    } catch {
+      return false;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
   }
 
   function ensureDirectorySync(directoryPath: string): void {
@@ -133,15 +149,16 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
 
     for (const nodeName of readdirSync(rootDirectory)) {
       const nodePath = join(rootDirectory, nodeName);
-      const nodeStats = statSync(nodePath, { throwIfNoEntry: false });
-      if (!nodeStats) {
-        continue;
-      }
-      const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
-      if (nodeStats.isFile() && filterFile(nodeDesc)) {
-        filePaths.push(nodePath);
-      } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
-        findFilesSync(nodePath, options, filePaths);
+      try {
+        const nodeStats = statSync(nodePath);
+        const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
+        if (nodeStats.isFile() && filterFile(nodeDesc)) {
+          filePaths.push(nodePath);
+        } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+          findFilesSync(nodePath, options, filePaths);
+        }
+      } catch (e) {
+        /**/
       }
     }
 
@@ -231,11 +248,19 @@ export function createExtendedFileSystemPromiseActions(
   } = baseFs;
 
   async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
-    return !!(await statFn(filePath, { throwIfNoEntry: false }))?.isFile();
+    try {
+      return (await statFn(filePath)).isFile();
+    } catch {
+      return false;
+    }
   }
 
   async function directoryExists(directoryPath: string, statFn = stat): Promise<boolean> {
-    return !!(await statFn(directoryPath, { throwIfNoEntry: false }))?.isDirectory();
+    try {
+      return (await statFn(directoryPath)).isDirectory();
+    } catch {
+      return false;
+    }
   }
 
   async function readJsonFile(
@@ -320,15 +345,16 @@ export function createExtendedFileSystemPromiseActions(
 
     for (const nodeName of await readdir(rootDirectory)) {
       const nodePath = join(rootDirectory, nodeName);
-      const nodeStats = await stat(nodePath, { throwIfNoEntry: false });
-      if (!nodeStats) {
-        continue;
-      }
-      const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
-      if (nodeStats.isFile() && filterFile(nodeDesc)) {
-        filePaths.push(nodePath);
-      } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
-        await findFiles(nodePath, options, filePaths);
+      try {
+        const nodeStats = await stat(nodePath);
+        const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
+        if (nodeStats.isFile() && filterFile(nodeDesc)) {
+          filePaths.push(nodePath);
+        } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+          await findFiles(nodePath, options, filePaths);
+        }
+      } catch (e) {
+        /**/
       }
     }
 

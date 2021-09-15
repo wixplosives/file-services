@@ -9,7 +9,6 @@ import {
   BufferEncoding,
   IDirectoryEntry,
   IBaseFileSystemSyncActions,
-  StatOptions,
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes.js';
 import type {
@@ -293,34 +292,20 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     return !!getNode(resolvePath(nodePath));
   }
 
-  function statSync(nodePath: string, options?: StatOptions & { throwIfNoEntry?: true }): IFileSystemStats;
-  function statSync(nodePath: string, options: StatOptions & { throwIfNoEntry: false }): IFileSystemStats | undefined;
-  function statSync(nodePath: string, options?: StatOptions): IFileSystemStats | undefined {
+  function statSync(nodePath: string): IFileSystemStats {
     const resolvedPath = resolvePath(nodePath);
     const node = getNode(resolvedPath);
     if (!node) {
-      const throwIfNoEntry = options?.throwIfNoEntry ?? true;
-      if (throwIfNoEntry) {
-        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
-      } else {
-        return undefined;
-      }
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
     return node.entry;
   }
 
-  function lstatSync(nodePath: string, options?: StatOptions & { throwIfNoEntry?: true }): IFileSystemStats;
-  function lstatSync(nodePath: string, options: StatOptions & { throwIfNoEntry: false }): IFileSystemStats | undefined;
-  function lstatSync(nodePath: string, options?: StatOptions): IFileSystemStats | undefined {
+  function lstatSync(nodePath: string): IFileSystemStats {
     const resolvedPath = resolvePath(nodePath);
     const node = getRawNode(resolvedPath);
     if (!node) {
-      const throwIfNoEntry = options?.throwIfNoEntry ?? true;
-      if (throwIfNoEntry) {
-        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
-      } else {
-        return undefined;
-      }
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
     }
     return node.entry;
   }

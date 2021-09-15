@@ -106,6 +106,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       copyFile(srcPath, destPath, ...args) {
         return fsPromises.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
       },
+      lstat(path) {
+        return fsPromises.lstat(resolveFullPath(path));
+      },
       mkdir(path, ...args) {
         return fsPromises.mkdir(resolveFullPath(path), ...args);
       },
@@ -136,12 +139,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       exists(path) {
         return fsPromises.exists(resolveFullPath(path));
       },
-      stat: function stat(path: string, ...args: []) {
-        return fsPromises.stat(resolveFullPath(path), ...args);
-      } as IBaseFileSystemPromiseActions['stat'],
-      lstat: function lstat(path: string, ...args: []) {
-        return fsPromises.lstat(resolveFullPath(path), ...args);
-      } as IBaseFileSystemPromiseActions['lstat'],
+      stat(path) {
+        return fsPromises.stat(resolveFullPath(path));
+      },
       symlink(target, path, type) {
         return fsPromises.symlink(
           posixPath.isAbsolute(target) ? resolveFullPath(target) : target,
@@ -158,6 +158,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     },
     copyFileSync(src, dest, ...args) {
       return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...args);
+    },
+    lstatSync(path) {
+      return fs.lstatSync(resolveFullPath(path));
     },
     mkdirSync(path, ...args) {
       return fs.mkdirSync(resolveFullPath(path), ...args);
@@ -189,12 +192,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     existsSync(path) {
       return fs.existsSync(resolveFullPath(path));
     },
-    statSync: function statSync(path: string, ...args: []) {
-      return fs.statSync(resolveFullPath(path), ...args);
-    } as IBaseFileSystemSyncActions['statSync'],
-    lstatSync: function lstatSync(path: string, ...args: []) {
-      return fs.lstatSync(resolveFullPath(path), ...args);
-    } as IBaseFileSystemSyncActions['lstatSync'],
+    statSync(path) {
+      return fs.statSync(resolveFullPath(path));
+    },
     symlinkSync(target, path, type) {
       return fs.symlinkSync(
         posixPath.isAbsolute(target) ? resolveFullPath(target) : target,

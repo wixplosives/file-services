@@ -67,6 +67,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
     describe('reading files', () => {
       it('can read the contents of a file', () => {
         const { fs, tempDirectoryPath } = testInput;
+
         const firstFilePath = fs.join(tempDirectoryPath, 'first-file');
         const secondFilePath = fs.join(tempDirectoryPath, 'second-file');
 
@@ -79,36 +80,53 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
       it('fails if reading a non-existing file', () => {
         const { fs, tempDirectoryPath } = testInput;
+
         const filePath = fs.join(tempDirectoryPath, 'missing-file');
-        expect(() => fs.readFileSync(filePath, 'utf8')).to.throw('ENOENT');
+
+        const expectedToFail = () => fs.readFileSync(filePath, 'utf8');
+
+        expect(expectedToFail).to.throw('ENOENT');
       });
 
       it('fails if reading a directory as a file', () => {
         const { fs, tempDirectoryPath } = testInput;
-        expect(() => fs.readFileSync(tempDirectoryPath, 'utf8')).to.throw('EISDIR');
+        const expectedToFail = () => fs.readFileSync(tempDirectoryPath, 'utf8');
+
+        expect(expectedToFail).to.throw('EISDIR');
       });
     });
 
     describe('removing files', () => {
       it('can remove files', () => {
         const { fs, tempDirectoryPath } = testInput;
+
         const filePath = fs.join(tempDirectoryPath, 'file');
+
         fs.writeFileSync(filePath, SAMPLE_CONTENT);
         fs.unlinkSync(filePath);
-        expect(fs.statSync(filePath, { throwIfNoEntry: false })).to.equal(undefined);
+
+        expect(() => fs.statSync(filePath)).to.throw('ENOENT');
       });
 
       it('fails if trying to remove a non-existing file', () => {
         const { fs, tempDirectoryPath } = testInput;
+
         const filePath = fs.join(tempDirectoryPath, 'missing-file');
-        expect(() => fs.unlinkSync(filePath)).to.throw('ENOENT');
+
+        const expectedToFail = () => fs.unlinkSync(filePath);
+
+        expect(expectedToFail).to.throw('ENOENT');
       });
 
       it('fails if trying to remove a directory as a file', () => {
         const { fs, tempDirectoryPath } = testInput;
+
         const directoryPath = fs.join(tempDirectoryPath, 'dir');
+
         fs.mkdirSync(directoryPath);
-        expect(() => fs.unlinkSync(directoryPath)).to.throw(); // linux throws `EISDIR`, mac throws `EPERM`
+        const expectedToFail = () => fs.unlinkSync(directoryPath);
+
+        expect(expectedToFail).to.throw(); // linux throws `EISDIR`, mac throws `EPERM`
       });
     });
 
@@ -333,7 +351,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         fs.mkdirSync(directoryPath);
         fs.rmdirSync(directoryPath);
 
-        expect(fs.statSync(directoryPath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(() => fs.statSync(directoryPath)).to.throw('ENOENT');
       });
 
       it('fails if removing a non-empty directory', () => {
@@ -482,7 +500,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         expect(fs.statSync(destinationPath).isFile()).to.equal(true);
         expect(fs.readFileSync(destinationPath, 'utf8')).to.eql(SAMPLE_CONTENT);
-        expect(fs.statSync(sourcePath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(() => fs.statSync(sourcePath)).to.throw('ENOENT');
       });
 
       it('updates mtime', () => {
@@ -553,7 +571,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
           expect(fs.statSync(destinationPath).isDirectory()).to.equal(true);
           expect(fs.readFileSync(fs.join(destinationPath, 'file'), 'utf8')).to.eql(SAMPLE_CONTENT);
-          expect(fs.statSync(sourcePath, { throwIfNoEntry: false })).to.equal(undefined);
+          expect(() => fs.statSync(sourcePath)).to.throw('ENOENT');
         });
 
         it(`allows renaming a directory over a non-existing directory`, () => {
@@ -591,7 +609,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
       fs.writeFileSync(filePath, SAMPLE_CONTENT);
 
       if (fs.caseSensitive) {
-        expect(fs.statSync(upperCaseFilePath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(() => fs.statSync(upperCaseFilePath)).to.throw('ENOENT');
       } else {
         expect(fs.statSync(upperCaseFilePath).isFile()).to.equal(true);
       }
@@ -731,7 +749,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         fs.unlinkSync(targetPath);
 
         expect(fs.lstatSync(linkPath).isSymbolicLink()).to.eq(true);
-        expect(fs.statSync(linkPath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(() => fs.statSync(linkPath)).to.throw('ENOENT');
       });
 
       it('resolves the real path of a link', () => {

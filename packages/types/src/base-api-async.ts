@@ -6,7 +6,6 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
-  StatOptions,
 } from './common-fs-types.js';
 import type { IFileSystemPath } from './path.js';
 import type { IWatchService } from './watch-api.js';
@@ -174,15 +173,12 @@ export interface IBaseFileSystemPromiseActions {
   /**
    * Get path's `IFileSystemStats`.
    */
-  stat(path: string, options?: StatOptions & { throwIfNoEntry?: true }): Promise<IFileSystemStats>;
-  stat(path: string, options: StatOptions & { throwIfNoEntry: false }): Promise<IFileSystemStats | undefined>;
-  stat(path: string, options?: StatOptions): Promise<IFileSystemStats | undefined>;
+  stat(path: string): Promise<IFileSystemStats>;
+
   /**
    * Get path's `IFileSystemStats`. Does not dereference symbolic links.
    */
-  lstat(path: string, options?: StatOptions & { throwIfNoEntry?: true }): Promise<IFileSystemStats>;
-  lstat(path: string, options: StatOptions & { throwIfNoEntry: false }): Promise<IFileSystemStats | undefined>;
-  lstat(path: string, options?: StatOptions): Promise<IFileSystemStats | undefined>;
+  lstat(path: string): Promise<IFileSystemStats>;
 
   /**
    * Gets the canonicalized absolute pathname.

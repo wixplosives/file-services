@@ -59,10 +59,7 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
  * Currently a subset of the sync base file system API.
  */
 export interface IResolutionFileSystem {
-  statSync(
-    path: string,
-    options: { throwIfNoEntry: false }
-  ): { isFile(): boolean; isDirectory(): boolean; birthtime: Date; mtime: Date } | undefined;
+  statSync(path: string): { isFile(): boolean; isDirectory(): boolean; birthtime: Date; mtime: Date };
   readFileSync(path: string, encoding: 'utf8'): string;
   realpathSync(path: string): string;
 
