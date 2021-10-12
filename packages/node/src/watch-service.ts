@@ -104,7 +104,7 @@ export class NodeWatchService implements IWatchService {
   private onPathEvent(eventType: string, eventPath: string) {
     const pendingEvent = this.pendingEvents.get(eventPath);
     const timerId = setTimeout(() => {
-      this.emitEvent(eventPath).catch((e) => this.onWatchError(e, eventPath));
+      this.emitEvent(eventPath).catch((e) => this.onWatchError(e as Error, eventPath));
     }, this.options.debounceWait);
 
     if (pendingEvent) {

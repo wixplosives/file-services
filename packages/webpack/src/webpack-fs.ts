@@ -40,7 +40,7 @@ export function createWebpackFs(fs: IFileSystem): IWebpackFileSystem {
     readJson(filePath, callback) {
       readJsonFile(filePath)
         .then((value) => callback(undefined, value))
-        .catch((e) => callback(e, undefined));
+        .catch((e) => callback(e as Error, undefined));
     },
     mkdirp(directoryPath, callback) {
       ensureDirectory(directoryPath)
