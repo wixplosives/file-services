@@ -41,7 +41,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "rimraf": "^3.0.2",
-    "sass": "^1.42.1",
+    "sass": "^1.43.2",
     "sinon": "^11.1.2",
     "sinon-chai": "^3.7.0",
     "source-map-loader": "^3.0.0",
