@@ -604,7 +604,7 @@ describe('alias support', () => {
         it(`should throw for import '${MODULE_INTERNAL}'`, () => {
           expect(() => {
             resolver('/abc', MODULE_INTERNAL);
-          }).to.throw('Alias points to file');
+          }).to.throw('Alias points to file, cannot make request to internal path');
         });
       }
     });

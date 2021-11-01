@@ -130,20 +130,26 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    */
   function* aliasRequestPaths(request: string) {
     for (const [aliasedFrom, aliasedTo] of Object.entries(aliases)) {
-      if (aliasedFrom.endsWith('$') && request === aliasedFrom.slice(0, aliasedFrom.length - 1)) {
-        if (aliasedTo === false) {
-          yield false;
+      // Aliases that end with $ denote exact match (without the $ obviously)
+      if (aliasedFrom.endsWith('$')) {
+        const exactMatch = request === aliasedFrom.slice(0, aliasedFrom.length - 1);
+        if (exactMatch) {
+          if (aliasedTo === false) {
+            yield false;
+          }
+          yield aliasedTo;
         }
-        yield aliasedTo;
-      } else if (!request.endsWith('$') && request.startsWith(aliasedFrom)) {
+      } else if (request.startsWith(aliasedFrom)) {
         if (aliasedTo === false) {
           yield false;
+          // Aliasing to specific file, either we have a perfect match or an illegal request
         } else if (/\.\w+$/.test(aliasedTo)) {
           if (request === aliasedFrom) {
             yield aliasedTo;
           } else {
-            throw new Error('Alias points to file');
+            throw new Error('Alias points to file, cannot make request to internal path');
           }
+          // Aliasing a module to a dir, just replace the alias
         } else {
           yield request.replace(aliasedFrom, `${aliasedTo}/`);
         }
