@@ -123,16 +123,21 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
+  /**
+   *
+   * @param request - the original request
+   * The function generates all the possible aliased requests, and falls back to the original request if all else failed
+   */
   function* aliasRequestPaths(request: string) {
     for (const [aliasedFrom, aliasedTo] of Object.entries(aliases)) {
       if (aliasedFrom.endsWith('$') && request === aliasedFrom.slice(0, aliasedFrom.length - 1)) {
         if (aliasedTo === false) {
-          yield 'false';
+          yield false;
         }
         yield aliasedTo;
       } else if (!request.endsWith('$') && request.startsWith(aliasedFrom)) {
         if (aliasedTo === false) {
-          yield 'false';
+          yield false;
         } else if (/\.\w+$/.test(aliasedTo)) {
           if (request === aliasedFrom) {
             yield aliasedTo;

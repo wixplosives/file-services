@@ -61,6 +61,7 @@ describe('alias support', () => {
     expectedModule: string | false | undefined;
     expectedInternal?: string | false | undefined;
   }[] = [
+    // Cases as states in webpack docs https://webpack.js.org/configuration/resolve/#resolvealias
     { alias: {}, expectedModule: '/abc/node_modules/xyz/index.js', expectedInternal: '/abc/node_modules/xyz/file.js' },
     {
       alias: { xyz: '/abc/path/to/file.js' },
@@ -115,6 +116,12 @@ describe('alias support', () => {
       expectedModule: '/abc/node_modules/modu/dir/index.js',
       expectedInternal: '/abc/node_modules/xyz/file.js',
     },
+    // Additional cases
+    {
+      alias: { xyz: false },
+      expectedModule: false,
+      expectedInternal: false,
+    },
   ];
 
   aliasExpectationMapper.forEach(({ alias, expectedModule, expectedInternal }) => {
@@ -123,12 +130,12 @@ describe('alias support', () => {
       it(`should return ${JSON.stringify(expectedModule)} for import '${MODULE_REQUEST}' `, () => {
         expect(resolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(expectedModule);
       });
-      if (expectedInternal) {
+      if (expectedInternal !== undefined) {
         it(`should return ${JSON.stringify(expectedInternal)} for import '${MODULE_INTERNAL}`, () => {
           expect(resolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql(expectedInternal);
         });
       } else {
-        it(`should throw for import '${MODULE_INTERNAL}`, () => {
+        it(`should throw for import '${MODULE_INTERNAL}'`, () => {
           expect(() => {
             resolver('/abc', MODULE_INTERNAL);
           }).to.throw('Alias points to file');
