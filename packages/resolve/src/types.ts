@@ -29,6 +29,17 @@ export interface IRequestResolverOptions {
    * If not provided, resolver will create an internal Map (still caches).
    */
   resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
+
+  /**
+   * Resolution aliases
+   * Map either a request prefix or an exact request (by adding $ at the end of it), to another request/prefix
+   *
+   * ex.
+   * { xyz: '/abc/path/to/file.js' } -> import 'xyz' // output /abc/path/to/file.js
+   *
+   * Aliases take precedence over other module resolutions.
+   */
+  aliases?: Record<string, string | false>;
 }
 
 export interface IResolutionOutput {

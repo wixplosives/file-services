@@ -15,6 +15,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     extensions = defaultExtensions,
     target = defaultTarget,
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
+    aliases = {},
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
@@ -22,33 +23,38 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   return requestResolver;
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
-    let request: string | false = originalRequest;
-    if (target === 'browser') {
-      const fromPackageJson = findUpPackageJson(contextPath);
-      const remappedRequest = fromPackageJson?.browserMappings?.[originalRequest];
-      if (remappedRequest !== undefined) {
-        request = remappedRequest;
-        if (request === false) {
-          return { resolvedFile: request };
-        }
-      }
-    }
-
-    for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
-      if (!statSyncSafe(resolvedFile)?.isFile()) {
-        continue;
+    for (const aliasedRequest of aliasRequestPaths(originalRequest)) {
+      let request: string | false = aliasedRequest;
+      if (request === false) {
+        return { resolvedFile: false };
       }
       if (target === 'browser') {
-        const toPackageJson = findUpPackageJson(dirname(resolvedFile));
-        const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
-        if (remappedFilePath !== undefined) {
-          return {
-            resolvedFile: remappedFilePath,
-            originalFilePath: resolvedFile,
-          };
+        const fromPackageJson = findUpPackageJson(contextPath);
+        const remappedRequest = fromPackageJson?.browserMappings?.[originalRequest];
+        if (remappedRequest !== undefined) {
+          request = remappedRequest;
+          if (request === false) {
+            return { resolvedFile: request };
+          }
         }
       }
-      return { resolvedFile: realpathSyncSafe(resolvedFile) };
+
+      for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
+        if (!statSyncSafe(resolvedFile)?.isFile()) {
+          continue;
+        }
+        if (target === 'browser') {
+          const toPackageJson = findUpPackageJson(dirname(resolvedFile));
+          const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
+          if (remappedFilePath !== undefined) {
+            return {
+              resolvedFile: remappedFilePath,
+              originalFilePath: resolvedFile,
+            };
+          }
+        }
+        return { resolvedFile: realpathSyncSafe(resolvedFile) };
+      }
     }
     return { resolvedFile: undefined };
   }
@@ -115,6 +121,30 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         yield join(directoryPath, packageRoot);
       }
     }
+  }
+
+  function* aliasRequestPaths(request: string) {
+    for (const [aliasedFrom, aliasedTo] of Object.entries(aliases)) {
+      if (aliasedFrom.endsWith('$') && request === aliasedFrom.slice(0, aliasedFrom.length - 1)) {
+        if (aliasedTo === false) {
+          yield 'false';
+        }
+        yield aliasedTo;
+      } else if (!request.endsWith('$') && request.startsWith(aliasedFrom)) {
+        if (aliasedTo === false) {
+          yield 'false';
+        } else if (/\.\w+$/.test(aliasedTo)) {
+          if (request === aliasedFrom) {
+            yield aliasedTo;
+          } else {
+            throw new Error('Alias points to file');
+          }
+        } else {
+          yield request.replace(aliasedFrom, `${aliasedTo}/`);
+        }
+      }
+    }
+    yield request;
   }
 
   function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
