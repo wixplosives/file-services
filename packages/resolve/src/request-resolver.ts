@@ -129,8 +129,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    * The function generates all the possible aliased requests, and falls back to the original request if all else failed
    */
   function* aliasRequestPaths(request: string) {
-    for (const { name, alias, onlyModule } of normalizeAliases(aliases)) {
-      if (onlyModule) {
+    for (const { name, alias, exactMatch } of normalizeAliases(aliases)) {
+      if (exactMatch) {
         if (request === name) {
           if (alias === false) {
             yield false;
@@ -143,18 +143,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       } else if (request.startsWith(name)) {
         if (alias === false) {
           yield false;
-          // Aliasing to specific file, either we have a perfect match or an illegal request
         } else {
           for (const aliasOption of alias) {
-            if (/\.\w+$/.test(aliasOption)) {
-              if (request === name) {
-                yield aliasOption;
-              } else {
-                throw new Error('Alias points to file, cannot make request to internal path');
-              }
-              // Aliasing a module to a dir, just replace the alias
+            if (request === name) {
+              yield aliasOption;
             } else {
-              yield request.replace(name, `${aliasOption}/`);
+              yield join(aliasOption, request.substr(name.length));
             }
           }
         }
@@ -293,30 +287,18 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
 }
 
 function normalizeAliases(
-  aliases:
-    | Record<string, string | false | string[]>
-    | { alias: string | false | string[]; name: string; onlyModule?: boolean }[]
-    | undefined
-): { alias: false | string[]; name: string; onlyModule?: boolean }[] {
+  aliases: Record<string, string | false | string[]> | undefined
+): { alias: false | string[]; name: string; exactMatch: boolean }[] {
   if (aliases === undefined) {
     return [];
   }
-  if (Array.isArray(aliases)) {
-    return aliases.map(({ name, alias, onlyModule }) => {
-      return {
-        alias: alias === false ? false : Array.isArray(alias) ? alias : [alias],
-        name,
-        onlyModule,
-      };
-    });
-  }
   return Object.entries(aliases).map(([aliasedFrom, aliasedTo]) => {
     // Aliases that end with $ denote exact match (without the $ obviously)
-    const exactMatch = aliasedFrom.endsWith('$');
+    const prefixMatch = aliasedFrom.endsWith('/*');
     return {
       alias: aliasedTo === false ? false : Array.isArray(aliasedTo) ? aliasedTo : [aliasedTo],
-      name: exactMatch ? aliasedFrom.slice(0, -1) : aliasedFrom,
-      onlyModule: exactMatch,
+      name: prefixMatch ? aliasedFrom.slice(0, -2) : aliasedFrom,
+      exactMatch: !prefixMatch,
     };
   });
 }
