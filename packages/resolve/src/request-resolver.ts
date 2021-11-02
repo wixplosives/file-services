@@ -1,5 +1,11 @@
 import type { PackageJson } from 'type-fest';
-import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types.js';
+import type {
+  RequestResolver,
+  IRequestResolverOptions,
+  IResolvedPackageJson,
+  IResolutionOutput,
+  IRequestRuleMapper,
+} from './types.js';
 
 const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
@@ -16,6 +22,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     target = defaultTarget,
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
     aliases = {},
+    fallback = {},
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
@@ -23,7 +30,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   return requestResolver;
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
-    for (const aliasedRequest of aliasRequestPaths(originalRequest)) {
+    for (const aliasedRequest of userMappedRequestPaths(originalRequest)) {
       let request: string | false = aliasedRequest;
       if (request === false) {
         return { resolvedFile: false };
@@ -128,8 +135,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    * @param request - the original request
    * The function generates all the possible aliased requests, and falls back to the original request if all else failed
    */
-  function* aliasRequestPaths(request: string) {
-    for (const { name, alias, exactMatch } of normalizeAliases(aliases)) {
+  function* mappedRequestPaths(request: string, map: IRequestRuleMapper) {
+    for (const { name, alias, exactMatch } of normalizeAliases(map)) {
       if (exactMatch) {
         if (request === name) {
           if (alias === false) {
@@ -155,6 +162,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       }
     }
     yield request;
+  }
+
+  function* userMappedRequestPaths(request: string) {
+    yield* mappedRequestPaths(request, aliases);
+    yield request;
+    yield* mappedRequestPaths(request, fallback);
   }
 
   function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {

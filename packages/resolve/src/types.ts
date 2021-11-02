@@ -1,3 +1,5 @@
+export type IRequestRuleMapper = Record<string, string | false | string[]>;
+
 export interface IRequestResolverOptions {
   /**
    * File system to use when resolving requests.
@@ -39,7 +41,18 @@ export interface IRequestResolverOptions {
    *
    * Aliases take precedence over other module resolutions.
    */
-  aliases?: Record<string, string | false | string[]>;
+  aliases?: IRequestRuleMapper;
+
+  /**
+   * Resolution fallback
+   * Map either a request prefix or an exact request (by adding $ at the end of it), to another request/prefix
+   *
+   * ex.
+   * { xyz: '/abc/path/to/file.js' } -> import 'xyz' // output /abc/path/to/file.js
+   *
+   * fallack take place if normal resolution failed.
+   */
+  fallback?: IRequestRuleMapper;
 }
 
 export interface IResolutionOutput {
