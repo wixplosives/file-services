@@ -24,7 +24,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
     for (const aliasedRequest of aliasRequestPaths(originalRequest)) {
-      let request: string | false = aliasedRequest;
+      let request: string | false = aliasedRequest as string | false;
       if (request === false) {
         return { resolvedFile: false };
       }
@@ -129,29 +129,28 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    * The function generates all the possible aliased requests, and falls back to the original request if all else failed
    */
   function* aliasRequestPaths(request: string) {
-    for (const [aliasedFrom, aliasedTo] of Object.entries(aliases)) {
+    for (const { name, alias, onlyModule } of normalizeAliases(aliases)) {
       // Aliases that end with $ denote exact match (without the $ obviously)
-      if (aliasedFrom.endsWith('$')) {
-        const exactMatch = request === aliasedFrom.slice(0, aliasedFrom.length - 1);
-        if (exactMatch) {
-          if (aliasedTo === false) {
+      if (onlyModule) {
+        if (request === name) {
+          if (alias === false) {
             yield false;
           }
-          yield aliasedTo;
+          yield alias;
         }
-      } else if (request.startsWith(aliasedFrom)) {
-        if (aliasedTo === false) {
+      } else if (request.startsWith(name)) {
+        if (alias === false) {
           yield false;
           // Aliasing to specific file, either we have a perfect match or an illegal request
-        } else if (/\.\w+$/.test(aliasedTo)) {
-          if (request === aliasedFrom) {
-            yield aliasedTo;
+        } else if (/\.\w+$/.test(alias as string)) {
+          if (request === name) {
+            yield alias;
           } else {
             throw new Error('Alias points to file, cannot make request to internal path');
           }
           // Aliasing a module to a dir, just replace the alias
         } else {
-          yield request.replace(aliasedFrom, `${aliasedTo}/`);
+          yield request.replace(name, `${alias as string}/`);
         }
       }
     }
@@ -285,6 +284,28 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
       return result;
     }
   };
+}
+
+function normalizeAliases(
+  aliases:
+    | Record<string, string | false | string[]>
+    | { alias: string | false | string[]; name: string; onlyModule?: boolean }[]
+    | undefined
+): { alias: string | false | string[]; name: string; onlyModule?: boolean }[] {
+  if (aliases === undefined) {
+    return [];
+  }
+  if (Array.isArray(aliases)) {
+    return aliases;
+  }
+  return Object.entries(aliases).map(([aliasedFrom, aliasedTo]) => {
+    const exactMatch = aliasedFrom.endsWith('$');
+    return {
+      alias: aliasedTo,
+      name: exactMatch ? aliasedFrom.slice(0, -1) : aliasedFrom,
+      onlyModule: exactMatch,
+    };
+  });
 }
 
 // to avoid having to include @types/node
