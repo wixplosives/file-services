@@ -39,7 +39,9 @@ export interface IRequestResolverOptions {
    *
    * Aliases take precedence over other module resolutions.
    */
-  aliases?: Record<string, string | false>;
+  aliases?:
+    | Record<string, string | false | string[]>
+    | { alias: string | false | string[]; name: string; onlyModule?: boolean }[];
 }
 
 export interface IResolutionOutput {

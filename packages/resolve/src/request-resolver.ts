@@ -24,7 +24,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
     for (const aliasedRequest of aliasRequestPaths(originalRequest)) {
-      let request: string | false = aliasedRequest as string | false;
+      let request: string | false = aliasedRequest;
       if (request === false) {
         return { resolvedFile: false };
       }
@@ -130,27 +130,33 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    */
   function* aliasRequestPaths(request: string) {
     for (const { name, alias, onlyModule } of normalizeAliases(aliases)) {
-      // Aliases that end with $ denote exact match (without the $ obviously)
       if (onlyModule) {
         if (request === name) {
           if (alias === false) {
             yield false;
+          } else {
+            for (const aliasOption of alias) {
+              yield aliasOption;
+            }
           }
-          yield alias;
         }
       } else if (request.startsWith(name)) {
         if (alias === false) {
           yield false;
           // Aliasing to specific file, either we have a perfect match or an illegal request
-        } else if (/\.\w+$/.test(alias as string)) {
-          if (request === name) {
-            yield alias;
-          } else {
-            throw new Error('Alias points to file, cannot make request to internal path');
-          }
-          // Aliasing a module to a dir, just replace the alias
         } else {
-          yield request.replace(name, `${alias as string}/`);
+          for (const aliasOption of alias) {
+            if (/\.\w+$/.test(aliasOption)) {
+              if (request === name) {
+                yield aliasOption;
+              } else {
+                throw new Error('Alias points to file, cannot make request to internal path');
+              }
+              // Aliasing a module to a dir, just replace the alias
+            } else {
+              yield request.replace(name, `${aliasOption}/`);
+            }
+          }
         }
       }
     }
@@ -291,17 +297,24 @@ function normalizeAliases(
     | Record<string, string | false | string[]>
     | { alias: string | false | string[]; name: string; onlyModule?: boolean }[]
     | undefined
-): { alias: string | false | string[]; name: string; onlyModule?: boolean }[] {
+): { alias: false | string[]; name: string; onlyModule?: boolean }[] {
   if (aliases === undefined) {
     return [];
   }
   if (Array.isArray(aliases)) {
-    return aliases;
+    return aliases.map(({ name, alias, onlyModule }) => {
+      return {
+        alias: alias === false ? false : Array.isArray(alias) ? alias : [alias],
+        name,
+        onlyModule,
+      };
+    });
   }
   return Object.entries(aliases).map(([aliasedFrom, aliasedTo]) => {
+    // Aliases that end with $ denote exact match (without the $ obviously)
     const exactMatch = aliasedFrom.endsWith('$');
     return {
-      alias: aliasedTo,
+      alias: aliasedTo === false ? false : Array.isArray(aliasedTo) ? aliasedTo : [aliasedTo],
       name: exactMatch ? aliasedFrom.slice(0, -1) : aliasedFrom,
       onlyModule: exactMatch,
     };

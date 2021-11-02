@@ -511,6 +511,10 @@ describe('alias support', () => {
           some: generateFolderContent(),
           dir: generateFolderContent(),
         },
+        grosso: {
+          'unresolve.js': '',
+          'file.js': '',
+        },
       },
       path: {
         to: generateFolderContent(),
@@ -523,7 +527,9 @@ describe('alias support', () => {
   });
 
   const aliasExpectationMapper: {
-    alias: Record<string, string | false>;
+    alias:
+      | Record<string, string | false | string[]>
+      | { alias: string | false | string[]; name: string; onlyModule?: boolean }[];
     expectedModule: string | false | undefined;
     expectedInternal?: string | false | undefined;
   }[] = [
@@ -535,6 +541,15 @@ describe('alias support', () => {
     },
     {
       alias: { xyz$: '/abc/path/to/file.js' },
+      expectedModule: '/abc/path/to/file.js',
+      expectedInternal: '/abc/node_modules/xyz/file.js',
+    },
+    {
+      alias: [{ name: 'xyz', alias: '/abc/path/to/file.js' }],
+      expectedModule: '/abc/path/to/file.js',
+    },
+    {
+      alias: [{ name: 'xyz', alias: '/abc/path/to/file.js', onlyModule: true }],
       expectedModule: '/abc/path/to/file.js',
       expectedInternal: '/abc/node_modules/xyz/file.js',
     },
@@ -587,6 +602,22 @@ describe('alias support', () => {
       alias: { xyz: false },
       expectedModule: false,
       expectedInternal: false,
+    },
+    {
+      alias: { xyz: ['grosso', 'modu'] },
+      expectedModule: '/abc/node_modules/modu/index.js',
+      expectedInternal: '/abc/node_modules/grosso/file.js',
+    },
+    {
+      // Flipped order from previous test
+      alias: { xyz: ['modu', 'grosso'] },
+      expectedModule: '/abc/node_modules/modu/index.js',
+      expectedInternal: '/abc/node_modules/modu/file.js',
+    },
+    {
+      alias: [{ name: 'xyz', alias: ['grosso', 'modu'] }],
+      expectedModule: '/abc/node_modules/modu/index.js',
+      expectedInternal: '/abc/node_modules/grosso/file.js',
     },
   ];
 
