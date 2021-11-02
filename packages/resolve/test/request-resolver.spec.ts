@@ -604,7 +604,7 @@ describe('Aliases', () => {
     );
 
     const exactMatchToArrayResolver = createRequestResolver({ fs, aliases: { xyz: ['grosso', 'modu'] } });
-    expect(exactMatchToArrayResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/node_modules/xyz/index.js');
+    expect(exactMatchToArrayResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/node_modules/modu/index.js');
     expect(exactMatchToArrayResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql('/abc/node_modules/xyz/file.js');
   });
 
