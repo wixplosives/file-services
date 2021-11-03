@@ -5,6 +5,7 @@ import type {
   IResolvedPackageJson,
   IResolutionOutput,
   IRequestRuleMapper,
+  IRequestMap,
 } from './types.js';
 
 const defaultTarget = 'browser';
@@ -26,6 +27,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
+  const normalizedAliases = normalizeRuleMapOption(aliases);
+  const normalizedFallbacks = normalizeRuleMapOption(fallback);
 
   return requestResolver;
 
@@ -135,8 +138,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    * @param request - the original request
    * The function generates all the possible aliased requests, and falls back to the original request if all else failed
    */
-  function* mappedRequestPaths(request: string, map: IRequestRuleMapper) {
-    for (const { name, alias, exactMatch } of normalizeAliases(map)) {
+  function* mappedRequestPaths(request: string, map: IRequestMap[]) {
+    for (const { name, alias, exactMatch } of map) {
       if (exactMatch) {
         if (request === name) {
           if (alias === false) {
@@ -165,9 +168,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* userMappedRequestPaths(request: string) {
-    yield* mappedRequestPaths(request, aliases);
+    yield* mappedRequestPaths(request, normalizedAliases);
     yield request;
-    yield* mappedRequestPaths(request, fallback);
+    yield* mappedRequestPaths(request, normalizedFallbacks);
   }
 
   function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
@@ -299,9 +302,7 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
   };
 }
 
-function normalizeAliases(
-  aliases: Record<string, string | false | string[]> | undefined
-): { alias: false | string[]; name: string; exactMatch: boolean }[] {
+function normalizeRuleMapOption(aliases: IRequestRuleMapper | undefined): IRequestMap[] {
   if (aliases === undefined) {
     return [];
   }

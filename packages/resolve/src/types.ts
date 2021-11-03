@@ -1,4 +1,5 @@
 export type IRequestRuleMapper = Record<string, string | false | string[]>;
+export type IRequestMap = { alias: false | string[]; name: string; exactMatch: boolean };
 
 export interface IRequestResolverOptions {
   /**
