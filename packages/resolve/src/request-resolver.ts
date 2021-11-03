@@ -145,8 +145,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           if (alias === false) {
             yield false;
           } else {
-            for (const aliasOption of alias) {
-              yield aliasOption;
+            for (const { target } of alias) {
+              yield target;
             }
           }
         }
@@ -154,11 +154,11 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         if (alias === false) {
           yield false;
         } else {
-          for (const aliasOption of alias) {
-            if (request === name) {
-              yield aliasOption;
+          for (const { exact, target } of alias) {
+            if (request === name || exact) {
+              yield target;
             } else {
-              yield join(aliasOption, request.substr(name.length));
+              yield join(target, request.substr(name.length));
             }
           }
         }
@@ -310,7 +310,18 @@ function normalizeRuleMapOption(aliases: IRequestRuleMapper | undefined): IReque
     // Aliases that end with $ denote exact match (without the $ obviously)
     const prefixMatch = aliasedFrom.endsWith('/*');
     return {
-      alias: aliasedTo === false ? false : Array.isArray(aliasedTo) ? aliasedTo : [aliasedTo],
+      alias:
+        aliasedTo === false
+          ? false
+          : Array.isArray(aliasedTo)
+          ? aliasedTo.map((option) =>
+              option.endsWith('/*') ? { exact: false, target: option.slice(0, -2) } : { exact: true, target: option }
+            )
+          : [
+              aliasedTo.endsWith('/*')
+                ? { exact: false, target: aliasedTo.slice(0, -2) }
+                : { exact: true, target: aliasedTo },
+            ],
       name: prefixMatch ? aliasedFrom.slice(0, -2) : aliasedFrom,
       exactMatch: !prefixMatch,
     };
