@@ -22,12 +22,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     extensions = defaultExtensions,
     target = defaultTarget,
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
-    aliases = {},
+    alias = {},
     fallback = {},
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
-  const normalizedAliases = normalizeRuleMapOption(aliases);
+  const normalizedAliases = normalizeRuleMapOption(alias);
   const normalizedFallbacks = normalizeRuleMapOption(fallback);
 
   return requestResolver;

@@ -492,6 +492,64 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './another-missing')).to.be.resolvedTo(undefined);
     });
   });
+
+  xdescribe('alias', () => {
+    it('remaps absolute file path of existing files', () => {
+      const fs = createMemoryFs({
+        'x.js': EMPTY,
+        'y.js': EMPTY,
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          '/x.js': '/y.js',
+          '/node_modules/a/index.js': '/node_modules/b/index.js',
+        },
+      });
+
+      expect(resolveRequest('/', './x')).to.be.resolvedTo('/y.js');
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/b/index.js');
+    });
+
+    it('remaps package requests to other package requests', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          a: 'b',
+          'a/other': 'b/other',
+          'a/missing': 'a/index',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/b/index.js');
+      expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
+      expect(resolveRequest('/', 'a/other.js')).to.be.resolvedTo('/node_modules/a/other.js');
+      expect(resolveRequest('/', 'a/missing')).to.be.resolvedTo('/node_modules/a/index.js');
+    });
+  });
+
   describe('Aliases', () => {
     const MODULE_REQUEST = 'xyz';
     const MODULE_INTERNAL = 'xyz/file.js';
@@ -525,14 +583,14 @@ describe('request resolver', () => {
         },
       });
 
-      const emptyAliasResolver = createRequestResolver({ fs, aliases: {} });
+      const emptyAliasResolver = createRequestResolver({ fs, alias: {} });
       expect(emptyAliasResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/node_modules/xyz/index.js');
       expect(emptyAliasResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql('/abc/node_modules/xyz/file.js');
 
       // File like absolute path
       const exactMatchToAbsoluteFilePathResolver = createRequestResolver({
         fs,
-        aliases: { xyz: '/abc/path/to/file.js' },
+        alias: { xyz: '/abc/path/to/file.js' },
       });
       expect(exactMatchToAbsoluteFilePathResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/path/to/file.js');
       expect(exactMatchToAbsoluteFilePathResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql(
@@ -540,18 +598,18 @@ describe('request resolver', () => {
       );
 
       // Dir like absolute path
-      const prefixMathToAbsoluteDirResolver = createRequestResolver({ fs, aliases: { 'xyz/*': '/some/dir/*' } });
+      const prefixMathToAbsoluteDirResolver = createRequestResolver({ fs, alias: { 'xyz/*': '/some/dir/*' } });
       expect(prefixMathToAbsoluteDirResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/some/dir/index.js');
       expect(prefixMathToAbsoluteDirResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql('/some/dir/file.js');
 
-      const exactMathToAbsoluteDirResolver = createRequestResolver({ fs, aliases: { xyz: '/some/dir' } });
+      const exactMathToAbsoluteDirResolver = createRequestResolver({ fs, alias: { xyz: '/some/dir' } });
       expect(exactMathToAbsoluteDirResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/some/dir/index.js');
       expect(exactMathToAbsoluteDirResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql(
         '/abc/node_modules/xyz/file.js'
       );
 
       // Alias to module
-      const prefixMatchToModuleResolver = createRequestResolver({ fs, aliases: { 'xyz/*': 'modu/*' } });
+      const prefixMatchToModuleResolver = createRequestResolver({ fs, alias: { 'xyz/*': 'modu/*' } });
       expect(prefixMatchToModuleResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(
         '/abc/node_modules/modu/index.js'
       );
@@ -559,12 +617,12 @@ describe('request resolver', () => {
         '/abc/node_modules/modu/file.js'
       );
 
-      const exactMatchToModuleResolver = createRequestResolver({ fs, aliases: { xyz: 'modu' } });
+      const exactMatchToModuleResolver = createRequestResolver({ fs, alias: { xyz: 'modu' } });
       expect(exactMatchToModuleResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/node_modules/modu/index.js');
       expect(exactMatchToModuleResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql('/abc/node_modules/xyz/file.js');
 
       // Alias to module internals
-      const prefixMatchToModuleInternalResolver = createRequestResolver({ fs, aliases: { 'xyz/*': 'modu/dir/*' } });
+      const prefixMatchToModuleInternalResolver = createRequestResolver({ fs, alias: { 'xyz/*': 'modu/dir/*' } });
       expect(prefixMatchToModuleInternalResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(
         '/abc/node_modules/modu/dir/index.js'
       );
@@ -572,7 +630,7 @@ describe('request resolver', () => {
         '/abc/node_modules/modu/dir/file.js'
       );
 
-      const exactPathToModuleInternalResolver = createRequestResolver({ fs, aliases: { xyz: 'modu/dir' } });
+      const exactPathToModuleInternalResolver = createRequestResolver({ fs, alias: { xyz: 'modu/dir' } });
       expect(exactPathToModuleInternalResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(
         '/abc/node_modules/modu/dir/index.js'
       );
@@ -581,16 +639,16 @@ describe('request resolver', () => {
       );
 
       //alias to false
-      const prefixMatchToFalseResolver = createRequestResolver({ fs, aliases: { 'xyz/*': false } });
+      const prefixMatchToFalseResolver = createRequestResolver({ fs, alias: { 'xyz/*': false } });
       expect(prefixMatchToFalseResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(false);
       expect(prefixMatchToFalseResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql(false);
 
-      const exactPathToFalseResolver = createRequestResolver({ fs, aliases: { xyz: false } });
+      const exactPathToFalseResolver = createRequestResolver({ fs, alias: { xyz: false } });
       expect(exactPathToFalseResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(false);
       expect(exactPathToFalseResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql('/abc/node_modules/xyz/file.js');
 
       // Array aliases
-      const prefixMatchToArrayResolver = createRequestResolver({ fs, aliases: { 'xyz/*': ['grosso/*', 'modu/*'] } });
+      const prefixMatchToArrayResolver = createRequestResolver({ fs, alias: { 'xyz/*': ['grosso/*', 'modu/*'] } });
       expect(prefixMatchToArrayResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/node_modules/modu/index.js');
       expect(prefixMatchToArrayResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql(
         '/abc/node_modules/grosso/file.js'
@@ -598,7 +656,7 @@ describe('request resolver', () => {
 
       const prefixMatchToArrayVerifyOrderResolver = createRequestResolver({
         fs,
-        aliases: { 'xyz/*': ['modu/*', 'grosso/*'] },
+        alias: { 'xyz/*': ['modu/*', 'grosso/*'] },
       });
       expect(prefixMatchToArrayVerifyOrderResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql(
         '/abc/node_modules/modu/index.js'
@@ -607,7 +665,7 @@ describe('request resolver', () => {
         '/abc/node_modules/modu/file.js'
       );
 
-      const exactMatchToArrayResolver = createRequestResolver({ fs, aliases: { xyz: ['grosso', 'modu'] } });
+      const exactMatchToArrayResolver = createRequestResolver({ fs, alias: { xyz: ['grosso', 'modu'] } });
       expect(exactMatchToArrayResolver('/abc', MODULE_REQUEST).resolvedFile).to.eql('/abc/node_modules/modu/index.js');
       expect(exactMatchToArrayResolver('/abc', MODULE_INTERNAL).resolvedFile).to.eql('/abc/node_modules/xyz/file.js');
     });
@@ -629,7 +687,7 @@ describe('request resolver', () => {
 
       // Prefer alias
       expect(
-        createRequestResolver({ fs, aliases: { 'xyz/*': '/dir/*' }, fallback: { 'xyz/*': 'abc/*' } })('/', 'xyz/file')
+        createRequestResolver({ fs, alias: { 'xyz/*': '/dir/*' }, fallback: { 'xyz/*': 'abc/*' } })('/', 'xyz/file')
           .resolvedFile
       ).to.eq('/dir/file.js');
       // Without alias, prefer redular resolution
@@ -637,7 +695,7 @@ describe('request resolver', () => {
       // When resolving non-existing file go to fallback
       expect(
         // Alias point to nothing to get alias to fail
-        createRequestResolver({ fs, aliases: { 'pac/*': 'dir/*' }, fallback: { 'pac/*': 'abc/*' } })('/', 'pac/file')
+        createRequestResolver({ fs, alias: { 'pac/*': 'dir/*' }, fallback: { 'pac/*': 'abc/*' } })('/', 'pac/file')
           .resolvedFile
       ).to.eq('/node_modules/abc/file.js');
     });

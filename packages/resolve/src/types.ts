@@ -42,7 +42,7 @@ export interface IRequestResolverOptions {
    *
    * Aliases take precedence over other module resolutions, fallbacks attermpt if regular resolution fails
    */
-  aliases?: IRequestRuleMapper;
+  alias?: IRequestRuleMapper;
   fallback?: IRequestRuleMapper;
 }
 
