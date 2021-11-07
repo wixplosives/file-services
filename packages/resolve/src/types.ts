@@ -34,25 +34,15 @@ export interface IRequestResolverOptions {
   resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
 
   /**
-   * Resolution aliases
-   * Map either a request prefix or an exact request (by adding $ at the end of it), to another request/prefix
+   * Resolution aliases and fallback
+   * Map either a request prefix or an exact request to another request/prefix
    *
    * ex.
-   * { xyz: '/abc/path/to/file.js' } -> import 'xyz' // output /abc/path/to/file.js
+   * { xyz: '/abc/path/to/file.js', '/xyz/*': '/abc/*' } -> import 'xyz' // output /abc/path/to/file.js, import 'xyz/file' => '/abc/file.js'
    *
-   * Aliases take precedence over other module resolutions.
+   * Aliases take precedence over other module resolutions, fallbacks attermpt if regular resolution fails
    */
   aliases?: IRequestRuleMapper;
-
-  /**
-   * Resolution fallback
-   * Map either a request prefix or an exact request (by adding $ at the end of it), to another request/prefix
-   *
-   * ex.
-   * { xyz: '/abc/path/to/file.js' } -> import 'xyz' // output /abc/path/to/file.js
-   *
-   * fallack take place if normal resolution failed.
-   */
   fallback?: IRequestRuleMapper;
 }
 
