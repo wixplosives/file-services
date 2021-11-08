@@ -8,7 +8,7 @@
       "type": "pwa-node",
       "request": "launch",
       "name": "Mocha Current",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "program": "${workspaceFolder}/node_modules/.bin/mocha",
       "args": ["--timeout", "999999", "packages/*/dist/**/${fileBasenameNoExtension}.js"],
       "preLaunchTask": "npm: build",
       "internalConsoleOptions": "openOnSessionStart",

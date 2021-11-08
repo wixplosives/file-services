@@ -523,6 +523,36 @@ describe('request resolver', () => {
       expect(resolveRequest('/', 'a/missing')).to.be.resolvedTo('/node_modules/a/index.js');
     });
 
+    xit('remaps requests using pattern ending with /*', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          c: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          'a/*': 'b/*',
+          a: 'c',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/c/index.js');
+      expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
+      expect(resolveRequest('/', 'a/index.js')).to.be.resolvedTo('/node_modules/b/index.js');
+    });
+
     // not sure we want this behavior
     xit('remaps absolute file path of existing files', () => {
       const fs = createMemoryFs({
