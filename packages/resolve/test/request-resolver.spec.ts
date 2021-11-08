@@ -605,6 +605,17 @@ describe('request resolver', () => {
       expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/a/index.js');
     });
 
+    it('allows remapping package requests to false', () => {
+      const fs = createMemoryFs();
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: { anything: false },
+      });
+
+      expect(resolveRequest('/', 'anything')).to.be.resolvedTo(false);
+    });
+
     // not sure we want this behavior
     xit('remaps absolute file path of existing files', () => {
       const fs = createMemoryFs({
@@ -630,6 +641,37 @@ describe('request resolver', () => {
 
       expect(resolveRequest('/', './x')).to.be.resolvedTo('/y.js');
       expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/b/index.js');
+    });
+  });
+
+  describe('fallback', () => {
+    it('remaps package requests to fallback requests when cannot resolve', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'package.json': stringifyPackageJson({ browser: { path: false } }),
+          },
+          b: {
+            'index.js': EMPTY,
+          },
+        },
+        polyfills: {
+          'path.js': EMPTY,
+          'os.js': EMPTY,
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        fallback: {
+          path: '/polyfills/path.js',
+          os: '/polyfills/os.js',
+        },
+      });
+
+      expect(resolveRequest('/', 'path')).to.be.resolvedTo('/polyfills/path.js');
+      expect(resolveRequest('/node_modules/a', 'path')).to.be.resolvedTo(false);
+      expect(resolveRequest('/node_modules/a', 'os')).to.be.resolvedTo('/polyfills/os.js');
     });
   });
 
