@@ -505,6 +505,11 @@ describe('request resolver', () => {
             'index.js': EMPTY,
             'other.js': EMPTY,
           },
+          c: {
+            subfolder: {
+              'index.js': EMPTY,
+            },
+          },
         },
       });
 
@@ -514,6 +519,7 @@ describe('request resolver', () => {
           a: 'b',
           'a/other': 'b/other',
           'a/missing': 'a/index',
+          xyz: 'c/subfolder',
         },
       });
 
@@ -521,6 +527,35 @@ describe('request resolver', () => {
       expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
       expect(resolveRequest('/', 'a/other.js')).to.be.resolvedTo('/node_modules/a/other.js');
       expect(resolveRequest('/', 'a/missing')).to.be.resolvedTo('/node_modules/a/index.js');
+      expect(resolveRequest('/', 'xyz')).to.be.resolvedTo('/node_modules/c/subfolder/index.js');
+    });
+
+    it('remaps package requests to absolute paths of files/dirs', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+          },
+        },
+        polyfills: {
+          'index.js': EMPTY,
+          'b.js': EMPTY,
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          a: '/polyfills',
+          b: '/polyfills/b.js',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/polyfills/index.js');
+      expect(resolveRequest('/', 'b')).to.be.resolvedTo('/polyfills/b.js');
     });
 
     it('remaps requests using pattern ending with /*', () => {
@@ -551,6 +586,23 @@ describe('request resolver', () => {
       expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/c/index.js');
       expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
       expect(resolveRequest('/', 'a/index.js')).to.be.resolvedTo('/node_modules/b/index.js');
+    });
+
+    it('resolves as usual when provided with an empty alias record', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {},
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/a/index.js');
     });
 
     // not sure we want this behavior
