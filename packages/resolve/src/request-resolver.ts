@@ -58,12 +58,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
           if (remappedFilePath !== undefined) {
             return {
-              resolvedFile: remappedFilePath,
+              resolvedFile: getAliasedPath(remappedFilePath),
               originalFilePath: resolvedFile,
             };
           }
         }
-        return { resolvedFile: realpathSyncSafe(resolvedFile) };
+        return { resolvedFile: getAliasedPath(realpathSyncSafe(resolvedFile)) };
       }
     }
     return { resolvedFile: undefined };
@@ -287,6 +287,21 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     } finally {
       Error.stackTraceLimit = stackTraceLimit;
     }
+  }
+
+  function getAliasedPath(path: string | false) {
+    if (path === false) {
+      return false;
+    }
+    // We only map if there is a direct file to file mapping
+    if (
+      Object.prototype.hasOwnProperty.call(alias, path) &&
+      typeof alias[path] === 'string' &&
+      isAbsolute(alias[path] as string)
+    ) {
+      return alias[path] as string;
+    }
+    return path;
   }
 }
 

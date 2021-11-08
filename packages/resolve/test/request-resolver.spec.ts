@@ -493,7 +493,7 @@ describe('request resolver', () => {
     });
   });
 
-  xdescribe('alias', () => {
+  describe('alias', () => {
     it('remaps absolute file path of existing files', () => {
       const fs = createMemoryFs({
         'x.js': EMPTY,
