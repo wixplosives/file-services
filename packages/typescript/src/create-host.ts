@@ -10,6 +10,7 @@ const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE;
  * formatting diagnostics, and resolving modules using TypeScript.
  */
 export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost, ts.ModuleResolutionHost {
+  useCaseSensitiveFileNames: boolean;
   getCurrentDirectory: IFileSystemSync['cwd'];
   directoryExists: IFileSystemSync['directoryExistsSync'];
 
