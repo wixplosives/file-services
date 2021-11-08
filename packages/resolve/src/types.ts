@@ -1,5 +1,4 @@
 export type IRequestRuleMapper = Record<string, string | false | string[]>;
-export type IRequestMap = { alias: false | { exact: boolean; target: string }[]; name: string; exactMatch: boolean };
 
 export interface IRequestResolverOptions {
   /**
@@ -34,15 +33,17 @@ export interface IRequestResolverOptions {
   resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
 
   /**
-   * Resolution aliases and fallback
-   * Map either a request prefix or an exact request to another request/prefix
-   *
-   * ex.
-   * { xyz: '/abc/path/to/file.js', '/xyz/*': '/abc/*' } -> import 'xyz' // output /abc/path/to/file.js, import 'xyz/file' => '/abc/file.js'
-   *
-   * Aliases take precedence over other module resolutions, fallbacks attermpt if regular resolution fails
+   * Aliases for package requests.
+   * Record key is the request to be mapped, value is the new target.
+   * Alias is attempted before original request.
    */
   alias?: IRequestRuleMapper;
+
+  /**
+   * Fallback for package requests.
+   * Record key is the request to be mapped, value is the new target.
+   * Original request is attempted before fallback.
+   */
   fallback?: IRequestRuleMapper;
 }
 

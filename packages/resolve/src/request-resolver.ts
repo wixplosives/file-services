@@ -5,7 +5,6 @@ import type {
   IResolvedPackageJson,
   IResolutionOutput,
   IRequestRuleMapper,
-  IRequestMap,
 } from './types.js';
 
 const defaultTarget = 'browser';
@@ -14,6 +13,7 @@ const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) =>
   request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
+type IRequestMap = { alias: false | { exact: boolean; target: string }[]; name: string; exactMatch: boolean };
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
