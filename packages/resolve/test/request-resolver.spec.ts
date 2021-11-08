@@ -523,7 +523,7 @@ describe('request resolver', () => {
       expect(resolveRequest('/', 'a/missing')).to.be.resolvedTo('/node_modules/a/index.js');
     });
 
-    xit('remaps requests using pattern ending with /*', () => {
+    it('remaps requests using pattern ending with /*', () => {
       const fs = createMemoryFs({
         node_modules: {
           a: {

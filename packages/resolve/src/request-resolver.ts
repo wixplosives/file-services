@@ -321,26 +321,29 @@ function normalizeRuleMapOption(aliases: IRequestRuleMapper | undefined): IReque
   if (aliases === undefined) {
     return [];
   }
-  return Object.entries(aliases).map(([aliasedFrom, aliasedTo]) => {
-    // Aliases that end with $ denote exact match (without the $ obviously)
-    const prefixMatch = aliasedFrom.endsWith('/*');
-    return {
-      alias:
-        aliasedTo === false
-          ? false
-          : Array.isArray(aliasedTo)
-          ? aliasedTo.map((option) =>
-              option.endsWith('/*') ? { exact: false, target: option.slice(0, -2) } : { exact: true, target: option }
-            )
-          : [
-              aliasedTo.endsWith('/*')
-                ? { exact: false, target: aliasedTo.slice(0, -2) }
-                : { exact: true, target: aliasedTo },
-            ],
-      name: prefixMatch ? aliasedFrom.slice(0, -2) : aliasedFrom,
-      exactMatch: !prefixMatch,
-    };
-  });
+
+  return Object.entries(aliases)
+    .map(([aliasedFrom, aliasedTo]) => {
+      // Aliases that end with $ denote exact match (without the $ obviously)
+      const prefixMatch = aliasedFrom.endsWith('/*');
+      return {
+        alias:
+          aliasedTo === false
+            ? false
+            : Array.isArray(aliasedTo)
+            ? aliasedTo.map((option) =>
+                option.endsWith('/*') ? { exact: false, target: option.slice(0, -2) } : { exact: true, target: option }
+              )
+            : [
+                aliasedTo.endsWith('/*')
+                  ? { exact: false, target: aliasedTo.slice(0, -2) }
+                  : { exact: true, target: aliasedTo },
+              ],
+        name: prefixMatch ? aliasedFrom.slice(0, -2) : aliasedFrom,
+        exactMatch: !prefixMatch,
+      };
+    })
+    .sort((a, b) => (a.exactMatch ? -1 : b.exactMatch ? 1 : 0)) as IRequestMap[];
 }
 
 // to avoid having to include @types/node
