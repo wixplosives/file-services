@@ -617,7 +617,7 @@ describe('request resolver', () => {
     });
 
     // not sure we want this behavior
-    xit('remaps absolute file path of existing files', () => {
+    it('remaps absolute file path of existing files', () => {
       const fs = createMemoryFs({
         'x.js': EMPTY,
         'y.js': EMPTY,
