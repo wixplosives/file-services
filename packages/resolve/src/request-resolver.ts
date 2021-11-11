@@ -13,7 +13,7 @@ const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) =>
   request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
-type IRequestMap = { alias: false | { exact: boolean; target: string }[]; name: string; exactMatch: boolean };
+type IRequestMap = { alias: false | Array<{ exactMatch: boolean; target: string }>; name: string; exactMatch: boolean };
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
@@ -154,11 +154,11 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         if (alias === false) {
           yield false;
         } else {
-          for (const { exact, target } of alias) {
-            if (request === name || exact) {
+          for (const { exactMatch, target } of alias) {
+            if (request === name || exactMatch) {
               yield target;
             } else {
-              yield join(target, request.substr(name.length));
+              yield join(target, request.slice(name.length));
             }
           }
         }
