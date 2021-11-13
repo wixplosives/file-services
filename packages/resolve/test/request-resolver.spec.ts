@@ -644,6 +644,23 @@ describe('request resolver', () => {
       );
     });
 
+    xit('does not use original request if cannot find mapped', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          react: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: { react: 'missing' },
+      });
+
+      expect(resolveRequest('/', 'react')).to.be.resolvedTo(undefined);
+    });
+
     // not sure we want this behavior
     xit('remaps absolute file path of existing files', () => {
       const fs = createMemoryFs({
