@@ -1,11 +1,5 @@
 import type { PackageJson } from 'type-fest';
-import type {
-  RequestResolver,
-  IRequestResolverOptions,
-  IResolvedPackageJson,
-  IResolutionOutput,
-  IRequestRuleMapper,
-} from './types.js';
+import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types.js';
 
 const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
@@ -13,7 +7,6 @@ const defaultExtensions = ['.js', '.json'];
 const isRelative = (request: string) =>
   request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
-type IRequestMap = { alias: false | Array<{ exactMatch: boolean; target: string }>; name: string; exactMatch: boolean };
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
   const {
@@ -27,8 +20,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
-  const normalizedAliases = normalizeRuleMapOption(alias);
-  const normalizedFallbacks = normalizeRuleMapOption(fallback);
+  const normalizedAliases = remapRecordToMap(alias);
+  const normalizedFallbacks = remapRecordToMap(fallback);
 
   return requestResolver;
 
@@ -133,34 +126,20 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  /**
-   *
-   * @param request - the original request
-   * The function generates all the possible aliased requests, and falls back to the original request if all else failed
-   */
-  function* mappedRequestPaths(request: string, map: IRequestMap[]) {
-    for (const { name, alias, exactMatch } of map) {
-      if (exactMatch) {
-        if (request === name) {
-          if (alias === false) {
-            yield false;
-          } else {
-            for (const { target } of alias) {
-              yield target;
-            }
-          }
+  function* mappedRequestPaths(
+    request: string,
+    map: Map<string | { prefix: string }, string | { prefix: string } | false>
+  ) {
+    for (const [key, value] of map) {
+      const keyType = typeof key;
+      if (keyType === 'string') {
+        if (request === key) {
+          yield value as string | false;
         }
-      } else if (request.startsWith(name)) {
-        if (alias === false) {
-          yield false;
-        } else {
-          for (const { exactMatch, target } of alias) {
-            if (request === name || exactMatch) {
-              yield target;
-            } else {
-              yield join(target, request.slice(name.length));
-            }
-          }
+      } else if (keyType === 'object') {
+        const { prefix: keyPrefix } = key as { prefix: string };
+        if (request.startsWith(keyPrefix) && request.length > keyPrefix.length) {
+          yield typeof value === 'object' ? value.prefix + request.slice(keyPrefix.length) : value;
         }
       }
     }
@@ -307,33 +286,22 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
   };
 }
 
-function normalizeRuleMapOption(aliases: IRequestRuleMapper | undefined): IRequestMap[] {
-  if (aliases === undefined) {
-    return [];
+/** converts to Map and parses "package/*" to { prefix: "package/" } */
+function remapRecordToMap(record: Record<string, string | false>) {
+  const map = new Map<string | { prefix: string }, string | false | { prefix: string }>();
+  for (const [key, value] of Object.entries(record)) {
+    let parsedKey: string | { prefix: string } = key;
+    let parsedValue: string | false | { prefix: string } = value;
+    if (key.endsWith('/*')) {
+      parsedKey = { prefix: key.slice(0, -1) };
+      if (typeof value === 'string' && value.endsWith('/*')) {
+        parsedValue = { prefix: value.slice(0, -1) };
+      }
+    }
+    map.set(parsedKey, parsedValue);
   }
 
-  return Object.entries(aliases)
-    .map(([aliasedFrom, aliasedTo]) => {
-      // Aliases that end with $ denote exact match (without the $ obviously)
-      const prefixMatch = aliasedFrom.endsWith('/*');
-      return {
-        alias:
-          aliasedTo === false
-            ? false
-            : Array.isArray(aliasedTo)
-            ? aliasedTo.map((option) =>
-                option.endsWith('/*') ? { exact: false, target: option.slice(0, -2) } : { exact: true, target: option }
-              )
-            : [
-                aliasedTo.endsWith('/*')
-                  ? { exact: false, target: aliasedTo.slice(0, -2) }
-                  : { exact: true, target: aliasedTo },
-              ],
-        name: prefixMatch ? aliasedFrom.slice(0, -2) : aliasedFrom,
-        exactMatch: !prefixMatch,
-      };
-    })
-    .sort((a, b) => (a.exactMatch ? -1 : b.exactMatch ? 1 : 0)) as IRequestMap[];
+  return map;
 }
 
 // to avoid having to include @types/node

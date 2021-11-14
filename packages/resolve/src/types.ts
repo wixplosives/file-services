@@ -1,5 +1,3 @@
-export type IRequestRuleMapper = Record<string, string | false | string[]>;
-
 export interface IRequestResolverOptions {
   /**
    * File system to use when resolving requests.
@@ -37,14 +35,14 @@ export interface IRequestResolverOptions {
    * Record key is the request to be mapped, value is the new target.
    * Alias is attempted before original request.
    */
-  alias?: IRequestRuleMapper;
+  alias?: Record<string, string | false>;
 
   /**
    * Fallback for package requests.
    * Record key is the request to be mapped, value is the new target.
    * Original request is attempted before fallback.
    */
-  fallback?: IRequestRuleMapper;
+  fallback?: Record<string, string | false>;
 }
 
 export interface IResolutionOutput {
