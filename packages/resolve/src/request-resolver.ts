@@ -293,21 +293,6 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       Error.stackTraceLimit = stackTraceLimit;
     }
   }
-
-  function getAliasedPath(path: string | false) {
-    if (path === false) {
-      return false;
-    }
-    // We only map if there is a direct file to file mapping
-    if (
-      Object.prototype.hasOwnProperty.call(alias, path) &&
-      typeof alias[path] === 'string' &&
-      isAbsolute(alias[path] as string)
-    ) {
-      return alias[path] as string;
-    }
-    return path;
-  }
 }
 
 function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: K) => T {
