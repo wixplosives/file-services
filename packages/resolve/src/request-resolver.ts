@@ -58,12 +58,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
           if (remappedFilePath !== undefined) {
             return {
-              resolvedFile: getAliasedPath(remappedFilePath),
+              resolvedFile: remappedFilePath,
               originalFilePath: resolvedFile,
             };
           }
         }
-        return { resolvedFile: getAliasedPath(realpathSyncSafe(resolvedFile)) };
+        return { resolvedFile: realpathSyncSafe(resolvedFile) };
       }
     }
     return { resolvedFile: undefined };
@@ -164,12 +164,17 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         }
       }
     }
-    yield request;
   }
 
   function* userMappedRequestPaths(request: string) {
-    yield* mappedRequestPaths(request, normalizedAliases);
-    yield request;
+    let foundCandidate = false;
+    for (const aliasedAlternative of mappedRequestPaths(request, normalizedAliases)) {
+      foundCandidate = true;
+      yield aliasedAlternative;
+    }
+    if (!foundCandidate) {
+      yield request;
+    }
     yield* mappedRequestPaths(request, normalizedFallbacks);
   }
 

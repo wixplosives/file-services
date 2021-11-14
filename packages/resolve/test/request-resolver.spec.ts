@@ -644,7 +644,7 @@ describe('request resolver', () => {
       );
     });
 
-    xit('does not use original request if cannot find mapped', () => {
+    it('does not use original request if cannot find mapped', () => {
       const fs = createMemoryFs({
         node_modules: {
           react: {
