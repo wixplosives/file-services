@@ -20,26 +20,15 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
-  const normalizedAliases = remapRecordToMap(alias);
-  const normalizedFallbacks = remapRecordToMap(fallback);
+  const [normalizedAliases, aliasHasTemplates] = remapRecordToMap(alias);
+  const [normalizedFallbacks, fallbackHasTemplates] = remapRecordToMap(fallback);
 
   return requestResolver;
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
-    for (const aliasedRequest of userMappedRequestPaths(originalRequest)) {
-      let request: string | false = aliasedRequest;
+    for (const request of requestsToTry(contextPath, originalRequest)) {
       if (request === false) {
-        return { resolvedFile: false };
-      }
-      if (target === 'browser') {
-        const fromPackageJson = findUpPackageJson(contextPath);
-        const remappedRequest = fromPackageJson?.browserMappings?.[originalRequest];
-        if (remappedRequest !== undefined) {
-          request = remappedRequest;
-          if (request === false) {
-            return { resolvedFile: request };
-          }
-        }
+        return { resolvedFile: request };
       }
 
       for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
@@ -59,7 +48,38 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         return { resolvedFile: realpathSyncSafe(resolvedFile) };
       }
     }
+
     return { resolvedFile: undefined };
+  }
+
+  function* requestsToTry(contextPath: string, request: string) {
+    const requestAlias = aliasHasTemplates
+      ? getFromTemplateMap(normalizedAliases, request)
+      : (normalizedAliases.get(request) as string | false | undefined);
+    let emittedCandidate = false;
+    if (requestAlias !== undefined) {
+      emittedCandidate = true;
+      yield requestAlias;
+    }
+
+    if (!emittedCandidate && target === 'browser') {
+      const fromPackageJson = findUpPackageJson(contextPath);
+      const remappedRequest = fromPackageJson?.browserMappings?.[request];
+      if (remappedRequest !== undefined) {
+        emittedCandidate = true;
+        yield remappedRequest;
+      }
+    }
+
+    if (!emittedCandidate) {
+      yield request;
+    }
+    const requestFallback = fallbackHasTemplates
+      ? getFromTemplateMap(normalizedFallbacks, request)
+      : (normalizedFallbacks.get(request) as string | false | undefined);
+    if (requestFallback !== undefined) {
+      yield requestFallback;
+    }
   }
 
   function* nodeRequestPaths(contextPath: string, request: string) {
@@ -126,35 +146,24 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function* mappedRequestPaths(
-    request: string,
-    map: Map<string | { prefix: string }, string | { prefix: string } | false>
-  ) {
+  function getFromTemplateMap(
+    map: Map<string | { prefix: string }, string | { prefix: string } | false>,
+    request: string
+  ): string | false | undefined {
     for (const [key, value] of map) {
       const keyType = typeof key;
       if (keyType === 'string') {
         if (request === key) {
-          yield value as string | false;
+          return value as string | false;
         }
       } else if (keyType === 'object') {
         const { prefix: keyPrefix } = key as { prefix: string };
         if (request.startsWith(keyPrefix) && request.length > keyPrefix.length) {
-          yield typeof value === 'object' ? value.prefix + request.slice(keyPrefix.length) : value;
+          return typeof value === 'object' ? value.prefix + request.slice(keyPrefix.length) : value;
         }
       }
     }
-  }
-
-  function* userMappedRequestPaths(request: string) {
-    let foundCandidate = false;
-    for (const aliasedAlternative of mappedRequestPaths(request, normalizedAliases)) {
-      foundCandidate = true;
-      yield aliasedAlternative;
-    }
-    if (!foundCandidate) {
-      yield request;
-    }
-    yield* mappedRequestPaths(request, normalizedFallbacks);
+    return undefined;
   }
 
   function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
@@ -289,10 +298,12 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
 /** converts to Map and parses "package/*" to { prefix: "package/" } */
 function remapRecordToMap(record: Record<string, string | false>) {
   const map = new Map<string | { prefix: string }, string | false | { prefix: string }>();
+  let hasTemplate = false;
   for (const [key, value] of Object.entries(record)) {
     let parsedKey: string | { prefix: string } = key;
     let parsedValue: string | false | { prefix: string } = value;
     if (key.endsWith('/*')) {
+      hasTemplate = true;
       parsedKey = { prefix: key.slice(0, -1) };
       if (typeof value === 'string' && value.endsWith('/*')) {
         parsedValue = { prefix: value.slice(0, -1) };
@@ -301,7 +312,7 @@ function remapRecordToMap(record: Record<string, string | false>) {
     map.set(parsedKey, parsedValue);
   }
 
-  return map;
+  return [map, hasTemplate] as const;
 }
 
 // to avoid having to include @types/node
