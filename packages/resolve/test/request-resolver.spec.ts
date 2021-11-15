@@ -492,4 +492,261 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './another-missing')).to.be.resolvedTo(undefined);
     });
   });
+
+  describe('alias', () => {
+    it('remaps package requests to other package requests', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          c: {
+            subfolder: {
+              'index.js': EMPTY,
+            },
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          a: 'b',
+          'a/other': 'b/other',
+          'a/missing': 'a/index',
+          xyz: 'c/subfolder',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/b/index.js');
+      expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
+      expect(resolveRequest('/', 'a/other.js')).to.be.resolvedTo('/node_modules/a/other.js');
+      expect(resolveRequest('/', 'a/missing')).to.be.resolvedTo('/node_modules/a/index.js');
+      expect(resolveRequest('/', 'xyz')).to.be.resolvedTo('/node_modules/c/subfolder/index.js');
+    });
+
+    it('remaps package requests to absolute paths of files/dirs', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+          },
+        },
+        polyfills: {
+          'index.js': EMPTY,
+          'b.js': EMPTY,
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          a: '/polyfills',
+          b: '/polyfills/b.js',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/polyfills/index.js');
+      expect(resolveRequest('/', 'b')).to.be.resolvedTo('/polyfills/b.js');
+    });
+
+    it('remaps requests using pattern ending with /*', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          b: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          c: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          'a/*': 'b/*',
+          a: 'c',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/c/index.js');
+      expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
+      expect(resolveRequest('/', 'a/index.js')).to.be.resolvedTo('/node_modules/b/index.js');
+    });
+
+    it('resolves as usual when provided with an empty alias record', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {},
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/a/index.js');
+    });
+
+    it('allows remapping package requests to false', () => {
+      const fs = createMemoryFs();
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: { anything: false },
+      });
+
+      expect(resolveRequest('/', 'anything')).to.be.resolvedTo(false);
+    });
+
+    it('uses correct context for alias resolution', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          some_package: {
+            node_modules: {
+              remapped: {
+                'index.js': EMPTY,
+              },
+            },
+          },
+          target: {
+            'index.js': EMPTY,
+          },
+          remapped: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: {
+          target: 'remapped',
+        },
+      });
+
+      expect(resolveRequest('/node_modules/some_package', 'target')).to.be.resolvedTo(
+        '/node_modules/some_package/node_modules/remapped/index.js'
+      );
+    });
+
+    it('does not use original request if cannot find mapped', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          react: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        alias: { react: 'missing' },
+      });
+
+      expect(resolveRequest('/', 'react')).to.be.resolvedTo(undefined);
+    });
+  });
+
+  describe('fallback', () => {
+    it('remaps package requests to fallback requests when cannot resolve', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          a: {
+            'package.json': stringifyPackageJson({ browser: { path: false } }),
+          },
+          b: {
+            'index.js': EMPTY,
+          },
+        },
+        polyfills: {
+          'path.js': EMPTY,
+          'os.js': EMPTY,
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        fallback: {
+          path: '/polyfills/path.js',
+          os: '/polyfills/os.js',
+        },
+      });
+
+      expect(resolveRequest('/', 'path')).to.be.resolvedTo('/polyfills/path.js');
+      expect(resolveRequest('/node_modules/a', 'path')).to.be.resolvedTo(false);
+      expect(resolveRequest('/node_modules/a', 'os')).to.be.resolvedTo('/polyfills/os.js');
+    });
+
+    it('supports fallbacks using pattern ending with /*', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          b: {
+            'index.js': EMPTY,
+            'other.js': EMPTY,
+          },
+          c: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        fallback: {
+          'a/*': 'b/*',
+          a: 'c',
+        },
+      });
+
+      expect(resolveRequest('/', 'a')).to.be.resolvedTo('/node_modules/c/index.js');
+      expect(resolveRequest('/', 'a/other')).to.be.resolvedTo('/node_modules/b/other.js');
+      expect(resolveRequest('/', 'a/index.js')).to.be.resolvedTo('/node_modules/b/index.js');
+    });
+
+    it('uses correct context for fallback resolution', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          some_package: {
+            node_modules: {
+              remapped: {
+                'index.js': EMPTY,
+              },
+            },
+          },
+          remapped: {
+            'index.js': EMPTY,
+          },
+        },
+      });
+
+      const resolveRequest = createRequestResolver({
+        fs,
+        fallback: {
+          target: 'remapped',
+        },
+      });
+
+      expect(resolveRequest('/node_modules/some_package', 'target')).to.be.resolvedTo(
+        '/node_modules/some_package/node_modules/remapped/index.js'
+      );
+    });
+  });
 });

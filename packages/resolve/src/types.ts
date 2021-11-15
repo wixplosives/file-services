@@ -29,6 +29,20 @@ export interface IRequestResolverOptions {
    * If not provided, resolver will create an internal Map (still caches).
    */
   resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
+
+  /**
+   * Aliases for package requests.
+   * Record key is the request to be mapped, value is the new target.
+   * Alias is attempted before original request.
+   */
+  alias?: Record<string, string | false>;
+
+  /**
+   * Fallback for package requests.
+   * Record key is the request to be mapped, value is the new target.
+   * Original request is attempted before fallback.
+   */
+  fallback?: Record<string, string | false>;
 }
 
 export interface IResolutionOutput {
