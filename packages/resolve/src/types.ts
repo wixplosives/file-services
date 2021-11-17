@@ -58,6 +58,11 @@ export interface IResolutionOutput {
    * filePath this request pointed to.
    */
   originalFilePath?: string;
+
+  /**
+   * All paths resolver visited before getting to `resolvedFile`.
+   */
+  visitedPaths: Set<string>;
 }
 
 /**
