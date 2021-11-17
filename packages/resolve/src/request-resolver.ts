@@ -26,33 +26,44 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   return requestResolver;
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
-    for (const request of requestsToTry(contextPath, originalRequest)) {
+    const visitedPaths = new Set<string>();
+    for (const request of requestsToTry(contextPath, originalRequest, visitedPaths)) {
       if (request === false) {
-        return { resolvedFile: request };
+        return { resolvedFile: request, visitedPaths };
       }
 
-      for (const resolvedFile of nodeRequestPaths(contextPath, request)) {
-        if (!statSyncSafe(resolvedFile)?.isFile()) {
+      for (const resolvedFilePath of nodeRequestPaths(contextPath, request)) {
+        visitedPaths.add(resolvedFilePath);
+        if (!statSyncSafe(resolvedFilePath)?.isFile()) {
           continue;
         }
         if (target === 'browser') {
-          const toPackageJson = findUpPackageJson(dirname(resolvedFile));
-          const remappedFilePath = toPackageJson?.browserMappings?.[resolvedFile];
-          if (remappedFilePath !== undefined) {
-            return {
-              resolvedFile: remappedFilePath,
-              originalFilePath: resolvedFile,
-            };
+          const toPackageJson = findUpPackageJson(dirname(resolvedFilePath));
+          if (toPackageJson) {
+            visitedPaths.add(toPackageJson.filePath);
+            const remappedFilePath = toPackageJson.browserMappings?.[resolvedFilePath];
+            if (remappedFilePath !== undefined) {
+              if (remappedFilePath !== false) {
+                visitedPaths.add(remappedFilePath);
+              }
+              return {
+                resolvedFile: remappedFilePath,
+                originalFilePath: resolvedFilePath,
+                visitedPaths,
+              };
+            }
           }
         }
-        return { resolvedFile: realpathSyncSafe(resolvedFile) };
+        const realResolvedFilePath = realpathSyncSafe(resolvedFilePath);
+        visitedPaths.add(realResolvedFilePath);
+        return { resolvedFile: realResolvedFilePath, visitedPaths };
       }
     }
 
-    return { resolvedFile: undefined };
+    return { resolvedFile: undefined, visitedPaths };
   }
 
-  function* requestsToTry(contextPath: string, request: string) {
+  function* requestsToTry(contextPath: string, request: string, visitedPaths: Set<string>) {
     const requestAlias = aliasHasTemplates
       ? getFromTemplateMap(normalizedAliases, request)
       : (normalizedAliases.get(request) as string | false | undefined);
@@ -64,10 +75,13 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     if (!emittedCandidate && target === 'browser') {
       const fromPackageJson = findUpPackageJson(contextPath);
-      const remappedRequest = fromPackageJson?.browserMappings?.[request];
-      if (remappedRequest !== undefined) {
-        emittedCandidate = true;
-        yield remappedRequest;
+      if (fromPackageJson) {
+        visitedPaths.add(fromPackageJson.filePath);
+        const remappedRequest = fromPackageJson.browserMappings?.[request];
+        if (remappedRequest !== undefined) {
+          emittedCandidate = true;
+          yield remappedRequest;
+        }
       }
     }
 

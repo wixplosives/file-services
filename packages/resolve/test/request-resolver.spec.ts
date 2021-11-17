@@ -749,4 +749,27 @@ describe('request resolver', () => {
       );
     });
   });
+
+  describe('tracking', () => {
+    it('lists all paths it visited to resolve the request', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({}),
+        src: {
+          'index.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      const resolutionOutput = resolveRequest('/', './src');
+      expect(resolutionOutput).to.be.resolvedTo('/src/index.js');
+      expect(Array.from(resolutionOutput.visitedPaths)).to.eql([
+        '/package.json',
+        '/src',
+        '/src.js',
+        '/src.json',
+        '/src/index',
+        '/src/index.js',
+      ]);
+    });
+  });
 });

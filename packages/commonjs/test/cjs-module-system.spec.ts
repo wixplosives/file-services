@@ -211,6 +211,7 @@ module.exports = global;`,
 
     const resolver = (_contextPath: string, request: string) => ({
       resolvedFile: request === 'some-package' ? '/src/package.js' : undefined,
+      visitedPaths: new Set<string>(),
     });
 
     const { requireModule } = createCjsModuleSystem({ fs, resolver });
