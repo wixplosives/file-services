@@ -10,7 +10,7 @@ Isomorphic, fs-agnostic implementation of Node's CommonJS module system.
 Install library in project:
 
 ```sh
-yarn add @file-services/commonjs
+npm i @file-services/commonjs
 ```
 
 Then, use the programmatic API:

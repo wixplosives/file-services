@@ -19,7 +19,7 @@ Features:
 Install library in project:
 
 ```sh
-yarn add @file-services/memory
+npm i @file-services/memory
 ```
 
 Then, use the programmatic API:

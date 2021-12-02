@@ -4,7 +4,7 @@
   "version": "5.4.3",
   "main": "dist/index.js",
   "scripts": {
-    "test": "yarn test:node",
+    "test": "npm run test:node",
     "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\""
   },
   "dependencies": {

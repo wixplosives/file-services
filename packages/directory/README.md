@@ -10,7 +10,7 @@ A file system wrapper that adds directory scoping to any `IFileSystem` implement
 Install library in project:
 
 ```sh
-yarn add @file-services/directory
+npm i @file-services/directory
 ```
 
 Then, use the programmatic API:

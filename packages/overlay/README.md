@@ -17,7 +17,7 @@ Currently, all write operations go directly to the original lower fs.
 Install library in project:
 
 ```sh
-yarn add @file-services/overlay
+npm i @file-services/overlay
 ```
 
 Then, use the programmatic API:

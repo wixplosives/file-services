@@ -6,10 +6,10 @@
   "scripts": {
     "clean": "rimraf ./packages/*/dist",
     "build": "tsc --build",
-    "watch": "yarn build -w",
+    "watch": "npm run build -- -w",
     "lint": "eslint .",
-    "pretest": "yarn build && yarn lint",
-    "test": "yarn test:node && yarn test:browser",
+    "pretest": "npm run build && npm run lint",
+    "test": "npm run test:node && npm run test:browser",
     "test:node": "mocha \"./packages/*/dist/test/*.{spec,nodespec}.js\" --parallel",
     "test:browser": "mocha-play \"packages/*/dist/test/**/*.spec.js\""
   },
