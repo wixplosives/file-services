@@ -4,7 +4,7 @@
   "version": "5.6.0",
   "main": "dist/index.js",
   "scripts": {
-    "test": "yarn test:node && yarn test:browser",
+    "test": "npm run test:node && npm run test:browser",
     "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\"",
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },

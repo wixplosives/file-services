@@ -15,7 +15,7 @@ Implements the following behaviors:
 Install library in project:
 
 ```sh
-yarn add @file-services/resolve
+npm i @file-services/resolve
 ```
 
 Then, use the programmatic API:

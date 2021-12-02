@@ -9,7 +9,7 @@ Helpers for creation of webpack-compatible file systems.
 Install library in project:
 
 ```sh
-yarn add @file-services/webpack
+npm i @file-services/webpack
 ```
 
 ## Usage

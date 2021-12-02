@@ -10,7 +10,7 @@ Helpers for creation of TypeScript hosts.
 Install library in project:
 
 ```sh
-yarn add @file-services/typescript
+npm i @file-services/typescript
 ```
 
 ## API

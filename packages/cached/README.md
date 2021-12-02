@@ -10,7 +10,7 @@ A file system wrapper that adds cache to any `IFileSystem` implementation.
 Install library in project:
 
 ```sh
-yarn add @file-services/cached
+npm i @file-services/cached
 ```
 
 Then, use the programmatic API:
