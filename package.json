@@ -8,7 +8,7 @@
     "build": "tsc --build",
     "watch": "npm run build -- -w",
     "lint": "eslint .",
-    "pretest": "npm run build && npm run lint",
+    "pretest": "npm run lint && npm run build",
     "test": "npm run test:node && npm run test:browser",
     "test:node": "mocha \"./packages/*/dist/test/*.{spec,nodespec}.js\" --parallel",
     "test:browser": "mocha-play \"packages/*/dist/test/**/*.spec.js\""
