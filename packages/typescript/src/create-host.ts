@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import type { IFileSystemSync, IFileSystemPath } from '@file-services/types';
 
+const statsNoThrowOptions = { throwIfNoEntry: false } as const;
 const UNIX_NEW_LINE = '\n';
 const identity = (val: string) => val;
 const toLowerCase = (val: string) => val.toLowerCase();
@@ -110,15 +111,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
       }
     },
     getScriptVersion(filePath) {
-      const { stackTraceLimit } = Error;
-      try {
-        Error.stackTraceLimit = 0;
-        return `${statSync(filePath).mtime.getTime()}`;
-      } catch {
-        return `${Date.now()}`;
-      } finally {
-        Error.stackTraceLimit = stackTraceLimit;
-      }
+      return `${statSync(filePath, statsNoThrowOptions)?.mtime.getTime() ?? Date.now()}`;
     },
     useCaseSensitiveFileNames: caseSensitive,
     getCanonicalFileName: caseSensitive ? identity : toLowerCase,

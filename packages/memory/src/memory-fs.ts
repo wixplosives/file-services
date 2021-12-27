@@ -9,6 +9,7 @@ import {
   BufferEncoding,
   IDirectoryEntry,
   IBaseFileSystemSyncActions,
+  StatSyncOptions,
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes.js';
 import type {
@@ -292,20 +293,40 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     return !!getNode(resolvePath(nodePath));
   }
 
-  function statSync(nodePath: string): IFileSystemStats {
+  function statSync(nodePath: string, options?: StatSyncOptions & { throwIfNoEntry?: true }): IFileSystemStats;
+  function statSync(
+    nodePath: string,
+    options: StatSyncOptions & { throwIfNoEntry: false }
+  ): IFileSystemStats | undefined;
+  function statSync(nodePath: string, options?: StatSyncOptions): IFileSystemStats | undefined {
     const resolvedPath = resolvePath(nodePath);
     const node = getNode(resolvedPath);
     if (!node) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      const throwIfNoEntry = options?.throwIfNoEntry ?? true;
+      if (throwIfNoEntry) {
+        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      } else {
+        return undefined;
+      }
     }
     return node.entry;
   }
 
-  function lstatSync(nodePath: string): IFileSystemStats {
+  function lstatSync(nodePath: string, options?: StatSyncOptions & { throwIfNoEntry?: true }): IFileSystemStats;
+  function lstatSync(
+    nodePath: string,
+    options: StatSyncOptions & { throwIfNoEntry: false }
+  ): IFileSystemStats | undefined;
+  function lstatSync(nodePath: string, options?: StatSyncOptions): IFileSystemStats | undefined {
     const resolvedPath = resolvePath(nodePath);
     const node = getRawNode(resolvedPath);
     if (!node) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      const throwIfNoEntry = options?.throwIfNoEntry ?? true;
+      if (throwIfNoEntry) {
+        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      } else {
+        return undefined;
+      }
     }
     return node.entry;
   }

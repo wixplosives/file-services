@@ -159,9 +159,6 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     copyFileSync(src, dest, ...args) {
       return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...args);
     },
-    lstatSync(path) {
-      return fs.lstatSync(resolveFullPath(path));
-    },
     mkdirSync(path, ...args) {
       return fs.mkdirSync(resolveFullPath(path), ...args);
     },
@@ -192,9 +189,12 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     existsSync(path) {
       return fs.existsSync(resolveFullPath(path));
     },
-    statSync(path) {
-      return fs.statSync(resolveFullPath(path));
-    },
+    statSync: function statSync(path: string, ...args: []) {
+      return fs.statSync(resolveFullPath(path), ...args);
+    } as IBaseFileSystemSyncActions['statSync'],
+    lstatSync: function lstatSync(path: string, ...args: []) {
+      return fs.lstatSync(resolveFullPath(path), ...args);
+    } as IBaseFileSystemSyncActions['lstatSync'],
     symlinkSync(target, path, type) {
       return fs.symlinkSync(
         posixPath.isAbsolute(target) ? resolveFullPath(target) : target,
