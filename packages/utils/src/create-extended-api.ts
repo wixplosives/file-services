@@ -51,7 +51,11 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   } = baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
-    return !!statFn(filePath, statsNoThrowOptions)?.isFile();
+    try {
+      return !!statFn(filePath, statsNoThrowOptions)?.isFile();
+    } catch {
+      return false;
+    }
   }
 
   function readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown {
@@ -59,7 +63,11 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   }
 
   function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
-    return !!statFn(directoryPath, statsNoThrowOptions)?.isDirectory();
+    try {
+      return !!statFn(directoryPath, statsNoThrowOptions)?.isDirectory();
+    } catch {
+      return false;
+    }
   }
 
   function ensureDirectorySync(directoryPath: string): void {

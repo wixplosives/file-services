@@ -39,6 +39,24 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
         expect(fs.fileExistsSync(directoryPath)).to.equal(false);
       });
+
+      it('returns false if parent path points to a file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+
+        fs.writeFileSync(filePath, SAMPLE_CONTENT);
+
+        expect(fs.fileExistsSync(fs.join(filePath, 'file-within-file'))).to.equal(false);
+      });
+
+      it('returns false even if parent path does not exist', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'missing-parent', 'non-existing-file');
+
+        expect(fs.fileExistsSync(filePath)).to.equal(false);
+      });
     });
 
     describe('directoryExistsSync', () => {
@@ -66,6 +84,24 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
         const filePath = fs.join(tempDirectoryPath, 'file');
 
         fs.writeFileSync(filePath, SAMPLE_CONTENT);
+
+        expect(fs.directoryExistsSync(filePath)).to.equal(false);
+      });
+
+      it('returns false if parent path points to a file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+
+        fs.writeFileSync(filePath, SAMPLE_CONTENT);
+
+        expect(fs.directoryExistsSync(fs.join(filePath, 'dir-within-file'))).to.equal(false);
+      });
+
+      it('returns false if parent path does not exist', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'missing-parent', 'non-existing-directory');
 
         expect(fs.directoryExistsSync(filePath)).to.equal(false);
       });

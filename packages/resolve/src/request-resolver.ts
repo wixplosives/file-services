@@ -35,7 +35,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
       for (const resolvedFilePath of nodeRequestPaths(contextPath, request)) {
         visitedPaths.add(resolvedFilePath);
-        if (!statSync(resolvedFilePath, statsNoThrowOptions)?.isFile()) {
+        if (!statSyncSafe(resolvedFilePath)?.isFile()) {
           continue;
         }
         if (target === 'browser') {
@@ -129,7 +129,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* directoryRequestPaths(directoryPath: string) {
-    if (!statSync(directoryPath, statsNoThrowOptions)?.isDirectory()) {
+    if (!statSyncSafe(directoryPath)?.isDirectory()) {
       return;
     }
     const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
@@ -144,7 +144,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function* packageRequestPaths(initialPath: string, request: string) {
     for (const packagesPath of packageRootsToPaths(initialPath)) {
-      if (!statSync(packagesPath, statsNoThrowOptions)?.isDirectory()) {
+      if (!statSyncSafe(packagesPath)?.isDirectory()) {
         continue;
       }
       const requestInPackages = join(packagesPath, request);
@@ -237,11 +237,23 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
   function resolveRelative(request: string) {
     for (const filePath of fileOrDirIndexRequestPaths(request)) {
-      if (statSync(filePath, statsNoThrowOptions)?.isFile()) {
+      if (statSyncSafe(filePath)?.isFile()) {
         return realpathSyncSafe(filePath);
       }
     }
     return undefined;
+  }
+
+  function statSyncSafe(path: string) {
+    const { stackTraceLimit } = Error;
+    try {
+      Error.stackTraceLimit = 0;
+      return statSync(path, statsNoThrowOptions);
+    } catch {
+      return undefined;
+    } finally {
+      Error.stackTraceLimit = stackTraceLimit;
+    }
   }
 
   function realpathSyncSafe(itemPath: string): string {
