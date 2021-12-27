@@ -1,10 +1,10 @@
 {
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
-  "version": "5.4.0",
+  "version": "5.7.0",
   "main": "dist/index.js",
   "dependencies": {
-    "@file-services/types": "^5.4.0"
+    "@file-services/types": "^5.7.0"
   },
   "files": [
     "dist",
