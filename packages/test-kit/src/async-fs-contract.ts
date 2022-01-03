@@ -107,53 +107,6 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
       });
     });
 
-    describe('remove', () => {
-      it('should delete directory recursively', async () => {
-        const { fs, tempDirectoryPath } = testInput;
-
-        const directoryPath = fs.join(tempDirectoryPath, 'dir');
-
-        await fs.promises.populateDirectory(directoryPath, {
-          'file1.ts': '',
-          'file2.ts': '',
-          folder1: {
-            'file1.ts': '',
-            'file2.ts': '',
-            'file3.ts': '',
-          },
-          folder2: {
-            'file1.ts': '',
-            'file2.ts': '',
-            'file3.ts': '',
-          },
-        });
-
-        await fs.promises.remove(directoryPath);
-
-        expect(await fs.promises.directoryExists(directoryPath)).to.equal(false);
-      });
-
-      it('should delete a file', async () => {
-        const { fs, tempDirectoryPath } = testInput;
-
-        const filePath = fs.join(tempDirectoryPath, 'file');
-
-        await fs.promises.writeFile(filePath, '');
-
-        await fs.promises.remove(filePath);
-
-        expect(await fs.promises.fileExists(tempDirectoryPath)).to.equal(false);
-      });
-
-      it('should fail on nonexistant', async () => {
-        const { fs, tempDirectoryPath } = testInput;
-
-        const filePath = fs.join(tempDirectoryPath, 'file');
-
-        return expect(fs.promises.remove(filePath)).to.eventually.rejectedWith(/ENOENT/);
-      });
-    });
-
     const fileName = 'a.json';
     const anotherFileName = 'b.json';
 

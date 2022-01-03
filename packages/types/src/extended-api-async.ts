@@ -64,11 +64,6 @@ export interface IFileSystemExtendedPromiseActions {
   populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>;
 
   /**
-   * Recursively remove a path.
-   */
-  remove(path: string): Promise<void>;
-
-  /**
    * Read a file and parse it using `JSON.parse`.
    *
    * @param filePath path pointing to a `json` file.

@@ -35,20 +35,8 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 }
 
 export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSystemExtendedSyncActions {
-  const {
-    statSync,
-    mkdirSync,
-    writeFileSync,
-    unlinkSync,
-    rmdirSync,
-    lstatSync,
-    readdirSync,
-    readFileSync,
-    copyFileSync,
-    dirname,
-    join,
-    resolve,
-  } = baseFs;
+  const { statSync, mkdirSync, writeFileSync, readdirSync, readFileSync, copyFileSync, dirname, join, resolve } =
+    baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
     try {
@@ -119,22 +107,6 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       }
     }
     return filePaths;
-  }
-
-  // TODO: replace with rmdirSync(path, {recursive: true}) once Node 12+
-  function removeSync(entryPath: string): void {
-    const stats = lstatSync(entryPath);
-    if (stats.isDirectory()) {
-      const directoryItems = readdirSync(entryPath);
-      for (const entryName of directoryItems) {
-        removeSync(join(entryPath, entryName));
-      }
-      rmdirSync(entryPath);
-    } else if (stats.isFile() || stats.isSymbolicLink()) {
-      unlinkSync(entryPath);
-    } else {
-      throw new Error(`unknown node type, cannot delete ${entryPath}`);
-    }
   }
 
   function findFilesSync(rootDirectory: string, options: IWalkOptions = {}, filePaths: string[] = []): string[] {
@@ -209,7 +181,6 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     // resolve path once for recursive functions
     ensureDirectorySync: (directoryPath) => ensureDirectorySync(resolve(directoryPath)),
     populateDirectorySync: (directoryPath, contents) => populateDirectorySync(resolve(directoryPath), contents),
-    removeSync: (entryPath) => removeSync(resolve(entryPath)),
     findFilesSync: (rootDirectory, options) => findFilesSync(resolve(rootDirectory), options),
     copyDirectorySync: (sourcePath, destinationPath) =>
       copyDirectorySync(resolve(sourcePath), resolve(destinationPath)),
@@ -236,7 +207,7 @@ export function createExtendedFileSystemPromiseActions(
     dirname,
     resolve,
     join,
-    promises: { stat, mkdir, writeFile, lstat, rmdir, unlink, readdir, readFile, copyFile },
+    promises: { stat, mkdir, writeFile, readdir, readFile, copyFile },
   } = baseFs;
 
   async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
@@ -312,20 +283,6 @@ export function createExtendedFileSystemPromiseActions(
       }
     }
     return filePaths;
-  }
-
-  // TODO: replace with rmdir(path, {recursive: true}) once Node 12+
-  async function remove(entryPath: string): Promise<void> {
-    const stats = await lstat(entryPath);
-    if (stats.isDirectory()) {
-      const directoryItems = await readdir(entryPath);
-      await Promise.all(directoryItems.map((entryName) => remove(join(entryPath, entryName))));
-      await rmdir(entryPath);
-    } else if (stats.isFile() || stats.isSymbolicLink()) {
-      await unlink(entryPath);
-    } else {
-      throw new Error(`unknown node type, cannot delete ${entryPath}`);
-    }
   }
 
   async function findFiles(
@@ -404,7 +361,6 @@ export function createExtendedFileSystemPromiseActions(
     directoryExists,
     ensureDirectory: (directoryPath) => ensureDirectory(resolve(directoryPath)),
     populateDirectory: (directoryPath, contents) => populateDirectory(resolve(directoryPath), contents),
-    remove: (entryPath) => remove(resolve(entryPath)),
     findFiles: (rootDirectory, options) => findFiles(resolve(rootDirectory), options),
     copyDirectory: (sourcePath, destinationPath) => copyDirectory(resolve(sourcePath), resolve(destinationPath)),
     findClosestFile,
@@ -412,9 +368,3 @@ export function createExtendedFileSystemPromiseActions(
     readJsonFile,
   };
 }
-
-// to avoid having to include @types/node
-interface TracedErrorConstructor extends ErrorConstructor {
-  stackTraceLimit?: number;
-}
-declare let Error: TracedErrorConstructor;

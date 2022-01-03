@@ -60,11 +60,6 @@ export interface IFileSystemExtendedSyncActions {
   populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[];
 
   /**
-   * Recursively remove a path.
-   */
-  removeSync(path: string): void;
-
-  /**
    * Read a file and parse it using `JSON.parse`.
    *
    * @param filePath path pointing to a `json` file.
