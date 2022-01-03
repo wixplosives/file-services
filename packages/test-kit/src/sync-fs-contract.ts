@@ -138,56 +138,6 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
       });
     });
 
-    describe('removeSync', () => {
-      it('should delete directory recursively', () => {
-        const { fs, tempDirectoryPath } = testInput;
-
-        const directoryPath = fs.join(tempDirectoryPath, 'dir');
-
-        fs.populateDirectorySync(directoryPath, {
-          'file1.ts': '',
-          'file2.ts': '',
-          folder1: {
-            'file1.ts': '',
-            'file2.ts': '',
-            'file3.ts': '',
-          },
-          folder2: {
-            'file1.ts': '',
-            'file2.ts': '',
-            'file3.ts': '',
-          },
-        });
-
-        fs.removeSync(directoryPath);
-
-        expect(fs.directoryExistsSync(directoryPath)).to.equal(false);
-      });
-
-      it('should delete a file', () => {
-        const { fs, tempDirectoryPath } = testInput;
-
-        const filePath = fs.join(tempDirectoryPath, 'file');
-
-        fs.writeFileSync(filePath, '');
-
-        expect(fs.readdirSync(tempDirectoryPath)).to.deep.equal(['file']);
-
-        fs.removeSync(filePath);
-
-        expect(fs.fileExistsSync(tempDirectoryPath)).to.equal(false);
-      });
-
-      it('should fail on nonexistant', () => {
-        const { fs, tempDirectoryPath } = testInput;
-
-        const filePath = fs.join(tempDirectoryPath, 'file');
-
-        const thrower = () => fs.removeSync(filePath);
-        expect(thrower).to.throw(/ENOENT/);
-      });
-    });
-
     const fileName = 'a.json';
     const anotherFileName = 'b.json';
 
