@@ -904,5 +904,80 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         );
       });
     });
+
+    describe('removing directories and files', () => {
+      it('removes an existing file, no matter the flags', async () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+        const secondFilePath = fs.join(tempDirectoryPath, 'file2');
+        const thirdFilePath = fs.join(tempDirectoryPath, 'file3');
+        const fourthFilePath = fs.join(tempDirectoryPath, 'file4');
+        await fs.promises.writeFile(filePath, SAMPLE_CONTENT);
+        await fs.promises.writeFile(secondFilePath, SAMPLE_CONTENT);
+        await fs.promises.writeFile(thirdFilePath, SAMPLE_CONTENT);
+        await fs.promises.writeFile(fourthFilePath, SAMPLE_CONTENT);
+
+        await fs.promises.rm(filePath);
+        await fs.promises.rm(secondFilePath, { recursive: true });
+        await fs.promises.rm(thirdFilePath, { force: true });
+        await fs.promises.rm(fourthFilePath, { force: true, recursive: true });
+
+        expect(await fs.promises.exists(filePath)).to.equal(false);
+        expect(await fs.promises.exists(secondFilePath)).to.equal(false);
+        expect(await fs.promises.exists(thirdFilePath)).to.equal(false);
+        expect(await fs.promises.exists(fourthFilePath)).to.equal(false);
+      });
+
+      it('removes an empty or populated directory when "recursive" is set', async () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const emptyDirectoryPath = fs.join(tempDirectoryPath, 'dir');
+        const populatedDirectoryPath = fs.join(tempDirectoryPath, 'dir-with-file');
+        await fs.promises.mkdir(emptyDirectoryPath);
+        await fs.promises.mkdir(populatedDirectoryPath);
+        await fs.promises.writeFile(fs.join(populatedDirectoryPath, 'file'), SAMPLE_CONTENT);
+
+        await fs.promises.rm(emptyDirectoryPath, { recursive: true });
+        await fs.promises.rm(populatedDirectoryPath, { recursive: true });
+
+        expect(await fs.promises.exists(emptyDirectoryPath)).to.equal(false);
+        expect(await fs.promises.exists(populatedDirectoryPath)).to.equal(false);
+      });
+
+      it('fails removing a directory when "recursive" is not set', async () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const emptyDirectoryPath = fs.join(tempDirectoryPath, 'dir');
+        const populatedDirectoryPath = fs.join(tempDirectoryPath, 'dir-with-file');
+        await fs.promises.mkdir(emptyDirectoryPath);
+        await fs.promises.mkdir(populatedDirectoryPath);
+        await fs.promises.writeFile(fs.join(populatedDirectoryPath, 'file'), SAMPLE_CONTENT);
+
+        // linux throws `EISDIR`, Windows throws `EPERM`
+        await expect(fs.promises.rm(emptyDirectoryPath)).to.eventually.be.rejected;
+        await expect(fs.promises.rm(emptyDirectoryPath, { force: true })).to.eventually.be.rejected;
+        await expect(fs.promises.rm(populatedDirectoryPath)).to.eventually.be.rejected;
+        await expect(fs.promises.rm(populatedDirectoryPath, { force: true })).to.eventually.be.rejected;
+      });
+
+      it('throws removing a non-existing target', async () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const targetPath = fs.join(tempDirectoryPath, 'target');
+
+        await expect(fs.promises.rm(targetPath)).to.eventually.be.rejectedWith('ENOENT');
+        await expect(fs.promises.rm(targetPath, { recursive: true })).to.eventually.be.rejectedWith('ENOENT');
+      });
+
+      it('does not fail removing a non-existing target if "force" is set', async () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const targetPath = fs.join(tempDirectoryPath, 'target');
+
+        await expect(fs.promises.rm(targetPath, { force: true })).to.eventually.become(undefined);
+        await expect(fs.promises.rm(targetPath, { force: true, recursive: true })).to.eventually.become(undefined);
+      });
+    });
   });
 }

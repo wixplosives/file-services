@@ -10,6 +10,7 @@ import {
   IDirectoryEntry,
   IBaseFileSystemSyncActions,
   StatSyncOptions,
+  RmOptions,
 } from '@file-services/types';
 import { FsErrorCodes } from './error-codes.js';
 import type {
@@ -109,6 +110,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     readlinkSync,
     renameSync,
     rmdirSync,
+    rmSync,
     statSync,
     symlinkSync,
     unlinkSync,
@@ -286,6 +288,37 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     parentNode.contents.delete(directoryName);
+    emitWatchEvent({ path: resolvedPath, stats: null });
+  }
+
+  function rmSync(targetPath: string, { force, recursive }: RmOptions = {}): void {
+    const resolvedPath = resolvePath(targetPath);
+    const parentPath = posixPath.dirname(resolvedPath);
+    const parentNode = getNode(parentPath);
+
+    if (!parentNode || parentNode.type !== 'dir') {
+      if (force) {
+        return;
+      } else {
+        throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
+      }
+    }
+
+    const targetName = posixPath.basename(resolvedPath);
+    const targetNode = parentNode.contents.get(targetName);
+
+    if (!targetNode) {
+      if (force) {
+        return;
+      } else {
+        throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
+      }
+    }
+    if (targetNode.type === 'dir' && !recursive) {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+    }
+
+    parentNode.contents.delete(targetName);
     emitWatchEvent({ path: resolvedPath, stats: null });
   }
 

@@ -54,6 +54,9 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
       async symlink(...args) {
         return syncFs.symlinkSync(...args);
       },
+      async rm(...args) {
+        return syncFs.rmSync(...args);
+      },
     },
     exists(nodePath, callback) {
       callback(syncFs.existsSync(nodePath));

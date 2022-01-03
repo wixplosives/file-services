@@ -155,3 +155,17 @@ export interface IWalkOptions {
    */
   filterDirectory?(pathDesc: IFileSystemDescriptor): boolean;
 }
+
+export interface RmOptions {
+  /**
+   * When `true`, exceptions will be ignored if `path` does not exist.
+   * @default false
+   */
+  force?: boolean | undefined;
+
+  /**
+   * If `true`, perform a recursive directory removal.
+   * @default false
+   */
+  recursive?: boolean | undefined;
+}
