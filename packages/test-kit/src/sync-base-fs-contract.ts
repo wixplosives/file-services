@@ -818,5 +818,80 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         expect(() => fs.symlinkSync(targetPath, linkPath, 'junction')).to.throw('EEXIST');
       });
     });
+
+    describe('removing directories and files', () => {
+      it('removes an existing file, no matter the flags', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+        const secondFilePath = fs.join(tempDirectoryPath, 'file2');
+        const thirdFilePath = fs.join(tempDirectoryPath, 'file3');
+        const fourthFilePath = fs.join(tempDirectoryPath, 'file4');
+        fs.writeFileSync(filePath, SAMPLE_CONTENT);
+        fs.writeFileSync(secondFilePath, SAMPLE_CONTENT);
+        fs.writeFileSync(thirdFilePath, SAMPLE_CONTENT);
+        fs.writeFileSync(fourthFilePath, SAMPLE_CONTENT);
+
+        fs.rmSync(filePath);
+        fs.rmSync(secondFilePath, { recursive: true });
+        fs.rmSync(thirdFilePath, { force: true });
+        fs.rmSync(fourthFilePath, { force: true, recursive: true });
+
+        expect(fs.statSync(filePath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(fs.statSync(secondFilePath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(fs.statSync(thirdFilePath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(fs.statSync(fourthFilePath, { throwIfNoEntry: false })).to.equal(undefined);
+      });
+
+      it('removes an empty or populated directory when "recursive" is set', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const emptyDirectoryPath = fs.join(tempDirectoryPath, 'dir');
+        const populatedDirectoryPath = fs.join(tempDirectoryPath, 'dir-with-file');
+        fs.mkdirSync(emptyDirectoryPath);
+        fs.mkdirSync(populatedDirectoryPath);
+        fs.writeFileSync(fs.join(populatedDirectoryPath, 'file'), SAMPLE_CONTENT);
+
+        fs.rmSync(emptyDirectoryPath, { recursive: true });
+        fs.rmSync(populatedDirectoryPath, { recursive: true });
+
+        expect(fs.statSync(emptyDirectoryPath, { throwIfNoEntry: false })).to.equal(undefined);
+        expect(fs.statSync(populatedDirectoryPath, { throwIfNoEntry: false })).to.equal(undefined);
+      });
+
+      it('fails removing a directory when "recursive" is not set', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const emptyDirectoryPath = fs.join(tempDirectoryPath, 'dir');
+        const populatedDirectoryPath = fs.join(tempDirectoryPath, 'dir-with-file');
+        fs.mkdirSync(emptyDirectoryPath);
+        fs.mkdirSync(populatedDirectoryPath);
+        fs.writeFileSync(fs.join(populatedDirectoryPath, 'file'), SAMPLE_CONTENT);
+
+        // linux throws `EISDIR`, Windows throws `EPERM`
+        expect(() => fs.rmSync(emptyDirectoryPath)).to.throw();
+        expect(() => fs.rmSync(emptyDirectoryPath, { force: true })).to.throw();
+        expect(() => fs.rmSync(populatedDirectoryPath)).to.throw();
+        expect(() => fs.rmSync(populatedDirectoryPath, { force: true })).to.throw();
+      });
+
+      it('throws removing a non-existing target', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const targetPath = fs.join(tempDirectoryPath, 'target');
+
+        expect(() => fs.rmSync(targetPath)).to.throw('ENOENT');
+        expect(() => fs.rmSync(targetPath, { recursive: true })).to.throw('ENOENT');
+      });
+
+      it('does not fail removing a non-existing target if "force" is set', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const targetPath = fs.join(tempDirectoryPath, 'target');
+
+        expect(() => fs.rmSync(targetPath, { force: true })).to.not.throw();
+        expect(() => fs.rmSync(targetPath, { force: true, recursive: true })).to.not.throw();
+      });
+    });
   });
 }

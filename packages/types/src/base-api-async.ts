@@ -6,6 +6,7 @@ import type {
   WriteFileOptions,
   ReadFileOptions,
   IDirectoryEntry,
+  RmOptions,
 } from './common-fs-types.js';
 import type { IFileSystemPath } from './path.js';
 import type { IWatchService } from './watch-api.js';
@@ -200,4 +201,9 @@ export interface IBaseFileSystemPromiseActions {
    * Creates a symbolic link for `target` at `path`. default type is 'file'.
    */
   symlink(target: string, path: string, type?: 'dir' | 'file' | 'junction'): Promise<void>;
+
+  /**
+   * Removes files and directories.
+   */
+  rm(path: string, options?: RmOptions): Promise<void>;
 }

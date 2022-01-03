@@ -5,6 +5,7 @@ import type {
   ReadFileOptions,
   IDirectoryEntry,
   StatSyncOptions,
+  RmOptions,
 } from './common-fs-types.js';
 import type { IFileSystemPath } from './path.js';
 import type { IWatchService } from './watch-api.js';
@@ -121,4 +122,9 @@ export interface IBaseFileSystemSyncActions {
    * Creates a symbolic link for `target` at `path`. default type is 'file'.
    */
   symlinkSync(target: string, path: string, type?: 'dir' | 'file' | 'junction'): void;
+
+  /**
+   * Removes files and directories.
+   */
+  rmSync(path: string, options?: RmOptions): void;
 }

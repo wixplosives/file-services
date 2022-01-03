@@ -136,6 +136,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       rmdir(path) {
         return fsPromises.rmdir(resolveFullPath(path));
       },
+      rm(path, options) {
+        return fsPromises.rm(resolveFullPath(path), options);
+      },
       exists(path) {
         return fsPromises.exists(resolveFullPath(path));
       },
@@ -185,6 +188,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     },
     rmdirSync(path) {
       return fs.rmdirSync(resolveFullPath(path));
+    },
+    rmSync(path, options) {
+      return fs.rmSync(resolveFullPath(path), options);
     },
     existsSync(path) {
       return fs.existsSync(resolveFullPath(path));
