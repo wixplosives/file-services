@@ -532,8 +532,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       nodePath = posixPath.resolve(posixPath.dirname(nodePath), node.target);
       node = getRawNode(nodePath);
     }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    return node as IFsMemFileNode | IFsMemDirectoryNode | undefined;
+    return node;
   }
 
   function getRawNode(nodePath: string): IFsMemNodeType | undefined {
