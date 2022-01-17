@@ -87,6 +87,20 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         const { fs, tempDirectoryPath } = testInput;
         expect(() => fs.readFileSync(tempDirectoryPath, 'utf8')).to.throw('EISDIR');
       });
+
+      it('fails if using statSync or lstatSync on a target path with parent as a file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const filePath = fs.join(tempDirectoryPath, 'file');
+
+        fs.writeFileSync(filePath, SAMPLE_CONTENT);
+
+        const targetUnderFile = fs.join(filePath, 'broken-target');
+        expect(() => fs.statSync(targetUnderFile)).to.throw(/ENOTDIR|ENOENT/);
+        expect(() => fs.statSync(targetUnderFile, { throwIfNoEntry: false })).to.throw(/ENOTDIR|ENOENT/);
+
+        expect(() => fs.lstatSync(targetUnderFile)).to.throw(/ENOTDIR|ENOENT/);
+        expect(() => fs.lstatSync(targetUnderFile, { throwIfNoEntry: false })).to.throw(/ENOTDIR|ENOENT/);
+      });
     });
 
     describe('removing files', () => {

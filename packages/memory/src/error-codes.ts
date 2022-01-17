@@ -9,6 +9,7 @@ export enum FsErrorCodes {
 
   CONTAINING_NOT_EXISTS = 'ENOENT: containing directory does not exist',
   DIRECTORY_NOT_EMPTY = 'ENOTEMPTY: directory is not empty',
+  NOT_A_DIRECTORY = 'ENOTDIR: not a directory',
 
   PATH_ALREADY_EXISTS = 'EEXIST: path already exists',
 }

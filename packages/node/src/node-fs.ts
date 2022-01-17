@@ -15,7 +15,7 @@ import type {
 import { NodeWatchService, INodeWatchServiceOptions } from './watch-service.js';
 
 const nodeMajor = parseInt(process.versions.node, 10);
-const needsStatPolyfill = nodeMajor < 14;
+const needsStatPolyfill = nodeMajor < 14; // node 12 has no throwIfNoEntry
 const caseSensitive = !fs.existsSync(__filename.toUpperCase());
 const fsPromisesExists = promisify(fs.exists);
 
@@ -53,7 +53,7 @@ function statSync(path: string, options?: StatSyncOptions): IFileSystemStats | u
     return fs.statSync(path, options);
   } catch (e) {
     const throwIfNoEntry = options?.throwIfNoEntry ?? true;
-    if (throwIfNoEntry) {
+    if (throwIfNoEntry || (e as NodeJS.ErrnoException)?.code !== 'ENOENT') {
       throw e;
     } else {
       return undefined;
@@ -68,7 +68,7 @@ function lstatSync(path: string, options?: StatSyncOptions): IFileSystemStats | 
     return fs.lstatSync(path, options);
   } catch (e) {
     const throwIfNoEntry = options?.throwIfNoEntry ?? true;
-    if (throwIfNoEntry) {
+    if (throwIfNoEntry || (e as NodeJS.ErrnoException)?.code !== 'ENOENT') {
       throw e;
     } else {
       return undefined;

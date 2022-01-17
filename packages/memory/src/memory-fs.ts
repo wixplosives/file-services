@@ -333,6 +333,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   ): IFileSystemStats | undefined;
   function statSync(nodePath: string, options?: StatSyncOptions): IFileSystemStats | undefined {
     const resolvedPath = resolvePath(nodePath);
+    const parentPath = posixPath.dirname(resolvedPath);
+    const parentNode = getNode(parentPath);
+    if (parentNode && parentNode.type !== 'dir') {
+      throw createFsError(resolvedPath, FsErrorCodes.NOT_A_DIRECTORY, 'ENOTDIR');
+    }
     const node = getNode(resolvedPath);
     if (!node) {
       const throwIfNoEntry = options?.throwIfNoEntry ?? true;
@@ -352,7 +357,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   ): IFileSystemStats | undefined;
   function lstatSync(nodePath: string, options?: StatSyncOptions): IFileSystemStats | undefined {
     const resolvedPath = resolvePath(nodePath);
-    const node = getRawNode(resolvedPath);
+    const parentPath = posixPath.dirname(resolvedPath);
+    const parentNode = getNode(parentPath);
+    if (parentNode && parentNode.type !== 'dir') {
+      throw createFsError(resolvedPath, FsErrorCodes.NOT_A_DIRECTORY, 'ENOTDIR');
+    }
+    const node = parentNode?.contents.get(posixPath.basename(resolvedPath));
     if (!node) {
       const throwIfNoEntry = options?.throwIfNoEntry ?? true;
       if (throwIfNoEntry) {
