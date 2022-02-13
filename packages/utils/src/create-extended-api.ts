@@ -93,12 +93,12 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     }
   }
 
-  function populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[] {
+  function populateDirectorySync(directoryPath: string, contents: IDirectoryContents<string | Uint8Array>): string[] {
     const filePaths: string[] = [];
     ensureDirectorySync(directoryPath);
     for (const [nodeName, nodeValue] of Object.entries(contents)) {
       const nodePath = join(directoryPath, nodeName);
-      if (typeof nodeValue === 'string') {
+      if (typeof nodeValue === 'string' || nodeValue instanceof Uint8Array) {
         ensureDirectorySync(dirname(nodePath));
         writeFileSync(nodePath, nodeValue);
         filePaths.push(nodePath);
@@ -265,12 +265,15 @@ export function createExtendedFileSystemPromiseActions(
     }
   }
 
-  async function populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]> {
+  async function populateDirectory(
+    directoryPath: string,
+    contents: IDirectoryContents<string | Uint8Array>
+  ): Promise<string[]> {
     const filePaths: string[] = [];
     await ensureDirectory(directoryPath);
     for (const [nodeName, nodeValue] of Object.entries(contents)) {
       const nodePath = join(directoryPath, nodeName);
-      if (typeof nodeValue === 'string') {
+      if (typeof nodeValue === 'string' || nodeValue instanceof Uint8Array) {
         await ensureDirectory(dirname(nodePath));
         await writeFile(nodePath, nodeValue);
         filePaths.push(nodePath);

@@ -267,8 +267,8 @@ export function createOverlayFs(
     },
     readFile(
       path: string,
-      options?: ReadFileOptions | CallbackFn<Buffer>,
-      callback?: CallbackFn<string> | CallbackFn<Buffer> | CallbackFn<string | Buffer>
+      options?: ReadFileOptions | CallbackFn<Uint8Array>,
+      callback?: CallbackFn<string> | CallbackFn<Uint8Array> | CallbackFn<string | Uint8Array>
     ): void {
       if (typeof options === 'function') {
         callback = options;
@@ -280,13 +280,13 @@ export function createOverlayFs(
       if (resolvedUpperPath !== undefined) {
         upperFs.readFile(resolvedUpperPath, options, (upperError, upperValue) => {
           if (upperError) {
-            lowerFs.readFile(resolvedLowerPath, options as BufferEncoding, callback as CallbackFn<string | Buffer>);
+            lowerFs.readFile(resolvedLowerPath, options as BufferEncoding, callback as CallbackFn<string | Uint8Array>);
           } else {
-            (callback as CallbackFn<string | Buffer>)(upperError, upperValue);
+            (callback as CallbackFn<string | Uint8Array>)(upperError, upperValue);
           }
         });
       } else {
-        lowerFs.readFile(resolvedLowerPath, options, callback as CallbackFn<string | Buffer>);
+        lowerFs.readFile(resolvedLowerPath, options, callback as CallbackFn<string | Uint8Array>);
       }
     },
     stat(path, callback) {

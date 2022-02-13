@@ -6,15 +6,15 @@ import { WatchEventsValidator } from './watch-events-validator.js';
 
 chai.use(chaiAsPromised);
 
-const SAMPLE_CONTENT = 'content';
-const DIFFERENT_CONTENT = 'another content';
-
 export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseFileSystemAsync>>): void {
   describe('ASYNC file system contract', () => {
     let testInput: ITestInput<IBaseFileSystemAsync>;
 
     beforeEach(async () => (testInput = await testProvider()));
     afterEach(async () => await testInput.dispose());
+
+    const SAMPLE_CONTENT = 'content';
+    const DIFFERENT_CONTENT = 'another content';
 
     describe('writing files', () => {
       it('can write a new file into an existing directory', async () => {
@@ -31,6 +31,27 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
 
         expect((await stat(filePath)).isFile()).to.equal(true);
         expect(await readFile(filePath, 'utf8')).to.eql(SAMPLE_CONTENT);
+      });
+
+      it('can write a binary file', async () => {
+        const {
+          fs: {
+            join,
+            promises: { writeFile, readFile, stat },
+          },
+          tempDirectoryPath,
+        } = testInput;
+
+        const filePath = join(tempDirectoryPath, 'file');
+        const BINARY_CONTENT = new Uint8Array([1, 2, 3, 4, 5]);
+        await writeFile(filePath, BINARY_CONTENT);
+
+        expect((await stat(filePath)).isFile()).to.equal(true);
+        expect(await readFile(filePath)).to.be.instanceOf(Uint8Array);
+        expect(await readFile(filePath)).to.eql(BINARY_CONTENT);
+        BINARY_CONTENT[0] = 5;
+        expect(await readFile(filePath)).to.not.eql(BINARY_CONTENT);
+        expect(await readFile(filePath)).to.eql(new Uint8Array([1, 2, 3, 4, 5]));
       });
 
       it('can overwrite an existing file', async () => {

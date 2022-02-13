@@ -3,15 +3,15 @@ import { IBaseFileSystemSync, FileSystemConstants } from '@file-services/types';
 import type { ITestInput } from './types.js';
 import { WatchEventsValidator } from './watch-events-validator.js';
 
-const SAMPLE_CONTENT = 'content';
-const DIFFERENT_CONTENT = 'another content';
-
 export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseFileSystemSync>>): void {
   describe('SYNC file system contract', () => {
     let testInput: ITestInput<IBaseFileSystemSync>;
 
     beforeEach(async () => (testInput = await testProvider()));
     afterEach(async () => await testInput.dispose());
+
+    const SAMPLE_CONTENT = 'content';
+    const DIFFERENT_CONTENT = 'another content';
 
     describe('writing files', () => {
       it('can write a new file into an existing directory', () => {
@@ -23,6 +23,21 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         expect(fs.statSync(filePath).isFile()).to.equal(true);
         expect(fs.readFileSync(filePath, 'utf8')).to.eql(SAMPLE_CONTENT);
+      });
+
+      it('can write a binary file', () => {
+        const { fs, tempDirectoryPath } = testInput;
+
+        const filePath = fs.join(tempDirectoryPath, 'file');
+        const BINARY_CONTENT = new Uint8Array([1, 2, 3, 4, 5]);
+        fs.writeFileSync(filePath, BINARY_CONTENT);
+
+        expect(fs.statSync(filePath).isFile()).to.equal(true);
+        expect(fs.readFileSync(filePath)).to.be.instanceOf(Uint8Array);
+        expect(fs.readFileSync(filePath)).to.eql(BINARY_CONTENT);
+        BINARY_CONTENT[0] = 5;
+        expect(fs.readFileSync(filePath)).to.not.eql(BINARY_CONTENT);
+        expect(fs.readFileSync(filePath)).to.eql(new Uint8Array([1, 2, 3, 4, 5]));
       });
 
       it('can overwrite an existing file', () => {
@@ -75,6 +90,7 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
 
         expect(fs.readFileSync(firstFilePath, 'utf8'), 'contents of first-file').to.eql(SAMPLE_CONTENT);
         expect(fs.readFileSync(secondFilePath, 'utf8'), 'contents of second-file').to.eql(DIFFERENT_CONTENT);
+        expect(fs.readFileSync(firstFilePath), 'binary contents of first-file').to.be.instanceOf(Uint8Array);
       });
 
       it('fails if reading a non-existing file', () => {

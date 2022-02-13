@@ -38,19 +38,19 @@ export interface IBaseFileSystemCallbackActions {
   readFile(
     path: string,
     options: { encoding?: null; flag?: string } | undefined | null,
-    callback: CallbackFn<Buffer>
+    callback: CallbackFn<Uint8Array>
   ): void;
   readFile(
     path: string,
     options: { encoding: BufferEncoding; flag?: string } | BufferEncoding,
     callback: CallbackFn<string>
   ): void;
-  readFile(path: string, options: ReadFileOptions | undefined, callback: CallbackFn<string | Buffer>): void;
-  readFile(path: string, callback: CallbackFn<Buffer>): void;
+  readFile(path: string, options: ReadFileOptions | undefined, callback: CallbackFn<string | Uint8Array>): void;
+  readFile(path: string, callback: CallbackFn<Uint8Array>): void;
 
   /**
    * Write data to a file, replacing the file if already exists.
-   * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
+   * `encoding` is used when a string `content` (not `Uint8Array`) was provided (with default 'utf8').
    */
   writeFile(path: string, data: string | Uint8Array, options: WriteFileOptions, callback: CallbackFnVoid): void;
   writeFile(path: string, data: string | Uint8Array, callback: CallbackFnVoid): void;
@@ -129,13 +129,13 @@ export interface IBaseFileSystemPromiseActions {
   /**
    * Read the entire contents of a file.
    */
-  readFile(path: string, options?: { encoding?: null; flag?: string } | null): Promise<Buffer>;
+  readFile(path: string, options?: { encoding?: null; flag?: string } | null): Promise<Uint8Array>;
   readFile(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): Promise<string>;
-  readFile(path: string, options?: ReadFileOptions): Promise<string | Buffer>;
+  readFile(path: string, options?: ReadFileOptions): Promise<string | Uint8Array>;
 
   /**
    * Write data to a file, replacing the file if already exists.
-   * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
+   * `encoding` is used when a string `content` (not `Uint8Array`) was provided (with default 'utf8').
    */
   writeFile(path: string, data: string | Uint8Array, options?: WriteFileOptions): Promise<void>;
 

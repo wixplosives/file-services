@@ -46,13 +46,13 @@ export interface IBaseFileSystemSyncActions {
   /**
    * Read the entire contents of a file.
    */
-  readFileSync(path: string, options?: { encoding?: null; flag?: string } | null): Buffer;
+  readFileSync(path: string, options?: { encoding?: null; flag?: string } | null): Uint8Array;
   readFileSync(path: string, options: { encoding: BufferEncoding; flag?: string } | BufferEncoding): string;
-  readFileSync(path: string, options?: ReadFileOptions): string | Buffer;
+  readFileSync(path: string, options?: ReadFileOptions): string | Uint8Array;
 
   /**
    * Write data to a file, replacing the file if already exists.
-   * `encoding` is used when a string `content` (not `Buffer`) was provided (with default 'utf8').
+   * `encoding` is used when a string `content` (not `Uint8Array`) was provided (with default 'utf8').
    */
   writeFileSync(path: string, data: string | Uint8Array, options?: WriteFileOptions): void;
 

@@ -1,4 +1,5 @@
 import { platform } from 'os';
+import { expect } from 'chai';
 import { syncBaseFsContract, asyncBaseFsContract, asyncFsContract, syncFsContract } from '@file-services/test-kit';
 import { createTempDirectory } from 'create-temp-directory';
 import { createNodeFs } from '@file-services/node';
@@ -33,4 +34,10 @@ describe('Node File System Implementation', function () {
 
   asyncFsContract(testProvider);
   syncFsContract(testProvider);
+
+  it('returns instances of Buffer when reading binary', async () => {
+    const fs = createNodeFs();
+    expect(fs.readFileSync(__filename)).to.be.instanceOf(Buffer);
+    expect(await fs.promises.readFile(__filename)).to.be.instanceOf(Buffer);
+  });
 });

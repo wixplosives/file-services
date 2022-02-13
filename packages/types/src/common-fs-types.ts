@@ -10,13 +10,6 @@ export type BufferEncoding =
   | 'binary'
   | 'hex';
 
-// use global augmentation so that users without @types/node will have a partial Buffer interface
-declare global {
-  interface Buffer {
-    toString(ecoding?: BufferEncoding): string;
-  }
-}
-
 export type CallbackFn<T> = (error: Error | null, value: T) => void;
 export type CallbackFnVoid = (error?: Error | null) => void;
 
@@ -53,8 +46,8 @@ export enum FileSystemConstants {
   COPYFILE_EXCL = 1,
 }
 
-export interface IDirectoryContents {
-  [nodeName: string]: string | IDirectoryContents;
+export interface IDirectoryContents<T extends Uint8Array | string = string> {
+  [nodeName: string]: T | IDirectoryContents<T>;
 }
 
 /**
