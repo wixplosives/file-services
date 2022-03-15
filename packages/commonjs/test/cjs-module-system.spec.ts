@@ -291,6 +291,13 @@ module.exports = global;`,
     const { requireModule } = createCjsModuleSystem({ fs });
 
     expect(() => requireModule(sampleFilePath)).to.throw('Thanos is coming!');
+    let e: unknown;
+    try {
+      requireModule(sampleFilePath);
+    } catch (error) {
+      e = error;
+    }
+    expect(e).to.haveOwnProperty('filePath', sampleFilePath);
 
     fs.writeFileSync(sampleFilePath, `module.exports = 1`);
 
