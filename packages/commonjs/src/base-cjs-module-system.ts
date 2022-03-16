@@ -113,6 +113,12 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       moduleFn(...Object.values(moduleBuiltins));
     } catch (e) {
       loadedModules.delete(filePath);
+
+      // switch to Error.cause once more places support it
+      if (e instanceof Error && !(e as { filePath?: string }).filePath) {
+        (e as { filePath?: string }).filePath = filePath;
+      }
+
       throw e;
     }
 
