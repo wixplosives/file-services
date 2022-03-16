@@ -27,15 +27,19 @@ export interface IBaseModuleSystemOptions {
    * `undefined` - couldn't resolve request.
    */
   resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
+
+  wrapRequire?: (require: (modulePath: string | false) => unknown) => (modulePath: string | false) => unknown;
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals = {} } = options;
+  const { resolveFrom, dirname, readFileSync, globals = {}, wrapRequire } = options;
 
   const loadedModules = new Map<string, IModule>();
 
+  const wrappedRequireModule = wrapRequire ? wrapRequire(requireModule) : requireModule;
+
   return {
-    requireModule,
+    requireModule: wrappedRequireModule,
     requireFrom,
     resolveFrom,
     loadedModules,
@@ -56,7 +60,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       return existingModule.exports;
     }
 
-    return requireModule(resolveThrow(contextPath, request, requestOrigin));
+    return wrappedRequireModule(resolveThrow(contextPath, request, requestOrigin));
   }
 
   function requireModule(filePath: string | false): unknown {

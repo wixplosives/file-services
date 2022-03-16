@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
-import { createCjsModuleSystem } from '@file-services/commonjs';
+import { createBaseCjsModuleSystem, createCjsModuleSystem } from '@file-services/commonjs';
+import { createRequestResolver } from '@file-services/resolve';
 
 describe('commonjs module system', () => {
   const sampleString = 'named';
@@ -309,5 +310,33 @@ module.exports = global;`,
     fs.writeFileSync(sampleJsonPath, `{ "name": "test" }`);
 
     expect(requireModule(sampleJsonPath)).to.eql({ name: 'test' });
+  });
+
+  it('allows registering to evaluation hooks', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const fs = createMemoryFs({
+      [aFile]: `require('./b');`,
+      [bFile]: 'module.exports = 5;',
+    });
+    const callArray: string[] = [];
+    const wrappedRequireCall =
+      (requireModule: (modulePath: string | false) => unknown) => (modulePath: string | false) => {
+        expect(modulePath).to.be.a.string;
+        callArray.push((modulePath as string) + ' start');
+        const res = requireModule(modulePath);
+        callArray.push((modulePath as string) + ' end');
+        return res;
+      };
+    const resolver = createRequestResolver({ fs });
+    const { requireModule } = createBaseCjsModuleSystem({
+      readFileSync: (filePath) => fs.readFileSync(filePath, 'utf8'),
+      resolveFrom: (contextPath, request) => resolver(contextPath, request).resolvedFile,
+      wrapRequire: wrappedRequireCall,
+      dirname: fs.dirname,
+    });
+
+    requireModule(aFile);
+    expect(callArray).to.eql([aFile + ' start', bFile + ' start', bFile + ' end', aFile + ' end']);
   });
 });
