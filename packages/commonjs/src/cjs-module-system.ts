@@ -25,18 +25,21 @@ export interface IModuleSystemOptions {
    * @default createRequestResolver of `@file-services/resolve`
    */
   resolver?(contextPath: string, request: string, requestOrigin?: string): ReturnType<RequestResolver>;
+
+  wrapRequire?: (require: (modulePath: string | false) => unknown) => (modulePath: string | false) => unknown;
 }
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
   const { fs, globals } = options;
   const { dirname, readFileSync } = fs;
 
-  const { resolver = createRequestResolver({ fs }) } = options;
+  const { resolver = createRequestResolver({ fs }), wrapRequire } = options;
 
   return createBaseCjsModuleSystem({
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     dirname,
     globals,
+    wrapRequire,
   });
 }

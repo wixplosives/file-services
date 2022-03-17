@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
-import { createBaseCjsModuleSystem, createCjsModuleSystem } from '@file-services/commonjs';
-import { createRequestResolver } from '@file-services/resolve';
+import { createCjsModuleSystem } from '@file-services/commonjs';
 
 describe('commonjs module system', () => {
   const sampleString = 'named';
@@ -327,23 +326,27 @@ module.exports = global;`,
       [bFile]: 'module.exports = 5;',
     });
     const callArray: string[] = [];
-    const wrappedRequireCall =
-      (requireModule: (modulePath: string | false) => unknown) => (modulePath: string | false) => {
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      wrapRequire: (requireModule) => (modulePath) => {
         expect(modulePath).to.be.a.string;
-        callArray.push((modulePath as string) + ' start');
+        callArray.push(moduleEvaluationMode(modulePath, 'before'));
         const res = requireModule(modulePath);
-        callArray.push((modulePath as string) + ' end');
+        callArray.push(moduleEvaluationMode(modulePath, 'after'));
         return res;
-      };
-    const resolver = createRequestResolver({ fs });
-    const { requireModule } = createBaseCjsModuleSystem({
-      readFileSync: (filePath) => fs.readFileSync(filePath, 'utf8'),
-      resolveFrom: (contextPath, request) => resolver(contextPath, request).resolvedFile,
-      wrapRequire: wrappedRequireCall,
-      dirname: fs.dirname,
+      },
     });
 
     requireModule(aFile);
-    expect(callArray).to.eql([aFile + ' start', bFile + ' start', bFile + ' end', aFile + ' end']);
+    expect(callArray).to.eql([
+      moduleEvaluationMode(aFile, 'before'),
+      moduleEvaluationMode(bFile, 'before'),
+      moduleEvaluationMode(bFile, 'after'),
+      moduleEvaluationMode(aFile, 'after'),
+    ]);
   });
 });
+
+function moduleEvaluationMode(modulePath: string | boolean, mode: 'before' | 'after'): string {
+  return `${modulePath as string}.${mode}`;
+}
