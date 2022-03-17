@@ -28,7 +28,10 @@ export interface IBaseModuleSystemOptions {
    */
   resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
 
-  wrapRequire?: (require: (modulePath: string | false) => unknown) => (modulePath: string | false) => unknown;
+  wrapRequire?: (
+    require: (modulePath: string | false) => unknown,
+    loadedModules: Map<string, IModule>
+  ) => (modulePath: string | false) => unknown;
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
@@ -36,7 +39,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
 
   const loadedModules = new Map<string, IModule>();
 
-  const wrappedRequireModule = wrapRequire ? wrapRequire(requireModule) : requireModule;
+  const wrappedRequireModule = wrapRequire ? wrapRequire(requireModule, loadedModules) : requireModule;
 
   return {
     requireModule: wrappedRequireModule,

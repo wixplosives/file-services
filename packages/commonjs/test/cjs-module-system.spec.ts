@@ -345,6 +345,167 @@ module.exports = global;`,
       moduleEvaluationMode(aFile, 'after'),
     ]);
   });
+
+  it('allows accessing modules cache in require hook', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const cFile = '/c.js';
+    const dFile = '/d.js';
+    const fs = createMemoryFs({
+      [aFile]: `require('./b');`,
+      [bFile]: `require('./c');
+      require('./d');`,
+      [cFile]: `require('./d')`,
+      [dFile]: 'module.exports = 5;',
+    });
+    const callArray: string[] = [];
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      wrapRequire: (requireModule, loadedModules) => (modulePath) => {
+        expect(modulePath).to.be.a.string;
+        const loadedModule = loadedModules.get(modulePath as string);
+        if (!loadedModule) {
+          callArray.push(moduleEvaluationMode(modulePath, 'before'));
+          const res = requireModule(modulePath);
+          callArray.push(moduleEvaluationMode(modulePath, 'after'));
+          return res;
+        } else {
+          return loadedModule;
+        }
+      },
+    });
+
+    requireModule(aFile);
+    expect(callArray).to.eql([
+      moduleEvaluationMode(aFile, 'before'),
+      moduleEvaluationMode(bFile, 'before'),
+      moduleEvaluationMode(cFile, 'before'),
+      moduleEvaluationMode(dFile, 'before'),
+      moduleEvaluationMode(dFile, 'after'),
+      moduleEvaluationMode(cFile, 'after'),
+      moduleEvaluationMode(bFile, 'after'),
+      moduleEvaluationMode(aFile, 'after'),
+    ]);
+  });
+
+  it('iterates over entire evaluation flow', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const cFile = '/c.js';
+    const dFile = '/d.js';
+    const eFile = '/e.js';
+    const fs = createMemoryFs({
+      [aFile]: `require('./b');`,
+      [bFile]: `require('./c');
+      require('./e');`,
+      [cFile]: `require('./d')`,
+      [dFile]: `require('./e')`,
+      [eFile]: 'module.exports = 5;',
+    });
+    const callArray: string[] = [];
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      wrapRequire: (requireModule) => (modulePath) => {
+        expect(modulePath).to.be.a.string;
+        callArray.push(moduleEvaluationMode(modulePath, 'before'));
+        const res = requireModule(modulePath);
+        callArray.push(moduleEvaluationMode(modulePath, 'after'));
+        return res;
+      },
+    });
+
+    requireModule(aFile);
+    expect(callArray).to.eql([
+      moduleEvaluationMode(aFile, 'before'),
+      moduleEvaluationMode(bFile, 'before'),
+      moduleEvaluationMode(cFile, 'before'),
+      moduleEvaluationMode(dFile, 'before'),
+      moduleEvaluationMode(eFile, 'before'),
+      moduleEvaluationMode(eFile, 'after'),
+      moduleEvaluationMode(dFile, 'after'),
+      moduleEvaluationMode(cFile, 'after'),
+      moduleEvaluationMode(eFile, 'before'),
+      moduleEvaluationMode(eFile, 'after'),
+      moduleEvaluationMode(bFile, 'after'),
+      moduleEvaluationMode(aFile, 'after'),
+    ]);
+  });
+
+  it('allows re-evaluating a module', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const fs = createMemoryFs({
+      [aFile]: `const { increase } = require('./b');
+        module.exports = {
+          do: () => {
+            increase();
+            const { get } = require('./b');
+            return get();
+          }
+        }
+      `,
+      [bFile]: `
+      let counter = 0;
+      
+      module.exports = {
+        increase: () => ++counter,
+        get: () => counter
+      }`,
+    });
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      wrapRequire: (requireModule, loadedModules) => (modulePath) => {
+        if (!modulePath) {
+          return {};
+        }
+        if (loadedModules.has(modulePath)) {
+          loadedModules.delete(modulePath);
+        }
+        return requireModule(modulePath);
+      },
+    });
+
+    const aModule = requireModule(aFile) as { do(): number };
+    expect(aModule.do()).to.eq(0);
+  });
+
+  it('keeps references to the old module state', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const fs = createMemoryFs({
+      [aFile]: `const { get, increase } = require('./b');
+        module.exports = {
+          do: () => {
+            increase();
+            require('./b');
+            return get();
+          }
+        }
+      `,
+      [bFile]: `
+      let counter = 0;
+      
+      module.exports = {
+        increase: () => ++counter,
+        get: () => counter
+      }`,
+    });
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      wrapRequire: (requireModule, loadedModules) => (modulePath) => {
+        if (!modulePath) {
+          return {};
+        }
+        if (loadedModules.has(modulePath)) {
+          loadedModules.delete(modulePath);
+        }
+        return requireModule(modulePath);
+      },
+    });
+
+    const aModule = requireModule(aFile) as { do(): number };
+    expect(aModule.do()).to.eq(0);
+  });
 });
 
 function moduleEvaluationMode(modulePath: string | boolean, mode: 'before' | 'after'): string {
