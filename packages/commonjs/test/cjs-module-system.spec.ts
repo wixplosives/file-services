@@ -469,7 +469,7 @@ module.exports = global;`,
     expect(aModule.do()).to.eq(0);
   });
 
-  it('keeps references to the old module state', () => {
+  xit('keeps references to the old module state', () => {
     const aFile = '/a.js';
     const bFile = '/b.js';
     const fs = createMemoryFs({

@@ -1,6 +1,8 @@
 import type { IModule, ICommonJsModuleSystem } from './types.js';
 import { envGlobal } from './global-this.js';
 
+export type RequireCall = (modulePath: string | false) => unknown;
+
 export interface IBaseModuleSystemOptions {
   /**
    * Exposed to modules as globals.
@@ -28,18 +30,20 @@ export interface IBaseModuleSystemOptions {
    */
   resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
 
-  wrapRequire?: (
-    require: (modulePath: string | false) => unknown,
-    loadedModules: Map<string, IModule>
-  ) => (modulePath: string | false) => unknown;
+  wrapRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
 }
 
+const defaultWrapRequire =
+  (req: (modulePath: string | false) => unknown): ((path: string | false) => unknown) =>
+  (path) =>
+    req(path);
+
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals = {}, wrapRequire } = options;
+  const { resolveFrom, dirname, readFileSync, globals = {}, wrapRequire = defaultWrapRequire } = options;
 
   const loadedModules = new Map<string, IModule>();
 
-  const wrappedRequireModule = wrapRequire ? wrapRequire(requireModule, loadedModules) : requireModule;
+  const wrappedRequireModule = wrapRequire(requireModule, loadedModules);
 
   return {
     requireModule: wrappedRequireModule,

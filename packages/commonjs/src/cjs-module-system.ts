@@ -1,7 +1,7 @@
 import type { IFileSystemSync } from '@file-services/types';
 import { createRequestResolver, RequestResolver } from '@file-services/resolve';
 import type { ICommonJsModuleSystem, IModule } from './types.js';
-import { createBaseCjsModuleSystem } from './base-cjs-module-system.js';
+import { createBaseCjsModuleSystem, RequireCall } from './base-cjs-module-system.js';
 
 export interface IModuleSystemOptions {
   /**
@@ -26,10 +26,7 @@ export interface IModuleSystemOptions {
    */
   resolver?(contextPath: string, request: string, requestOrigin?: string): ReturnType<RequestResolver>;
 
-  wrapRequire?: (
-    require: (modulePath: string | false) => unknown,
-    loadedModules: Map<string, IModule>
-  ) => (modulePath: string | false) => unknown;
+  wrapRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
 }
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
