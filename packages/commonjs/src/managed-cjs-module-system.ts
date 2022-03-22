@@ -60,13 +60,11 @@ export const createManagedBaseCjsModuleSystem = ({
     wrapRequire: (requireCall, loadedModules) => {
       const wrappedRequireCall = wrapRequire(requireCall, loadedModules);
       return (modulePath) => {
-        if (modulePath) {
-          if (!moduleGraph.has(modulePath)) {
-            moduleGraph.set(modulePath, {
-              dependencies: [],
-              importers: [],
-            });
-          }
+        if (modulePath && !moduleGraph.has(modulePath)) {
+          moduleGraph.set(modulePath, {
+            dependencies: [],
+            importers: [],
+          });
         }
         return wrappedRequireCall(modulePath);
       };

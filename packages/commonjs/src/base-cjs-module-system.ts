@@ -33,17 +33,12 @@ export interface IBaseModuleSystemOptions {
   wrapRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
 }
 
-const defaultWrapRequire =
-  (req: (modulePath: string | false) => unknown): ((path: string | false) => unknown) =>
-  (path) =>
-    req(path);
-
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals = {}, wrapRequire = defaultWrapRequire } = options;
+  const { resolveFrom, dirname, readFileSync, globals = {}, wrapRequire } = options;
 
   const loadedModules = new Map<string, IModule>();
 
-  const wrappedRequireModule = wrapRequire(requireModule, loadedModules);
+  const wrappedRequireModule = wrapRequire ? wrapRequire(requireModule, loadedModules) : requireModule;
 
   return {
     requireModule: wrappedRequireModule,
