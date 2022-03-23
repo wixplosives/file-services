@@ -228,7 +228,12 @@ module.exports = global;`,
 
     const { requireModule, requireFrom, loadedModules } = createCjsModuleSystem({ fs });
 
-    loadedModules.set('some-package', { id: 'some-package', filename: 'some-package', exports: sampleObject });
+    loadedModules.set('some-package', {
+      id: 'some-package',
+      filename: 'some-package',
+      exports: sampleObject,
+      children: [],
+    });
 
     expect(requireModule('some-package')).to.eql(sampleObject);
     expect(requireFrom('/', 'some-package')).to.eql(sampleObject);

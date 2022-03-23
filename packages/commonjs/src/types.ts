@@ -45,4 +45,9 @@ export interface IModule {
    * Exported values of module.
    */
   exports: unknown;
+
+  /**
+   * Modules evaluated as a result of the current's module evaluation
+   */
+  children: IModule[];
 }

@@ -75,7 +75,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       return existingModule.exports;
     }
 
-    const newModule: IModule = { exports: {}, filename: filePath, id: filePath };
+    const newModule: IModule = { exports: {}, filename: filePath, id: filePath, children: [] };
 
     const contextPath = dirname(filePath);
     const fileContents = readFileSync(filePath);
@@ -85,7 +85,18 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       loadedModules.set(filePath, newModule);
       return newModule.exports;
     }
-    const requireFromContext = (request: string) => requireFrom(contextPath, request, filePath);
+    const requireFromContext = (request: string) => {
+      const modulePath = resolveThrow(contextPath, request, filePath);
+      const moduleExports = requireModule(modulePath);
+      if (modulePath) {
+        const loadedModule = loadedModules.get(modulePath);
+        if (!loadedModule) {
+          throw new Error(`request ${request} failed to evaluate from ${filePath}`);
+        }
+        newModule.children.push(loadedModule);
+      }
+      return moduleExports;
+    };
     requireFromContext.resolve = (request: string) => resolveThrow(contextPath, request, filePath);
 
     const moduleBuiltins = {

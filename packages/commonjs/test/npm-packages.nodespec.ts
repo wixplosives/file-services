@@ -35,8 +35,8 @@ describe('commonjs module system - integration with existing npm packages', func
 
   it('evaluates postcss successfully', () => {
     const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
-    loadedModules.set('url', { filename: 'url', id: 'url', exports: url });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
+    loadedModules.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
     const postcss = requireFrom(__dirname, 'postcss') as typeof import('postcss');
 
     expect(postcss.parse).to.be.instanceOf(Function);
@@ -44,8 +44,8 @@ describe('commonjs module system - integration with existing npm packages', func
 
   it('evaluates typescript successfully', () => {
     const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
-    loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
+    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
+    loadedModules.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
 
     const ts = requireFrom(__dirname, 'typescript') as typeof import('typescript');
 
@@ -57,13 +57,13 @@ describe('commonjs module system - integration with existing npm packages', func
       fs,
       resolver: createRequestResolver({ fs, target: 'node' }),
     });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
-    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
-    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
-    loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
-    loadedModules.set('tty', { filename: 'tty', id: 'tty', exports: tty });
-    loadedModules.set('util', { filename: 'util', id: 'util', exports: util });
-    loadedModules.set('url', { filename: 'url', id: 'url', exports: url });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
+    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
+    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
+    loadedModules.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
+    loadedModules.set('tty', { filename: 'tty', id: 'tty', exports: tty, children: [] });
+    loadedModules.set('util', { filename: 'util', id: 'util', exports: util, children: [] });
+    loadedModules.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
     const mocha = requireFrom(__dirname, 'mocha') as typeof import('mocha');
 
     expect(mocha.reporters).to.be.an('object');
@@ -71,13 +71,13 @@ describe('commonjs module system - integration with existing npm packages', func
 
   it('evaluates sass successfully', () => {
     const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path });
-    loadedModules.set('url', { filename: 'url', id: 'url', exports: url });
-    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream });
-    loadedModules.set('os', { filename: 'os', id: 'os', exports: os });
-    loadedModules.set('readline', { filename: 'readline', id: 'readline', exports: readline });
-    loadedModules.set('util', { filename: 'util', id: 'util', exports: util });
+    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
+    loadedModules.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
+    loadedModules.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
+    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
+    loadedModules.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
+    loadedModules.set('readline', { filename: 'readline', id: 'readline', exports: readline, children: [] });
+    loadedModules.set('util', { filename: 'util', id: 'util', exports: util, children: [] });
 
     const sass = requireFrom(__dirname, 'sass') as typeof import('sass');
 

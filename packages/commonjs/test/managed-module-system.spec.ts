@@ -121,9 +121,9 @@ describe('managed module system', () => {
       },
     });
 
-    moduleSystem.requireModule(aFile);
+    moduleSystem.requireModule(bFile);
     expect(counter).to.eq(1);
-    moduleSystem.invalidateModule(bFile);
+    moduleSystem.invalidateModule(aFile);
     expect(counter).to.eq(3);
   });
 });

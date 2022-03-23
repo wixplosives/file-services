@@ -1,6 +1,6 @@
 import type { IModuleSystemOptions } from './cjs-module-system';
 import { IBaseModuleSystemOptions, createBaseCjsModuleSystem } from './base-cjs-module-system';
-import type { ICommonJsModuleSystem } from './types';
+import type { ICommonJsModuleSystem, IModule } from './types';
 import { createRequestResolver } from '@file-services/resolve';
 
 export interface IManagedCommonJsModuleSystem extends ICommonJsModuleSystem {
@@ -8,131 +8,54 @@ export interface IManagedCommonJsModuleSystem extends ICommonJsModuleSystem {
 }
 
 export const createManagedCjsModuleSystem = (options: IModuleSystemOptions) => {
-  const { fs, globals } = options;
+  const { fs, resolver = createRequestResolver({ fs }) } = options;
   const { dirname, readFileSync } = fs;
-
-  const { resolver = createRequestResolver({ fs }), wrapRequire } = options;
 
   return createManagedBaseCjsModuleSystem({
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     dirname,
-    globals,
-    wrapRequire,
+    ...options,
   });
 };
 
-export const createManagedBaseCjsModuleSystem = ({
-  dirname,
-  readFileSync,
-  resolveFrom,
-  globals,
-  wrapRequire = (req) => (path) => req(path),
-}: IBaseModuleSystemOptions): IManagedCommonJsModuleSystem => {
-  const moduleGraph = new Map<
-    string,
-    {
-      dependencies: string[];
-      importers: string[];
-    }
-  >();
+export const createManagedBaseCjsModuleSystem = (options: IBaseModuleSystemOptions): IManagedCommonJsModuleSystem => {
+  const moduleSystem = createBaseCjsModuleSystem(options);
 
-  const moduleSystem = createBaseCjsModuleSystem({
-    resolveFrom: (contextPath, request, origin) => {
-      const resolvedFile = resolveFrom(contextPath, request);
-      if (origin && resolvedFile) {
-        moduleGraph.get(origin)?.dependencies.push(resolvedFile);
-        let graphNode = moduleGraph.get(resolvedFile);
-        if (!graphNode) {
-          graphNode = {
-            dependencies: [],
-            importers: [],
-          };
-          moduleGraph.set(resolvedFile, graphNode);
-        }
-        graphNode.importers.push(origin);
-      }
-
-      return resolvedFile;
-    },
-    dirname,
-    readFileSync,
-    wrapRequire: (requireCall, loadedModules) => {
-      const wrappedRequireCall = wrapRequire(requireCall, loadedModules);
-      return (modulePath) => {
-        if (modulePath && !moduleGraph.has(modulePath)) {
-          moduleGraph.set(modulePath, {
-            dependencies: [],
-            importers: [],
-          });
-        }
-        return wrappedRequireCall(modulePath);
-      };
-    },
-    globals,
-  });
-
-  const { resolveFrom: msResolveFrom, requireModule: msRequireModule, loadedModules } = moduleSystem;
-
-  const populateModuleGraph = (modulePath: string, visited = new Set<string>()) => {
-    if (visited.has(modulePath)) {
-      return;
-    }
-    visited.add(modulePath);
-    let moduleNode = moduleGraph.get(modulePath);
-    if (!moduleNode) {
-      moduleNode = {
-        dependencies: [],
-        importers: [],
-      };
-      moduleGraph.set(modulePath, moduleNode);
-    }
-    for (const [moduleId, node] of moduleGraph) {
-      if (node.dependencies.includes(modulePath)) {
-        moduleNode.importers.push(moduleId);
-        populateModuleGraph(moduleId, visited);
-      }
-    }
-  };
-
-  const requireModule = (modulePath: string | false) => {
-    const requiredModule = msRequireModule(modulePath);
-    if (modulePath) {
-      populateModuleGraph(modulePath);
-    }
-    return requiredModule;
-  };
-
-  const requireFrom: ICommonJsModuleSystem['requireFrom'] = (contextPath, request) => {
-    const resolvedRequest = msResolveFrom(contextPath, request);
-    if (resolvedRequest === undefined) {
-      throw new Error(`Cannot resolve "${request}" in ${contextPath}`);
-    }
-
-    return requireModule(resolvedRequest);
-  };
-
-  const invalidateModule = (modulePath: string | false, visited = new Set<string>()) => {
+  const invalidateModule = (modulePath: string | false) => {
     if (!modulePath) {
       return {};
     }
-    if (visited.has(modulePath)) {
-      return loadedModules.get(modulePath);
+
+    for (const { filename } of getModulesTree(modulePath, moduleSystem.loadedModules)) {
+      moduleSystem.loadedModules.delete(filename);
+      moduleSystem.requireModule(filename);
     }
 
-    visited.add(modulePath);
-
-    const { importers } = moduleGraph.get(modulePath) ?? { importers: [] };
-
-    loadedModules.delete(modulePath);
-    moduleGraph.delete(modulePath);
-
-    const moduleExports = requireModule(modulePath);
-    for (const importer of importers) {
-      invalidateModule(importer, visited);
-    }
-    return moduleExports;
+    return moduleSystem.loadedModules.get(modulePath);
   };
 
-  return { ...moduleSystem, requireFrom, requireModule, invalidateModule };
+  return { ...moduleSystem, invalidateModule };
 };
+
+function* getModulesTree(entryModulePath: string, moduleCache: Map<string, IModule>): Generator<IModule> {
+  const entryModule = moduleCache.get(entryModulePath);
+  if (!entryModule) {
+    return;
+  }
+  const visited = new Set<string>();
+  const importingModules: Array<IModule> = [entryModule];
+  while (importingModules.length) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const importingModule = importingModules.shift()!;
+    if (!visited.has(importingModule.filename)) {
+      visited.add(importingModule.filename);
+      yield importingModule;
+      for (const module of moduleCache.values()) {
+        if (module.children.includes(importingModule)) {
+          importingModules.push(module);
+        }
+      }
+    }
+  }
+}
