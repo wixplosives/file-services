@@ -30,15 +30,15 @@ export interface IBaseModuleSystemOptions {
    */
   resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
 
-  wrapRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
+  aroundRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
 }
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals = {}, wrapRequire } = options;
+  const { resolveFrom, dirname, readFileSync, globals = {}, aroundRequire } = options;
 
   const loadedModules = new Map<string, IModule>();
 
-  const wrappedRequireModule = wrapRequire ? wrapRequire(requireModule, loadedModules) : requireModule;
+  const wrappedRequireModule = aroundRequire ? aroundRequire(requireModule, loadedModules) : requireModule;
 
   return {
     requireModule: wrappedRequireModule,
@@ -86,14 +86,24 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       return newModule.exports;
     }
     const requireFromContext = (request: string) => {
+      const loadedModule = loadedModules.get(request);
+      if (loadedModule) {
+        if (!newModule.children.includes(loadedModule)) {
+          newModule.children.push(loadedModule);
+        }
+        return loadedModule.exports;
+      }
+
       const modulePath = resolveThrow(contextPath, request, filePath);
-      const moduleExports = requireModule(modulePath);
+      const moduleExports = wrappedRequireModule(modulePath);
       if (modulePath) {
         const loadedModule = loadedModules.get(modulePath);
         if (!loadedModule) {
           throw new Error(`request ${request} failed to evaluate from ${filePath}`);
         }
-        newModule.children.push(loadedModule);
+        if (!newModule.children.includes(loadedModule)) {
+          newModule.children.push(loadedModule);
+        }
       }
       return moduleExports;
     };

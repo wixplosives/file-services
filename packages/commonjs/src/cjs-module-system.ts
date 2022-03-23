@@ -26,20 +26,20 @@ export interface IModuleSystemOptions {
    */
   resolver?(contextPath: string, request: string, requestOrigin?: string): ReturnType<RequestResolver>;
 
-  wrapRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
+  aroundRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
 }
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
   const { fs, globals } = options;
   const { dirname, readFileSync } = fs;
 
-  const { resolver = createRequestResolver({ fs }), wrapRequire } = options;
+  const { resolver = createRequestResolver({ fs }), aroundRequire } = options;
 
   return createBaseCjsModuleSystem({
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     dirname,
     globals,
-    wrapRequire,
+    aroundRequire,
   });
 }

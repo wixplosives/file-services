@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
-import { createManagedCjsModuleSystem, createManagedBaseCjsModuleSystem } from '@file-services/commonjs';
+import { invalidateModule, createCjsModuleSystem } from '@file-services/commonjs';
 
 describe('managed module system', () => {
   it('invalidates a module', () => {
@@ -15,7 +15,7 @@ describe('managed module system', () => {
             `,
     });
 
-    const moduleSystem = createManagedCjsModuleSystem({
+    const moduleSystem = createCjsModuleSystem({
       fs,
     });
 
@@ -26,7 +26,7 @@ describe('managed module system', () => {
 
     const module = moduleSystem.requireModule(aFile) as AModuleType;
     module.increment();
-    moduleSystem.invalidateModule(aFile);
+    invalidateModule(aFile, moduleSystem.loadedModules);
     const reEvaluatedModule = moduleSystem.requireModule(aFile) as AModuleType;
     expect(reEvaluatedModule.get()).to.eq(0);
   });
@@ -48,7 +48,7 @@ describe('managed module system', () => {
         `,
     });
 
-    const moduleSystem = createManagedCjsModuleSystem({
+    const moduleSystem = createCjsModuleSystem({
       fs,
     });
 
@@ -59,7 +59,7 @@ describe('managed module system', () => {
 
     const module = moduleSystem.requireModule(bFile) as ModuleType;
     module.increment();
-    moduleSystem.invalidateModule(aFile);
+    invalidateModule(aFile, moduleSystem.loadedModules);
     const reEvaluatedModule = moduleSystem.requireModule(bFile) as ModuleType;
     expect(reEvaluatedModule.get()).to.eq(0);
   });
@@ -70,38 +70,31 @@ describe('managed module system', () => {
     const cFile = '/c.js';
     const dFile = '/d.js';
     const eFile = '/e.js';
-    const evalCounter: Record<string, number> = {};
-    const countEval = (modulePath: string) => {
-      const counterValue = evalCounter[modulePath] ?? 0;
-      evalCounter[modulePath] = counterValue + 1;
-    };
+    const fFile = '/f.js';
+
     const fs = createMemoryFs({
-      [aFile]: `require('./b');`,
+      [aFile]: `require('./b');
+      require('./f');`,
       [bFile]: `require('./c');`,
       [cFile]: `require('./d');`,
       [dFile]: `require('./e');`,
       [eFile]: `module.exports = 5;`,
+      [fFile]: `require('./c');`,
     });
 
-    const moduleSystem = createManagedBaseCjsModuleSystem({
-      globals: {
-        countEval,
-      },
-      dirname: fs.dirname,
-      readFileSync: (filePath) => `${fs.readFileSync(filePath, 'utf8')}
-      countEval(__filename);`,
-      resolveFrom: (_, r) => r.slice(1) + '.js',
+    const moduleSystem = createCjsModuleSystem({
+      fs,
     });
 
     moduleSystem.requireModule(aFile);
-    Object.entries(evalCounter).map(([filePath, counter]) => expect(counter, `${filePath} wasn't evaluated`).to.eq(1));
 
-    moduleSystem.invalidateModule(cFile);
-    expect(evalCounter[cFile], `file ${cFile} wasn't evaluated twice`).to.eq(2);
-    expect(evalCounter[bFile], `file ${bFile} wasn't evaluated twice`).to.eq(2);
-    expect(evalCounter[aFile], `file ${aFile} wasn't evaluated twice`).to.eq(2);
-    expect(evalCounter[dFile], `file ${dFile} was evaluated more then once`).to.eq(1);
-    expect(evalCounter[eFile], `file ${eFile} was evaluated more then once`).to.eq(1);
+    invalidateModule(cFile, moduleSystem.loadedModules);
+    expect(moduleSystem.loadedModules.get(cFile)).to.be.undefined;
+    expect(moduleSystem.loadedModules.get(bFile)).to.be.undefined;
+    expect(moduleSystem.loadedModules.get(aFile)).to.be.undefined;
+    expect(moduleSystem.loadedModules.get(fFile)).to.be.undefined;
+    expect(moduleSystem.loadedModules.get(eFile)).to.not.be.undefined;
+    expect(moduleSystem.loadedModules.get(dFile)).to.not.be.undefined;
   });
 
   it('allows wrapping the require call', () => {
@@ -113,17 +106,18 @@ describe('managed module system', () => {
     });
     let counter = 0;
 
-    const moduleSystem = createManagedCjsModuleSystem({
+    const moduleSystem = createCjsModuleSystem({
       fs,
-      wrapRequire: (require) => (modulePath) => {
+      aroundRequire: (require) => (modulePath) => {
         counter++;
         return require(modulePath);
       },
     });
 
-    moduleSystem.requireModule(bFile);
+    moduleSystem.requireModule(aFile);
     expect(counter).to.eq(1);
-    moduleSystem.invalidateModule(aFile);
+    invalidateModule(aFile, moduleSystem.loadedModules);
+    moduleSystem.requireModule(bFile);
     expect(counter).to.eq(3);
   });
 });

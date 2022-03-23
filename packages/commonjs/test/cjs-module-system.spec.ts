@@ -333,7 +333,7 @@ module.exports = global;`,
     const callArray: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      wrapRequire: (requireModule) => (modulePath) => {
+      aroundRequire: (requireModule) => (modulePath) => {
         expect(modulePath).to.be.a.string;
         callArray.push(moduleEvaluationMode(modulePath, 'before'));
         const res = requireModule(modulePath);
@@ -366,7 +366,7 @@ module.exports = global;`,
     const callArray: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      wrapRequire: (requireModule, loadedModules) => (modulePath) => {
+      aroundRequire: (requireModule, loadedModules) => (modulePath) => {
         expect(modulePath).to.be.a.string;
         const loadedModule = loadedModules.get(modulePath as string);
         if (!loadedModule) {
@@ -410,7 +410,7 @@ module.exports = global;`,
     const callArray: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      wrapRequire: (requireModule) => (modulePath) => {
+      aroundRequire: (requireModule) => (modulePath) => {
         expect(modulePath).to.be.a.string;
         callArray.push(moduleEvaluationMode(modulePath, 'before'));
         const res = requireModule(modulePath);
