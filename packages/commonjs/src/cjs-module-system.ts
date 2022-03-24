@@ -1,6 +1,6 @@
 import type { IFileSystemSync } from '@file-services/types';
 import { createRequestResolver, RequestResolver } from '@file-services/resolve';
-import type { ICommonJsModuleSystem } from './types.js';
+import type { ICommonJsModuleSystem, LoadModule } from './types.js';
 import { createBaseCjsModuleSystem } from './base-cjs-module-system.js';
 
 export interface IModuleSystemOptions {
@@ -25,18 +25,24 @@ export interface IModuleSystemOptions {
    * @default createRequestResolver of `@file-services/resolve`
    */
   resolver?(contextPath: string, request: string, requestOrigin?: string): ReturnType<RequestResolver>;
+
+  /**
+   * Hook into file module evaluation.
+   */
+  loadModuleHook?: (loadModule: LoadModule) => LoadModule;
 }
 
 export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsModuleSystem {
   const { fs, globals } = options;
   const { dirname, readFileSync } = fs;
 
-  const { resolver = createRequestResolver({ fs }) } = options;
+  const { resolver = createRequestResolver({ fs }), loadModuleHook } = options;
 
   return createBaseCjsModuleSystem({
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
     readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
     dirname,
     globals,
+    loadModuleHook,
   });
 }

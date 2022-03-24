@@ -228,7 +228,12 @@ module.exports = global;`,
 
     const { requireModule, requireFrom, loadedModules } = createCjsModuleSystem({ fs });
 
-    loadedModules.set('some-package', { id: 'some-package', filename: 'some-package', exports: sampleObject });
+    loadedModules.set('some-package', {
+      id: 'some-package',
+      filename: 'some-package',
+      exports: sampleObject,
+      children: [],
+    });
 
     expect(requireModule('some-package')).to.eql(sampleObject);
     expect(requireFrom('/', 'some-package')).to.eql(sampleObject);
@@ -316,5 +321,52 @@ module.exports = global;`,
     fs.writeFileSync(sampleJsonPath, `{ "name": "test" }`);
 
     expect(requireModule(sampleJsonPath)).to.eql({ name: 'test' });
+  });
+
+  it('allows registering to evaluation hooks', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const fs = createMemoryFs({
+      [aFile]: `require('./b');`,
+      [bFile]: 'module.exports = 5;',
+    });
+    const evaluatedFilePaths: string[] = [];
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      loadModuleHook: (loadModule) => (modulePath) => {
+        evaluatedFilePaths.push(modulePath);
+        return loadModule(modulePath);
+      },
+    });
+
+    requireModule(aFile);
+    expect(evaluatedFilePaths).to.eql([aFile, bFile]);
+  });
+
+  it('iterates over entire evaluation flow', () => {
+    const aFile = '/a.js';
+    const bFile = '/b.js';
+    const cFile = '/c.js';
+    const dFile = '/d.js';
+    const eFile = '/e.js';
+    const fs = createMemoryFs({
+      [aFile]: `require('./b');`,
+      [bFile]: `require('./c');
+      require('./e');`,
+      [cFile]: `require('./d');`,
+      [dFile]: `require('./e')`,
+      [eFile]: 'module.exports = 5;',
+    });
+    const evaluatedFilePaths: string[] = [];
+    const { requireModule } = createCjsModuleSystem({
+      fs,
+      loadModuleHook: (requireModule) => (modulePath) => {
+        evaluatedFilePaths.push(modulePath);
+        return requireModule(modulePath);
+      },
+    });
+
+    requireModule(aFile);
+    expect(evaluatedFilePaths).to.eql([aFile, bFile, cFile, dFile, eFile]);
   });
 });

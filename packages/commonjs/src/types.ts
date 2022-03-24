@@ -45,4 +45,11 @@ export interface IModule {
    * Exported values of module.
    */
   exports: unknown;
+
+  /**
+   * Modules requested by this module via `require`
+   */
+  children: IModule[];
 }
+
+export type LoadModule = (modulePath: string) => IModule;
