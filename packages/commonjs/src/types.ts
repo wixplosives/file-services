@@ -47,7 +47,7 @@ export interface IModule {
   exports: unknown;
 
   /**
-   * Modules evaluated as a result of the current's module evaluation
+   * Modules requested by this module via `require`
    */
   children: IModule[];
 }

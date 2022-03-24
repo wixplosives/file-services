@@ -2,6 +2,11 @@ import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
 import { invalidateModule, createCjsModuleSystem } from '@file-services/commonjs';
 
+type ModuleShape = {
+  get(): number;
+  increment(): void;
+};
+
 describe('invalidateModule', () => {
   it('invalidates a module', () => {
     const aFile = '/a.js';
@@ -19,15 +24,10 @@ describe('invalidateModule', () => {
       fs,
     });
 
-    type AModuleType = {
-      get(): number;
-      increment(): void;
-    };
-
-    const module = moduleSystem.requireModule(aFile) as AModuleType;
+    const module = moduleSystem.requireModule(aFile) as ModuleShape;
     module.increment();
     invalidateModule(aFile, moduleSystem.loadedModules);
-    const reEvaluatedModule = moduleSystem.requireModule(aFile) as AModuleType;
+    const reEvaluatedModule = moduleSystem.requireModule(aFile) as ModuleShape;
     expect(reEvaluatedModule.get()).to.eq(0);
   });
 
@@ -52,15 +52,10 @@ describe('invalidateModule', () => {
       fs,
     });
 
-    type ModuleType = {
-      get(): number;
-      increment(): void;
-    };
-
-    const module = moduleSystem.requireModule(bFile) as ModuleType;
+    const module = moduleSystem.requireModule(bFile) as ModuleShape;
     module.increment();
     invalidateModule(aFile, moduleSystem.loadedModules);
-    const reEvaluatedModule = moduleSystem.requireModule(bFile) as ModuleType;
+    const reEvaluatedModule = moduleSystem.requireModule(bFile) as ModuleShape;
     expect(reEvaluatedModule.get()).to.eq(0);
   });
 
@@ -89,12 +84,14 @@ describe('invalidateModule', () => {
     moduleSystem.requireModule(aFile);
 
     invalidateModule(cFile, moduleSystem.loadedModules);
-    expect(moduleSystem.loadedModules.get(cFile)).to.be.undefined;
-    expect(moduleSystem.loadedModules.get(bFile)).to.be.undefined;
-    expect(moduleSystem.loadedModules.get(aFile)).to.be.undefined;
-    expect(moduleSystem.loadedModules.get(fFile)).to.be.undefined;
-    expect(moduleSystem.loadedModules.get(eFile)).to.not.be.undefined;
-    expect(moduleSystem.loadedModules.get(dFile)).to.not.be.undefined;
+    const moduleSystemKeys = [...moduleSystem.loadedModules.keys()];
+
+    expect(moduleSystemKeys).to.not.include(cFile);
+    expect(moduleSystemKeys).to.not.include(bFile);
+    expect(moduleSystemKeys).to.not.include(aFile);
+    expect(moduleSystemKeys).to.not.include(fFile);
+    expect(moduleSystemKeys).to.include(dFile);
+    expect(moduleSystemKeys).to.include(eFile);
   });
 
   it('allows wrapping the require call', () => {
@@ -104,20 +101,20 @@ describe('invalidateModule', () => {
       [aFile]: `module.exports = 5;`,
       [bFile]: `module.exports = require('./a');`,
     });
-    let counter = 0;
+    const evaluatedModules: string[] = [];
 
     const moduleSystem = createCjsModuleSystem({
       fs,
       loadModuleHook: (require) => (modulePath) => {
-        counter++;
+        evaluatedModules.push(modulePath);
         return require(modulePath);
       },
     });
 
     moduleSystem.requireModule(aFile);
-    expect(counter).to.eq(1);
+    expect(evaluatedModules).to.eql([aFile]);
     invalidateModule(aFile, moduleSystem.loadedModules);
     moduleSystem.requireModule(bFile);
-    expect(counter).to.eq(3);
+    expect(evaluatedModules).to.eql([aFile, bFile, aFile]);
   });
 });

@@ -330,17 +330,17 @@ module.exports = global;`,
       [aFile]: `require('./b');`,
       [bFile]: 'module.exports = 5;',
     });
-    const callArray: string[] = [];
+    const evaluatedFilePaths: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      loadModuleHook: (requireModule) => (modulePath) => {
-        callArray.push(modulePath);
-        return requireModule(modulePath);
+      loadModuleHook: (loadModule) => (modulePath) => {
+        evaluatedFilePaths.push(modulePath);
+        return loadModule(modulePath);
       },
     });
 
     requireModule(aFile);
-    expect(callArray).to.eql([aFile, bFile]);
+    expect(evaluatedFilePaths).to.eql([aFile, bFile]);
   });
 
   it('iterates over entire evaluation flow', () => {
@@ -353,20 +353,20 @@ module.exports = global;`,
       [aFile]: `require('./b');`,
       [bFile]: `require('./c');
       require('./e');`,
-      [cFile]: `require('./d')`,
+      [cFile]: `require('./d');`,
       [dFile]: `require('./e')`,
       [eFile]: 'module.exports = 5;',
     });
-    const callArray: string[] = [];
+    const evaluatedFilePaths: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
       loadModuleHook: (requireModule) => (modulePath) => {
-        callArray.push(modulePath);
+        evaluatedFilePaths.push(modulePath);
         return requireModule(modulePath);
       },
     });
 
     requireModule(aFile);
-    expect(callArray).to.eql([aFile, bFile, cFile, dFile, eFile]);
+    expect(evaluatedFilePaths).to.eql([aFile, bFile, cFile, dFile, eFile]);
   });
 });
