@@ -343,31 +343,6 @@ module.exports = global;`,
     expect(callArray).to.eql([aFile, bFile]);
   });
 
-  it('allows accessing modules cache in require hook', () => {
-    const aFile = '/a.js';
-    const bFile = '/b.js';
-    const cFile = '/c.js';
-    const dFile = '/d.js';
-    const fs = createMemoryFs({
-      [aFile]: `require('./b');`,
-      [bFile]: `require('./c');
-      require('./d');`,
-      [cFile]: `require('./d')`,
-      [dFile]: 'module.exports = 5;',
-    });
-    const callArray: string[] = [];
-    const { requireModule } = createCjsModuleSystem({
-      fs,
-      loadModuleHook: (requireModule) => (modulePath) => {
-        callArray.push(modulePath);
-        return requireModule(modulePath);
-      },
-    });
-
-    requireModule(aFile);
-    expect(callArray).to.eql([aFile, bFile, cFile, dFile]);
-  });
-
   it('iterates over entire evaluation flow', () => {
     const aFile = '/a.js';
     const bFile = '/b.js';

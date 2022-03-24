@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { createMemoryFs } from '@file-services/memory';
 import { invalidateModule, createCjsModuleSystem } from '@file-services/commonjs';
 
-describe('managed module system', () => {
+describe('invalidateModule', () => {
   it('invalidates a module', () => {
     const aFile = '/a.js';
     const fs = createMemoryFs({
