@@ -4,10 +4,6 @@ import type { IModule } from './types.js';
  * Removes module and it's deep importers from the module cache
  */
 export const invalidateModule = (modulePath: string, requireCache: Map<string, IModule>): void => {
-  if (!modulePath) {
-    return;
-  }
-
   for (const { filename } of getModulesTree(modulePath, requireCache)) {
     requireCache.delete(filename);
   }
