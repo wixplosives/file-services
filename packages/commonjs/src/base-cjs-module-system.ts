@@ -84,7 +84,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     const fileContents = readFileSync(filePath);
 
     if (filePath.endsWith('.json')) {
-      newModule.exports = JSON.parse(fileContents) as unknown;
+      newModule.exports = JSON.parse(fileContents);
       loadedModules.set(filePath, newModule);
       return newModule;
     }
