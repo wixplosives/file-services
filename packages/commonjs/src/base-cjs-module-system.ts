@@ -33,7 +33,14 @@ export interface IBaseModuleSystemOptions {
   loadModuleHook?: (loadModule: LoadModule) => LoadModule;
 }
 
-const falseModule = { exports: {}, filename: '', id: '', children: [] };
+const falseModule = {
+  get exports() {
+    return {};
+  },
+  filename: '',
+  id: '',
+  children: [],
+};
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
   const { resolveFrom, dirname, readFileSync, globals = {}, loadModuleHook } = options;
@@ -90,10 +97,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     }
     const localRequire = (request: string) => {
       const childModule = loadFrom(contextPath, request, filePath);
-      if (childModule === falseModule) {
-        return {};
-      }
-      if (!newModule.children.includes(childModule)) {
+      if (childModule !== falseModule && !newModule.children.includes(childModule)) {
         newModule.children.push(childModule);
       }
       return childModule.exports;
