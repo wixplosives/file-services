@@ -1,7 +1,5 @@
-import type { IModule, ICommonJsModuleSystem } from './types.js';
+import type { IModule, ICommonJsModuleSystem, LoadModule } from './types.js';
 import { envGlobal } from './global-this.js';
-
-export type RequireCall = (modulePath: string | false) => unknown;
 
 export interface IBaseModuleSystemOptions {
   /**
@@ -29,20 +27,31 @@ export interface IBaseModuleSystemOptions {
    * `undefined` - couldn't resolve request.
    */
   resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
-
-  aroundRequire?: (require: RequireCall, loadedModules: Map<string, IModule>) => RequireCall;
+  /**
+   * Hook into file module evaluation.
+   */
+  loadModuleHook?: (loadModule: LoadModule) => LoadModule;
 }
 
-export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals = {}, aroundRequire } = options;
+const falseModule = { exports: {}, filename: '', id: '', children: [] };
 
+export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
+  const { resolveFrom, dirname, readFileSync, globals = {}, loadModuleHook } = options;
   const loadedModules = new Map<string, IModule>();
 
-  const wrappedRequireModule = aroundRequire ? aroundRequire(requireModule, loadedModules) : requireModule;
+  const load = loadModuleHook ? loadModuleHook(loadModule) : loadModule;
 
   return {
-    requireModule: wrappedRequireModule,
-    requireFrom,
+    requireModule(filePath) {
+      if (filePath === false) {
+        return {};
+      }
+      const fileModule = loadedModules.get(filePath) ?? load(filePath);
+      return fileModule.exports;
+    },
+    requireFrom(contextPath, request) {
+      return loadFrom(contextPath, request).exports;
+    },
     resolveFrom,
     loadedModules,
     globals,
@@ -56,25 +65,19 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     return resolvedRequest;
   }
 
-  function requireFrom(contextPath: string, request: string, requestOrigin?: string): unknown {
-    const existingModule = loadedModules.get(request);
-    if (existingModule) {
-      return existingModule.exports;
+  function loadFrom(contextPath: string, request: string, requestOrigin?: string): IModule {
+    const existingRequestModule = loadedModules.get(request);
+    if (existingRequestModule) {
+      return existingRequestModule;
     }
-
-    return wrappedRequireModule(resolveThrow(contextPath, request, requestOrigin));
+    const resolvedPath = resolveThrow(contextPath, request, requestOrigin);
+    if (resolvedPath === false) {
+      return falseModule;
+    }
+    return loadedModules.get(resolvedPath) ?? load(resolvedPath);
   }
 
-  function requireModule(filePath: string | false): unknown {
-    if (filePath === false) {
-      return {};
-    }
-
-    const existingModule = loadedModules.get(filePath);
-    if (existingModule) {
-      return existingModule.exports;
-    }
-
+  function loadModule(filePath: string): IModule {
     const newModule: IModule = { exports: {}, filename: filePath, id: filePath, children: [] };
 
     const contextPath = dirname(filePath);
@@ -83,38 +86,26 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     if (filePath.endsWith('.json')) {
       newModule.exports = JSON.parse(fileContents) as unknown;
       loadedModules.set(filePath, newModule);
-      return newModule.exports;
+      return newModule;
     }
-    const requireFromContext = (request: string) => {
-      const loadedModule = loadedModules.get(request);
-      if (loadedModule) {
-        if (!newModule.children.includes(loadedModule)) {
-          newModule.children.push(loadedModule);
-        }
-        return loadedModule.exports;
+    const localRequire = (request: string) => {
+      const childModule = loadFrom(contextPath, request, filePath);
+      if (childModule === falseModule) {
+        return {};
       }
-
-      const modulePath = resolveThrow(contextPath, request, filePath);
-      const moduleExports = wrappedRequireModule(modulePath);
-      if (modulePath) {
-        const loadedModule = loadedModules.get(modulePath);
-        if (!loadedModule) {
-          throw new Error(`request ${request} failed to evaluate from ${filePath}`);
-        }
-        if (!newModule.children.includes(loadedModule)) {
-          newModule.children.push(loadedModule);
-        }
+      if (!newModule.children.includes(childModule)) {
+        newModule.children.push(childModule);
       }
-      return moduleExports;
+      return childModule.exports;
     };
-    requireFromContext.resolve = (request: string) => resolveThrow(contextPath, request, filePath);
+    localRequire.resolve = (request: string) => resolveThrow(contextPath, request, filePath);
 
     const moduleBuiltins = {
       module: newModule,
       exports: newModule.exports,
       __filename: filePath,
       __dirname: contextPath,
-      require: requireFromContext,
+      require: localRequire,
     };
 
     const injectedGlobals = {
@@ -145,6 +136,6 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       throw e;
     }
 
-    return newModule.exports;
+    return newModule;
   }
 }

@@ -333,22 +333,14 @@ module.exports = global;`,
     const callArray: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      aroundRequire: (requireModule) => (modulePath) => {
-        expect(modulePath).to.be.a.string;
-        callArray.push(moduleEvaluationMode(modulePath, 'before'));
-        const res = requireModule(modulePath);
-        callArray.push(moduleEvaluationMode(modulePath, 'after'));
-        return res;
+      loadModuleHook: (requireModule) => (modulePath) => {
+        callArray.push(modulePath);
+        return requireModule(modulePath);
       },
     });
 
     requireModule(aFile);
-    expect(callArray).to.eql([
-      moduleEvaluationMode(aFile, 'before'),
-      moduleEvaluationMode(bFile, 'before'),
-      moduleEvaluationMode(bFile, 'after'),
-      moduleEvaluationMode(aFile, 'after'),
-    ]);
+    expect(callArray).to.eql([aFile, bFile]);
   });
 
   it('allows accessing modules cache in require hook', () => {
@@ -366,31 +358,14 @@ module.exports = global;`,
     const callArray: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      aroundRequire: (requireModule, loadedModules) => (modulePath) => {
-        expect(modulePath).to.be.a.string;
-        const loadedModule = loadedModules.get(modulePath as string);
-        if (!loadedModule) {
-          callArray.push(moduleEvaluationMode(modulePath, 'before'));
-          const res = requireModule(modulePath);
-          callArray.push(moduleEvaluationMode(modulePath, 'after'));
-          return res;
-        } else {
-          return loadedModule;
-        }
+      loadModuleHook: (requireModule) => (modulePath) => {
+        callArray.push(modulePath);
+        return requireModule(modulePath);
       },
     });
 
     requireModule(aFile);
-    expect(callArray).to.eql([
-      moduleEvaluationMode(aFile, 'before'),
-      moduleEvaluationMode(bFile, 'before'),
-      moduleEvaluationMode(cFile, 'before'),
-      moduleEvaluationMode(dFile, 'before'),
-      moduleEvaluationMode(dFile, 'after'),
-      moduleEvaluationMode(cFile, 'after'),
-      moduleEvaluationMode(bFile, 'after'),
-      moduleEvaluationMode(aFile, 'after'),
-    ]);
+    expect(callArray).to.eql([aFile, bFile, cFile, dFile]);
   });
 
   it('iterates over entire evaluation flow', () => {
@@ -410,33 +385,13 @@ module.exports = global;`,
     const callArray: string[] = [];
     const { requireModule } = createCjsModuleSystem({
       fs,
-      aroundRequire: (requireModule) => (modulePath) => {
-        expect(modulePath).to.be.a.string;
-        callArray.push(moduleEvaluationMode(modulePath, 'before'));
-        const res = requireModule(modulePath);
-        callArray.push(moduleEvaluationMode(modulePath, 'after'));
-        return res;
+      loadModuleHook: (requireModule) => (modulePath) => {
+        callArray.push(modulePath);
+        return requireModule(modulePath);
       },
     });
 
     requireModule(aFile);
-    expect(callArray).to.eql([
-      moduleEvaluationMode(aFile, 'before'),
-      moduleEvaluationMode(bFile, 'before'),
-      moduleEvaluationMode(cFile, 'before'),
-      moduleEvaluationMode(dFile, 'before'),
-      moduleEvaluationMode(eFile, 'before'),
-      moduleEvaluationMode(eFile, 'after'),
-      moduleEvaluationMode(dFile, 'after'),
-      moduleEvaluationMode(cFile, 'after'),
-      moduleEvaluationMode(eFile, 'before'),
-      moduleEvaluationMode(eFile, 'after'),
-      moduleEvaluationMode(bFile, 'after'),
-      moduleEvaluationMode(aFile, 'after'),
-    ]);
+    expect(callArray).to.eql([aFile, bFile, cFile, dFile, eFile]);
   });
 });
-
-function moduleEvaluationMode(modulePath: string | boolean, mode: 'before' | 'after'): string {
-  return `${modulePath as string}.${mode}`;
-}

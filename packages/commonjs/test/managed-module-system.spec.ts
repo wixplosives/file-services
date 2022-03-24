@@ -108,7 +108,7 @@ describe('managed module system', () => {
 
     const moduleSystem = createCjsModuleSystem({
       fs,
-      aroundRequire: (require) => (modulePath) => {
+      loadModuleHook: (require) => (modulePath) => {
         counter++;
         return require(modulePath);
       },

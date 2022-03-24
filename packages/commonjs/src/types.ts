@@ -51,3 +51,5 @@ export interface IModule {
    */
   children: IModule[];
 }
+
+export type LoadModule = (modulePath: string) => IModule;
