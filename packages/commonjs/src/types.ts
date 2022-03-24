@@ -2,7 +2,7 @@ export interface ICommonJsModuleSystem {
   /**
    * Map of file path to a loaded module.
    */
-  loadedModules: Map<string, IModule>;
+  requireCache: Map<string, IModule>;
 
   /**
    * Exposed to modules as globals.

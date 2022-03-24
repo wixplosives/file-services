@@ -226,9 +226,9 @@ module.exports = global;`,
       },
     });
 
-    const { requireModule, requireFrom, loadedModules } = createCjsModuleSystem({ fs });
+    const { requireModule, requireFrom, requireCache } = createCjsModuleSystem({ fs });
 
-    loadedModules.set('some-package', {
+    requireCache.set('some-package', {
       id: 'some-package',
       filename: 'some-package',
       exports: sampleObject,

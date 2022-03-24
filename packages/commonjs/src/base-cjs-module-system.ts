@@ -44,7 +44,7 @@ const falseModule = {
 
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
   const { resolveFrom, dirname, readFileSync, globals = {}, loadModuleHook } = options;
-  const loadedModules = new Map<string, IModule>();
+  const requireCache = new Map<string, IModule>();
 
   const load = loadModuleHook ? loadModuleHook(loadModule) : loadModule;
 
@@ -53,14 +53,14 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       if (filePath === false) {
         return {};
       }
-      const fileModule = loadedModules.get(filePath) ?? load(filePath);
+      const fileModule = requireCache.get(filePath) ?? load(filePath);
       return fileModule.exports;
     },
     requireFrom(contextPath, request) {
       return loadFrom(contextPath, request).exports;
     },
     resolveFrom,
-    loadedModules,
+    requireCache,
     globals,
   };
 
@@ -73,7 +73,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
   }
 
   function loadFrom(contextPath: string, request: string, requestOrigin?: string): IModule {
-    const existingRequestModule = loadedModules.get(request);
+    const existingRequestModule = requireCache.get(request);
     if (existingRequestModule) {
       return existingRequestModule;
     }
@@ -81,7 +81,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     if (resolvedPath === false) {
       return falseModule;
     }
-    return loadedModules.get(resolvedPath) ?? load(resolvedPath);
+    return requireCache.get(resolvedPath) ?? load(resolvedPath);
   }
 
   function loadModule(filePath: string): IModule {
@@ -92,7 +92,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
 
     if (filePath.endsWith('.json')) {
       newModule.exports = JSON.parse(fileContents);
-      loadedModules.set(filePath, newModule);
+      requireCache.set(filePath, newModule);
       return newModule;
     }
     const localRequire = (request: string) => {
@@ -124,13 +124,13 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       ...args: unknown[]
     ) => (...args: unknown[]) => void;
 
-    loadedModules.set(filePath, newModule);
+    requireCache.set(filePath, newModule);
 
     try {
       const moduleFn = globalFn(...Object.values(injectedGlobals));
       moduleFn(...Object.values(moduleBuiltins));
     } catch (e) {
-      loadedModules.delete(filePath);
+      requireCache.delete(filePath);
 
       // switch to Error.cause once more places support it
       if (e instanceof Error && !(e as { filePath?: string }).filePath) {

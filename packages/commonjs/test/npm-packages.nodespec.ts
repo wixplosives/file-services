@@ -34,18 +34,18 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates postcss successfully', () => {
-    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
-    loadedModules.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
+    const { requireFrom, requireCache } = createCjsModuleSystem({ fs });
+    requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
+    requireCache.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
     const postcss = requireFrom(__dirname, 'postcss') as typeof import('postcss');
 
     expect(postcss.parse).to.be.instanceOf(Function);
   });
 
   it('evaluates typescript successfully', () => {
-    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
-    loadedModules.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
+    const { requireFrom, requireCache } = createCjsModuleSystem({ fs });
+    requireCache.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
+    requireCache.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
 
     const ts = requireFrom(__dirname, 'typescript') as typeof import('typescript');
 
@@ -53,31 +53,31 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates mocha successfully', () => {
-    const { requireFrom, loadedModules } = createCjsModuleSystem({
+    const { requireFrom, requireCache } = createCjsModuleSystem({
       fs,
       resolver: createRequestResolver({ fs, target: 'node' }),
     });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
-    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
-    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
-    loadedModules.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
-    loadedModules.set('tty', { filename: 'tty', id: 'tty', exports: tty, children: [] });
-    loadedModules.set('util', { filename: 'util', id: 'util', exports: util, children: [] });
-    loadedModules.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
+    requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
+    requireCache.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
+    requireCache.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
+    requireCache.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
+    requireCache.set('tty', { filename: 'tty', id: 'tty', exports: tty, children: [] });
+    requireCache.set('util', { filename: 'util', id: 'util', exports: util, children: [] });
+    requireCache.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
     const mocha = requireFrom(__dirname, 'mocha') as typeof import('mocha');
 
     expect(mocha.reporters).to.be.an('object');
   });
 
   it('evaluates sass successfully', () => {
-    const { requireFrom, loadedModules } = createCjsModuleSystem({ fs });
-    loadedModules.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
-    loadedModules.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
-    loadedModules.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
-    loadedModules.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
-    loadedModules.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
-    loadedModules.set('readline', { filename: 'readline', id: 'readline', exports: readline, children: [] });
-    loadedModules.set('util', { filename: 'util', id: 'util', exports: util, children: [] });
+    const { requireFrom, requireCache } = createCjsModuleSystem({ fs });
+    requireCache.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
+    requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
+    requireCache.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
+    requireCache.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
+    requireCache.set('os', { filename: 'os', id: 'os', exports: os, children: [] });
+    requireCache.set('readline', { filename: 'readline', id: 'readline', exports: readline, children: [] });
+    requireCache.set('util', { filename: 'util', id: 'util', exports: util, children: [] });
 
     const sass = requireFrom(__dirname, 'sass') as typeof import('sass');
 
