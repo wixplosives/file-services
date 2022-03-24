@@ -10,24 +10,25 @@ export const invalidateModule = (modulePath: string | false, requireCache: Map<s
   }
 };
 
-export function* getModulesTree(entryModulePath: string, moduleCache: Map<string, IModule>): Generator<IModule> {
-  const entryModule = moduleCache.get(entryModulePath);
-  if (!entryModule) {
+export function* getModulesTree(
+  modulePath: string,
+  moduleCache: Map<string, IModule>,
+  visited = new Set<string>()
+): Generator<IModule> {
+  if (visited.has(modulePath)) {
     return;
   }
-  const visited = new Set<string>();
-  const importingModules: Array<IModule> = [entryModule];
-  while (importingModules.length) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const importingModule = importingModules.shift()!;
-    if (!visited.has(importingModule.filename)) {
-      visited.add(importingModule.filename);
-      yield importingModule;
-      for (const module of moduleCache.values()) {
-        if (module.children.includes(importingModule)) {
-          importingModules.push(module);
-        }
-      }
+  visited.add(modulePath);
+  const module = moduleCache.get(modulePath);
+
+  if (!module) {
+    return;
+  }
+
+  yield module;
+  for (const [moduleFileName, cachedModule] of moduleCache) {
+    if (cachedModule.children.includes(module)) {
+      yield* getModulesTree(moduleFileName, moduleCache, visited);
     }
   }
 }
