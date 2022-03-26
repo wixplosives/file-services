@@ -1,7 +1,7 @@
 {
   "name": "@file-services/commonjs",
   "description": "Isomorphic, fs-agnostic implementation of the Node commonjs module system.",
-  "version": "5.7.1",
+  "version": "6.0.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run test:node && npm run test:browser",
@@ -9,8 +9,8 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/resolve": "^5.7.1",
-    "@file-services/types": "^5.7.1"
+    "@file-services/resolve": "^6.0.0",
+    "@file-services/types": "^6.0.0"
   },
   "files": [
     "dist",
