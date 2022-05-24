@@ -205,7 +205,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       browserMappings = Object.create(null) as Record<string, string | false>;
       for (const [from, to] of Object.entries(browser)) {
         const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
-        if (resolvedFrom) {
+        if (resolvedFrom && to !== undefined) {
           const resolvedTo = resolveRemappedRequest(directoryPath, to);
           if (resolvedTo !== undefined) {
             browserMappings[resolvedFrom] = resolvedTo;
