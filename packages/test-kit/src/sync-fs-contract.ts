@@ -134,7 +134,7 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
 
         fs.writeFileSync(filePath, `#NON-JSON#`);
 
-        expect(() => fs.readJsonFileSync(filePath)).to.throw(`Unexpected token # in JSON at position 0`);
+        expect(() => fs.readJsonFileSync(filePath)).to.throw(/Unexpected token/);
       });
     });
 

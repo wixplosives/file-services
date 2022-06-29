@@ -101,9 +101,7 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
 
         await fs.promises.writeFile(filePath, `#NON-JSON#`);
 
-        await expect(fs.promises.readJsonFile(filePath)).to.eventually.be.rejectedWith(
-          `Unexpected token # in JSON at position 0`
-        );
+        await expect(fs.promises.readJsonFile(filePath)).to.eventually.be.rejectedWith(/Unexpected token/);
       });
     });
 
