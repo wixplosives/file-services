@@ -1,13 +1,13 @@
 {
   "name": "@file-services/typescript",
   "description": "Helpers for creation of TypeScript hosts",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "main": "dist/index.js",
   "peerDependencies": {
     "typescript": ">=2.8.0"
   },
   "dependencies": {
-    "@file-services/types": "^6.0.0"
+    "@file-services/types": "^7.0.0"
   },
   "files": [
     "dist",
