@@ -91,4 +91,28 @@ describe('overlay fs', () => {
     expect(readdirSync(commonFolder)).to.eql(['file1.js', 'folder-1', 'file2.js', 'folder-2']);
     expect(await readdir(commonFolder)).to.eql(['file1.js', 'folder-1', 'file2.js', 'folder-2']);
   });
+
+  it('returns a single instance when both lower and higher contain an item', async () => {
+    const srcPath = '/src';
+    const fileInSrc = '/src/file.js';
+
+    const lower = createMemoryFs({
+      [fileInSrc]: sampleContent1,
+    });
+
+    const higher = createMemoryFs({
+      [fileInSrc]: sampleContent1,
+    });
+
+    const {
+      readdirSync,
+      promises: { readdir },
+    } = createOverlayFs(lower, higher);
+
+    expect(readdirSync(srcPath)).to.eql(['file.js']);
+    expect(await readdir(srcPath)).to.eql(['file.js']);
+
+    expect(readdirSync(srcPath, { withFileTypes: true })).to.have.lengthOf(1);
+    expect(await readdir(srcPath, { withFileTypes: true })).to.have.lengthOf(1);
+  });
 });
