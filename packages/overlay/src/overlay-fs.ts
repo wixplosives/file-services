@@ -10,6 +10,8 @@ import type {
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
+const getEntryName = (item: IDirectoryEntry) => item.name;
+
 export function createOverlayFs(
   lowerFs: IFileSystem,
   upperFs: IFileSystem,
@@ -115,15 +117,20 @@ export function createOverlayFs(
       }
       return lowerFs.readlinkSync(resolvedLowerPath);
     },
-    readdirSync: ((path: string, ...args: [{ withFileTypes: true }]) => {
+    readdirSync: ((path, options: { withFileTypes: true }) => {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
         const { stackTraceLimit } = Error;
         try {
           Error.stackTraceLimit = 0;
-          const resInUpper = upperFs.readdirSync(resolvedUpperPath, ...args);
+          const resInUpper = upperFs.readdirSync(resolvedUpperPath, options);
           try {
-            return [...lowerFs.readdirSync(resolvedLowerPath, ...args), ...resInUpper];
+            const resInLower = lowerFs.readdirSync(resolvedLowerPath, options);
+            if (options !== null && typeof options === 'object' && options.withFileTypes) {
+              const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
+              return [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
+            }
+            return Array.from(new Set([...resInLower, ...resInUpper]));
           } catch {
             return resInUpper;
           }
@@ -133,7 +140,7 @@ export function createOverlayFs(
           Error.stackTraceLimit = stackTraceLimit;
         }
       }
-      return lowerFs.readdirSync(resolvedLowerPath, ...args);
+      return lowerFs.readdirSync(resolvedLowerPath, options);
     }) as IBaseFileSystemSyncActions['readdirSync'],
   };
 
@@ -201,13 +208,18 @@ export function createOverlayFs(
       }
       return lowerPromises.readlink(resolvedLowerPath);
     },
-    readdir: async function readdir(path: string, ...args: [{ withFileTypes: false }]) {
+    readdir: async function readdir(path: string, options: { withFileTypes: true }) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
         try {
-          const resInUpper = await upperPromises.readdir(resolvedUpperPath, ...args);
+          const resInUpper = await upperPromises.readdir(resolvedUpperPath, options);
           try {
-            return [...(await lowerPromises.readdir(resolvedLowerPath, ...args)), ...resInUpper];
+            const resInLower = await lowerPromises.readdir(resolvedLowerPath, options);
+            if (options !== null && typeof options === 'object' && options.withFileTypes) {
+              const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
+              return [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
+            }
+            return Array.from(new Set([...resInLower, ...resInUpper]));
           } catch {
             /**/
           }
@@ -216,7 +228,7 @@ export function createOverlayFs(
           /**/
         }
       }
-      return lowerPromises.readdir(resolvedLowerPath, ...args);
+      return lowerPromises.readdir(resolvedLowerPath, options);
     } as IBaseFileSystemPromiseActions['readdir'],
   };
 
@@ -328,7 +340,7 @@ export function createOverlayFs(
       }
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined) {
-        upperFs.readdir(resolvedUpperPath, options as { withFileTypes: true }, (upperError, upperItems) => {
+        upperFs.readdir(resolvedUpperPath, options as { withFileTypes: true }, (upperError, resInUpper) => {
           if (upperError) {
             lowerFs.readdir(
               resolvedLowerPath,
@@ -336,11 +348,18 @@ export function createOverlayFs(
               callback as CallbackFn<IDirectoryEntry[]>
             );
           } else {
-            lowerFs.readdir(resolvedLowerPath, options as { withFileTypes: true }, (lowerError, lowerItems) => {
+            lowerFs.readdir(resolvedLowerPath, options as { withFileTypes: true }, (lowerError, resInLower) => {
               if (lowerError) {
-                (callback as CallbackFn<IDirectoryEntry[]>)(upperError, upperItems);
+                (callback as CallbackFn<IDirectoryEntry[]>)(upperError, resInUpper);
               } else {
-                (callback as CallbackFn<IDirectoryEntry[]>)(upperError, [...lowerItems, ...upperItems]);
+                if (options !== null && typeof options === 'object' && options.withFileTypes) {
+                  const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
+                  const combined = [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
+                  (callback as CallbackFn<IDirectoryEntry[]>)(upperError, combined);
+                } else {
+                  const combined = Array.from(new Set([...resInLower, ...resInUpper]));
+                  (callback as CallbackFn<IDirectoryEntry[]>)(upperError, combined);
+                }
               }
             });
           }
