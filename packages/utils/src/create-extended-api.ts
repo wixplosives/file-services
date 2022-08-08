@@ -112,16 +112,12 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   function findFilesSync(rootDirectory: string, options: IWalkOptions = {}, filePaths: string[] = []): string[] {
     const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 
-    for (const nodeName of readdirSync(rootDirectory)) {
-      const nodePath = join(rootDirectory, nodeName);
-      const nodeStats = statSync(nodePath, statsNoThrowOptions);
-      if (!nodeStats) {
-        continue;
-      }
-      const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
-      if (nodeStats.isFile() && filterFile(nodeDesc)) {
+    for (const item of readdirSync(rootDirectory, { withFileTypes: true })) {
+      const nodePath = join(rootDirectory, item.name);
+      const nodeDesc: IFileSystemDescriptor = { name: item.name, path: nodePath };
+      if (item.isFile() && filterFile(nodeDesc)) {
         filePaths.push(nodePath);
-      } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
+      } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
         findFilesSync(nodePath, options, filePaths);
       }
     }
@@ -292,18 +288,13 @@ export function createExtendedFileSystemPromiseActions(
   ): Promise<string[]> {
     const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 
-    for (const nodeName of await readdir(rootDirectory)) {
-      const nodePath = join(rootDirectory, nodeName);
-      try {
-        const nodeStats = await stat(nodePath);
-        const nodeDesc: IFileSystemDescriptor = { name: nodeName, path: nodePath, stats: nodeStats };
-        if (nodeStats.isFile() && filterFile(nodeDesc)) {
-          filePaths.push(nodePath);
-        } else if (nodeStats.isDirectory() && filterDirectory(nodeDesc)) {
-          await findFiles(nodePath, options, filePaths);
-        }
-      } catch (e) {
-        /**/
+    for (const item of await readdir(rootDirectory, { withFileTypes: true })) {
+      const nodePath = join(rootDirectory, item.name);
+      const nodeDesc: IFileSystemDescriptor = { name: item.name, path: nodePath };
+      if (item.isFile() && filterFile(nodeDesc)) {
+        filePaths.push(nodePath);
+      } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
+        await findFiles(nodePath, options, filePaths);
       }
     }
 
