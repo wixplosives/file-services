@@ -44,9 +44,9 @@ export function createOverlayFs(
         return lowerFs.existsSync(resolvedLowerPath);
       }
     },
-    readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]): string | Buffer {
+    readFileSync: function readFileSync(path, ...args) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         const { stackTraceLimit } = Error;
         try {
           Error.stackTraceLimit = 0;
@@ -61,7 +61,7 @@ export function createOverlayFs(
     } as IBaseFileSystemSyncActions['readFileSync'],
     statSync: function (path: string, ...args: []) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           const stats = upperFs.statSync(resolvedUpperPath, ...args);
           if (stats) {
@@ -75,7 +75,7 @@ export function createOverlayFs(
     } as IBaseFileSystemSyncActions['statSync'],
     lstatSync: function lstatSync(path: string, ...args: []) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           const stats = upperFs.lstatSync(resolvedUpperPath, ...args);
           if (stats) {
@@ -89,7 +89,7 @@ export function createOverlayFs(
     } as IBaseFileSystemSyncActions['lstatSync'],
     realpathSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         const { stackTraceLimit } = Error;
         try {
           Error.stackTraceLimit = 0;
@@ -104,7 +104,7 @@ export function createOverlayFs(
     },
     readlinkSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         const { stackTraceLimit } = Error;
         try {
           Error.stackTraceLimit = 0;
@@ -119,7 +119,7 @@ export function createOverlayFs(
     },
     readdirSync: ((path, options: { withFileTypes: true }) => {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         const { stackTraceLimit } = Error;
         try {
           Error.stackTraceLimit = 0;
@@ -155,7 +155,7 @@ export function createOverlayFs(
     },
     readFile: async function readFile(path: string, ...args: [ReadFileOptions]) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           return await upperPromises.readFile(resolvedUpperPath, ...args);
         } catch {
@@ -166,7 +166,7 @@ export function createOverlayFs(
     } as IBaseFileSystemPromiseActions['readFile'],
     async stat(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           return await upperPromises.stat(resolvedUpperPath);
         } catch {
@@ -177,7 +177,7 @@ export function createOverlayFs(
     },
     async lstat(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           return await upperPromises.lstat(resolvedUpperPath);
         } catch {
@@ -188,7 +188,7 @@ export function createOverlayFs(
     },
     async realpath(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           return lowerFs.join(baseDirectoryPath, await upperPromises.realpath(resolvedUpperPath));
         } catch {
@@ -199,7 +199,7 @@ export function createOverlayFs(
     },
     async readlink(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           return await upperPromises.readlink(resolvedUpperPath);
         } catch {
@@ -210,7 +210,7 @@ export function createOverlayFs(
     },
     readdir: async function readdir(path: string, options: { withFileTypes: true }) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         try {
           const resInUpper = await upperPromises.readdir(resolvedUpperPath, options);
           try {
