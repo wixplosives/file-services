@@ -131,11 +131,6 @@ export interface IFileSystemDescriptor {
    * @example '/path/to/package.json'
    */
   path: string;
-
-  /**
-   * Stats for the path
-   */
-  stats: IFileSystemStats;
 }
 
 export interface IWalkOptions {
