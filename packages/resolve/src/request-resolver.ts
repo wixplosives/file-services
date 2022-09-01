@@ -21,8 +21,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   } = options;
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
-  const [normalizedAliases, aliasHasTemplates] = remapRecordToMap(alias);
-  const [normalizedFallbacks, fallbackHasTemplates] = remapRecordToMap(fallback);
+  const remapUsingAlias = createRequestRemapper(alias);
+  const remapUsingFallback = createRequestRemapper(fallback);
 
   return requestResolver;
 
@@ -65,9 +65,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* requestsToTry(contextPath: string, request: string, visitedPaths: Set<string>) {
-    const requestAlias = aliasHasTemplates
-      ? getFromTemplateMap(normalizedAliases, request)
-      : (normalizedAliases.get(request) as string | false | undefined);
+    const requestAlias = remapUsingAlias(request);
     let emittedCandidate = false;
     if (requestAlias !== undefined) {
       emittedCandidate = true;
@@ -89,9 +87,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     if (!emittedCandidate) {
       yield request;
     }
-    const requestFallback = fallbackHasTemplates
-      ? getFromTemplateMap(normalizedFallbacks, request)
-      : (normalizedFallbacks.get(request) as string | false | undefined);
+    const requestFallback = remapUsingFallback(request);
     if (requestFallback !== undefined) {
       yield requestFallback;
     }
@@ -159,26 +155,6 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         yield join(directoryPath, packageRoot);
       }
     }
-  }
-
-  function getFromTemplateMap(
-    map: Map<string | { prefix: string }, string | { prefix: string } | false>,
-    request: string
-  ): string | false | undefined {
-    for (const [key, value] of map) {
-      const keyType = typeof key;
-      if (keyType === 'string') {
-        if (request === key) {
-          return value as string | false;
-        }
-      } else if (keyType === 'object') {
-        const { prefix: keyPrefix } = key as { prefix: string };
-        if (request.startsWith(keyPrefix) && request.length > keyPrefix.length) {
-          return typeof value === 'object' ? value.prefix + request.slice(keyPrefix.length) : value;
-        }
-      }
-    }
-    return undefined;
   }
 
   function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
@@ -310,13 +286,20 @@ function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: 
   };
 }
 
-/** converts to Map and parses "package/*" to { prefix: "package/" } */
-function remapRecordToMap(record: Record<string, string | false>) {
-  const map = new Map<string | { prefix: string }, string | false | { prefix: string }>();
+type ParsedTemplate = { prefix: string };
+
+/**
+ * Create a function that accepts a string and returns T | undefined.
+ * The remapper supports paths ending with "/*", both in key and value.
+ */
+export function createRequestRemapper<T extends string | false>(
+  mapping: Record<string, T>
+): (request: string) => T | undefined {
+  const parsedTemplateMap = new Map<string | ParsedTemplate, T | ParsedTemplate>();
   let hasTemplate = false;
-  for (const [key, value] of Object.entries(record)) {
-    let parsedKey: string | { prefix: string } = key;
-    let parsedValue: string | false | { prefix: string } = value;
+  for (const [key, value] of Object.entries(mapping)) {
+    let parsedKey: string | ParsedTemplate = key;
+    let parsedValue: T | ParsedTemplate = value;
     if (key.endsWith('/*')) {
       hasTemplate = true;
       parsedKey = { prefix: key.slice(0, -1) };
@@ -324,10 +307,32 @@ function remapRecordToMap(record: Record<string, string | false>) {
         parsedValue = { prefix: value.slice(0, -1) };
       }
     }
-    map.set(parsedKey, parsedValue);
+    parsedTemplateMap.set(parsedKey, parsedValue);
   }
 
-  return [map, hasTemplate] as const;
+  return hasTemplate
+    ? (request) => getFromParsedTemplateMap(parsedTemplateMap, request)
+    : (request) => parsedTemplateMap.get(request) as T | undefined;
+}
+
+function getFromParsedTemplateMap<T extends string | false>(
+  map: Map<string | ParsedTemplate, T | ParsedTemplate>,
+  request: string
+): T | undefined {
+  for (const [key, value] of map) {
+    const keyType = typeof key;
+    if (keyType === 'string') {
+      if (request === key) {
+        return value as T;
+      }
+    } else if (keyType === 'object') {
+      const { prefix: keyPrefix } = key as ParsedTemplate;
+      if (request.startsWith(keyPrefix) && request.length > keyPrefix.length) {
+        return typeof value === 'object' ? ((value.prefix + request.slice(keyPrefix.length)) as T) : value;
+      }
+    }
+  }
+  return undefined;
 }
 
 // to avoid having to include @types/node
