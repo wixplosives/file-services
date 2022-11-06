@@ -206,4 +206,9 @@ export interface IBaseFileSystemPromiseActions {
    * Removes files and directories.
    */
   rm(path: string, options?: RmOptions): Promise<void>;
+
+  /**
+   * Changes the permissions of a file.
+   */
+  chmod(path: string, mode: number | string): Promise<void>;
 }

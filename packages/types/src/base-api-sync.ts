@@ -127,4 +127,9 @@ export interface IBaseFileSystemSyncActions {
    * Removes files and directories.
    */
   rmSync(path: string, options?: RmOptions): void;
+
+  /**
+   * Changes the permissions of a file.
+   */
+  chmodSync(path: string, mode: number | string): void;
 }

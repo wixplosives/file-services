@@ -57,6 +57,9 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
       async rm(...args) {
         return syncFs.rmSync(...args);
       },
+      async chmod(...args) {
+        return syncFs.chmodSync(...args);
+      },
     },
     exists(nodePath, callback) {
       callback(syncFs.existsSync(nodePath));
