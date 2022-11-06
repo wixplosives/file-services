@@ -115,6 +115,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     symlinkSync,
     unlinkSync,
     writeFileSync,
+    chmodSync: () => undefined,
   };
 
   function resolvePath(...pathSegments: string[]): string {

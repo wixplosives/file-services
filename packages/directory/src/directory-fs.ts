@@ -158,6 +158,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
       writeFile(path, ...args) {
         return fsPromises.writeFile(path === '' ? '' : resolveFullPath(path), ...args);
       },
+      chmod(path, mode) {
+        return fsPromises.chmod(resolveFullPath(path), mode);
+      },
     },
     copyFileSync(src, dest, ...args) {
       return fs.copyFileSync(resolveFullPath(src), resolveFullPath(dest), ...args);
@@ -213,6 +216,9 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     },
     writeFileSync(path, ...args: [string, WriteFileOptions]) {
       return fs.writeFileSync(path === '' ? '' : resolveFullPath(path), ...args);
+    },
+    chmodSync(path, mode) {
+      return fs.chmodSync(resolveFullPath(path), mode);
     },
     copyFile: function copyFile(srcPath: string, destPath: string, ...args: [CallbackFnVoid]) {
       fs.copyFile(resolveFullPath(srcPath), resolveFullPath(destPath), ...args);
