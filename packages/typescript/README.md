@@ -23,9 +23,8 @@ npm i @file-services/typescript
  * - `ts.ModuleResolutionHost` - for resolution of imports using TypeScript's built-in mechanism
  *
  * @param fs the file system to use as host backend
- * @param cwd current working directory to use
  */
-export function createBaseHost(fs: IFileSystemSync, cwd: string): IBaseHost;
+export function createBaseHost(fs: IFileSystemSync): IBaseHost;
 
 /**
  * Create a TypeScript `LanguageServiceHost` using provided file system.

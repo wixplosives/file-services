@@ -32,7 +32,6 @@ export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost,
  * - `ts.ModuleResolutionHost` - for resolution of imports using TypeScript's built-in mechanism
  *
  * @param fs the file system to use as host backend
- * @param cwd current working directory to use
  */
 export function createBaseHost(fs: IFileSystemSync): IBaseHost {
   const {
