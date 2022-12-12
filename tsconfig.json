@@ -7,9 +7,6 @@
     { "path": "./packages/commonjs/src" },
     { "path": "./packages/commonjs/test" },
 
-    { "path": "./packages/directory/src" },
-    { "path": "./packages/directory/test" },
-
     { "path": "./packages/memory/src" },
     { "path": "./packages/memory/test" },
 
