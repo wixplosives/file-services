@@ -32,7 +32,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-no-only-tests": "^3.1.0",
     "html-webpack-plugin": "^5.5.0",
-    "mocha": "^10.1.0",
+    "mocha": "^10.2.0",
     "mocha-play": "^4.1.0",
     "playwright-chromium": "^1.28.1",
     "postcss": "^8.4.20",
