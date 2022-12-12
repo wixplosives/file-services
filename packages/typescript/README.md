@@ -1,7 +1,7 @@
 # @file-services/typescript
 
 [![npm version](https://img.shields.io/npm/v/@file-services/typescript.svg)](https://www.npmjs.com/package/@file-services/typescript)
-[![package size](https://badgen.net/bundlephobia/minzip/@file-services/typescript)](https://bundlephobia.com/result?p=@file-services/typescript)
+[![package size](https://img.shields.io/bundlephobia/minzip/@file-services/typescript)](https://bundlephobia.com/result?p=@file-services/typescript)
 
 Helpers for creation of TypeScript hosts.
 

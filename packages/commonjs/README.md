@@ -1,7 +1,7 @@
 # @file-services/commonjs
 
 [![npm version](https://img.shields.io/npm/v/@file-services/commonjs.svg)](https://www.npmjs.com/package/@file-services/commonjs)
-[![package size](https://badgen.net/bundlephobia/minzip/@file-services/commonjs)](https://bundlephobia.com/result?p=@file-services/commonjs)
+[![package size](https://img.shields.io/bundlephobia/minzip/@file-services/commonjs)](https://bundlephobia.com/result?p=@file-services/commonjs)
 
 Isomorphic, fs-agnostic implementation of Node's CommonJS module system.
 

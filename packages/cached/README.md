@@ -1,7 +1,7 @@
 # @file-services/cached
 
 [![npm version](https://img.shields.io/npm/v/@file-services/cached.svg)](https://www.npmjs.com/package/@file-services/cached)
-[![package size](https://badgen.net/bundlephobia/minzip/@file-services/cached)](https://bundlephobia.com/result?p=@file-services/cached)
+[![package size](https://img.shields.io/bundlephobia/minzip/@file-services/cached)](https://bundlephobia.com/result?p=@file-services/cached)
 
 A file system wrapper that adds cache to any `IFileSystem` implementation.
 

@@ -1,7 +1,7 @@
 # @file-services/memory
 
 [![npm version](https://img.shields.io/npm/v/@file-services/memory.svg)](https://www.npmjs.com/package/@file-services/memory)
-[![package size](https://badgen.net/bundlephobia/minzip/@file-services/memory)](https://bundlephobia.com/result?p=@file-services/memory)
+[![package size](https://img.shields.io/bundlephobia/minzip/@file-services/memory)](https://bundlephobia.com/result?p=@file-services/memory)
 
 An in-memory, sync/async, file system implementation.
 
