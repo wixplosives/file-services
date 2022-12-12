@@ -5,7 +5,7 @@
 
 Node's `path` implementation, ready for the web.
 
-Original code: https://github.com/nodejs/node/blob/master/lib/path.js
+Original code: https://github.com/nodejs/node/blob/main/lib/path.js
 
 ## License
 

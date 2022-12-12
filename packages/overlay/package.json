@@ -19,7 +19,11 @@
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "license": "MIT",
-  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/overlay",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wixplosives/file-services.git",
+    "directory": "packages/overlay"
+  },
   "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"

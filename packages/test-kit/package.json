@@ -15,7 +15,11 @@
     "!*/tsconfig.{json,tsbuildinfo}"
   ],
   "license": "MIT",
-  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/test-kit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wixplosives/file-services.git",
+    "directory": "packages/test-kit"
+  },
   "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"

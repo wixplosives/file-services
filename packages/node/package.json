@@ -21,7 +21,11 @@
     "node": ">=14"
   },
   "license": "MIT",
-  "repository": "https://github.com/wixplosives/file-services/tree/master/packages/node",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wixplosives/file-services.git",
+    "directory": "packages/node"
+  },
   "homepage": "https://github.com/wixplosives/file-services",
   "publishConfig": {
     "access": "public"
