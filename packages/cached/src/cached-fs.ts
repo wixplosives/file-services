@@ -30,6 +30,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const getCanonicalPath = fs.caseSensitive ? identity : toLowerCase;
   const statsCache = new Map<string, ISuccessCacheResult<IFileSystemStats | undefined> | IFailureCacheResult>();
   const realpathCache = new Map<string, string>();
+  const realpathNativeCache = new Map<string, string>();
   const { promises, delimiter } = fs;
 
   const suffixTrue = delimiter + 'true';
@@ -38,6 +39,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   const invalidateAbsolute = (absolutePath: string) => {
     const cachePath = getCanonicalPath(absolutePath);
     realpathCache.delete(cachePath);
+    realpathNativeCache.delete(cachePath);
     statsCache.delete(cachePath + suffixTrue);
     statsCache.delete(cachePath + suffixFalse);
   };
@@ -48,11 +50,40 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         realpathCache.delete(key);
       }
     }
+    for (const key of realpathNativeCache.keys()) {
+      if (key.startsWith(prefix)) {
+        realpathNativeCache.delete(key);
+      }
+    }
     for (const key of statsCache.keys()) {
       if (key.startsWith(prefix)) {
         statsCache.delete(key);
       }
     }
+  };
+
+  function realpathSync(path: string): string {
+    path = fs.resolve(path);
+    const cacheKey = getCanonicalPath(path);
+    const cachedActualPath = realpathCache.get(cacheKey);
+    if (cachedActualPath !== undefined) {
+      return cachedActualPath;
+    }
+    const actualPath = fs.realpathSync(path);
+    realpathCache.set(cacheKey, actualPath);
+    return actualPath;
+  }
+
+  realpathSync.native = function realpathSyncNative(path: string): string {
+    path = fs.resolve(path);
+    const cacheKey = getCanonicalPath(path);
+    const cachedActualPath = realpathNativeCache.get(cacheKey);
+    if (cachedActualPath !== undefined) {
+      return cachedActualPath;
+    }
+    const actualPath = fs.realpathSync.native(path);
+    realpathNativeCache.set(cacheKey, actualPath);
+    return actualPath;
   };
 
   return {
@@ -179,17 +210,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           });
         }
       },
-      realpathSync(path) {
-        path = fs.resolve(path);
-        const cacheKey = getCanonicalPath(path);
-        const cachedActualPath = realpathCache.get(cacheKey);
-        if (cachedActualPath !== undefined) {
-          return cachedActualPath;
-        }
-        const actualPath = fs.realpathSync(path);
-        realpathCache.set(cacheKey, actualPath);
-        return actualPath;
-      },
+      realpathSync,
       realpath(path, callback) {
         path = fs.resolve(path);
         const cacheKey = getCanonicalPath(path);

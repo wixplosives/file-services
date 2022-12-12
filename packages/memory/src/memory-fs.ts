@@ -63,6 +63,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root');
   const pathListeners = new SetMultiMap<string, WatchEventListener>();
   const globalListeners = new Set<WatchEventListener>();
+  realpathSync.native = realpathSync;
 
   let workingDirectoryPath: string = posixPath.sep;
   return {

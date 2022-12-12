@@ -91,6 +91,20 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     },
   };
 
+  function realpathSync(path: string): string {
+    const resolvedPath = resolveScopedPath(path);
+    const unscopedPath = join(directoryPath, resolvedPath);
+    const unscopedActualPath = fs.realpathSync(unscopedPath);
+    return scopePath(unscopedActualPath) ?? resolvedPath;
+  }
+
+  realpathSync.native = function realpathSyncNative(path: string): string {
+    const resolvedPath = resolveScopedPath(path);
+    const unscopedPath = join(directoryPath, resolvedPath);
+    const unscopedActualPath = fs.realpathSync.native(unscopedPath);
+    return scopePath(unscopedActualPath) ?? resolvedPath;
+  };
+
   const scopedBaseFs: IBaseFileSystem = {
     ...posixPath,
     resolve: resolveScopedPath,
@@ -174,12 +188,7 @@ export function createDirectoryFs(fs: IFileSystem, directoryPath: string): IFile
     readFileSync: function readFileSync(path: string, ...args: [ReadFileOptions]) {
       return fs.readFileSync(resolveFullPath(path), ...args);
     } as IBaseFileSystemSyncActions['readFileSync'],
-    realpathSync(path) {
-      const resolvedPath = resolveScopedPath(path);
-      const unscopedPath = join(directoryPath, resolvedPath);
-      const unscopedActualPath = fs.realpathSync(unscopedPath);
-      return scopePath(unscopedActualPath) ?? resolvedPath;
-    },
+    realpathSync,
     readlinkSync(path) {
       const resolvedPath = resolveScopedPath(path);
       const unscopedPath = join(directoryPath, resolvedPath);

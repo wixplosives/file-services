@@ -106,7 +106,10 @@ export interface IBaseFileSystemSyncActions {
    * Get the canonicalized absolute pathname.
    * If path is linked, returns the actual target path.
    */
-  realpathSync(path: string): string;
+  realpathSync: {
+    (path: string): string;
+    native(path: string): string;
+  };
 
   /**
    * Rename (move) a file or a directory

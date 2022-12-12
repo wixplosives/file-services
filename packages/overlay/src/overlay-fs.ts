@@ -35,6 +35,38 @@ export function createOverlayFs(
     }
   }
 
+  function realpathSync(path: string) {
+    const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+    if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
+      const { stackTraceLimit } = Error;
+      try {
+        Error.stackTraceLimit = 0;
+        return lowerFs.join(baseDirectoryPath, upperFs.realpathSync(resolvedUpperPath));
+      } catch {
+        /**/
+      } finally {
+        Error.stackTraceLimit = stackTraceLimit;
+      }
+    }
+    return lowerFs.realpathSync(resolvedLowerPath);
+  }
+
+  realpathSync.native = function realpathSyncNative(path: string) {
+    const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+    if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
+      const { stackTraceLimit } = Error;
+      try {
+        Error.stackTraceLimit = 0;
+        return lowerFs.join(baseDirectoryPath, upperFs.realpathSync.native(resolvedUpperPath));
+      } catch {
+        /**/
+      } finally {
+        Error.stackTraceLimit = stackTraceLimit;
+      }
+    }
+    return lowerFs.realpathSync.native(resolvedLowerPath);
+  };
+
   const baseSyncActions: Partial<IBaseFileSystemSyncActions> = {
     existsSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
@@ -87,21 +119,7 @@ export function createOverlayFs(
       }
       return lowerFs.lstatSync(resolvedLowerPath, ...args);
     } as IBaseFileSystemSyncActions['lstatSync'],
-    realpathSync(path) {
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
-        const { stackTraceLimit } = Error;
-        try {
-          Error.stackTraceLimit = 0;
-          return lowerFs.join(baseDirectoryPath, upperFs.realpathSync(resolvedUpperPath));
-        } catch {
-          /**/
-        } finally {
-          Error.stackTraceLimit = stackTraceLimit;
-        }
-      }
-      return lowerFs.realpathSync(resolvedLowerPath);
-    },
+    realpathSync,
     readlinkSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
