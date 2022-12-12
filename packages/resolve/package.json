@@ -1,7 +1,7 @@
 {
   "name": "@file-services/resolve",
   "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
-  "version": "7.1.0",
+  "version": "7.2.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run test:node && npm run test:browser",
