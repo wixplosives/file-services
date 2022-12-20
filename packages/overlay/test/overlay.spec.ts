@@ -115,4 +115,22 @@ describe('overlay fs', () => {
     expect(readdirSync(srcPath, { withFileTypes: true })).to.have.lengthOf(1);
     expect(await readdir(srcPath, { withFileTypes: true })).to.have.lengthOf(1);
   });
+
+  it(`resolves real path when given the parent dir of the base dir`, async function () {
+    const lower = createMemoryFs({
+      '/src/a': {},
+    });
+
+    const higher = createMemoryFs({
+      '/src/a': {},
+    });
+
+    const {
+      realpathSync,
+      promises: { realpath },
+    } = createOverlayFs(lower, higher, '/src/a');
+
+    expect(realpathSync('/src')).to.eql('/src');
+    expect(await realpath('/src')).to.eql('/src');
+  });
 });
