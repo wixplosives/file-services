@@ -1,7 +1,7 @@
 {
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
-  "version": "7.2.0",
+  "version": "7.2.2",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run test:node && npm run test:browser",
