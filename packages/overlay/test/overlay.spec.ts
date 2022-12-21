@@ -31,7 +31,7 @@ describe('overlay fs', () => {
       [srcFile1Path]: sampleContent1,
       [srcFile2Path]: sampleContent2,
     });
-    const higher = createMemoryFs({
+    const upper = createMemoryFs({
       [rootFile1Path]: sampleContent3,
       [srcFile2Path]: sampleContent3,
       [folderPath]: {},
@@ -43,7 +43,7 @@ describe('overlay fs', () => {
       directoryExistsSync,
       existsSync,
       promises: { readFile, fileExists, directoryExists, exists },
-    } = createOverlayFs(lower, higher);
+    } = createOverlayFs(lower, upper);
 
     expect(readFileSync(srcFile1Path, 'utf8')).to.equal(sampleContent1);
     expect(readFileSync(srcFile2Path, 'utf8')).to.equal(sampleContent3);
@@ -117,18 +117,17 @@ describe('overlay fs', () => {
   });
 
   it(`resolves real path when given the parent dir of the base dir`, async function () {
-    const lower = createMemoryFs({
+    const upper = createMemoryFs({
       '/src/a': {},
     });
-
-    const higher = createMemoryFs({
-      '/src/a': {},
+    const lower = createMemoryFs({
+      '/src': {},
     });
 
     const {
       realpathSync,
       promises: { realpath },
-    } = createOverlayFs(lower, higher, '/src/a');
+    } = createOverlayFs(lower, upper, '/src/a');
 
     expect(realpathSync('/src')).to.eql('/src');
     expect(await realpath('/src')).to.eql('/src');
