@@ -1,15 +1,15 @@
 {
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
-  "version": "7.2.0",
+  "version": "7.2.1",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run test:node",
     "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\""
   },
   "dependencies": {
-    "@file-services/types": "^7.2.0",
-    "@file-services/utils": "^7.2.0"
+    "@file-services/types": "^7.2.1",
+    "@file-services/utils": "^7.2.1"
   },
   "files": [
     "dist",
