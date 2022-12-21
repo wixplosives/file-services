@@ -28,7 +28,11 @@ export function createOverlayFs(
     const resolvedLowerPath = lowerFs.resolve(path);
     const relativeToBase = lowerFs.relative(baseDirectoryPath, resolvedLowerPath);
 
-    if (!relativeToBase.startsWith(lowerFsRelativeUp) && !lowerFs.isAbsolute(lowerFsRelativeUp)) {
+    if (
+      relativeToBase !== '..' &&
+      !relativeToBase.startsWith(lowerFsRelativeUp) &&
+      !lowerFs.isAbsolute(lowerFsRelativeUp)
+    ) {
       return { resolvedLowerPath, resolvedUpperPath: relativeToBase.replace(/\\/g, '/') };
     } else {
       return { resolvedLowerPath };
