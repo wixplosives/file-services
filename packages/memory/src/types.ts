@@ -5,6 +5,7 @@ import type {
   IFileSystemSync,
   IFileSystemStats,
   IDirectoryEntry,
+  BufferEncoding,
 } from '@file-services/types';
 
 export interface IMemFileSystem extends IFileSystemSync, IFileSystemAsync {
@@ -28,9 +29,13 @@ export interface IFsMemNode {
 
 export type IFsMemNodeType = IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlinkNode;
 
+export type IEncodingKeys = Exclude<BufferEncoding, 'utf-8' | 'ucs-2'>;
+
+export type IEncodingMap = Map<IEncodingKeys, Uint8Array | string>;
+
 export interface IFsMemFileNode extends IFsMemNode {
   type: 'file';
-  contents: Uint8Array;
+  contents: IEncodingMap;
 }
 
 export interface IFsMemDirectoryNode extends IFsMemNode {

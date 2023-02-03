@@ -91,6 +91,10 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
         expect(fs.readFileSync(firstFilePath, 'utf8'), 'contents of first-file').to.eql(SAMPLE_CONTENT);
         expect(fs.readFileSync(secondFilePath, 'utf8'), 'contents of second-file').to.eql(DIFFERENT_CONTENT);
         expect(fs.readFileSync(firstFilePath), 'binary contents of first-file').to.be.instanceOf(Uint8Array);
+
+        // expect(() => fs.readFileSync(firstFilePath, 'base64'), 'base64 encoded of first-file').to.throw(
+        //   `The "base64" encoding is not supported`
+        // );
       });
 
       it('fails if reading a non-existing file', () => {

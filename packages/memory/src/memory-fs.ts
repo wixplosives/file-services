@@ -21,6 +21,8 @@ import type {
   IFsMemDirectoryNode,
   IFsMemNodeType,
   IFsMemSymlinkNode,
+  IEncodingMap,
+  IEncodingKeys,
 } from './types.js';
 
 const posixPath = path.posix;
@@ -147,10 +149,31 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
     }
 
-    const encoding = typeof options === 'string' ? options : options?.encoding;
-    return encoding === null || encoding == undefined
-      ? fileNode.contents
-      : new TextDecoder(encoding).decode(fileNode.contents);
+    const encoding = normalizeEncoding(options);
+    const content = fileNode.contents.get(encoding);
+    const isBinary = encoding === 'binary';
+
+    // fast return if we have the content in the requested encoding
+    if (content !== undefined) {
+      return isBinary ? content.slice() : content;
+    }
+
+    // try to decode from binary
+    const binary = fileNode.contents.get('binary');
+    if (binary instanceof Uint8Array) {
+      return decodeCache(encoding, binary, fileNode);
+    }
+
+    // try to decode from utf8 keep the binary cache
+    const raw = fileNode.contents.get('utf8');
+    if (typeof raw === 'string') {
+      const encoded = textEncoder.encode(raw);
+      fileNode.contents.set('binary', encoded);
+      return isBinary ? encoded : decodeCache(encoding, encoded, fileNode);
+    }
+
+    // no content found
+    throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
   }
 
   function writeFileSync(filePath: string, fileContent: string | Uint8Array): void {
@@ -160,13 +183,20 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     const resolvedPath = resolvePath(filePath);
     const existingNode = getNode(resolvedPath);
+
+    const contents: IEncodingMap = new Map();
+    if (typeof fileContent === 'string') {
+      contents.set('utf8', fileContent);
+    } else {
+      contents.set('binary', fileContent.slice());
+    }
+
     if (existingNode) {
       if (existingNode.type === 'dir') {
         throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
       }
       existingNode.entry = { ...existingNode.entry, mtime: new Date() };
-      existingNode.contents =
-        typeof fileContent === 'string' ? textEncoder.encode(fileContent) : new Uint8Array(fileContent);
+      existingNode.contents = contents;
       emitWatchEvent({ path: resolvedPath, stats: existingNode.entry });
     } else {
       const parentPath = posixPath.dirname(resolvedPath);
@@ -175,7 +205,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       if (!parentNode || parentNode.type !== 'dir') {
         throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
       }
-
       const fileName = posixPath.basename(resolvedPath);
       const currentDate = new Date();
       const newFileNode: IFsMemFileNode = {
@@ -188,7 +217,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
           isDirectory: returnsFalse,
           isSymbolicLink: returnsFalse,
         },
-        contents: typeof fileContent === 'string' ? textEncoder.encode(fileContent) : new Uint8Array(fileContent),
+        contents,
       };
       parentNode.contents.set(fileName, newFileNode);
       emitWatchEvent({ path: resolvedPath, stats: newFileNode.entry });
@@ -584,6 +613,23 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       }
     }
   }
+}
+
+function decodeCache(encoding: IEncodingKeys, binary: Uint8Array, fileNode: IFsMemFileNode) {
+  const decoded = new TextDecoder(encoding).decode(binary);
+  fileNode.contents.set(encoding, decoded);
+  return decoded;
+}
+
+function normalizeEncoding(
+  options:
+    | BufferEncoding
+    | { encoding?: BufferEncoding | null | undefined; flag?: string | undefined }
+    | null
+    | undefined
+): IEncodingKeys {
+  const encoding = typeof options === 'string' ? options : options?.encoding || 'binary';
+  return encoding === 'utf-8' ? 'utf8' : encoding === 'ucs-2' ? 'ucs2' : encoding;
 }
 
 function createMemDirectory(name: string): IFsMemDirectoryNode {
