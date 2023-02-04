@@ -9,7 +9,6 @@ import {
 } from '@file-services/test-kit';
 import { createMemoryFs } from '@file-services/memory';
 import { createOverlayFs } from '@file-services/overlay';
-import { describe } from 'mocha';
 import type { IWatchEvent, WatchEventListener } from '@file-services/types';
 
 const sampleContent1 = `111`;
@@ -144,7 +143,7 @@ describe('overlay fs', () => {
 });
 
 describe('overlayFs watch service', function () {
-  this.timeout(6000000_000);
+  this.timeout(8_000);
   const baseDir = '/src';
   const folderInLower = `${baseDir}/folder-1`;
   const fileInLower = `${baseDir}/file1.js`;
