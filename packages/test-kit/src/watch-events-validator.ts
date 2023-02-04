@@ -70,3 +70,18 @@ const simplifyEvent = ({ path, stats }: IWatchEvent) => ({
   path,
   stats: stats ? { birthtime: stats.birthtime.getTime(), mtime: stats.mtime.getTime() } : null,
 });
+
+export const validateEvents = async (
+  expectedEvents: IWatchEvent[],
+  actualEvents: IWatchEvent[],
+  options: IWatchEventValidatorOptions = { validateTimeout: 5000, noMoreEventsTimeout: 500 }
+): Promise<void> => {
+  await waitFor(
+    async () => {
+      const expected = expectedEvents.map(simplifyEvent);
+      const actual = actualEvents.map(simplifyEvent);
+      expect(actual).to.eql(expected);
+    },
+    { timeout: options.validateTimeout, delay: 100 }
+  );
+};

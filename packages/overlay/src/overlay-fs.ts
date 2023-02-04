@@ -7,6 +7,8 @@ import type {
   ReadFileOptions,
   IDirectoryEntry,
   BufferEncoding,
+  IWatchService,
+  WatchEventListener,
 } from '@file-services/types';
 import { createFileSystem } from '@file-services/utils';
 
@@ -396,8 +398,97 @@ export function createOverlayFs(
     },
   };
 
+  const pathProxyListeners = new Map<string, Map<WatchEventListener, WatchEventListener>>();
+  const globalProxyListeners = new Map<WatchEventListener, WatchEventListener>();
+
+  const watchServiceProxy: IWatchService = {
+    async watchPath(path, listener) {
+      await lowerFs.watchService.watchPath(path, listener);
+      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+      if (resolvedUpperPath) {
+        let proxyListener: WatchEventListener | undefined;
+
+        if (listener) {
+          proxyListener = (higherEvent) => {
+            listener({
+              ...higherEvent,
+              path: lowerFs.join(baseDirectoryPath, higherEvent.path),
+            });
+          };
+
+          const pathMap =
+            pathProxyListeners.get(resolvedLowerPath) ?? new Map<WatchEventListener, WatchEventListener>();
+
+          pathMap.set(listener, proxyListener);
+          pathProxyListeners.set(resolvedLowerPath, pathMap);
+        }
+
+        await upperFs.watchService.watchPath(resolvedUpperPath, proxyListener ?? listener);
+      }
+    },
+    async unwatchPath(path, listener) {
+      await lowerFs.watchService.unwatchPath(path, listener);
+      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
+
+      if (resolvedUpperPath) {
+        let proxyListener: WatchEventListener | undefined;
+
+        if (listener) {
+          const pathMap = pathProxyListeners.get(resolvedLowerPath);
+
+          if (pathMap) {
+            proxyListener = pathMap.get(listener);
+            pathMap.delete(listener);
+          }
+        } else {
+          pathProxyListeners.delete(resolvedLowerPath);
+        }
+
+        await upperFs.watchService.unwatchPath(resolvedUpperPath, proxyListener ?? listener);
+      }
+    },
+    async unwatchAllPaths() {
+      await lowerFs.watchService.unwatchAllPaths();
+      await upperFs.watchService.unwatchAllPaths();
+      pathProxyListeners.clear();
+    },
+    addGlobalListener(listener) {
+      lowerFs.watchService.addGlobalListener(listener);
+
+      let proxyListener: WatchEventListener | undefined;
+
+      if (listener) {
+        proxyListener = (higherEvent) => {
+          listener({
+            ...higherEvent,
+            path: lowerFs.join(baseDirectoryPath, higherEvent.path),
+          });
+        };
+
+        globalProxyListeners.set(listener, proxyListener);
+      }
+
+      upperFs.watchService.addGlobalListener(proxyListener ?? listener);
+    },
+    removeGlobalListener(listener) {
+      lowerFs.watchService.removeGlobalListener(listener);
+      const proxyListener = globalProxyListeners.get(listener);
+
+      if (proxyListener) {
+        upperFs.watchService.removeGlobalListener(proxyListener);
+        globalProxyListeners.delete(proxyListener);
+      }
+    },
+    clearGlobalListeners() {
+      lowerFs.watchService.clearGlobalListeners();
+      upperFs.watchService.clearGlobalListeners();
+      globalProxyListeners.clear();
+    },
+  };
+
   return createFileSystem({
     ...lowerFs,
+    watchService: watchServiceProxy,
     ...baseSyncActions,
     ...baseCallbackActions,
     promises: { ...lowerPromises, ...basePromiseActions },

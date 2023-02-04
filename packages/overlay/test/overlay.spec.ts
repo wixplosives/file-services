@@ -1,7 +1,16 @@
 import { expect } from 'chai';
-import { asyncBaseFsContract, asyncFsContract, syncBaseFsContract, syncFsContract } from '@file-services/test-kit';
+import {
+  asyncBaseFsContract,
+  asyncFsContract,
+  syncBaseFsContract,
+  syncFsContract,
+  WatchEventsValidator,
+  validateEvents,
+} from '@file-services/test-kit';
 import { createMemoryFs } from '@file-services/memory';
 import { createOverlayFs } from '@file-services/overlay';
+import { describe } from 'mocha';
+import type { IWatchEvent, WatchEventListener } from '@file-services/types';
 
 const sampleContent1 = `111`;
 const sampleContent2 = `222`;
@@ -131,5 +140,117 @@ describe('overlay fs', () => {
 
     expect(realpathSync('/src')).to.eql('/src');
     expect(await realpath('/src')).to.eql('/src');
+  });
+});
+
+describe('overlayFs watch service', function () {
+  this.timeout(6000000_000);
+  const baseDir = '/src';
+  const folderInLower = `${baseDir}/folder-1`;
+  const fileInLower = `${baseDir}/file1.js`;
+  const fileInHigher = '/file2.js';
+  const folderInHigher = '/folder-2';
+  const higherFileInOverlayFs = `${baseDir}${fileInHigher}`;
+
+  function getFileSystems() {
+    const lowerFs = createMemoryFs({
+      [fileInLower]: sampleContent1,
+      [folderInLower]: {},
+    });
+
+    const higherFs = createMemoryFs({
+      [fileInHigher]: sampleContent1,
+      [folderInHigher]: {},
+    });
+
+    const overlayFs = createOverlayFs(lowerFs, higherFs, baseDir);
+
+    return { overlayFs, higherFs, lowerFs };
+  }
+
+  it('watches change made with overlayFs in lowerFs', async () => {
+    const { overlayFs } = getFileSystems();
+    const validator = new WatchEventsValidator(overlayFs.watchService);
+
+    overlayFs.writeFileSync(fileInLower, '123');
+    const stats = overlayFs.statSync(fileInLower);
+    await validator.validateEvents([{ path: fileInLower, stats }]);
+    await validator.noMoreEvents();
+  });
+
+  it('watches change made with higherFs', async () => {
+    const { higherFs, overlayFs } = getFileSystems();
+
+    const validator = new WatchEventsValidator(overlayFs.watchService);
+
+    higherFs.writeFileSync(fileInHigher, '123');
+    const stats = overlayFs.statSync(higherFileInOverlayFs);
+    await validator.validateEvents([{ path: higherFileInOverlayFs, stats }]);
+    await validator.noMoreEvents();
+  });
+
+  it('watches path, change made with higherFs', async () => {
+    const { higherFs, overlayFs } = getFileSystems();
+    const actualPathEvents: IWatchEvent[] = [];
+    const listener1: WatchEventListener = (event) => {
+      actualPathEvents.push(event);
+    };
+
+    await overlayFs.watchService.watchPath(higherFileInOverlayFs, listener1);
+    higherFs.writeFileSync(fileInHigher, '123');
+
+    const stats = overlayFs.statSync(higherFileInOverlayFs);
+
+    await validateEvents([{ path: higherFileInOverlayFs, stats }], actualPathEvents);
+  });
+
+  it('watches path, receives change made with higherFs, no events sent after unwatchPath with listener1', async () => {
+    const { higherFs, overlayFs } = getFileSystems();
+    const actualPathEvents: IWatchEvent[] = [];
+    const listener1: WatchEventListener = (event) => {
+      actualPathEvents.push(event);
+    };
+
+    await overlayFs.watchService.watchPath(higherFileInOverlayFs, listener1);
+    higherFs.writeFileSync(fileInHigher, '123');
+    const stats = overlayFs.statSync(higherFileInOverlayFs);
+    await validateEvents([{ path: higherFileInOverlayFs, stats }], actualPathEvents);
+
+    // clear collected events
+    actualPathEvents.splice(0);
+
+    await overlayFs.watchService.unwatchPath(higherFileInOverlayFs, listener1);
+    higherFs.writeFileSync(fileInHigher, '456');
+    await validateEvents([], actualPathEvents);
+  });
+
+  it('watches path with multiple listeners, receives change made with higherFs, no events sent after unwatchPath with listener1', async () => {
+    const { higherFs, overlayFs } = getFileSystems();
+    const actualPathEvents1: IWatchEvent[] = [];
+    const listener1: WatchEventListener = (event) => {
+      actualPathEvents1.push(event);
+    };
+    const actualPathEvents2: IWatchEvent[] = [];
+    const listener2: WatchEventListener = (event) => {
+      actualPathEvents2.push(event);
+    };
+
+    await overlayFs.watchService.watchPath(higherFileInOverlayFs, listener1);
+    await overlayFs.watchService.watchPath(higherFileInOverlayFs, listener2);
+    higherFs.writeFileSync(fileInHigher, '123');
+    const stats = overlayFs.statSync(higherFileInOverlayFs);
+    await validateEvents([{ path: higherFileInOverlayFs, stats }], actualPathEvents1);
+    await validateEvents([{ path: higherFileInOverlayFs, stats }], actualPathEvents2);
+
+    // clear collected events
+    actualPathEvents1.splice(0);
+    actualPathEvents2.splice(0);
+
+    await overlayFs.watchService.unwatchPath(higherFileInOverlayFs, listener1);
+    higherFs.writeFileSync(fileInHigher, '456');
+    const stats2 = overlayFs.statSync(higherFileInOverlayFs);
+
+    await validateEvents([], actualPathEvents1);
+    await validateEvents([{ path: higherFileInOverlayFs, stats: stats2 }], actualPathEvents2);
   });
 });
