@@ -405,7 +405,7 @@ export function createOverlayFs(
     async watchPath(path, listener) {
       await lowerFs.watchService.watchPath(path, listener);
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         let proxyListener: WatchEventListener | undefined;
 
         if (listener) {
@@ -430,7 +430,7 @@ export function createOverlayFs(
       await lowerFs.watchService.unwatchPath(path, listener);
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
 
-      if (resolvedUpperPath) {
+      if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
         let proxyListener: WatchEventListener | undefined;
 
         if (listener) {

@@ -167,7 +167,7 @@ describe('overlayFs watch service', function () {
     return { overlayFs, higherFs, lowerFs };
   }
 
-  it('watches change made with overlayFs in lowerFs', async () => {
+  it('global listener captures change made with overlayFs in lower file', async () => {
     const { overlayFs } = getFileSystems();
     const validator = new WatchEventsValidator(overlayFs.watchService);
 
@@ -177,7 +177,7 @@ describe('overlayFs watch service', function () {
     await validator.noMoreEvents();
   });
 
-  it('watches change made with higherFs', async () => {
+  it('global listener captures change made with higherFs', async () => {
     const { higherFs, overlayFs } = getFileSystems();
 
     const validator = new WatchEventsValidator(overlayFs.watchService);
@@ -188,7 +188,7 @@ describe('overlayFs watch service', function () {
     await validator.noMoreEvents();
   });
 
-  it('watches path, change made with higherFs', async () => {
+  it('path listener captures change made with higherFs', async () => {
     const { higherFs, overlayFs } = getFileSystems();
     const actualPathEvents: IWatchEvent[] = [];
     const listener1: WatchEventListener = (event) => {
@@ -203,7 +203,7 @@ describe('overlayFs watch service', function () {
     await validateEvents([{ path: higherFileInOverlayFs, stats }], actualPathEvents);
   });
 
-  it('watches path, receives change made with higherFs, no events sent after unwatchPath with listener1', async () => {
+  it('path listener captures change made with higherFs, no events captured after unwatchPath with listener1', async () => {
     const { higherFs, overlayFs } = getFileSystems();
     const actualPathEvents: IWatchEvent[] = [];
     const listener1: WatchEventListener = (event) => {
@@ -223,7 +223,7 @@ describe('overlayFs watch service', function () {
     await validateEvents([], actualPathEvents);
   });
 
-  it('watches path with multiple listeners, receives change made with higherFs, no events sent after unwatchPath with listener1', async () => {
+  it('multiple path listeners capture changes made with higherFs, no events captured after unwatchPath with listener1, next event captured only by listener2', async () => {
     const { higherFs, overlayFs } = getFileSystems();
     const actualPathEvents1: IWatchEvent[] = [];
     const listener1: WatchEventListener = (event) => {
