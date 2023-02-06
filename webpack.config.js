@@ -1,5 +1,3 @@
-const webpack = require('webpack');
-
 /** @type {import('webpack').Configuration} */
 module.exports = {
   context: __dirname, // so paths in output will be clickable
@@ -13,5 +11,9 @@ module.exports = {
       },
     ],
   },
-  plugins: [new webpack.ProvidePlugin({ process: 'process' })],
+  resolve: {
+    alias: {
+      sinon: 'sinon/pkg/sinon-esm.js',
+    },
+  },
 };
