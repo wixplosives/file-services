@@ -1,5 +1,6 @@
 import { join } from 'path';
 import { promises as fsPromises, watch, FSWatcher } from 'fs';
+import { once } from 'events';
 import type { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types';
 import { SetMultiMap } from '@file-services/utils';
 
@@ -73,6 +74,7 @@ export class NodeWatchService implements IWatchService {
       if (fsWatcher) {
         fsWatcher.close();
         this.fsWatchers.delete(path);
+        await once(fsWatcher, 'close');
       }
     }
     const pendingEvent = this.pendingEvents.get(path);
@@ -89,9 +91,11 @@ export class NodeWatchService implements IWatchService {
     for (const { timerId } of this.pendingEvents.values()) {
       clearTimeout(timerId);
     }
+    const watcherCloseEvents = Array.from(this.fsWatchers.values(), (watcher) => once(watcher, 'close'));
     this.pendingEvents.clear();
     this.fsWatchers.clear();
     this.watchedPaths.clear();
+    await Promise.all(watcherCloseEvents);
   }
 
   public addGlobalListener(listener: WatchEventListener): void {
