@@ -60,6 +60,20 @@ describe('Node Watch Service', function () {
       ]);
       await validator.noMoreEvents();
     });
+
+    it(`does not emit events after unwatching a path`, async () => {
+      await writeFile(testFilePath, SAMPLE_CONTENT);
+      await watchService.unwatchPath(testFilePath);
+
+      await validator.noMoreEvents();
+    });
+
+    it(`does not emit events after unwatching all path`, async () => {
+      await writeFile(testFilePath, SAMPLE_CONTENT);
+      await watchService.unwatchAllPaths();
+
+      await validator.noMoreEvents();
+    });
   });
 
   describe('watching directories', () => {
