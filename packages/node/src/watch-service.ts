@@ -75,12 +75,21 @@ export class NodeWatchService implements IWatchService {
         this.fsWatchers.delete(path);
       }
     }
+    const pendingEvent = this.pendingEvents.get(path);
+    if (pendingEvent) {
+      clearTimeout(pendingEvent.timerId);
+      this.pendingEvents.delete(path);
+    }
   }
 
   public async unwatchAllPaths(): Promise<void> {
     for (const watcher of this.fsWatchers.values()) {
       watcher.close();
     }
+    for (const { timerId } of this.pendingEvents.values()) {
+      clearTimeout(timerId);
+    }
+    this.pendingEvents.clear();
     this.fsWatchers.clear();
     this.watchedPaths.clear();
   }
