@@ -27,7 +27,7 @@
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^2.3.0",
-    "eslint": "^8.34.0",
+    "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-no-only-tests": "^3.1.0",
     "html-webpack-plugin": "^5.5.0",
