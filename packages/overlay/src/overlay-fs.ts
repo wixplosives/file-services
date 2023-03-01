@@ -31,7 +31,7 @@ export function createOverlayFs(
     if (
       relativeToBase !== '..' &&
       !relativeToBase.startsWith(lowerFsRelativeUp) &&
-      !lowerFs.isAbsolute(lowerFsRelativeUp)
+      !lowerFs.isAbsolute(relativeToBase)
     ) {
       return { resolvedLowerPath, resolvedUpperPath: relativeToBase.replace(/\\/g, '/') };
     } else {
