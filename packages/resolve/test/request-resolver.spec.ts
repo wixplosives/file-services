@@ -771,5 +771,35 @@ describe('request resolver', () => {
         '/src/index.js',
       ]);
     });
+
+    it('lists paths for package.json files it met inside packages', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({}),
+        node_modules: {
+          some_package: {
+            alt: {
+              'package.json': stringifyPackageJson({
+                name: 'some_package/alt',
+                main: '../actual.js',
+                private: true,
+              }),
+            },
+            'actual.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      const resolutionOutput = resolveRequest('/', 'some_package/alt');
+      expect(resolutionOutput).to.be.resolvedTo('/node_modules/some_package/actual.js');
+      expect(Array.from(resolutionOutput.visitedPaths)).to.eql([
+        '/package.json',
+        '/node_modules/some_package/alt',
+        '/node_modules/some_package/alt.js',
+        '/node_modules/some_package/alt.json',
+        '/node_modules/some_package/alt/package.json',
+        '/node_modules/some_package/actual.js',
+      ]);
+    });
   });
 });
