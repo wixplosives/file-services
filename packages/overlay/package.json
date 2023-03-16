@@ -1,7 +1,7 @@
 {
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
-  "version": "7.2.4",
+  "version": "7.2.5",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run test:node && npm run test:browser",
@@ -9,8 +9,8 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/types": "^7.2.4",
-    "@file-services/utils": "^7.2.4"
+    "@file-services/types": "^7.2.5",
+    "@file-services/utils": "^7.2.5"
   },
   "files": [
     "dist",
