@@ -33,7 +33,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         return { resolvedFile: request, visitedPaths };
       }
 
-      for (const resolvedFilePath of nodeRequestPaths(contextPath, request)) {
+      for (const resolvedFilePath of nodeRequestPaths(contextPath, request, visitedPaths)) {
         visitedPaths.add(resolvedFilePath);
         if (!statSyncSafe(resolvedFilePath)?.isFile()) {
           continue;
@@ -93,13 +93,13 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function* nodeRequestPaths(contextPath: string, request: string) {
+  function* nodeRequestPaths(contextPath: string, request: string, visitedPaths: Set<string>) {
     if (isRelative(request) || isAbsolute(request)) {
       const requestPath = resolve(contextPath, request);
       yield* fileRequestPaths(requestPath);
-      yield* directoryRequestPaths(requestPath);
+      yield* directoryRequestPaths(requestPath, visitedPaths);
     } else {
-      yield* packageRequestPaths(contextPath, request);
+      yield* packageRequestPaths(contextPath, request, visitedPaths);
     }
   }
 
@@ -124,11 +124,14 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     yield* fileRequestPaths(join(targetPath, 'index'));
   }
 
-  function* directoryRequestPaths(directoryPath: string) {
+  function* directoryRequestPaths(directoryPath: string, visitedPaths: Set<string>) {
     if (!statSyncSafe(directoryPath)?.isDirectory()) {
       return;
     }
     const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
+    if (resolvedPackageJson !== undefined) {
+      visitedPaths.add(resolvedPackageJson.filePath);
+    }
     const mainPath = resolvedPackageJson?.mainPath;
 
     if (mainPath !== undefined) {
@@ -138,14 +141,14 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function* packageRequestPaths(initialPath: string, request: string) {
+  function* packageRequestPaths(initialPath: string, request: string, visitedPaths: Set<string>) {
     for (const packagesPath of packageRootsToPaths(initialPath)) {
       if (!statSyncSafe(packagesPath)?.isDirectory()) {
         continue;
       }
       const requestInPackages = join(packagesPath, request);
       yield* fileRequestPaths(requestInPackages);
-      yield* directoryRequestPaths(requestInPackages);
+      yield* directoryRequestPaths(requestInPackages, visitedPaths);
     }
   }
 
