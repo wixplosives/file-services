@@ -43,7 +43,7 @@
     "source-map-loader": "^4.0.1",
     "type-fest": "^3.9.0",
     "typescript": "~5.0.4",
-    "webpack": "^5.80.0"
+    "webpack": "^5.81.0"
   },
   "engines": {
     "npm": ">=8"
