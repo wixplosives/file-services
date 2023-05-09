@@ -43,6 +43,13 @@ export interface IRequestResolverOptions {
    * Original request is attempted before fallback.
    */
   fallback?: Record<string, string | false>;
+
+  /**
+   * Support the "module" field. Picked up over "main".
+   *
+   * @default true when "target" is set to "browser"
+   */
+  moduleField?: boolean;
 }
 
 export interface IResolutionOutput {
