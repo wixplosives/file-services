@@ -418,6 +418,19 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
     });
 
+    it('prefers "module" over "main" when "moduleField" is set to true and "target" is "node"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, moduleField: true, target: 'node' });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
     it('prefers "main" over "module" when "moduleField" is set to false', () => {
       const fs = createMemoryFs({
         lodash: {
