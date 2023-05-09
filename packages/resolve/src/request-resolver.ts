@@ -15,6 +15,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     target = defaultTarget,
+    moduleField = target === 'browser',
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
     alias = {},
     fallback = {},
@@ -247,12 +248,15 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function packageJsonTarget({ main, browser }: PackageJson): string | undefined {
-    if (target === 'browser' && typeof browser === 'string') {
-      return browser;
-    } else {
-      return typeof main === 'string' ? main : undefined;
+  function packageJsonTarget({ main, browser, module: moduleFieldValue }: PackageJson): string | undefined {
+    if (target === 'browser') {
+      if (typeof browser === 'string') {
+        return browser;
+      } else if (moduleField && typeof moduleFieldValue === 'string') {
+        return moduleFieldValue;
+      }
     }
+    return typeof main === 'string' ? main : undefined;
   }
 
   function* pathChainToRoot(currentPath: string) {

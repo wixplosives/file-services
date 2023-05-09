@@ -327,11 +327,11 @@ describe('request resolver', () => {
     });
   });
 
-  describe('browser field (string)', () => {
-    it('prefers "browser" over "main" when loading a package.json', () => {
+  describe('browser/module fields (string)', () => {
+    it('prefers "browser" over "main" and "module" when loading a package.json', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: 'entry.js', browser: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -341,7 +341,7 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
     });
 
-    it('uses "browser" if "main" was not defined', () => {
+    it('uses "browser" if "main" and "module" were not defined', () => {
       const fs = createMemoryFs({
         lodash: {
           'package.json': stringifyPackageJson({ browser: 'file.js' }),
@@ -356,7 +356,7 @@ describe('request resolver', () => {
     it('prefers "main" when resolution "target" is set to "node"', () => {
       const fs = createMemoryFs({
         lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js', module: './browser.js' }),
           'entry.js': EMPTY,
           'browser.js': EMPTY,
         },
@@ -377,6 +377,70 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs, target: 'browser' });
 
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('prefers "module" over "main"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('prefers "module" over "main" when "target" is set to "browser"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, target: 'browser' });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('prefers "main" over "module" when "target" is set to "node"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, target: 'node' });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
+    });
+
+    it('prefers "main" over "module" when "moduleField" is set to false', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, moduleField: false });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
+    });
+
+    it('uses "module" if "main" and "browser" were not defined', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ module: 'file.js' }),
+          'file.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/file.js');
     });
 
     it('resolves "browser" which points to a folder with an index file', () => {

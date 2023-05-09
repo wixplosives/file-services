@@ -34,9 +34,14 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates postcss successfully', () => {
-    const { requireFrom, requireCache } = createCjsModuleSystem({ fs });
+    const { requireFrom, requireCache } = createCjsModuleSystem({
+      fs,
+      resolver: createRequestResolver({ fs, target: 'node' }),
+    });
     requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
     requireCache.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
+    requireCache.set('tty', { filename: 'tty', id: 'tty', exports: tty, children: [] });
+    requireCache.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
     const postcss = requireFrom(__dirname, 'postcss') as typeof import('postcss');
 
     expect(postcss.parse).to.be.instanceOf(Function);
@@ -70,7 +75,10 @@ describe('commonjs module system - integration with existing npm packages', func
   });
 
   it('evaluates sass successfully', () => {
-    const { requireFrom, requireCache } = createCjsModuleSystem({ fs });
+    const { requireFrom, requireCache } = createCjsModuleSystem({
+      fs,
+      resolver: createRequestResolver({ fs, target: 'node' }),
+    });
     requireCache.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
     requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
     requireCache.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
