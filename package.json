@@ -18,7 +18,7 @@
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "16",
-    "@types/react": "^18.2.6",
+    "@types/react": "^18.2.7",
     "@types/react-dom": "^18.2.4",
     "@types/sinon": "^10.0.15",
     "@types/sinon-chai": "^3.2.9",
@@ -43,7 +43,7 @@
     "source-map-loader": "^4.0.1",
     "type-fest": "^3.11.0",
     "typescript": "~5.0.4",
-    "webpack": "^5.83.1"
+    "webpack": "^5.84.0"
   },
   "engines": {
     "npm": ">=8"
