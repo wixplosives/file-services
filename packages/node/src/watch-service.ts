@@ -190,7 +190,11 @@ export class NodeWatchService implements IWatchService {
       this.fsWatchers.set(path, fileWatcher);
     } else if (pathStats.isDirectory()) {
       const directoryWatcher = watch(path, watchOptions, (type, fileName) => {
-        this.onDirectoryEvent(type, path, fileName).catch;
+        if (fileName !== null) {
+          this.onDirectoryEvent(type, path, fileName).catch((e) => {
+            this.onWatchError(e, path);
+          });
+        }
       });
       directoryWatcher.once('error', (e) => {
         this.onWatchError(e, path);
@@ -201,7 +205,7 @@ export class NodeWatchService implements IWatchService {
     }
   }
 
-  private onWatchError(_e: Error, path: string) {
+  private onWatchError(_e: unknown, path: string) {
     this.onPathEvent('rename', path);
     const watcher = this.fsWatchers.get(path);
     if (watcher) {
