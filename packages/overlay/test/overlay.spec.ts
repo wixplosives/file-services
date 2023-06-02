@@ -24,7 +24,7 @@ describe('overlay fs', () => {
   it('overlays higher fs files and folders over lower fs', async () => {
     const srcFile1Path = '/src/file1.js';
     const srcFile2Path = '/src/file2.js';
-    const rootFile1Path = '/src/file2.js';
+    const rootFilePath = '/file.js';
     const folderPath = '/empty-folder';
 
     const lower = createMemoryFs({
@@ -32,7 +32,7 @@ describe('overlay fs', () => {
       [srcFile2Path]: sampleContent2,
     });
     const upper = createMemoryFs({
-      [rootFile1Path]: sampleContent3,
+      [rootFilePath]: sampleContent3,
       [srcFile2Path]: sampleContent3,
       [folderPath]: {},
     });
@@ -47,21 +47,21 @@ describe('overlay fs', () => {
 
     expect(readFileSync(srcFile1Path, 'utf8')).to.equal(sampleContent1);
     expect(readFileSync(srcFile2Path, 'utf8')).to.equal(sampleContent3);
-    expect(readFileSync(rootFile1Path, 'utf8')).to.equal(sampleContent3);
+    expect(readFileSync(rootFilePath, 'utf8')).to.equal(sampleContent3);
 
     expect(await readFile(srcFile1Path, 'utf8')).to.equal(sampleContent1);
     expect(await readFile(srcFile2Path, 'utf8')).to.equal(sampleContent3);
-    expect(await readFile(rootFile1Path, 'utf8')).to.equal(sampleContent3);
+    expect(await readFile(rootFilePath, 'utf8')).to.equal(sampleContent3);
 
     expect(fileExistsSync(srcFile1Path)).to.equal(true);
     expect(fileExistsSync(srcFile2Path)).to.equal(true);
-    expect(fileExistsSync(rootFile1Path)).to.equal(true);
+    expect(fileExistsSync(rootFilePath)).to.equal(true);
     expect(directoryExistsSync(folderPath)).to.equal(true);
     expect(existsSync(folderPath)).to.equal(true);
 
     expect(await fileExists(srcFile1Path)).to.equal(true);
     expect(await fileExists(srcFile2Path)).to.equal(true);
-    expect(await fileExists(rootFile1Path)).to.equal(true);
+    expect(await fileExists(rootFilePath)).to.equal(true);
     expect(await directoryExists(folderPath)).to.equal(true);
     expect(await exists(folderPath)).to.equal(true);
   });
