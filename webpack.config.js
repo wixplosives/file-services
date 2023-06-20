@@ -11,9 +11,4 @@ module.exports = {
       },
     ],
   },
-  resolve: {
-    alias: {
-      sinon: 'sinon/pkg/sinon-esm.js',
-    },
-  },
 };
