@@ -253,7 +253,14 @@ module.exports = global;`,
     });
     const { requireModule, requireFrom } = createCjsModuleSystem({ fs });
 
-    expect(() => requireModule(sampleFilePath)).to.throw(`Cannot resolve "missing" in ${sampleFilePath}`);
+    expect(() => requireModule(sampleFilePath)).to.throw(`Failed evaluating ${sampleFilePath}`);
+    let error: unknown;
+    try {
+      requireModule(sampleFilePath);
+    } catch (e) {
+      error = e;
+    }
+    expect(((error as Error)?.cause as Error).message).to.equal(`Cannot resolve "missing" in ${sampleFilePath}`);
     expect(() => requireFrom(fs.cwd(), 'missing')).to.throw(`Cannot resolve "missing" in ${fs.cwd()}`);
   });
 
@@ -271,9 +278,9 @@ module.exports = global;`,
         caughtError = e;
         throw e;
       }
-    }).to.throw(`Thanos is coming!`);
+    }).to.throw(`Failed evaluating ${sampleFilePath}`);
 
-    expect((caughtError as Error)?.stack).to.include(sampleFilePath);
+    expect(((caughtError as Error)?.cause as Error)?.message).to.equal('Thanos is coming!');
   });
 
   it('does not cache module if code parsing failed', () => {
@@ -295,14 +302,14 @@ module.exports = global;`,
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 
-    expect(() => requireModule(sampleFilePath)).to.throw('Thanos is coming!');
-    let e: unknown;
+    expect(() => requireModule(sampleFilePath)).to.throw(`Failed evaluating ${sampleFilePath}`);
+    let caughtError: unknown;
     try {
       requireModule(sampleFilePath);
-    } catch (error) {
-      e = error;
+    } catch (e) {
+      caughtError = e;
     }
-    expect(e).to.haveOwnProperty('filePath', sampleFilePath);
+    expect(((caughtError as Error)?.cause as Error)?.message).to.equal('Thanos is coming!');
 
     fs.writeFileSync(sampleFilePath, `module.exports = 1`);
 

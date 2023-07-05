@@ -131,13 +131,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       moduleFn(...Object.values(moduleBuiltins));
     } catch (e) {
       requireCache.delete(filePath);
-
-      // switch to Error.cause once more places support it
-      if (e instanceof Error && !(e as { filePath?: string }).filePath) {
-        (e as { filePath?: string }).filePath = filePath;
-      }
-
-      throw e;
+      throw new Error(`Failed evaluating ${filePath}`, { cause: e });
     }
 
     return newModule;
