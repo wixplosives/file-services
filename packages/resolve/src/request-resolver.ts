@@ -1,9 +1,9 @@
 import type { PackageJson } from 'type-fest';
-import type { RequestResolver, IRequestResolverOptions, IResolvedPackageJson, IResolutionOutput } from './types.js';
+import type { IRequestResolverOptions, IResolutionOutput, IResolvedPackageJson, RequestResolver } from './types.js';
 
-const defaultTarget = 'browser';
 const defaultPackageRoots = ['node_modules'];
 const defaultExtensions = ['.js', '.json'];
+const defaultConditions = ['browser', 'import', 'require'];
 const isRelative = (request: string) =>
   request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
@@ -14,12 +14,15 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     fs: { statSync, readFileSync, realpathSync, dirname, join, resolve, isAbsolute },
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
-    target = defaultTarget,
-    moduleField = target === 'browser',
+    conditions = defaultConditions,
     resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
     alias = {},
     fallback = {},
   } = options;
+
+  const exportConditions = new Set(conditions);
+  const targetsBrowser = exportConditions.has('browser');
+  const targetsEsm = exportConditions.has('import');
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
   const remapUsingAlias = createRequestRemapper(alias);
@@ -39,7 +42,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         if (!statSyncSafe(resolvedFilePath)?.isFile()) {
           continue;
         }
-        if (target === 'browser') {
+        if (targetsBrowser) {
           const toPackageJson = findUpPackageJson(dirname(resolvedFilePath));
           if (toPackageJson) {
             visitedPaths.add(toPackageJson.filePath);
@@ -73,7 +76,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       yield requestAlias;
     }
 
-    if (!emittedCandidate && target === 'browser') {
+    if (!emittedCandidate && targetsBrowser) {
       const fromPackageJson = findUpPackageJson(contextPath);
       if (fromPackageJson) {
         visitedPaths.add(fromPackageJson.filePath);
@@ -133,6 +136,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     if (resolvedPackageJson !== undefined) {
       visitedPaths.add(resolvedPackageJson.filePath);
     }
+
     const mainPath = resolvedPackageJson?.mainPath;
 
     if (mainPath !== undefined) {
@@ -146,6 +150,27 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     for (const packagesPath of packageRootsToPaths(initialPath)) {
       if (!statSyncSafe(packagesPath)?.isDirectory()) {
         continue;
+      }
+      const [packageName, innerPath] = parsePackageSpecifier(request);
+      if (!packageName.length || (packageName.startsWith('@') && !packageName.includes('/'))) {
+        return;
+      }
+      const packageDirectoryPath = join(packagesPath, packageName);
+      const resolvedPackageJson = loadPackageJsonFromCached(packageDirectoryPath);
+      if (resolvedPackageJson !== undefined) {
+        visitedPaths.add(resolvedPackageJson.filePath);
+      }
+      if (resolvedPackageJson?.exports !== undefined) {
+        const exactMatchExports = resolvedPackageJson.exports[innerPath];
+        if (exactMatchExports !== undefined) {
+          yield* resolveExportConditions(packageDirectoryPath, exactMatchExports);
+        } else if (resolvedPackageJson.hasPatternExports) {
+          const matchedPattern = matchSubpathPatterns(resolvedPackageJson.exports, innerPath);
+          if (matchedPattern !== undefined) {
+            yield join(packageDirectoryPath, matchedPattern);
+          }
+        }
+        return;
       }
       const requestInPackages = join(packagesPath, request);
       yield* fileRequestPaths(requestInPackages);
@@ -181,7 +206,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     const { browser } = packageJson;
     let browserMappings: Record<string, string | false> | undefined = undefined;
-    if (target === 'browser' && typeof browser === 'object' && browser !== null) {
+    if (targetsBrowser && typeof browser === 'object' && browser !== null) {
       browserMappings = Object.create(null) as Record<string, string | false>;
       for (const [from, to] of Object.entries(browser)) {
         const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
@@ -194,12 +219,36 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       }
     }
 
+    const [desugerifiedExports, hasPatternExports] = desugarifyExportsField(packageJson.exports);
+
     return {
       filePath: packageJsonPath,
       directoryPath,
       mainPath,
       browserMappings,
+      exports: desugerifiedExports,
+      hasPatternExports,
     };
+  }
+
+  function* resolveExportConditions(directoryPath: string, exportedValue: PackageJson.Exports): Generator<string> {
+    if (exportedValue === null) {
+      return;
+    } else if (typeof exportedValue === 'string') {
+      yield join(directoryPath, exportedValue);
+    } else if (typeof exportedValue === 'object') {
+      if (Array.isArray(exportedValue)) {
+        for (const arrayItem of exportedValue) {
+          yield* resolveExportConditions(directoryPath, arrayItem);
+        }
+      } else {
+        for (const [key, value] of Object.entries(exportedValue)) {
+          if (key === 'default' || exportConditions.has(key)) {
+            yield* resolveExportConditions(directoryPath, value);
+          }
+        }
+      }
+    }
   }
 
   function resolveRemappedRequest(directoryPath: string, to: string | false): string | false | undefined {
@@ -249,14 +298,20 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function packageJsonTarget({ main, browser, module: moduleFieldValue }: PackageJson): string | undefined {
-    if (target === 'browser' && typeof browser === 'string') {
+    if (targetsBrowser && typeof browser === 'string') {
       return browser;
-    } else if (moduleField && typeof moduleFieldValue === 'string') {
+    } else if (targetsEsm && typeof moduleFieldValue === 'string') {
       return moduleFieldValue;
     }
     return typeof main === 'string' ? main : undefined;
   }
 
+  /**
+   * Generates a path chain from the current path to the root directory.
+   *
+   * @param currentPath The current path to start the chain from.
+   * @yields The current path and continues to yield the parent directory path until the root directory is reached.
+   */
   function* pathChainToRoot(currentPath: string) {
     let lastPath: string | undefined;
     while (lastPath !== currentPath) {
@@ -277,6 +332,37 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       Error.stackTraceLimit = stackTraceLimit;
     }
   }
+}
+
+function matchSubpathPatterns(exportedSubpaths: PackageJson.ExportConditions, innerPath: string): string | undefined {
+  let matchedPattern: string | undefined;
+  for (const [patternKey, patternValue] of Object.entries(exportedSubpaths)) {
+    const keyStarIdx = patternKey.indexOf('*');
+    if (keyStarIdx === -1 || patternKey.indexOf('*', keyStarIdx + 1) !== -1) {
+      continue;
+    }
+    const keyPrefix = patternKey.slice(0, keyStarIdx);
+    if (!innerPath.startsWith(keyPrefix)) {
+      continue;
+    }
+    const keySuffix = patternKey.slice(keyStarIdx + 1);
+    if (keySuffix && !innerPath.endsWith(keySuffix)) {
+      continue;
+    }
+    if (patternValue === null) {
+      return undefined;
+    } else if (typeof patternValue === 'string') {
+      const keyStarValue = innerPath.slice(keyPrefix.length, -keySuffix.length);
+      const valueStarIdx = patternValue.indexOf('*');
+      if (valueStarIdx === -1 || patternValue.indexOf('*', valueStarIdx + 1) !== -1) {
+        continue;
+      }
+      const valuePrefix = patternValue.slice(0, valueStarIdx);
+      const valueSuffix = patternValue.slice(valueStarIdx + 1);
+      matchedPattern = valuePrefix + keyStarValue + valueSuffix;
+    }
+  }
+  return matchedPattern;
 }
 
 function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: K) => T {
@@ -345,3 +431,62 @@ interface TracedErrorConstructor extends ErrorConstructor {
   stackTraceLimit?: number;
 }
 declare let Error: TracedErrorConstructor;
+
+/**
+ * Parse a package specifier into a tuple of package name and path in package.
+ * Handles both scoped and non-scoped package specifiers and returns a default path of '.' if no path is specified.
+ *
+ * @param specifier - The package specifier to parse.
+ * @example parsePackageSpecifier('react-dom') === ['react-dom', "."]
+ * @example parsePackageSpecifier('react-dom/client') === ['react-dom', './client']
+ * @example parsePackageSpecifier('@stylable/core') === ['@stylable/core', "./core"]
+ * @example parsePackageSpecifier('@stylable/core/dist/some-file') === ['@stylable/core', './dist/some-file']
+ */
+function parsePackageSpecifier(specifier: string): readonly [packageName: string, pathInPackage: string] {
+  const firstSlashIdx = specifier.indexOf('/');
+  if (firstSlashIdx === -1) {
+    return [specifier, '.'];
+  }
+  const isScopedPackage = specifier.startsWith('@');
+  if (isScopedPackage) {
+    const secondSlashIdx = specifier.indexOf('/', firstSlashIdx + 1);
+    return secondSlashIdx === -1
+      ? [specifier, '.']
+      : [specifier.slice(0, secondSlashIdx), '.' + specifier.slice(secondSlashIdx)];
+  } else {
+    return [specifier.slice(0, firstSlashIdx), '.' + specifier.slice(firstSlashIdx)];
+  }
+}
+
+/**
+ * Desugarify the `exports` field of a package.json file.
+ *
+ * If `exports` is a string or an array, it is converted to an object with a single key of `'.'`.
+ * If `exports` is already an object and has a key of `'.'` or starts with `'./'`, it is returned as is.
+ * Otherwise, `exports` is wrapped in an object with a single key of `'.'`.
+ *
+ * @param packageExports - The `exports` field of a package.json file.
+ * @returns tuple containing the desugarified `exports` field, with a flag saying whether it includes pattern exports.
+ */
+function desugarifyExportsField(
+  packageExports: PackageJson.Exports | undefined
+): [PackageJson.ExportConditions | undefined, boolean] {
+  let hasPatternExports = false;
+  if (packageExports === undefined || packageExports === null) {
+    packageExports = undefined;
+  } else if (typeof packageExports === 'string' || Array.isArray(packageExports)) {
+    packageExports = { '.': packageExports };
+  } else {
+    for (const key of Object.keys(packageExports)) {
+      if (key.includes('*')) {
+        hasPatternExports = true;
+      }
+      if (key !== '.' && !key.startsWith('./')) {
+        packageExports = { '.': packageExports };
+        hasPatternExports = false;
+        break;
+      }
+    }
+  }
+  return [packageExports, hasPatternExports];
+}

@@ -328,19 +328,6 @@ describe('request resolver', () => {
   });
 
   describe('browser/module fields (string)', () => {
-    it('prefers "browser" over "main" and "module" when loading a package.json', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', module: 'entry.js', browser: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
-    });
-
     it('uses "browser" if "main" and "module" were not defined', () => {
       const fs = createMemoryFs({
         lodash: {
@@ -353,97 +340,6 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/file.js');
     });
 
-    it('prefers "main" when resolution "target" is set to "node"', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js', module: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs, target: 'node' });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
-    });
-
-    it('prefers "browser" when resolution "target" is set to "browser" (also default)', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs, target: 'browser' });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
-    });
-
-    it('prefers "module" over "main"', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
-    });
-
-    it('prefers "module" over "main" when "target" is set to "browser"', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs, target: 'browser' });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
-    });
-
-    it('prefers "main" over "module" when "target" is set to "node"', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs, target: 'node' });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
-    });
-
-    it('prefers "module" over "main" when "moduleField" is set to true and "target" is "node"', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs, moduleField: true, target: 'node' });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
-    });
-
-    it('prefers "main" over "module" when "moduleField" is set to false', () => {
-      const fs = createMemoryFs({
-        lodash: {
-          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js' }),
-          'entry.js': EMPTY,
-          'browser.js': EMPTY,
-        },
-      });
-      const resolveRequest = createRequestResolver({ fs, moduleField: false });
-
-      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
-    });
-
     it('uses "module" if "main" and "browser" were not defined', () => {
       const fs = createMemoryFs({
         lodash: {
@@ -454,6 +350,71 @@ describe('request resolver', () => {
       const resolveRequest = createRequestResolver({ fs });
 
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/file.js');
+    });
+
+    it('prefers "module" over "main"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: 'browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('prefers "browser" over "main" and "module"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: 'entry.js', browser: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('prefers "main" over "module" and "browser" when conditions only include "node"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js', module: './browser.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, conditions: ['node'] });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
+    });
+
+    it('prefers "browser" over "main" and "module" when conditions only include "browser"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', browser: './browser.js', module: 'entry.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, conditions: ['browser'] });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
+    });
+
+    it('prefers "module" over "main" when conditions only include "import"', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: './browser.js', browser: 'entry.js' }),
+          'entry.js': EMPTY,
+          'browser.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs, conditions: ['import'] });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
     });
 
     it('resolves "browser" which points to a folder with an index file', () => {
@@ -567,6 +528,366 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './file')).to.be.resolvedTo('/file.js');
       expect(resolveRequest('/', './missing-source')).to.be.resolvedTo(undefined);
       expect(resolveRequest('/', './another-missing')).to.be.resolvedTo(undefined);
+    });
+  });
+
+  describe('exports field', () => {
+    it('treats empty object as nothing can be imported', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          lodash: {
+            'package.json': stringifyPackageJson({ exports: {} }),
+            'index.js': EMPTY,
+            'entry.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'lodash')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', 'lodash/entry.js')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', 'lodash/package.json')).to.be.resolvedTo(undefined);
+    });
+
+    it('treats dot as package root', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          lodash: {
+            'package.json': stringifyPackageJson({ exports: { '.': './entry.js' } }),
+            'entry.js': EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/entry.js');
+      expect(resolveRequest('/', 'lodash/entry.js')).to.be.resolvedTo(undefined);
+    });
+
+    // https://nodejs.org/api/packages.html#subpath-exports
+    it('supports subpath exports', () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          lodash: {
+            'package.json': stringifyPackageJson({ exports: { './anything': './f/file.js' } }),
+            f: {
+              'file.js': EMPTY,
+            },
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', 'lodash/anything')).to.be.resolvedTo('/node_modules/lodash/f/file.js');
+      expect(resolveRequest('/', 'lodash/anything.js')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', 'lodash/f/anything.js')).to.be.resolvedTo(undefined);
+      expect(resolveRequest('/', 'lodash/f/file.js')).to.be.resolvedTo(undefined);
+    });
+
+    // https://nodejs.org/api/packages.html#conditional-exports
+    describe('conditional-exports', () => {
+      it('supports the "default" condition', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: { '.': { default: './entry.js' } } }),
+              'entry.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/entry.js');
+        expect(resolveRequest('/', 'lodash/entry.js')).to.be.resolvedTo(undefined);
+      });
+
+      it('picks up "browser", "import" and "require" coniditions', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            esm: {
+              'package.json': stringifyPackageJson({ exports: { '.': { import: './entry.mjs' } } }),
+              'entry.mjs': EMPTY,
+            },
+            cjs: {
+              'package.json': stringifyPackageJson({ exports: { '.': { require: './entry.js' } } }),
+              'entry.js': EMPTY,
+            },
+            web: {
+              'package.json': stringifyPackageJson({ exports: { '.': { browser: './entry.mjs' } } }),
+              'entry.mjs': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'esm')).to.be.resolvedTo('/node_modules/esm/entry.mjs');
+        expect(resolveRequest('/', 'cjs')).to.be.resolvedTo('/node_modules/cjs/entry.js');
+        expect(resolveRequest('/', 'web')).to.be.resolvedTo('/node_modules/web/entry.mjs');
+      });
+
+      // https://nodejs.org/api/packages.html#nested-conditions
+      it('supports nested conditions', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({
+                exports: {
+                  '.': {
+                    node: { import: './entry.mjs', require: './entry.cjs' },
+                    browser: { import: './entry.browser.mjs', require: './entry.browser.cjs' },
+                  },
+                },
+              }),
+              'entry.cjs': EMPTY,
+              'entry.mjs': EMPTY,
+              'entry.browser.cjs': EMPTY,
+              'entry.browser.mjs': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/entry.browser.mjs');
+      });
+
+      it('ignores any other condition by default', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            with_types: {
+              'package.json': stringifyPackageJson({
+                exports: { '.': { types: './entry.d.ts', require: './entry.js' } },
+              }),
+              'entry.js': EMPTY,
+              'entry.d.ts': EMPTY,
+            },
+            styling_lib: {
+              'package.json': stringifyPackageJson({
+                exports: { '.': { browser: { css: './style.css' } } },
+              }),
+              'style.css': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'with_types')).to.be.resolvedTo('/node_modules/with_types/entry.js');
+        expect(resolveRequest('/', 'styling_lib')).to.be.resolvedTo(undefined);
+      });
+
+      it('allows specifying custom conditions', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            with_types: {
+              'package.json': stringifyPackageJson({
+                exports: { '.': { types: './entry.d.ts', require: './entry.js' } },
+              }),
+              'entry.js': EMPTY,
+              'entry.d.ts': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs, conditions: ['types'] });
+
+        expect(resolveRequest('/', 'with_types')).to.be.resolvedTo('/node_modules/with_types/entry.d.ts');
+      });
+
+      it('respects order of conditions', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            dual: {
+              'package.json': stringifyPackageJson({
+                exports: { '.': { import: './entry.mjs', require: './entry.js' } },
+              }),
+              'entry.js': EMPTY,
+              'entry.mjs': EMPTY,
+            },
+            dual_reversed: {
+              'package.json': stringifyPackageJson({
+                exports: { '.': { require: './entry.js', import: './entry.mjs' } },
+              }),
+              'entry.js': EMPTY,
+              'entry.mjs': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'dual')).to.be.resolvedTo('/node_modules/dual/entry.mjs');
+        expect(resolveRequest('/', 'dual_reversed')).to.be.resolvedTo('/node_modules/dual_reversed/entry.js');
+      });
+    });
+
+    describe('syntactic sugar', () => {
+      // https://nodejs.org/api/packages.html#main-entry-point-export
+      it('treats string-value "exports" field as { ".": "the-string" }', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: './entry.js' }),
+              'entry.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/entry.js');
+      });
+
+      it('treats root conditions as { "." : { ...conditions } }', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: { browser: './entry.browser.js', default: 'entry.js' } }),
+              'entry.js': EMPTY,
+              'entry.browser.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/entry.browser.js');
+      });
+
+      it('treats Array-value "exports" field as { ".": [...] }', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: ['./entry.js'] }),
+              'entry.js': EMPTY,
+            },
+            no_entry: {
+              'package.json': stringifyPackageJson({ exports: ['./entry.js'] }),
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo('/node_modules/lodash/entry.js');
+        expect(resolveRequest('/', 'no_entry')).to.be.resolvedTo(undefined);
+      });
+    });
+
+    // https://nodejs.org/api/packages.html#subpath-patterns
+    describe('subpath patterns', () => {
+      it('supports pattern matching for files', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: { './features/*.js': './src/features/*.js' } }),
+              src: {
+                features: {
+                  'a.js': EMPTY,
+                  'b.css': EMPTY,
+                  deep: {
+                    'inner.js': EMPTY,
+                  },
+                },
+              },
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash/features/a.js')).to.be.resolvedTo('/node_modules/lodash/src/features/a.js');
+        expect(resolveRequest('/', 'lodash/features/b.css')).to.be.resolvedTo(undefined);
+        expect(resolveRequest('/', 'lodash/features/deep/inner.js')).to.be.resolvedTo(
+          '/node_modules/lodash/src/features/deep/inner.js'
+        );
+      });
+
+      it('supports exclusion of subfolders', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({
+                exports: {
+                  './features/*.js': './src/features/*.js',
+                  './features/private-internal/*': null,
+                },
+              }),
+              src: {
+                features: {
+                  'a.js': EMPTY,
+                  'private-internal': {
+                    'internal.js': EMPTY,
+                  },
+                },
+              },
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash/features/a.js')).to.be.resolvedTo('/node_modules/lodash/src/features/a.js');
+        expect(resolveRequest('/', 'lodash/features/private-internal/internal.js')).to.be.resolvedTo(undefined);
+      });
+    });
+
+    describe('no cjs resolution leakage', () => {
+      it('does not append extensions to export targets', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: { '.': './entry' } }),
+              'entry.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo(undefined);
+      });
+
+      it('does not allow mapping to folder root (no index.js appending)', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: { '.': './f' } }),
+              f: {
+                'index.js': EMPTY,
+              },
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash')).to.be.resolvedTo(undefined);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('treats "exports": null as not defined (matches node behavior)', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({ exports: null }),
+              'entry.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash/entry.js')).to.be.resolvedTo('/node_modules/lodash/entry.js');
+      });
+
+      it('resolves "<package-name>/" only if ./ is allowed', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            disallowed: {
+              'package.json': stringifyPackageJson({ exports: { '.': './entry.js' } }),
+              'entry.js': EMPTY,
+            },
+            allowed: {
+              'package.json': stringifyPackageJson({ exports: { '.': './entry.js', './': './entry.js' } }),
+              'entry.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'disallowed/')).to.be.resolvedTo(undefined);
+        expect(resolveRequest('/', 'allowed/')).to.be.resolvedTo('/node_modules/allowed/entry.js');
+      });
     });
   });
 

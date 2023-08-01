@@ -1,3 +1,5 @@
+import { PackageJson } from 'type-fest';
+
 export interface IRequestResolverOptions {
   /**
    * File system to use when resolving requests.
@@ -19,10 +21,12 @@ export interface IRequestResolverOptions {
   extensions?: string[];
 
   /**
-   * Whether to prefer the 'browser' field or 'main' field
-   * in `package.json`.
+   * Package export conditions to try resolving the request with.
+   *
+   * @default ['browser', 'import', 'require']
+   * @see https://nodejs.org/api/packages.html#conditional-exports
    */
-  target?: 'node' | 'browser';
+  conditions?: string[];
 
   /**
    * Cache for resolved packages. Map keys are directoryPaths.
@@ -43,13 +47,6 @@ export interface IRequestResolverOptions {
    * Original request is attempted before fallback.
    */
   fallback?: Record<string, string | false>;
-
-  /**
-   * Support the "module" field. Picked up over "main".
-   *
-   * @default true when "target" is set to "browser"
-   */
-  moduleField?: boolean;
 }
 
 export interface IResolutionOutput {
@@ -105,4 +102,6 @@ export interface IResolvedPackageJson {
   browserMappings?: {
     [from: string]: string | false;
   };
+  exports?: PackageJson.ExportConditions;
+  hasPatternExports?: boolean;
 }

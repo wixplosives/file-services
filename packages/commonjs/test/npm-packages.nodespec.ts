@@ -36,7 +36,7 @@ describe('commonjs module system - integration with existing npm packages', func
   it('evaluates postcss successfully', () => {
     const { requireFrom, requireCache } = createCjsModuleSystem({
       fs,
-      resolver: createRequestResolver({ fs, target: 'node' }),
+      resolver: createRequestResolver({ fs, conditions: ['node', 'require'] }),
     });
     requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
     requireCache.set('url', { filename: 'url', id: 'url', exports: url, children: [] });
@@ -60,7 +60,7 @@ describe('commonjs module system - integration with existing npm packages', func
   it('evaluates mocha successfully', () => {
     const { requireFrom, requireCache } = createCjsModuleSystem({
       fs,
-      resolver: createRequestResolver({ fs, target: 'node' }),
+      resolver: createRequestResolver({ fs, conditions: ['node', 'require'] }),
     });
     requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
     requireCache.set('stream', { filename: 'stream', id: 'stream', exports: stream, children: [] });
@@ -77,7 +77,7 @@ describe('commonjs module system - integration with existing npm packages', func
   it('evaluates sass successfully', () => {
     const { requireFrom, requireCache } = createCjsModuleSystem({
       fs,
-      resolver: createRequestResolver({ fs, target: 'node' }),
+      resolver: createRequestResolver({ fs, conditions: ['node', 'require'] }),
     });
     requireCache.set('fs', { filename: 'fs', id: 'fs', exports: fs, children: [] });
     requireCache.set('path', { filename: 'path', id: 'path', exports: path, children: [] });
