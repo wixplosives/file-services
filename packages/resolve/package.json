@@ -8,6 +8,9 @@
     "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\"",
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
+  "dependencies": {
+    "type-fest": "^4.1.0"
+  },
   "files": [
     "dist",
     "!dist/test",
