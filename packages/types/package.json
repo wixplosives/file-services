@@ -1,7 +1,7 @@
 {
   "name": "@file-services/types",
   "description": "Common file system interfaces",
-  "version": "7.4.0",
+  "version": "8.0.0",
   "main": "dist/index.js",
   "files": [
     "dist",
