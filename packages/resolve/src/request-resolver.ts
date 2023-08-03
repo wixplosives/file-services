@@ -147,13 +147,30 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   }
 
   function* packageRequestPaths(initialPath: string, request: string, visitedPaths: Set<string>) {
+    const [packageName, innerPath] = parsePackageSpecifier(request);
+    if (!packageName.length || (packageName.startsWith('@') && !packageName.includes('/'))) {
+      return;
+    }
+
+    const ownPackageJson = findUpPackageJson(initialPath);
+    if (ownPackageJson !== undefined) {
+      visitedPaths.add(ownPackageJson.filePath);
+      if (ownPackageJson.name === packageName) {
+        if (ownPackageJson.exports !== undefined) {
+          yield* matchExportsField(
+            ownPackageJson.directoryPath,
+            ownPackageJson.exports,
+            innerPath,
+            ownPackageJson.hasPatternExports
+          );
+          return;
+        }
+      }
+    }
+
     for (const packagesPath of packageRootsToPaths(initialPath)) {
       if (!statSyncSafe(packagesPath)?.isDirectory()) {
         continue;
-      }
-      const [packageName, innerPath] = parsePackageSpecifier(request);
-      if (!packageName.length || (packageName.startsWith('@') && !packageName.includes('/'))) {
-        return;
       }
       const packageDirectoryPath = join(packagesPath, packageName);
       const resolvedPackageJson = loadPackageJsonFromCached(packageDirectoryPath);
@@ -161,20 +178,34 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         visitedPaths.add(resolvedPackageJson.filePath);
       }
       if (resolvedPackageJson?.exports !== undefined) {
-        const exactMatchExports = resolvedPackageJson.exports[innerPath];
-        if (exactMatchExports !== undefined) {
-          yield* resolveExportConditions(packageDirectoryPath, exactMatchExports);
-        } else if (resolvedPackageJson.hasPatternExports) {
-          const matchedPattern = matchSubpathPatterns(resolvedPackageJson.exports, innerPath);
-          if (matchedPattern !== undefined) {
-            yield join(packageDirectoryPath, matchedPattern);
-          }
-        }
+        yield* matchExportsField(
+          packageDirectoryPath,
+          resolvedPackageJson.exports,
+          innerPath,
+          resolvedPackageJson.hasPatternExports
+        );
         return;
       }
       const requestInPackages = join(packagesPath, request);
       yield* fileRequestPaths(requestInPackages);
       yield* directoryRequestPaths(requestInPackages, visitedPaths);
+    }
+  }
+
+  function* matchExportsField(
+    contextPath: string,
+    exportConditions: PackageJson.ExportConditions,
+    innerPath: string,
+    hasPatternExports?: boolean
+  ) {
+    const exactMatchExports = exportConditions[innerPath];
+    if (exactMatchExports !== undefined) {
+      yield* resolveExportConditions(contextPath, exactMatchExports);
+    } else if (hasPatternExports) {
+      const matchedPattern = matchSubpathPatterns(exportConditions, innerPath);
+      if (matchedPattern !== undefined) {
+        yield join(contextPath, matchedPattern);
+      }
     }
   }
 
@@ -222,6 +253,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     const [desugerifiedExports, hasPatternExports] = desugarifyExportsField(packageJson.exports);
 
     return {
+      name: packageJson.name,
       filePath: packageJsonPath,
       directoryPath,
       mainPath,

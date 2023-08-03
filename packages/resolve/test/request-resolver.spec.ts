@@ -717,6 +717,20 @@ describe('request resolver', () => {
       });
     });
 
+    // https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
+    it('supports self resolution', () => {
+      const fs = createMemoryFs({
+        'package.json': stringifyPackageJson({ name: 'lodash', exports: 'main.js' }),
+        'main.js': EMPTY,
+        src: {
+          'file.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/src', 'lodash')).to.be.resolvedTo('/main.js');
+    });
+
     describe('syntactic sugar', () => {
       // https://nodejs.org/api/packages.html#main-entry-point-export
       it('treats string-value "exports" field as { ".": "the-string" }', () => {

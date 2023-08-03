@@ -96,6 +96,7 @@ export interface IResolutionFileSystem {
 }
 
 export interface IResolvedPackageJson {
+  name?: string;
   filePath: string;
   directoryPath: string;
   mainPath?: string;
