@@ -8,8 +8,8 @@
     "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\""
   },
   "dependencies": {
-    "@file-services/types": "^8.0.0",
-    "@file-services/utils": "^8.0.0"
+    "@file-services/types": "^8.0.1",
+    "@file-services/utils": "^8.0.1"
   },
   "files": [
     "dist",

@@ -7,7 +7,7 @@
     "typescript": ">=2.8.0"
   },
   "dependencies": {
-    "@file-services/types": "^8.0.0"
+    "@file-services/types": "^8.0.1"
   },
   "files": [
     "dist",

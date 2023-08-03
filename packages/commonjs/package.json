@@ -9,8 +9,8 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/resolve": "^8.0.0",
-    "@file-services/types": "^8.0.0"
+    "@file-services/resolve": "^8.0.1",
+    "@file-services/types": "^8.0.1"
   },
   "files": [
     "dist",
