@@ -384,14 +384,14 @@ function matchSubpathPatterns(exportedSubpaths: PackageJson.ExportConditions, in
     if (patternValue === null) {
       return undefined;
     } else if (typeof patternValue === 'string') {
-      const keyStarValue = innerPath.slice(keyPrefix.length, -keySuffix.length);
+      const innerPathStarValue = innerPath.slice(keyPrefix.length, innerPath.length - keySuffix.length);
       const valueStarIdx = patternValue.indexOf('*');
       if (valueStarIdx === -1 || patternValue.indexOf('*', valueStarIdx + 1) !== -1) {
         continue;
       }
       const valuePrefix = patternValue.slice(0, valueStarIdx);
       const valueSuffix = patternValue.slice(valueStarIdx + 1);
-      matchedPattern = valuePrefix + keyStarValue + valueSuffix;
+      matchedPattern = valuePrefix + innerPathStarValue + valueSuffix;
     }
   }
   return matchedPattern;

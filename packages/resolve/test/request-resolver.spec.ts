@@ -835,6 +835,20 @@ describe('request resolver', () => {
         expect(resolveRequest('/', 'lodash/features/a.js')).to.be.resolvedTo('/node_modules/lodash/src/features/a.js');
         expect(resolveRequest('/', 'lodash/features/private-internal/internal.js')).to.be.resolvedTo(undefined);
       });
+
+      it('supports remapping entire contents of a package', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            tslib: {
+              'package.json': stringifyPackageJson({ exports: { './*': './*' } }),
+              'tslib.js': EMPTY,
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'tslib/tslib.js')).to.be.resolvedTo('/node_modules/tslib/tslib.js');
+      });
     });
 
     describe('no cjs resolution leakage', () => {
