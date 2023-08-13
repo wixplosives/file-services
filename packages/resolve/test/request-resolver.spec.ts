@@ -849,6 +849,22 @@ describe('request resolver', () => {
 
         expect(resolveRequest('/', 'tslib/tslib.js')).to.be.resolvedTo('/node_modules/tslib/tslib.js');
       });
+
+      it('picks first match, even if there are several that match', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            tslib: {
+              'package.json': stringifyPackageJson({ exports: { './dist/*': './dist/*.js', './*': './*' } }),
+              dist: {
+                'file.js': EMPTY,
+              },
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'tslib/dist/file')).to.be.resolvedTo('/node_modules/tslib/dist/file.js');
+      });
     });
 
     describe('no cjs resolution leakage', () => {
