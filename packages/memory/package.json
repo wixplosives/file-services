@@ -1,7 +1,7 @@
 {
   "name": "@file-services/memory",
   "description": "An in-memory, sync/async, file system implementation.",
-  "version": "8.1.1",
+  "version": "8.1.2",
   "main": "dist/index.js",
   "scripts": {
     "test": "npm run test:node && npm run test:browser",
@@ -9,9 +9,9 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/path": "^8.1.1",
-    "@file-services/types": "^8.1.1",
-    "@file-services/utils": "^8.1.1"
+    "@file-services/path": "^8.1.2",
+    "@file-services/types": "^8.1.2",
+    "@file-services/utils": "^8.1.2"
   },
   "files": [
     "dist",
