@@ -383,7 +383,7 @@ function matchSubpathPatterns(exportedSubpaths: PackageJson.ExportConditions, in
     }
     if (patternValue === null) {
       return undefined;
-    } else if (typeof patternValue === 'string') {
+    } else if (matchedPattern === undefined && typeof patternValue === 'string') {
       const innerPathStarValue = innerPath.slice(keyPrefix.length, innerPath.length - keySuffix.length);
       const valueStarIdx = patternValue.indexOf('*');
       if (valueStarIdx === -1 || patternValue.indexOf('*', valueStarIdx + 1) !== -1) {
