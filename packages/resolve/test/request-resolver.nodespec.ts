@@ -8,7 +8,7 @@ chai.use(resolutionMatchers);
 describe('request resolver node integration', () => {
   it('resolves symlinks to realpath', () => {
     const resolveRequest = createRequestResolver({ fs });
-    const requestViaLink = '@file-services/resolve/package.json';
+    const requestViaLink = '@file-services/node/package.json';
 
     expect(resolveRequest(__dirname, requestViaLink)).to.be.resolvedTo(require.resolve(requestViaLink));
   });
@@ -22,7 +22,7 @@ describe('request resolver node integration', () => {
         },
       },
     });
-    const requestViaLink = '@file-services/resolve/package.json';
+    const requestViaLink = '@file-services/node/package.json';
     expect(resolveRequest(__dirname, requestViaLink).resolvedFile).to.include(fs.join('node_modules', requestViaLink));
   });
 });

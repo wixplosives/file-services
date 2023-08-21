@@ -2,7 +2,11 @@
   "name": "@file-services/test-kit",
   "description": "File system test-kit, containing contracts and validators.",
   "version": "8.1.2",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "dependencies": {
     "@file-services/types": "^8.1.2",
     "chai": "^4.3.7",
