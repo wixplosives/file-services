@@ -2,7 +2,11 @@
   "name": "@file-services/typescript",
   "description": "Helpers for creation of TypeScript hosts",
   "version": "8.1.2",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "peerDependencies": {
     "typescript": ">=2.8.0"
   },

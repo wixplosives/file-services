@@ -2,7 +2,11 @@
   "name": "@file-services/types",
   "description": "Common file system interfaces",
   "version": "8.1.2",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "!dist/test",
