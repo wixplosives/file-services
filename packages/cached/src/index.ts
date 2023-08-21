@@ -1,1 +1,1 @@
-export * from './cached-fs.js';
+export * from './cached-fs';

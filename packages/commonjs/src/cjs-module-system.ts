@@ -1,7 +1,7 @@
 import type { IFileSystemSync } from '@file-services/types';
 import { createRequestResolver, RequestResolver } from '@file-services/resolve';
-import type { ICommonJsModuleSystem, LoadModule } from './types.js';
-import { createBaseCjsModuleSystem } from './base-cjs-module-system.js';
+import type { ICommonJsModuleSystem, LoadModule } from './types';
+import { createBaseCjsModuleSystem } from './base-cjs-module-system';
 
 export interface IModuleSystemOptions {
   /**

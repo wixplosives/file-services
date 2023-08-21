@@ -1,3 +1,3 @@
-export * from './dependency-resolver.js';
-export * from './request-resolver.js';
-export * from './types.js';
+export * from './dependency-resolver';
+export * from './request-resolver';
+export * from './types';

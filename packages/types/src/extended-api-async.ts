@@ -1,5 +1,5 @@
-import type { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types.js';
-import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async.js';
+import type { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types';
+import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async';
 
 /**
  * ASYNC-only file system.

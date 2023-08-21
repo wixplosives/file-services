@@ -12,7 +12,7 @@ import {
   StatSyncOptions,
   RmOptions,
 } from '@file-services/types';
-import { FsErrorCodes } from './error-codes.js';
+import { FsErrorCodes } from './error-codes';
 import type {
   IMemFileSystem,
   IBaseMemFileSystem,
@@ -21,7 +21,7 @@ import type {
   IFsMemDirectoryNode,
   IFsMemNodeType,
   IFsMemSymlinkNode,
-} from './types.js';
+} from './types';
 
 const posixPath = path.posix;
 

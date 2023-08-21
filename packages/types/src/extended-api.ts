@@ -1,8 +1,8 @@
-import type { IFileSystemSync } from './extended-api-sync.js';
-import type { IFileSystemAsync } from './extended-api-async.js';
+import type { IFileSystemSync } from './extended-api-sync';
+import type { IFileSystemAsync } from './extended-api-async';
 
-export * from './extended-api-sync.js';
-export * from './extended-api-async.js';
+export * from './extended-api-sync';
+export * from './extended-api-async';
 
 /**
  * SYNC and ASYNC file system.

@@ -6,9 +6,9 @@ import type {
   IDirectoryEntry,
   StatSyncOptions,
   RmOptions,
-} from './common-fs-types.js';
-import type { IFileSystemPath } from './path.js';
-import type { IWatchService } from './watch-api.js';
+} from './common-fs-types';
+import type { IFileSystemPath } from './path';
+import type { IWatchService } from './watch-api';
 
 /**
  * SYNC-only base file system.

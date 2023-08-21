@@ -1,1 +1,1 @@
-export * from './create-host.js';
+export * from './create-host';

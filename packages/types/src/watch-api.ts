@@ -1,4 +1,4 @@
-import type { IFileSystemStats } from './common-fs-types.js';
+import type { IFileSystemStats } from './common-fs-types';
 
 /**
  * File watching service.
