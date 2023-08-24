@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@file-services/types": "^8.1.2",
-    "chai": "^4.3.7",
+    "chai": "^4.3.8",
     "promise-assist": "^2.0.1"
   },
   "files": [
