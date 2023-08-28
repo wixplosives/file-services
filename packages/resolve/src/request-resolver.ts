@@ -76,7 +76,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       yield requestAlias;
     }
 
-    if (!emittedCandidate && targetsBrowser) {
+    if (!emittedCandidate && targetsBrowser && !isRelative(request)) {
       const fromPackageJson = findUpPackageJson(contextPath);
       if (fromPackageJson) {
         visitedPaths.add(fromPackageJson.filePath);
@@ -135,15 +135,19 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
     if (resolvedPackageJson !== undefined) {
       visitedPaths.add(resolvedPackageJson.filePath);
+
+      if (targetsBrowser && resolvedPackageJson.browser !== undefined) {
+        yield* fileOrDirIndexRequestPaths(join(directoryPath, resolvedPackageJson.browser));
+      }
+      if (targetsEsm && resolvedPackageJson.module !== undefined) {
+        yield* fileOrDirIndexRequestPaths(join(directoryPath, resolvedPackageJson.module));
+      }
+      if (resolvedPackageJson.main !== undefined) {
+        yield* fileOrDirIndexRequestPaths(join(directoryPath, resolvedPackageJson.main));
+      }
     }
 
-    const mainPath = resolvedPackageJson?.mainPath;
-
-    if (mainPath !== undefined) {
-      yield* fileOrDirIndexRequestPaths(join(directoryPath, mainPath));
-    } else {
-      yield* fileRequestPaths(join(directoryPath, 'index'));
-    }
+    yield* fileRequestPaths(join(directoryPath, 'index'));
   }
 
   function* packageRequestPaths(initialPath: string, request: string, visitedPaths: Set<string>) {
@@ -233,13 +237,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     if (typeof packageJson !== 'object' || packageJson === null) {
       return undefined;
     }
-    const mainPath = packageJsonTarget(packageJson);
+    const { main: mainField, module: moduleField, browser: browserField } = packageJson;
 
-    const { browser } = packageJson;
     let browserMappings: Record<string, string | false> | undefined = undefined;
-    if (targetsBrowser && typeof browser === 'object' && browser !== null) {
+    if (targetsBrowser && typeof browserField === 'object' && browserField !== null) {
       browserMappings = Object.create(null) as Record<string, string | false>;
-      for (const [from, to] of Object.entries(browser)) {
+      for (const [from, to] of Object.entries(browserField)) {
         const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
         if (resolvedFrom && to !== undefined) {
           const resolvedTo = resolveRemappedRequest(directoryPath, to);
@@ -256,7 +259,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       name: packageJson.name,
       filePath: packageJsonPath,
       directoryPath,
-      mainPath,
+      main: typeof mainField === 'string' ? mainField : undefined,
+      module: typeof moduleField === 'string' ? moduleField : undefined,
+      browser: typeof browserField === 'string' ? browserField : undefined,
       browserMappings,
       exports: desugerifiedExports,
       hasPatternExports,
@@ -327,15 +332,6 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     } finally {
       Error.stackTraceLimit = stackTraceLimit;
     }
-  }
-
-  function packageJsonTarget({ main, browser, module: moduleFieldValue }: PackageJson): string | undefined {
-    if (targetsBrowser && typeof browser === 'string') {
-      return browser;
-    } else if (targetsEsm && typeof moduleFieldValue === 'string') {
-      return moduleFieldValue;
-    }
-    return typeof main === 'string' ? main : undefined;
   }
 
   /**

@@ -378,6 +378,46 @@ describe('request resolver', () => {
       expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/browser.js');
     });
 
+    it('falls back to "module" when "browser" cannot be resolved', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ module: 'entry.js', browser: 'missing-file.js' }),
+          'entry.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
+    });
+
+    it('falls back to "main" when "module" cannot be resolved', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({ main: 'entry.js', module: 'missing-file.js' }),
+          'entry.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
+    });
+
+    it('falls back to "main" when both "browser" and "module" cannot be resolved', () => {
+      const fs = createMemoryFs({
+        lodash: {
+          'package.json': stringifyPackageJson({
+            main: 'entry.js',
+            module: 'missing-file.js',
+            browser: 'missing-file.js',
+          }),
+          'entry.js': EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest('/', './lodash')).to.be.resolvedTo('/lodash/entry.js');
+    });
+
     it('prefers "main" over "module" and "browser" when conditions only include "node"', () => {
       const fs = createMemoryFs({
         lodash: {
@@ -1205,12 +1245,12 @@ describe('request resolver', () => {
       const resolutionOutput = resolveRequest('/', './src');
       expect(resolutionOutput).to.be.resolvedTo('/src/index.js');
       expect(Array.from(resolutionOutput.visitedPaths)).to.eql([
-        '/package.json',
         '/src',
         '/src.js',
         '/src.json',
         '/src/index',
         '/src/index.js',
+        '/package.json',
       ]);
     });
 
