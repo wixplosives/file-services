@@ -96,10 +96,12 @@ export interface IResolutionFileSystem {
 }
 
 export interface IResolvedPackageJson {
-  name?: string;
   filePath: string;
   directoryPath: string;
-  mainPath?: string;
+  name?: string;
+  main?: string;
+  module?: string;
+  browser?: string;
   browserMappings?: {
     [from: string]: string | false;
   };
