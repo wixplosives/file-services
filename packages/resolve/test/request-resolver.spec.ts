@@ -905,6 +905,37 @@ describe('request resolver', () => {
 
         expect(resolveRequest('/', 'tslib/dist/file')).to.be.resolvedTo('/node_modules/tslib/dist/file.js');
       });
+
+      it('supports patterns with nested conditions', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({
+                exports: {
+                  './api/*': { custom: ['./src/second/*.ts', './src/second/*.tsx'], default: './src/first/*' },
+                },
+              }),
+              src: {
+                first: {
+                  'a.ts': EMPTY,
+                  'b.tsx': EMPTY,
+                },
+                second: {
+                  'a.ts': EMPTY,
+                  'b.tsx': EMPTY,
+                },
+              },
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+        expect(resolveRequest('/', 'lodash/api/a.ts')).to.be.resolvedTo('/node_modules/lodash/src/first/a.ts');
+        expect(resolveRequest('/', 'lodash/api/b.tsx')).to.be.resolvedTo('/node_modules/lodash/src/first/b.tsx');
+
+        const customResolve = createRequestResolver({ fs, conditions: ['custom'] });
+        expect(customResolve('/', 'lodash/api/a')).to.be.resolvedTo('/node_modules/lodash/src/second/a.ts');
+        expect(customResolve('/', 'lodash/api/b')).to.be.resolvedTo('/node_modules/lodash/src/second/b.tsx');
+      });
     });
 
     describe('no cjs resolution leakage', () => {
