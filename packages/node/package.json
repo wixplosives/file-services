@@ -2,9 +2,14 @@
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
   "version": "8.2.0",
-  "main": "./dist/index.js",
+  "main": "./dist/fs-node.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fs-node.mjs",
+      "require": "./dist/fs-node.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

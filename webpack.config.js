@@ -9,6 +9,13 @@ module.exports = {
         enforce: 'pre',
         loader: 'source-map-loader',
       },
+      {
+        test: /\.tsx?$/,
+        loader: '@ts-tools/webpack-loader',
+      },
     ],
+  },
+  resolve: {
+    extensions: ['.ts', '.tsx', '.mjs', '.js', '.json'],
   },
 };
