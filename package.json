@@ -5,16 +5,18 @@
   ],
   "scripts": {
     "clean": "rimraf -g \"./packages/*/dist\"",
-    "build": "tsc --build",
+    "build": "node ./scripts/build.mjs && tsc --build",
     "watch": "npm run build -- -w",
     "lint": "eslint .",
     "pretest": "npm run lint && npm run build",
     "test": "npm run test:node && npm run test:browser",
-    "test:node": "mocha \"./packages/*/dist/test/*.{spec,nodespec}.js\" --parallel",
-    "test:browser": "mocha-play \"packages/*/dist/test/**/*.spec.js\""
+    "test:node": "mocha \"./packages/*/test/*.{spec,nodespec}.ts?(x)\" --parallel",
+    "test:browser": "mocha-play \"packages/*/test/**/*.spec.ts?(x)\""
   },
   "devDependencies": {
     "@playwright/browser-chromium": "^1.38.0",
+    "@ts-tools/node": "^5.0.2",
+    "@ts-tools/webpack-loader": "^5.0.2",
     "@types/chai": "^4.3.6",
     "@types/chai-as-promised": "^7.1.6",
     "@types/mocha": "^10.0.1",
@@ -27,6 +29,7 @@
     "chai": "^4.3.8",
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^2.4.0",
+    "esbuild": "^0.19.3",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-no-only-tests": "^3.1.0",

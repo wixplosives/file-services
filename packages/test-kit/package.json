@@ -2,9 +2,14 @@
   "name": "@file-services/test-kit",
   "description": "File system test-kit, containing contracts and validators.",
   "version": "8.2.0",
-  "main": "./dist/index.js",
+  "main": "./dist/fs-test-kit.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fs-test-kit.mjs",
+      "require": "./dist/fs-test-kit.cjs"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {

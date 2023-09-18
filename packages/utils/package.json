@@ -2,9 +2,14 @@
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
   "version": "8.2.0",
-  "main": "./dist/index.js",
+  "main": "./dist/fs-utils.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fs-utils.mjs",
+      "require": "./dist/fs-utils.cjs"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {

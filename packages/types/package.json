@@ -2,9 +2,14 @@
   "name": "@file-services/types",
   "description": "Common file system interfaces",
   "version": "8.2.0",
-  "main": "./dist/index.js",
+  "main": "./dist/fs-types.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fs-types.mjs",
+      "require": "./dist/fs-types.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [

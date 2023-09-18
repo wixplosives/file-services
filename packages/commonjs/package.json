@@ -2,9 +2,14 @@
   "name": "@file-services/commonjs",
   "description": "Isomorphic, fs-agnostic implementation of the Node commonjs module system.",
   "version": "8.2.0",
-  "main": "./dist/index.js",
+  "main": "./dist/fs-commonjs.cjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fs-commonjs.mjs",
+      "require": "./dist/fs-commonjs.cjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
