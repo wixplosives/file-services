@@ -1,9 +1,9 @@
 import type { PackageJson } from 'type-fest';
 import type { IRequestResolverOptions, IResolutionOutput, IResolvedPackageJson, RequestResolver } from './types';
 
-const defaultPackageRoots = ['node_modules'];
-const defaultExtensions = ['.js', '.json'];
-const defaultConditions = ['browser', 'import', 'require'];
+export const defaultPackageRoots = ['node_modules'] as const;
+export const defaultExtensions = ['.js', '.json'] as const;
+export const defaultConditions = ['browser', 'import', 'require'] as const;
 const isRelative = (request: string) =>
   request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
 const PACKAGE_JSON = 'package.json';
