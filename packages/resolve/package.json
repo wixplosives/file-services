@@ -18,7 +18,7 @@
     "test:browser": "mocha-play \"./test/**/*.spec.ts?(x)\""
   },
   "dependencies": {
-    "type-fest": "^4.3.1"
+    "type-fest": "^4.3.2"
   },
   "files": [
     "dist",
