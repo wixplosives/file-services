@@ -1,7 +1,8 @@
-import { join } from 'path';
-import { promises as fsPromises, watch, FSWatcher } from 'fs';
-import { once } from 'events';
-import type { IWatchService, WatchEventListener, IWatchEvent, IFileSystemStats } from '@file-services/types';
+import { once } from 'node:events';
+import { FSWatcher, promises as fsPromises, watch } from 'node:fs';
+import { join } from 'node:path';
+
+import type { IFileSystemStats, IWatchEvent, IWatchService, WatchEventListener } from '@file-services/types';
 import { SetMultiMap } from '@file-services/utils';
 
 const { stat } = fsPromises;
