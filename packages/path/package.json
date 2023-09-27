@@ -1,13 +1,13 @@
 {
   "name": "@file-services/path",
   "description": "Node's `path` implementation, ready for the web.",
-  "version": "8.3.0",
+  "version": "8.3.1",
   "main": "index.js",
   "browser": {
     "./index.js": "./browser-path.js"
   },
   "dependencies": {
-    "@file-services/types": "^8.3.0"
+    "@file-services/types": "^8.3.1"
   },
   "files": [
     "index.js",
