@@ -863,6 +863,13 @@ describe('request resolver', () => {
                   a: {
                     'a.js': EMPTY,
                   },
+                  b: {
+                    b: {
+                      b: {
+                        'b.js': EMPTY,
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -872,6 +879,9 @@ describe('request resolver', () => {
 
         expect(resolveRequest('/', 'lodash/features/a.js')).to.be.resolvedTo(
           '/node_modules/lodash/src/features/a/a.js'
+        );
+        expect(resolveRequest('/', 'lodash/features/b/b.js')).to.be.resolvedTo(
+          '/node_modules/lodash/src/features/b/b/b/b.js'
         );
       });
 
