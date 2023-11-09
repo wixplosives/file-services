@@ -1,7 +1,7 @@
 {
   "name": "@file-services/types",
   "description": "Common file system interfaces",
-  "version": "8.3.2",
+  "version": "8.3.3",
   "main": "./dist/fs-types.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
