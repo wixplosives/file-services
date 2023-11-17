@@ -44,7 +44,7 @@
     "sinon": "^17.0.1",
     "sinon-chai": "^3.7.0",
     "source-map-loader": "^4.0.1",
-    "type-fest": "^4.7.1",
+    "type-fest": "^4.8.1",
     "typescript": "~5.2.2",
     "webpack": "^5.89.0"
   },
