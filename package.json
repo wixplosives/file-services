@@ -19,7 +19,7 @@
     "@ts-tools/webpack-loader": "^5.0.2",
     "@types/chai": "^4.3.10",
     "@types/chai-as-promised": "^7.1.8",
-    "@types/mocha": "^10.0.4",
+    "@types/mocha": "^10.0.5",
     "@types/node": "16",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
