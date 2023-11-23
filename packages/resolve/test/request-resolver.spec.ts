@@ -885,6 +885,32 @@ describe('request resolver', () => {
         );
       });
 
+      it('supports pattern matching with no replacements for files', () => {
+        const fs = createMemoryFs({
+          node_modules: {
+            lodash: {
+              'package.json': stringifyPackageJson({
+                exports: {
+                  './features/*.js': './src/features/a.js',
+                },
+              }),
+              src: {
+                features: {
+                  'a.js': EMPTY,
+                },
+              },
+            },
+          },
+        });
+        const resolveRequest = createRequestResolver({ fs });
+
+        expect(resolveRequest('/', 'lodash/features/a.js')).to.be.resolvedTo('/node_modules/lodash/src/features/a.js');
+        expect(resolveRequest('/', 'lodash/features/b.js')).to.be.resolvedTo('/node_modules/lodash/src/features/a.js');
+        expect(resolveRequest('/', 'lodash/features/b/b.js')).to.be.resolvedTo(
+          '/node_modules/lodash/src/features/a.js'
+        );
+      });
+
       it('supports exclusion of subfolders', () => {
         const fs = createMemoryFs({
           node_modules: {
