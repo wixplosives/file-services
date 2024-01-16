@@ -14,7 +14,7 @@
     "test:browser": "mocha-play \"packages/*/test/**/*.spec.ts?(x)\""
   },
   "devDependencies": {
-    "@playwright/browser-chromium": "^1.40.1",
+    "@playwright/browser-chromium": "^1.41.0",
     "@ts-tools/node": "^5.0.2",
     "@ts-tools/webpack-loader": "^5.0.2",
     "@types/chai": "^4.3.11",
