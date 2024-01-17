@@ -11,7 +11,8 @@
     "pretest": "npm run lint && npm run build",
     "test": "npm run test:node && npm run test:browser",
     "test:node": "mocha \"./packages/*/test/*.{spec,nodespec}.ts?(x)\" --parallel",
-    "test:browser": "mocha-play \"packages/*/test/**/*.spec.ts?(x)\""
+    "test:browser": "mocha-play \"packages/*/test/**/*.spec.ts?(x)\"",
+    "pretiffy": "prettier --write ."
   },
   "devDependencies": {
     "@playwright/browser-chromium": "^1.41.0",
@@ -36,6 +37,7 @@
     "mocha": "^10.2.0",
     "mocha-play": "^7.0.3",
     "postcss": "^8.4.33",
+    "prettier": "^3.2.4",
     "promise-assist": "^2.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
