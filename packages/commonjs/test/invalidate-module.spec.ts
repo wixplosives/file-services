@@ -1,15 +1,15 @@
-import { expect } from 'chai';
-import { createMemoryFs } from '@file-services/memory';
-import { invalidateModule, createCjsModuleSystem } from '@file-services/commonjs';
+import { expect } from "chai";
+import { createMemoryFs } from "@file-services/memory";
+import { invalidateModule, createCjsModuleSystem } from "@file-services/commonjs";
 
 type ModuleShape = {
   get(): number;
   increment(): void;
 };
 
-describe('invalidateModule', () => {
-  it('invalidates a module', () => {
-    const aFile = '/a.js';
+describe("invalidateModule", () => {
+  it("invalidates a module", () => {
+    const aFile = "/a.js";
     const fs = createMemoryFs({
       [aFile]: `
                 let counter = 0;
@@ -31,9 +31,9 @@ describe('invalidateModule', () => {
     expect(reEvaluatedModule.get()).to.eq(0);
   });
 
-  it('invalidates parent module when invalidating a dependent module', () => {
-    const aFile = '/a.js';
-    const bFile = '/b.js';
+  it("invalidates parent module when invalidating a dependent module", () => {
+    const aFile = "/a.js";
+    const bFile = "/b.js";
     const fs = createMemoryFs({
       [aFile]: `
         let counter = 0;
@@ -59,13 +59,13 @@ describe('invalidateModule', () => {
     expect(reEvaluatedModule.get()).to.eq(0);
   });
 
-  it('invalidates modules deep', () => {
-    const aFile = '/a.js';
-    const bFile = '/b.js';
-    const cFile = '/c.js';
-    const dFile = '/d.js';
-    const eFile = '/e.js';
-    const fFile = '/f.js';
+  it("invalidates modules deep", () => {
+    const aFile = "/a.js";
+    const bFile = "/b.js";
+    const cFile = "/c.js";
+    const dFile = "/d.js";
+    const eFile = "/e.js";
+    const fFile = "/f.js";
 
     const fs = createMemoryFs({
       [aFile]: `require('./b');
@@ -94,9 +94,9 @@ describe('invalidateModule', () => {
     expect(moduleSystemKeys).to.include(eFile);
   });
 
-  it('allows wrapping the require call', () => {
-    const aFile = '/a.js';
-    const bFile = '/b.js';
+  it("allows wrapping the require call", () => {
+    const aFile = "/a.js";
+    const bFile = "/b.js";
     const fs = createMemoryFs({
       [aFile]: `module.exports = 5;`,
       [bFile]: `module.exports = require('./a');`,

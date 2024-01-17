@@ -1,5 +1,5 @@
-import type { IWalkOptions, IDirectoryContents, BufferEncoding } from './common-fs-types';
-import type { IBaseFileSystemSync } from './base-api-sync';
+import type { IWalkOptions, IDirectoryContents, BufferEncoding } from "./common-fs-types";
+import type { IBaseFileSystemSync } from "./base-api-sync";
 
 /**
  * SYNC-only file system.
@@ -14,7 +14,7 @@ export interface IFileSystemExtendedSyncActions {
    * @param filePath possible file path.
    * @param statFn optional custom stat function (e.g. lstat to detect links).
    */
-  fileExistsSync(filePath: string, statFn?: IBaseFileSystemSync['statSync']): boolean;
+  fileExistsSync(filePath: string, statFn?: IBaseFileSystemSync["statSync"]): boolean;
 
   /**
    * Check if a path points to an existing directory.
@@ -22,7 +22,7 @@ export interface IFileSystemExtendedSyncActions {
    * @param directoryPath possible directory path.
    * @param statFn optional custom stat function (e.g. lstatSync to detect links).
    */
-  directoryExistsSync(directoryPath: string, statFn?: IBaseFileSystemSync['statSync']): boolean;
+  directoryExistsSync(directoryPath: string, statFn?: IBaseFileSystemSync["statSync"]): boolean;
 
   /**
    * Ensure that a directory and all its parent directories exist

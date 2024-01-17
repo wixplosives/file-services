@@ -1,7 +1,7 @@
-import type { IFileSystemSync } from '@file-services/types';
-import { createRequestResolver, RequestResolver } from '@file-services/resolve';
-import type { ICommonJsModuleSystem, LoadModule } from './types';
-import { createBaseCjsModuleSystem } from './base-cjs-module-system';
+import type { IFileSystemSync } from "@file-services/types";
+import { createRequestResolver, RequestResolver } from "@file-services/resolve";
+import type { ICommonJsModuleSystem, LoadModule } from "./types";
+import { createBaseCjsModuleSystem } from "./base-cjs-module-system";
 
 export interface IModuleSystemOptions {
   /**
@@ -40,7 +40,7 @@ export function createCjsModuleSystem(options: IModuleSystemOptions): ICommonJsM
 
   return createBaseCjsModuleSystem({
     resolveFrom: (contextPath, request, requestOrigin) => resolver(contextPath, request, requestOrigin).resolvedFile,
-    readFileSync: (filePath) => readFileSync(filePath, 'utf8'),
+    readFileSync: (filePath) => readFileSync(filePath, "utf8"),
     dirname,
     globals,
     loadModuleHook,

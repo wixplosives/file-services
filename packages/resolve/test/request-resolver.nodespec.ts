@@ -1,19 +1,19 @@
-import chai, { expect } from 'chai';
-import fs from '@file-services/node';
-import { createRequestResolver } from '@file-services/resolve';
-import { resolutionMatchers } from './resolution-matchers';
+import chai, { expect } from "chai";
+import fs from "@file-services/node";
+import { createRequestResolver } from "@file-services/resolve";
+import { resolutionMatchers } from "./resolution-matchers";
 
 chai.use(resolutionMatchers);
 
-describe('request resolver node integration', () => {
-  it('resolves symlinks to realpath', () => {
+describe("request resolver node integration", () => {
+  it("resolves symlinks to realpath", () => {
     const resolveRequest = createRequestResolver({ fs });
-    const requestViaLink = '@file-services/node/package.json';
+    const requestViaLink = "@file-services/node/package.json";
 
     expect(resolveRequest(__dirname, requestViaLink)).to.be.resolvedTo(require.resolve(requestViaLink));
   });
 
-  it('returns symlink path if realpathSync throws', () => {
+  it("returns symlink path if realpathSync throws", () => {
     const resolveRequest = createRequestResolver({
       fs: {
         ...fs,
@@ -22,7 +22,7 @@ describe('request resolver node integration', () => {
         },
       },
     });
-    const requestViaLink = '@file-services/node/package.json';
-    expect(resolveRequest(__dirname, requestViaLink).resolvedFile).to.include(fs.join('node_modules', requestViaLink));
+    const requestViaLink = "@file-services/node/package.json";
+    expect(resolveRequest(__dirname, requestViaLink).resolvedFile).to.include(fs.join("node_modules", requestViaLink));
   });
 });

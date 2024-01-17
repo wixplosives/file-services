@@ -1,5 +1,5 @@
-import { createFileSystem, syncToAsyncFs, SetMultiMap } from '@file-services/utils';
-import path from '@file-services/path';
+import { createFileSystem, syncToAsyncFs, SetMultiMap } from "@file-services/utils";
+import path from "@file-services/path";
 import {
   IDirectoryContents,
   IFileSystemStats,
@@ -11,8 +11,8 @@ import {
   IBaseFileSystemSyncActions,
   StatSyncOptions,
   RmOptions,
-} from '@file-services/types';
-import { FsErrorCodes } from './error-codes';
+} from "@file-services/types";
+import { FsErrorCodes } from "./error-codes";
 import type {
   IMemFileSystem,
   IBaseMemFileSystem,
@@ -21,7 +21,7 @@ import type {
   IFsMemDirectoryNode,
   IFsMemNodeType,
   IFsMemSymlinkNode,
-} from './types';
+} from "./types";
 
 const posixPath = path.posix;
 
@@ -60,7 +60,7 @@ export function createBaseMemoryFs(): IBaseMemFileSystem {
  * in-memory file system (without the extended API).
  */
 export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
-  const root: IFsMemDirectoryNode = createMemDirectory('memory-fs-root');
+  const root: IFsMemDirectoryNode = createMemDirectory("memory-fs-root");
   const pathListeners = new SetMultiMap<string, WatchEventListener>();
   const globalListeners = new Set<WatchEventListener>();
   realpathSync.native = realpathSync;
@@ -104,9 +104,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     copyFileSync,
     existsSync,
     lstatSync,
-    mkdirSync: mkdirSync as IBaseFileSystemSyncActions['mkdirSync'],
+    mkdirSync: mkdirSync as IBaseFileSystemSyncActions["mkdirSync"],
     readdirSync,
-    readFileSync: readFileSync as IBaseFileSystemSyncActions['readFileSync'],
+    readFileSync: readFileSync as IBaseFileSystemSyncActions["readFileSync"],
     realpathSync,
     readlinkSync,
     renameSync,
@@ -131,29 +131,29 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     workingDirectoryPath = resolvePath(directoryPath);
   }
 
-  function readFileSync(filePath: string, _options: { encoding: 'utf8' }): string {
+  function readFileSync(filePath: string, _options: { encoding: "utf8" }): string {
     const resolvedPath = resolvePath(filePath);
     const fileNode = getNode(resolvedPath);
 
     if (!fileNode) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
-    } else if (fileNode.type === 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, "ENOENT");
+    } else if (fileNode.type === "dir") {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
     }
 
     return fileNode.contents;
   }
 
   function writeFileSync(filePath: string, fileContent: string): void {
-    if (filePath === '') {
-      throw createFsError(filePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+    if (filePath === "") {
+      throw createFsError(filePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
     }
 
     const resolvedPath = resolvePath(filePath);
     const existingNode = getNode(resolvedPath);
     if (existingNode) {
-      if (existingNode.type === 'dir') {
-        throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+      if (existingNode.type === "dir") {
+        throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
       }
       existingNode.entry = { ...existingNode.entry, mtime: new Date() };
       existingNode.contents = fileContent;
@@ -162,14 +162,14 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       const parentPath = posixPath.dirname(resolvedPath);
       const parentNode = getNode(parentPath);
 
-      if (!parentNode || parentNode.type !== 'dir') {
-        throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+      if (!parentNode || parentNode.type !== "dir") {
+        throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, "ENOENT");
       }
 
       const fileName = posixPath.basename(resolvedPath);
       const currentDate = new Date();
       const newFileNode: IFsMemFileNode = {
-        type: 'file',
+        type: "file",
         entry: {
           name: fileName,
           birthtime: currentDate,
@@ -190,17 +190,17 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentPath = posixPath.dirname(resolvedPath);
     const parentNode = getNode(parentPath);
 
-    if (!parentNode || parentNode.type !== 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
+    if (!parentNode || parentNode.type !== "dir") {
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, "ENOENT");
     }
 
     const fileName = posixPath.basename(resolvedPath);
     const fileNode = parentNode.contents.get(fileName);
 
     if (!fileNode) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, 'ENOENT');
-    } else if (fileNode.type === 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE, "ENOENT");
+    } else if (fileNode.type === "dir") {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
     }
 
     parentNode.contents.delete(fileName);
@@ -209,26 +209,26 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function readdirSync(
     directoryPath: string,
-    options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null,
   ): string[];
   function readdirSync(
     directoryPath: string,
-    options?: { encoding?: BufferEncoding | null; withFileTypes?: true } | BufferEncoding | null
+    options?: { encoding?: BufferEncoding | null; withFileTypes?: true } | BufferEncoding | null,
   ): IDirectoryEntry[];
   function readdirSync(
     directoryPath: string,
-    options?: { encoding?: BufferEncoding | null; withFileTypes?: boolean } | BufferEncoding | null
+    options?: { encoding?: BufferEncoding | null; withFileTypes?: boolean } | BufferEncoding | null,
   ): string[] | IDirectoryEntry[] {
     const resolvedPath = resolvePath(directoryPath);
     const directoryNode = getNode(resolvedPath);
 
     if (!directoryNode) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
-    } else if (directoryNode.type === 'file') {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, "ENOENT");
+    } else if (directoryNode.type === "file") {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, "ENOTDIR");
     }
 
-    return !!options && typeof options === 'object' && options.withFileTypes
+    return !!options && typeof options === "object" && options.withFileTypes
       ? Array.from(directoryNode.contents.values(), ({ entry }) => entry)
       : Array.from(directoryNode.contents.keys());
   }
@@ -244,15 +244,15 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         mkdirSync(parentPath, options);
         parentNode = getNode(parentPath) as IFsMemDirectoryNode;
       } else {
-        throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+        throw createFsError(resolvedPath, FsErrorCodes.CONTAINING_NOT_EXISTS, "ENOENT");
       }
-    } else if (parentNode.type !== 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
+    } else if (parentNode.type !== "dir") {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_FILE, "ENOTDIR");
     } else if (parentPath === resolvedPath) {
       if (recursive) {
         return;
       } else {
-        throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+        throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, "EEXIST");
       }
     }
 
@@ -260,10 +260,10 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const existingNode = parentNode.contents.get(directoryName);
 
     if (existingNode) {
-      if (recursive && existingNode.type === 'dir') {
+      if (recursive && existingNode.type === "dir") {
         return;
       }
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_ALREADY_EXISTS, "EEXIST");
     }
 
     const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName);
@@ -276,17 +276,17 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentPath = posixPath.dirname(resolvedPath);
     const parentNode = getNode(parentPath);
 
-    if (!parentNode || parentNode.type !== 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
+    if (!parentNode || parentNode.type !== "dir") {
+      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, "ENOENT");
     }
 
     const directoryName = posixPath.basename(resolvedPath);
     const directoryNode = parentNode.contents.get(directoryName);
 
-    if (!directoryNode || directoryNode.type !== 'dir') {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
+    if (!directoryNode || directoryNode.type !== "dir") {
+      throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, "ENOENT");
     } else if (directoryNode.contents.size > 0) {
-      throw createFsError(resolvedPath, FsErrorCodes.DIRECTORY_NOT_EMPTY, 'ENOTEMPTY');
+      throw createFsError(resolvedPath, FsErrorCodes.DIRECTORY_NOT_EMPTY, "ENOTEMPTY");
     }
 
     parentNode.contents.delete(directoryName);
@@ -298,11 +298,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const parentPath = posixPath.dirname(resolvedPath);
     const parentNode = getNode(parentPath);
 
-    if (!parentNode || parentNode.type !== 'dir') {
+    if (!parentNode || parentNode.type !== "dir") {
       if (force) {
         return;
       } else {
-        throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
+        throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, "ENOENT");
       }
     }
 
@@ -313,11 +313,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       if (force) {
         return;
       } else {
-        throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, 'ENOENT');
+        throw createFsError(resolvedPath, FsErrorCodes.NO_DIRECTORY, "ENOENT");
       }
     }
-    if (targetNode.type === 'dir' && !recursive) {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+    if (targetNode.type === "dir" && !recursive) {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
     }
 
     parentNode.contents.delete(targetName);
@@ -331,7 +331,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   function statSync(nodePath: string, options?: StatSyncOptions & { throwIfNoEntry?: true }): IFileSystemStats;
   function statSync(
     nodePath: string,
-    options: StatSyncOptions & { throwIfNoEntry: false }
+    options: StatSyncOptions & { throwIfNoEntry: false },
   ): IFileSystemStats | undefined;
   function statSync(nodePath: string, options?: StatSyncOptions): IFileSystemStats | undefined {
     const resolvedPath = resolvePath(nodePath);
@@ -339,7 +339,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     if (!node) {
       const throwIfNoEntry = options?.throwIfNoEntry ?? true;
       if (throwIfNoEntry) {
-        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
       } else {
         return undefined;
       }
@@ -350,7 +350,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   function lstatSync(nodePath: string, options?: StatSyncOptions & { throwIfNoEntry?: true }): IFileSystemStats;
   function lstatSync(
     nodePath: string,
-    options: StatSyncOptions & { throwIfNoEntry: false }
+    options: StatSyncOptions & { throwIfNoEntry: false },
   ): IFileSystemStats | undefined;
   function lstatSync(nodePath: string, options?: StatSyncOptions): IFileSystemStats | undefined {
     const resolvedPath = resolvePath(nodePath);
@@ -358,7 +358,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     if (!node) {
       const throwIfNoEntry = options?.throwIfNoEntry ?? true;
       if (throwIfNoEntry) {
-        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+        throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
       } else {
         return undefined;
       }
@@ -368,19 +368,19 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function realpathSync(nodePath: string): string {
     const resolvedPath = resolvePath(nodePath);
-    let currentPath = '/';
+    let currentPath = "/";
     let node: IFsMemNodeType | undefined = root;
     for (const depthName of resolvedPath.split(posixPath.sep)) {
       if (!node) {
         break;
       }
-      if (depthName === '') {
+      if (depthName === "") {
         continue;
       }
-      if (node.type === 'dir') {
+      if (node.type === "dir") {
         node = node.contents.get(depthName);
         currentPath = posixPath.join(currentPath, depthName);
-        while (node?.type === 'symlink') {
+        while (node?.type === "symlink") {
           currentPath = posixPath.resolve(posixPath.dirname(currentPath), node.target);
           node = getRawNode(currentPath);
         }
@@ -389,7 +389,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       }
     }
     if (!node) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
     }
     return currentPath;
   }
@@ -398,9 +398,9 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const resolvedPath = resolvePath(nodePath);
     const node = getRawNode(resolvedPath);
     if (!node) {
-      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
-    } else if (node.type !== 'symlink') {
-      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_INVALID, 'EINVAL');
+      throw createFsError(resolvedPath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
+    } else if (node.type !== "symlink") {
+      throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_INVALID, "EINVAL");
     }
     return node.target;
   }
@@ -411,34 +411,34 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const sourceParentPath = posixPath.dirname(resolvedSourcePath);
     const sourceParentNode = getNode(sourceParentPath);
 
-    if (!sourceParentNode || sourceParentNode.type !== 'dir') {
-      throw createFsError(resolvedSourcePath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+    if (!sourceParentNode || sourceParentNode.type !== "dir") {
+      throw createFsError(resolvedSourcePath, FsErrorCodes.CONTAINING_NOT_EXISTS, "ENOENT");
     }
 
     const sourceName = posixPath.basename(resolvedSourcePath);
     const sourceNode = sourceParentNode.contents.get(sourceName);
 
     if (!sourceNode) {
-      throw createFsError(resolvedSourcePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      throw createFsError(resolvedSourcePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
     }
 
     const destinationParentPath = posixPath.dirname(resolvedDestinationPath);
     const destinationParentNode = getNode(destinationParentPath);
 
-    if (!destinationParentNode || destinationParentNode.type !== 'dir') {
-      throw createFsError(resolvedDestinationPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+    if (!destinationParentNode || destinationParentNode.type !== "dir") {
+      throw createFsError(resolvedDestinationPath, FsErrorCodes.CONTAINING_NOT_EXISTS, "ENOENT");
     }
 
     const destinationName = posixPath.basename(resolvedDestinationPath);
     const destinationNode = destinationParentNode.contents.get(destinationName);
 
     if (destinationNode) {
-      if (destinationNode.type === 'dir') {
+      if (destinationNode.type === "dir") {
         if (destinationNode.contents.size > 0) {
-          throw createFsError(resolvedDestinationPath, FsErrorCodes.DIRECTORY_NOT_EMPTY, 'ENOTEMPTY');
+          throw createFsError(resolvedDestinationPath, FsErrorCodes.DIRECTORY_NOT_EMPTY, "ENOTEMPTY");
         }
       } else {
-        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_ALREADY_EXISTS, "EEXIST");
       }
     }
 
@@ -456,18 +456,18 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const sourceFileNode = getNode(resolvedSourcePath);
 
     if (!sourceFileNode) {
-      throw createFsError(resolvedSourcePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, 'ENOENT');
+      throw createFsError(resolvedSourcePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
     }
 
-    if (sourceFileNode.type !== 'file') {
-      throw createFsError(resolvedSourcePath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+    if (sourceFileNode.type !== "file") {
+      throw createFsError(resolvedSourcePath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
     }
 
     const destParentPath = posixPath.dirname(resolvedDestinationPath);
     const destParentNode = getNode(destParentPath);
 
-    if (!destParentNode || destParentNode.type !== 'dir') {
-      throw createFsError(resolvedDestinationPath, FsErrorCodes.CONTAINING_NOT_EXISTS, 'ENOENT');
+    if (!destParentNode || destParentNode.type !== "dir") {
+      throw createFsError(resolvedDestinationPath, FsErrorCodes.CONTAINING_NOT_EXISTS, "ENOENT");
     }
 
     const targetName = posixPath.basename(resolvedDestinationPath);
@@ -477,11 +477,11 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       const shouldOverride = !(flags & FileSystemConstants.COPYFILE_EXCL);
 
       if (!shouldOverride) {
-        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_ALREADY_EXISTS, "EEXIST");
       }
 
-      if (destinationFileNode.type !== 'file') {
-        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_IS_DIRECTORY, 'EISDIR');
+      if (destinationFileNode.type !== "file") {
+        throw createFsError(resolvedDestinationPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
       }
     }
 
@@ -497,22 +497,22 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   function symlinkSync(target: string, linkPath: string) {
     const resolvedLinkPath = resolvePath(linkPath);
     if (getNode(resolvedLinkPath)) {
-      throw createFsError(resolvedLinkPath, FsErrorCodes.PATH_ALREADY_EXISTS, 'EEXIST');
+      throw createFsError(resolvedLinkPath, FsErrorCodes.PATH_ALREADY_EXISTS, "EEXIST");
     }
 
     const parentLinkPath = posixPath.dirname(resolvedLinkPath);
     const parentNode = getNode(parentLinkPath);
     if (!parentNode) {
-      throw createFsError(resolvedLinkPath, FsErrorCodes.NO_FILE, 'ENOENT');
+      throw createFsError(resolvedLinkPath, FsErrorCodes.NO_FILE, "ENOENT");
     }
-    if (parentNode.type === 'file') {
-      throw createFsError(resolvedLinkPath, FsErrorCodes.PATH_IS_FILE, 'ENOTDIR');
+    if (parentNode.type === "file") {
+      throw createFsError(resolvedLinkPath, FsErrorCodes.PATH_IS_FILE, "ENOTDIR");
     }
 
     const currentDate = new Date(Date.now());
     const fileName = posixPath.basename(resolvedLinkPath);
     const symlinkNode: IFsMemSymlinkNode = {
-      type: 'symlink',
+      type: "symlink",
       entry: {
         name: fileName,
         birthtime: currentDate,
@@ -530,7 +530,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
   function getNode(nodePath: string): IFsMemFileNode | IFsMemDirectoryNode | undefined {
     let node = getRawNode(nodePath);
-    while (node?.type === 'symlink') {
+    while (node?.type === "symlink") {
       nodePath = posixPath.resolve(posixPath.dirname(nodePath), node.target);
       node = getRawNode(nodePath);
     }
@@ -538,20 +538,20 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   }
 
   function getRawNode(nodePath: string): IFsMemNodeType | undefined {
-    let currentPath = '/';
+    let currentPath = "/";
     let node: IFsMemNodeType | undefined = root;
     for (const depthName of nodePath.split(posixPath.sep)) {
       if (!node) {
         break;
       }
-      if (depthName === '') {
+      if (depthName === "") {
         continue;
       }
-      while (node?.type === 'symlink') {
+      while (node?.type === "symlink") {
         currentPath = posixPath.resolve(posixPath.dirname(currentPath), node.target);
         node = getRawNode(currentPath);
       }
-      if (node?.type === 'dir') {
+      if (node?.type === "dir") {
         node = node.contents.get(depthName);
         currentPath = posixPath.join(currentPath, depthName);
       } else {
@@ -578,7 +578,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 function createMemDirectory(name: string): IFsMemDirectoryNode {
   const currentDate = new Date();
   return {
-    type: 'dir',
+    type: "dir",
     contents: new Map<string, IFsMemNodeType>(),
     entry: {
       name,
@@ -597,7 +597,7 @@ const returnsFalse = () => false;
 function createFsError(
   path: string,
   message: FsErrorCodes,
-  code: 'ENOENT' | 'EEXIST' | 'EISDIR' | 'ENOTDIR' | 'ENOTEMPTY' | 'EINVAL'
+  code: "ENOENT" | "EEXIST" | "EISDIR" | "ENOTDIR" | "ENOTEMPTY" | "EINVAL",
 ): Error {
   const error = new Error(`${path} ${message}`);
   (error as Error & { path: string }).path = path;

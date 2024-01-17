@@ -15,6 +15,6 @@
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": ["<node_internals>/**"],
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"]
-    },
+    }
   ]
 }

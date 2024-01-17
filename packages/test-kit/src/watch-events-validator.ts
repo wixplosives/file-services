@@ -1,6 +1,6 @@
-import { expect } from 'chai';
-import { sleep, waitFor } from 'promise-assist';
-import type { IWatchEvent, IWatchService } from '@file-services/types';
+import { expect } from "chai";
+import { sleep, waitFor } from "promise-assist";
+import type { IWatchEvent, IWatchService } from "@file-services/types";
 
 export interface IWatchEventValidatorOptions {
   /**
@@ -25,7 +25,10 @@ export class WatchEventsValidator {
   // resolved options (defaults + user overrides)
   private options: Required<IWatchEventValidatorOptions>;
 
-  constructor(private watchService: IWatchService, options?: IWatchEventValidatorOptions) {
+  constructor(
+    private watchService: IWatchService,
+    options?: IWatchEventValidatorOptions,
+  ) {
     this.options = { validateTimeout: 5000, noMoreEventsTimeout: 500, ...options };
 
     this.watchService.addGlobalListener((e) => this.capturedEvents.push(e));
@@ -36,19 +39,19 @@ export class WatchEventsValidator {
    * equal `expectedEvents`
    */
   public async validateEvents(
-    expectedEventsProvider: IWatchEvent[] | (() => IWatchEvent[] | Promise<IWatchEvent[]>)
+    expectedEventsProvider: IWatchEvent[] | (() => IWatchEvent[] | Promise<IWatchEvent[]>),
   ): Promise<void> {
     const { capturedEvents } = this;
 
     await waitFor(
       async () => {
         const expectedEvents =
-          typeof expectedEventsProvider === 'function' ? await expectedEventsProvider() : expectedEventsProvider;
+          typeof expectedEventsProvider === "function" ? await expectedEventsProvider() : expectedEventsProvider;
         const expected = expectedEvents.map(simplifyEvent);
         const actual = capturedEvents.slice(-1 * expectedEvents.length).map(simplifyEvent);
         expect(actual).to.eql(expected);
       },
-      { timeout: this.options.validateTimeout, delay: 100 }
+      { timeout: this.options.validateTimeout, delay: 100 },
     );
 
     this.capturedEvents.length = 0;

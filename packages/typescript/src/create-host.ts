@@ -1,8 +1,8 @@
-import ts from 'typescript';
-import type { IFileSystemSync, IFileSystemPath } from '@file-services/types';
+import ts from "typescript";
+import type { IFileSystemSync, IFileSystemPath } from "@file-services/types";
 
 const statsNoThrowOptions = { throwIfNoEntry: false } as const;
-const UNIX_NEW_LINE = '\n';
+const UNIX_NEW_LINE = "\n";
 const identity = (val: string) => val;
 const toLowerCase = (val: string) => val.toLowerCase();
 const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE;
@@ -12,17 +12,17 @@ const defaultGetNewLine = ts.sys ? () => ts.sys.newLine : () => UNIX_NEW_LINE;
  */
 export interface IBaseHost extends ts.ParseConfigHost, ts.FormatDiagnosticsHost, ts.ModuleResolutionHost {
   useCaseSensitiveFileNames: boolean;
-  getCurrentDirectory: IFileSystemSync['cwd'];
-  directoryExists: IFileSystemSync['directoryExistsSync'];
+  getCurrentDirectory: IFileSystemSync["cwd"];
+  directoryExists: IFileSystemSync["directoryExistsSync"];
 
-  readDirectory: NonNullable<ts.LanguageServiceHost['readDirectory']>;
-  getDirectories: NonNullable<ts.ModuleResolutionHost['getDirectories']>;
+  readDirectory: NonNullable<ts.LanguageServiceHost["readDirectory"]>;
+  getDirectories: NonNullable<ts.ModuleResolutionHost["getDirectories"]>;
 
-  getScriptVersion: ts.LanguageServiceHost['getScriptVersion'];
+  getScriptVersion: ts.LanguageServiceHost["getScriptVersion"];
 
-  dirname: IFileSystemPath['dirname'];
-  normalize: IFileSystemPath['normalize'];
-  join: IFileSystemPath['join'];
+  dirname: IFileSystemPath["dirname"];
+  normalize: IFileSystemPath["normalize"];
+  join: IFileSystemPath["join"];
 }
 
 /**
@@ -90,7 +90,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
         depth,
         getFileSystemEntries,
         realpathSyncSafe,
-        directoryExistsSync
+        directoryExistsSync,
       );
     },
     getDirectories(path) {
@@ -102,7 +102,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
       const { stackTraceLimit } = Error;
       try {
         Error.stackTraceLimit = 0;
-        return readFileSync(filePath, 'utf8');
+        return readFileSync(filePath, "utf8");
       } catch {
         return undefined;
       } finally {
@@ -139,7 +139,7 @@ export function createLanguageServiceHost(
   getScriptFileNames: () => string[],
   getCompilationSettings: () => ts.CompilerOptions,
   defaultLibsDirectory: string,
-  getCustomTransformers?: () => ts.CustomTransformers | undefined
+  getCustomTransformers?: () => ts.CustomTransformers | undefined,
 ): ts.LanguageServiceHost {
   const { readFile, join, useCaseSensitiveFileNames, getNewLine } = baseHost;
 

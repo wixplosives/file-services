@@ -7,9 +7,9 @@ import type {
   ReadFileOptions,
   IDirectoryEntry,
   RmOptions,
-} from './common-fs-types';
-import type { IFileSystemPath } from './path';
-import type { IWatchService } from './watch-api';
+} from "./common-fs-types";
+import type { IFileSystemPath } from "./path";
+import type { IWatchService } from "./watch-api";
 
 /**
  * ASYNC-only base file system.
@@ -38,12 +38,12 @@ export interface IBaseFileSystemCallbackActions {
   readFile(
     path: string,
     options: { encoding?: null; flag?: string } | undefined | null,
-    callback: CallbackFn<Buffer>
+    callback: CallbackFn<Buffer>,
   ): void;
   readFile(
     path: string,
     options: { encoding: BufferEncoding; flag?: string } | BufferEncoding,
-    callback: CallbackFn<string>
+    callback: CallbackFn<string>,
   ): void;
   readFile(path: string, options: ReadFileOptions | undefined, callback: CallbackFn<string | Buffer>): void;
   readFile(path: string, callback: CallbackFn<Buffer>): void;
@@ -67,7 +67,7 @@ export interface IBaseFileSystemCallbackActions {
   readdir(
     directoryPath: string,
     options: { encoding: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null | undefined,
-    callback: CallbackFn<string[]>
+    callback: CallbackFn<string[]>,
   ): void;
   readdir(directoryPath: string, options: { withFileTypes: true }, callback: CallbackFn<IDirectoryEntry[]>): void;
 
@@ -149,7 +149,7 @@ export interface IBaseFileSystemPromiseActions {
    */
   readdir(
     directoryPath: string,
-    options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    options?: { encoding?: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null,
   ): Promise<string[]>;
   readdir(directoryPath: string, options: { withFileTypes: true }): Promise<IDirectoryEntry[]>;
 
@@ -200,7 +200,7 @@ export interface IBaseFileSystemPromiseActions {
   /**
    * Creates a symbolic link for `target` at `path`. default type is 'file'.
    */
-  symlink(target: string, path: string, type?: 'dir' | 'file' | 'junction'): Promise<void>;
+  symlink(target: string, path: string, type?: "dir" | "file" | "junction"): Promise<void>;
 
   /**
    * Removes files and directories.

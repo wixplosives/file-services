@@ -1,5 +1,5 @@
-import type { IDirectoryContents, IWalkOptions, BufferEncoding } from './common-fs-types';
-import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from './base-api-async';
+import type { IDirectoryContents, IWalkOptions, BufferEncoding } from "./common-fs-types";
+import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions } from "./base-api-async";
 
 /**
  * ASYNC-only file system.
@@ -18,7 +18,7 @@ export interface IFileSystemExtendedPromiseActions {
    * @param filePath possible file path
    * @param statFn optional custom stat function (e.g. lstat to detect links)
    */
-  fileExists(filePath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>;
+  fileExists(filePath: string, statFn?: IBaseFileSystemPromiseActions["stat"]): Promise<boolean>;
 
   /**
    * Check if a path points to an existing directory.
@@ -26,7 +26,7 @@ export interface IFileSystemExtendedPromiseActions {
    * @param directoryPath possible directory path
    * @param statFn optional custom stat function (e.g. lstatSync to detect links)
    */
-  directoryExists(directoryPath: string, statFn?: IBaseFileSystemPromiseActions['stat']): Promise<boolean>;
+  directoryExists(directoryPath: string, statFn?: IBaseFileSystemPromiseActions["stat"]): Promise<boolean>;
 
   /**
    * Ensure that a directory and all its parent directories exist

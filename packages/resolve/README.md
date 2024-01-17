@@ -21,18 +21,18 @@ npm i @file-services/resolve
 Then, use the programmatic API:
 
 ```ts
-import { createRequestResolver } from '@file-services/resolve';
-import { createMemoryFs } from '@file-services/memory';
+import { createRequestResolver } from "@file-services/resolve";
+import { createMemoryFs } from "@file-services/memory";
 
 const fs = createMemoryFs({
-  'some-folder': {
-    'index.js': 'some content',
+  "some-folder": {
+    "index.js": "some content",
   },
 });
 
 const resolveRequest = createRequestResolver({ fs });
 
-resolveRequest('/', './some-folder');
+resolveRequest("/", "./some-folder");
 // === '/some-folder/index.js'
 ```
 

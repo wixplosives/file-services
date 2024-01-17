@@ -16,18 +16,18 @@ npm i @file-services/commonjs
 Then, use the programmatic API:
 
 ```ts
-import { createCjsModuleSystem } from '@file-services/commonjs';
-import { createMemoryFs } from '@file-services/memory';
+import { createCjsModuleSystem } from "@file-services/commonjs";
+import { createMemoryFs } from "@file-services/memory";
 
 const fs = createMemoryFs({
-  'some-folder': {
-    'index.js': `module.exports = 'exported value'`,
+  "some-folder": {
+    "index.js": `module.exports = 'exported value'`,
   },
 });
 
 const moduleSystem = createCjsModuleSystem({ fs });
 
-const evaluated = moduleSystem.requireModule('/some-folder/index.js');
+const evaluated = moduleSystem.requireModule("/some-folder/index.js");
 // evaluated === 'exported value'
 ```
 

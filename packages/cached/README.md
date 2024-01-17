@@ -16,19 +16,19 @@ npm i @file-services/cached
 Then, use the programmatic API:
 
 ```ts
-import { nodeFs } from '@file-services/node';
-import { createCachedFs } from '@file-services/cached';
+import { nodeFs } from "@file-services/node";
+import { createCachedFs } from "@file-services/cached";
 
 const cachedFs = createCachedFs(nodeFs);
-cachedFs.writeFileSync('/file.js', 'CONTENT');
+cachedFs.writeFileSync("/file.js", "CONTENT");
 
 // calls fs
-cachedFs.statSync('/file.js');
+cachedFs.statSync("/file.js");
 // cached
-cachedFs.statSync('/file.js');
+cachedFs.statSync("/file.js");
 
 // clears the cache
-cachedFs.invalidate('/file.js');
+cachedFs.invalidate("/file.js");
 ```
 
 ## License

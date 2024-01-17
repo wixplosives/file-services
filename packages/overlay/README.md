@@ -23,14 +23,14 @@ npm i @file-services/overlay
 Then, use the programmatic API:
 
 ```ts
-import { createOverlayFs } from '@file-services/overlay';
-import { createMemoryFs } from '@file-services/memory';
-import { nodeFs } from '@file-services/node';
+import { createOverlayFs } from "@file-services/overlay";
+import { createMemoryFs } from "@file-services/memory";
+import { nodeFs } from "@file-services/node";
 
 const memFs = createMemoryFs({
   src: {
-    'a.txt': `A`,
-    'b.txt': `B`,
+    "a.txt": `A`,
+    "b.txt": `B`,
   },
 });
 

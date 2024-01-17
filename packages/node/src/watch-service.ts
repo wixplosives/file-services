@@ -1,9 +1,9 @@
-import { once } from 'node:events';
-import { FSWatcher, promises as fsPromises, watch } from 'node:fs';
-import { join } from 'node:path';
+import { once } from "node:events";
+import { FSWatcher, promises as fsPromises, watch } from "node:fs";
+import { join } from "node:path";
 
-import type { IFileSystemStats, IWatchEvent, IWatchService, WatchEventListener } from '@file-services/types';
-import { SetMultiMap } from '@file-services/utils';
+import type { IFileSystemStats, IWatchEvent, IWatchService, WatchEventListener } from "@file-services/types";
+import { SetMultiMap } from "@file-services/utils";
 
 const { stat } = fsPromises;
 
@@ -75,7 +75,7 @@ export class NodeWatchService implements IWatchService {
       if (fsWatcher) {
         fsWatcher.close();
         this.fsWatchers.delete(path);
-        await once(fsWatcher, 'close');
+        await once(fsWatcher, "close");
       }
     }
     const pendingEvent = this.pendingEvents.get(path);
@@ -92,7 +92,7 @@ export class NodeWatchService implements IWatchService {
     for (const { timerId } of this.pendingEvents.values()) {
       clearTimeout(timerId);
     }
-    const watcherCloseEvents = Array.from(this.fsWatchers.values(), (watcher) => once(watcher, 'close'));
+    const watcherCloseEvents = Array.from(this.fsWatchers.values(), (watcher) => once(watcher, "close"));
     this.pendingEvents.clear();
     this.fsWatchers.clear();
     this.watchedPaths.clear();
@@ -123,10 +123,10 @@ export class NodeWatchService implements IWatchService {
 
     if (pendingEvent) {
       clearTimeout(pendingEvent.timerId);
-      pendingEvent.renamed = pendingEvent.renamed || eventType === 'rename';
+      pendingEvent.renamed = pendingEvent.renamed || eventType === "rename";
       pendingEvent.timerId = timerId;
     } else {
-      this.pendingEvents.set(eventPath, { renamed: eventType === 'rename', timerId });
+      this.pendingEvents.set(eventPath, { renamed: eventType === "rename", timerId });
     }
   }
 
@@ -185,7 +185,7 @@ export class NodeWatchService implements IWatchService {
     const watchOptions = { persistent: this.options.persistent };
     if (pathStats.isFile()) {
       const fileWatcher = watch(path, watchOptions, (type) => this.onPathEvent(type, path));
-      fileWatcher.once('error', (e) => {
+      fileWatcher.once("error", (e) => {
         this.onWatchError(e, path);
       });
       this.fsWatchers.set(path, fileWatcher);
@@ -197,7 +197,7 @@ export class NodeWatchService implements IWatchService {
           });
         }
       });
-      directoryWatcher.once('error', (e) => {
+      directoryWatcher.once("error", (e) => {
         this.onWatchError(e, path);
       });
       this.fsWatchers.set(path, directoryWatcher);
@@ -207,7 +207,7 @@ export class NodeWatchService implements IWatchService {
   }
 
   private onWatchError(_e: unknown, path: string) {
-    this.onPathEvent('rename', path);
+    this.onPathEvent("rename", path);
     const watcher = this.fsWatchers.get(path);
     if (watcher) {
       watcher.close();

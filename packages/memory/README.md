@@ -25,21 +25,21 @@ npm i @file-services/memory
 Then, use the programmatic API:
 
 ```ts
-import { createMemoryFs } from '@file-services/memory';
+import { createMemoryFs } from "@file-services/memory";
 
 const fs = createMemoryFs();
 
 // library uses `posix`-style paths
 // and exposes a subset of `fs` API
-fs.writeFileSync('/file-in-root', 'file contents');
+fs.writeFileSync("/file-in-root", "file contents");
 
 // several helper functions are included
-fs.populateDirectorySync('/src', {
-  'index.ts': '/* source code */',
-  'another-file.ts': '/* more source code */',
+fs.populateDirectorySync("/src", {
+  "index.ts": "/* source code */",
+  "another-file.ts": "/* more source code */",
 });
 
-fs.fileExistsSync('/src/another-file.ts'); // returns true
+fs.fileExistsSync("/src/another-file.ts"); // returns true
 ```
 
 ## License

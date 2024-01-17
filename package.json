@@ -12,7 +12,7 @@
     "test": "npm run test:node && npm run test:browser",
     "test:node": "mocha \"./packages/*/test/*.{spec,nodespec}.ts?(x)\" --parallel",
     "test:browser": "mocha-play \"packages/*/test/**/*.spec.ts?(x)\"",
-    "pretiffy": "prettier --write ."
+    "prettify": "prettier --write ."
   },
   "devDependencies": {
     "@playwright/browser-chromium": "^1.41.0",

@@ -1,2 +1,2 @@
-declare const path: import('@file-services/types').IFileSystemPath;
+declare const path: import("@file-services/types").IFileSystemPath;
 export = path;

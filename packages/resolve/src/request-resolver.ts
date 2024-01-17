@@ -1,12 +1,12 @@
-import type { PackageJson } from 'type-fest';
-import type { IRequestResolverOptions, IResolutionOutput, IResolvedPackageJson, RequestResolver } from './types';
+import type { PackageJson } from "type-fest";
+import type { IRequestResolverOptions, IResolutionOutput, IResolvedPackageJson, RequestResolver } from "./types";
 
-export const defaultPackageRoots = ['node_modules'] as const;
-export const defaultExtensions = ['.js', '.json'] as const;
-export const defaultConditions = ['browser', 'import', 'require'] as const;
+export const defaultPackageRoots = ["node_modules"] as const;
+export const defaultExtensions = [".js", ".json"] as const;
+export const defaultConditions = ["browser", "import", "require"] as const;
 const isRelative = (request: string) =>
-  request === '.' || request === '..' || request.startsWith('./') || request.startsWith('../');
-const PACKAGE_JSON = 'package.json';
+  request === "." || request === ".." || request.startsWith("./") || request.startsWith("../");
+const PACKAGE_JSON = "package.json";
 const statsNoThrowOptions = { throwIfNoEntry: false } as const;
 
 export function createRequestResolver(options: IRequestResolverOptions): RequestResolver {
@@ -21,8 +21,8 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   } = options;
 
   const exportConditions = new Set(conditions);
-  const targetsBrowser = exportConditions.has('browser');
-  const targetsEsm = exportConditions.has('import');
+  const targetsBrowser = exportConditions.has("browser");
+  const targetsEsm = exportConditions.has("import");
 
   const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
   const remapUsingAlias = createRequestRemapper(alias);
@@ -125,7 +125,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
    */
   function* fileOrDirIndexRequestPaths(targetPath: string) {
     yield* fileRequestPaths(targetPath);
-    yield* fileRequestPaths(join(targetPath, 'index'));
+    yield* fileRequestPaths(join(targetPath, "index"));
   }
 
   function* directoryRequestPaths(directoryPath: string, visitedPaths: Set<string>) {
@@ -147,12 +147,12 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       }
     }
 
-    yield* fileRequestPaths(join(directoryPath, 'index'));
+    yield* fileRequestPaths(join(directoryPath, "index"));
   }
 
   function* packageRequestPaths(initialPath: string, request: string, visitedPaths: Set<string>) {
     const [packageName, innerPath] = parsePackageSpecifier(request);
-    if (!packageName.length || (packageName.startsWith('@') && !packageName.includes('/'))) {
+    if (!packageName.length || (packageName.startsWith("@") && !packageName.includes("/"))) {
       return;
     }
 
@@ -165,7 +165,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
             ownPackageJson.directoryPath,
             ownPackageJson.exports,
             innerPath,
-            ownPackageJson.hasPatternExports
+            ownPackageJson.hasPatternExports,
           );
           return;
         }
@@ -186,7 +186,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
           packageDirectoryPath,
           resolvedPackageJson.exports,
           innerPath,
-          resolvedPackageJson.hasPatternExports
+          resolvedPackageJson.hasPatternExports,
         );
         return;
       }
@@ -200,7 +200,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     contextPath: string,
     packageJsonExports: PackageJson.ExportConditions,
     innerPath: string,
-    hasPatternExports?: boolean
+    hasPatternExports?: boolean,
   ) {
     const exactMatchExports = packageJsonExports[innerPath];
     if (exactMatchExports !== undefined) {
@@ -238,13 +238,13 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   function loadPackageJsonFrom(directoryPath: string): IResolvedPackageJson | undefined {
     const packageJsonPath = join(directoryPath, PACKAGE_JSON);
     const packageJson = readJsonFileSyncSafe(packageJsonPath) as PackageJson | null | undefined;
-    if (typeof packageJson !== 'object' || packageJson === null) {
+    if (typeof packageJson !== "object" || packageJson === null) {
       return undefined;
     }
     const { main: mainField, module: moduleField, browser: browserField } = packageJson;
 
     let browserMappings: Record<string, string | false> | undefined = undefined;
-    if (targetsBrowser && typeof browserField === 'object' && browserField !== null) {
+    if (targetsBrowser && typeof browserField === "object" && browserField !== null) {
       browserMappings = Object.create(null) as Record<string, string | false>;
       for (const [from, to] of Object.entries(browserField)) {
         const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
@@ -263,9 +263,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       name: packageJson.name,
       filePath: packageJsonPath,
       directoryPath,
-      main: typeof mainField === 'string' ? mainField : undefined,
-      module: typeof moduleField === 'string' ? moduleField : undefined,
-      browser: typeof browserField === 'string' ? browserField : undefined,
+      main: typeof mainField === "string" ? mainField : undefined,
+      module: typeof moduleField === "string" ? moduleField : undefined,
+      browser: typeof browserField === "string" ? browserField : undefined,
       browserMappings,
       exports: desugerifiedExports,
       hasPatternExports,
@@ -275,7 +275,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   function resolveRemappedRequest(directoryPath: string, to: string | false): string | false | undefined {
     if (to === false) {
       return to;
-    } else if (typeof to === 'string') {
+    } else if (typeof to === "string") {
       if (isRelative(to)) {
         return resolveRelative(join(directoryPath, to));
       } else {
@@ -337,7 +337,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     const { stackTraceLimit } = Error;
     try {
       Error.stackTraceLimit = 0;
-      return JSON.parse(readFileSync(filePath, 'utf8')) as unknown;
+      return JSON.parse(readFileSync(filePath, "utf8")) as unknown;
     } catch {
       return undefined;
     } finally {
@@ -365,17 +365,17 @@ type ParsedTemplate = { prefix: string };
  * The remapper supports paths ending with "/*", both in key and value.
  */
 export function createRequestRemapper<T extends string | false>(
-  mapping: Record<string, T>
+  mapping: Record<string, T>,
 ): (request: string) => T | undefined {
   const parsedTemplateMap = new Map<string | ParsedTemplate, T | ParsedTemplate>();
   let hasTemplate = false;
   for (const [key, value] of Object.entries(mapping)) {
     let parsedKey: string | ParsedTemplate = key;
     let parsedValue: T | ParsedTemplate = value;
-    if (key.endsWith('/*')) {
+    if (key.endsWith("/*")) {
       hasTemplate = true;
       parsedKey = { prefix: key.slice(0, -1) };
-      if (typeof value === 'string' && value.endsWith('/*')) {
+      if (typeof value === "string" && value.endsWith("/*")) {
         parsedValue = { prefix: value.slice(0, -1) };
       }
     }
@@ -389,18 +389,18 @@ export function createRequestRemapper<T extends string | false>(
 
 function getFromParsedTemplateMap<T extends string | false>(
   map: Map<string | ParsedTemplate, T | ParsedTemplate>,
-  request: string
+  request: string,
 ): T | undefined {
   for (const [key, value] of map) {
     const keyType = typeof key;
-    if (keyType === 'string') {
+    if (keyType === "string") {
       if (request === key) {
         return value as T;
       }
-    } else if (keyType === 'object') {
+    } else if (keyType === "object") {
       const { prefix: keyPrefix } = key as ParsedTemplate;
       if (request.startsWith(keyPrefix) && request.length > keyPrefix.length) {
-        return typeof value === 'object' ? ((value.prefix + request.slice(keyPrefix.length)) as T) : value;
+        return typeof value === "object" ? ((value.prefix + request.slice(keyPrefix.length)) as T) : value;
       }
     }
   }
@@ -424,18 +424,18 @@ declare let Error: TracedErrorConstructor;
  * @example parsePackageSpecifier('@stylable/core/dist/some-file') === ['@stylable/core', './dist/some-file']
  */
 function parsePackageSpecifier(specifier: string): readonly [packageName: string, pathInPackage: string] {
-  const firstSlashIdx = specifier.indexOf('/');
+  const firstSlashIdx = specifier.indexOf("/");
   if (firstSlashIdx === -1) {
-    return [specifier, '.'];
+    return [specifier, "."];
   }
-  const isScopedPackage = specifier.startsWith('@');
+  const isScopedPackage = specifier.startsWith("@");
   if (isScopedPackage) {
-    const secondSlashIdx = specifier.indexOf('/', firstSlashIdx + 1);
+    const secondSlashIdx = specifier.indexOf("/", firstSlashIdx + 1);
     return secondSlashIdx === -1
-      ? [specifier, '.']
-      : [specifier.slice(0, secondSlashIdx), '.' + specifier.slice(secondSlashIdx)];
+      ? [specifier, "."]
+      : [specifier.slice(0, secondSlashIdx), "." + specifier.slice(secondSlashIdx)];
   } else {
-    return [specifier.slice(0, firstSlashIdx), '.' + specifier.slice(firstSlashIdx)];
+    return [specifier.slice(0, firstSlashIdx), "." + specifier.slice(firstSlashIdx)];
   }
 }
 
@@ -450,20 +450,20 @@ function parsePackageSpecifier(specifier: string): readonly [packageName: string
  * @returns tuple containing the desugarified `exports` field, with a flag saying whether it includes pattern exports.
  */
 function desugarifyExportsField(
-  packageExports: PackageJson.Exports | undefined
+  packageExports: PackageJson.Exports | undefined,
 ): [PackageJson.ExportConditions | undefined, boolean] {
   let hasPatternExports = false;
   if (packageExports === undefined || packageExports === null) {
     packageExports = undefined;
-  } else if (typeof packageExports === 'string' || Array.isArray(packageExports)) {
-    packageExports = { '.': packageExports };
+  } else if (typeof packageExports === "string" || Array.isArray(packageExports)) {
+    packageExports = { ".": packageExports };
   } else {
     for (const key of Object.keys(packageExports)) {
-      if (key.includes('*')) {
+      if (key.includes("*")) {
         hasPatternExports = true;
       }
-      if (key !== '.' && !key.startsWith('./')) {
-        packageExports = { '.': packageExports };
+      if (key !== "." && !key.startsWith("./")) {
+        packageExports = { ".": packageExports };
         hasPatternExports = false;
         break;
       }
@@ -474,18 +474,18 @@ function desugarifyExportsField(
 
 function* matchExportConditions(
   conditionValue: PackageJson.Exports,
-  exportConditions: Set<string>
+  exportConditions: Set<string>,
 ): Generator<string | null> {
-  if (conditionValue === null || typeof conditionValue === 'string') {
+  if (conditionValue === null || typeof conditionValue === "string") {
     yield conditionValue;
-  } else if (typeof conditionValue === 'object') {
+  } else if (typeof conditionValue === "object") {
     if (Array.isArray(conditionValue)) {
       for (const arrayItem of conditionValue) {
         yield* matchExportConditions(arrayItem, exportConditions);
       }
     } else {
       for (const [key, value] of Object.entries(conditionValue)) {
-        if (key === 'default' || exportConditions.has(key)) {
+        if (key === "default" || exportConditions.has(key)) {
           yield* matchExportConditions(value, exportConditions);
         }
       }
@@ -496,12 +496,12 @@ function* matchExportConditions(
 function* matchSubpathPatterns(
   exportedSubpaths: PackageJson.ExportConditions,
   innerPath: string,
-  exportConditions: Set<string>
+  exportConditions: Set<string>,
 ): Generator<string, void, undefined> {
   const matchedValues: string[] = [];
   for (const [patternKey, patternValue] of Object.entries(exportedSubpaths)) {
-    const keyStarIdx = patternKey.indexOf('*');
-    if (keyStarIdx === -1 || patternKey.indexOf('*', keyStarIdx + 1) !== -1) {
+    const keyStarIdx = patternKey.indexOf("*");
+    if (keyStarIdx === -1 || patternKey.indexOf("*", keyStarIdx + 1) !== -1) {
       continue;
     }
     const keyPrefix = patternKey.slice(0, keyStarIdx);

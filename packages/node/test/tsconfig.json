@@ -2,14 +2,7 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../dist/test",
-    "types": ["mocha", "node"]
+    "types": ["mocha", "node"],
   },
-  "references": [
-    {
-      "path": "../src"
-    },
-    {
-      "path": "../../test-kit/src"
-    }
-  ]
+  "references": [{ "path": "../src" }, { "path": "../../test-kit/src" }],
 }

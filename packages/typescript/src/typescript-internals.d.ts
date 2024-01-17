@@ -1,6 +1,6 @@
-import ts from 'typescript';
+import ts from "typescript";
 
-declare module 'typescript' {
+declare module "typescript" {
   // needed for custom readDirectory
   export function matchFiles(
     path: string,
@@ -12,7 +12,7 @@ declare module 'typescript' {
     depth: number | undefined,
     getFileSystemEntries: (path: string) => FileSystemEntries,
     realpath: (path: string) => string,
-    directoryExists: (path: string) => boolean
+    directoryExists: (path: string) => boolean,
   ): string[];
 
   // used by matchFiles above
@@ -24,6 +24,6 @@ declare module 'typescript' {
   // needed to resolve newLine, while taking compilerOptions into consideration, for each `LanguageServiceHost`
   export function getNewLineCharacter(
     options: ts.CompilerOptions | ts.PrinterOptions,
-    getNewLine?: () => string
+    getNewLine?: () => string,
   ): string;
 }

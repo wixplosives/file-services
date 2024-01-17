@@ -6,9 +6,9 @@ import type {
   IDirectoryEntry,
   StatSyncOptions,
   RmOptions,
-} from './common-fs-types';
-import type { IFileSystemPath } from './path';
-import type { IWatchService } from './watch-api';
+} from "./common-fs-types";
+import type { IFileSystemPath } from "./path";
+import type { IWatchService } from "./watch-api";
 
 /**
  * SYNC-only base file system.
@@ -66,7 +66,7 @@ export interface IBaseFileSystemSyncActions {
    */
   readdirSync(
     directoryPath: string,
-    options?: { encoding: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null
+    options?: { encoding: BufferEncoding | null; withFileTypes?: false } | BufferEncoding | null,
   ): string[];
   readdirSync(directoryPath: string, options: { withFileTypes: true }): IDirectoryEntry[];
 
@@ -124,7 +124,7 @@ export interface IBaseFileSystemSyncActions {
   /**
    * Creates a symbolic link for `target` at `path`. default type is 'file'.
    */
-  symlinkSync(target: string, path: string, type?: 'dir' | 'file' | 'junction'): void;
+  symlinkSync(target: string, path: string, type?: "dir" | "file" | "junction"): void;
 
   /**
    * Removes files and directories.

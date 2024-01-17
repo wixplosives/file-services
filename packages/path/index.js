@@ -1,6 +1,6 @@
 "use strict";
-Object.defineProperty(exports, '__esModule', { value: true });
-const path = require('path');
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = require("path");
 
 exports.default = exports;
 exports.resolve = path.resolve;

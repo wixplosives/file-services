@@ -3,7 +3,7 @@ import type {
   IBaseFileSystemAsync,
   IBaseFileSystemPromiseActions,
   CallbackFnVoid,
-} from '@file-services/types';
+} from "@file-services/types";
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
   return {
@@ -14,7 +14,7 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
     promises: {
       readFile: async function readFile(...args: [string]) {
         return syncFs.readFileSync(...args);
-      } as IBaseFileSystemPromiseActions['readFile'],
+      } as IBaseFileSystemPromiseActions["readFile"],
       async writeFile(...args) {
         return syncFs.writeFileSync(...args);
       },
@@ -23,7 +23,7 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
       },
       readdir: async function readdir(...args: [string]) {
         return syncFs.readdirSync(...args);
-      } as IBaseFileSystemPromiseActions['readdir'],
+      } as IBaseFileSystemPromiseActions["readdir"],
       async mkdir(directoryPath, ...args) {
         return syncFs.mkdirSync(directoryPath, ...args);
       },
@@ -64,15 +64,15 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
     exists(nodePath, callback) {
       callback(syncFs.existsSync(nodePath));
     },
-    readFile: callbackify(syncFs.readFileSync) as IBaseFileSystemAsync['readFile'],
-    writeFile: callbackify(syncFs.writeFileSync) as IBaseFileSystemAsync['writeFile'],
-    copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync['copyFile'],
+    readFile: callbackify(syncFs.readFileSync) as IBaseFileSystemAsync["readFile"],
+    writeFile: callbackify(syncFs.writeFileSync) as IBaseFileSystemAsync["writeFile"],
+    copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync["copyFile"],
     unlink: callbackify(syncFs.unlinkSync),
-    readdir: callbackify(syncFs.readdirSync) as IBaseFileSystemAsync['readdir'],
-    mkdir: callbackify(syncFs.mkdirSync) as unknown as IBaseFileSystemAsync['mkdir'],
+    readdir: callbackify(syncFs.readdirSync) as IBaseFileSystemAsync["readdir"],
+    mkdir: callbackify(syncFs.mkdirSync) as unknown as IBaseFileSystemAsync["mkdir"],
     rmdir: callbackify(syncFs.rmdirSync),
-    stat: callbackify(syncFs.statSync) as unknown as IBaseFileSystemAsync['stat'],
-    lstat: callbackify(syncFs.lstatSync) as unknown as IBaseFileSystemAsync['lstat'],
+    stat: callbackify(syncFs.statSync) as unknown as IBaseFileSystemAsync["stat"],
+    lstat: callbackify(syncFs.lstatSync) as unknown as IBaseFileSystemAsync["lstat"],
     realpath: callbackify(syncFs.realpathSync),
     rename: callbackify(syncFs.renameSync),
     readlink: callbackify(syncFs.readlinkSync),
@@ -82,8 +82,8 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
 function callbackify<T extends unknown[], R>(fn: (...args: [...T]) => R) {
   return (...args: [...T, (error: Error | null, value: R) => void]): void => {
     const callback = args.pop() as (error: Error | null, value: R) => void;
-    if (typeof callback !== 'function') {
-      throw new Error('callback is not a function');
+    if (typeof callback !== "function") {
+      throw new Error("callback is not a function");
     }
     try {
       const result = fn(...(args as unknown as [...T]));

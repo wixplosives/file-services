@@ -1,5 +1,5 @@
-import type { IModule, ICommonJsModuleSystem, LoadModule } from './types';
-import { envGlobal } from './global-this';
+import type { IModule, ICommonJsModuleSystem, LoadModule } from "./types";
+import { envGlobal } from "./global-this";
 
 export interface IBaseModuleSystemOptions {
   /**
@@ -37,8 +37,8 @@ const falseModule = {
   get exports() {
     return {};
   },
-  filename: '',
-  id: '',
+  filename: "",
+  id: "",
   children: [],
 };
 
@@ -90,7 +90,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     const contextPath = dirname(filePath);
     const fileContents = readFileSync(filePath);
 
-    if (filePath.endsWith('.json')) {
+    if (filePath.endsWith(".json")) {
       newModule.exports = JSON.parse(fileContents);
       requireCache.set(filePath, newModule);
       return newModule;
@@ -117,8 +117,8 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       ...globals,
     };
 
-    const fnArgs = Object.keys(moduleBuiltins).join(', ');
-    const globalsArgs = Object.keys(injectedGlobals).join(', ');
+    const fnArgs = Object.keys(moduleBuiltins).join(", ");
+    const globalsArgs = Object.keys(injectedGlobals).join(", ");
     const moduleSource = `${fileContents}\n//# sourceURL=${filePath}\n`;
     const globalFn = (0, eval)(`(function (${globalsArgs}){ return (function (${fnArgs}){${moduleSource}}); })`) as (
       ...args: unknown[]

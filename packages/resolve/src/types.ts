@@ -1,4 +1,4 @@
-import { PackageJson } from 'type-fest';
+import { PackageJson } from "type-fest";
 
 export interface IRequestResolverOptions {
   /**
@@ -84,9 +84,9 @@ export type RequestResolver = (contextPath: string, request: string) => IResolut
 export interface IResolutionFileSystem {
   statSync(
     path: string,
-    options?: { throwIfNoEntry?: false }
+    options?: { throwIfNoEntry?: false },
   ): { isFile(): boolean; isDirectory(): boolean } | undefined;
-  readFileSync(path: string, encoding: 'utf8'): string;
+  readFileSync(path: string, encoding: "utf8"): string;
   realpathSync(path: string): string;
 
   dirname(path: string): string;

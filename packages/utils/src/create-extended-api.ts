@@ -11,7 +11,7 @@ import type {
   IFileSystem,
   IFileSystemExtendedSyncActions,
   IFileSystemExtendedPromiseActions,
-} from '@file-services/types';
+} from "@file-services/types";
 
 const returnsTrue = () => true;
 const statsNoThrowOptions = { throwIfNoEntry: false } as const;
@@ -47,7 +47,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
   }
 
   function readJsonFileSync(filePath: string, options?: BufferEncoding | { encoding: BufferEncoding } | null): unknown {
-    return JSON.parse(readFileSync(filePath, options || 'utf8')) as unknown;
+    return JSON.parse(readFileSync(filePath, options || "utf8")) as unknown;
   }
 
   function directoryExistsSync(directoryPath: string, statFn = statSync): boolean {
@@ -63,15 +63,15 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       mkdirSync(directoryPath);
     } catch (e) {
       const code = (e as { code?: string })?.code;
-      if (code === 'EISDIR') {
+      if (code === "EISDIR") {
         return;
-      } else if (code === 'EEXIST') {
+      } else if (code === "EEXIST") {
         if (directoryExistsSync(directoryPath)) {
           return;
         } else {
           throw e;
         }
-      } else if (code === 'ENOTDIR' || !code) {
+      } else if (code === "ENOTDIR" || !code) {
         throw e;
       }
 
@@ -85,7 +85,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         mkdirSync(directoryPath);
       } catch (e) {
         const code = (e as { code?: string })?.code;
-        const isDirectoryExistsError = code === 'EISDIR' || (code === 'EEXIST' && directoryExistsSync(directoryPath));
+        const isDirectoryExistsError = code === "EISDIR" || (code === "EEXIST" && directoryExistsSync(directoryPath));
         if (!isDirectoryExistsError) {
           throw e;
         }
@@ -98,7 +98,7 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
     ensureDirectorySync(directoryPath);
     for (const [nodeName, nodeValue] of Object.entries(contents)) {
       const nodePath = join(directoryPath, nodeName);
-      if (typeof nodeValue === 'string') {
+      if (typeof nodeValue === "string") {
         ensureDirectorySync(dirname(nodePath));
         writeFileSync(nodePath, nodeValue);
         filePaths.push(nodePath);
@@ -197,7 +197,7 @@ export function createAsyncFileSystem(baseFs: IBaseFileSystemAsync): IFileSystem
 }
 
 export function createExtendedFileSystemPromiseActions(
-  baseFs: IBaseFileSystemAsync
+  baseFs: IBaseFileSystemAsync,
 ): IFileSystemExtendedPromiseActions {
   const {
     dirname,
@@ -224,9 +224,9 @@ export function createExtendedFileSystemPromiseActions(
 
   async function readJsonFile(
     filePath: string,
-    options?: BufferEncoding | { encoding: BufferEncoding } | null
+    options?: BufferEncoding | { encoding: BufferEncoding } | null,
   ): Promise<unknown> {
-    return JSON.parse(await readFile(filePath, options || 'utf8')) as unknown;
+    return JSON.parse(await readFile(filePath, options || "utf8")) as unknown;
   }
 
   async function ensureDirectory(directoryPath: string): Promise<void> {
@@ -234,15 +234,15 @@ export function createExtendedFileSystemPromiseActions(
       await mkdir(directoryPath);
     } catch (e) {
       const code = (e as { code?: string })?.code;
-      if (code === 'EISDIR') {
+      if (code === "EISDIR") {
         return;
-      } else if (code === 'EEXIST') {
+      } else if (code === "EEXIST") {
         if (await directoryExists(directoryPath)) {
           return;
         } else {
           throw e;
         }
-      } else if (code === 'ENOTDIR' || !code) {
+      } else if (code === "ENOTDIR" || !code) {
         throw e;
       }
 
@@ -257,7 +257,7 @@ export function createExtendedFileSystemPromiseActions(
       } catch (e) {
         const code = (e as { code?: string })?.code;
         const isDirectoryExistsError =
-          code === 'EISDIR' || (code === 'EEXIST' && (await directoryExists(directoryPath)));
+          code === "EISDIR" || (code === "EEXIST" && (await directoryExists(directoryPath)));
         if (!isDirectoryExistsError) {
           throw e;
         }
@@ -270,7 +270,7 @@ export function createExtendedFileSystemPromiseActions(
     await ensureDirectory(directoryPath);
     for (const [nodeName, nodeValue] of Object.entries(contents)) {
       const nodePath = join(directoryPath, nodeName);
-      if (typeof nodeValue === 'string') {
+      if (typeof nodeValue === "string") {
         await ensureDirectory(dirname(nodePath));
         await writeFile(nodePath, nodeValue);
         filePaths.push(nodePath);
@@ -284,7 +284,7 @@ export function createExtendedFileSystemPromiseActions(
   async function findFiles(
     rootDirectory: string,
     options: IWalkOptions = {},
-    filePaths: string[] = []
+    filePaths: string[] = [],
   ): Promise<string[]> {
     const { filterFile = returnsTrue, filterDirectory = returnsTrue } = options;
 

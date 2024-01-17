@@ -44,7 +44,7 @@ export function createLanguageServiceHost(
   fileNames: string[],
   compilerOptions: ts.CompilerOptions,
   defaultLibsDirectory: string,
-  customTransformers?: ts.CustomTransformers
+  customTransformers?: ts.CustomTransformers,
 ): ts.LanguageServiceHost;
 ```
 

@@ -1,4 +1,4 @@
-import type { IModule } from './types';
+import type { IModule } from "./types";
 
 /**
  * Removes module and it's deep importers from the module cache
@@ -15,7 +15,7 @@ export const invalidateModule = (modulePath: string, requireCache: Map<string, I
 export function* getModulesTree(
   modulePath: string,
   moduleCache: Map<string, IModule>,
-  visited = new Set<string>()
+  visited = new Set<string>(),
 ): Generator<IModule> {
   if (visited.has(modulePath)) {
     return;

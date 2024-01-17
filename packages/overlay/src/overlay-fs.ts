@@ -7,15 +7,15 @@ import type {
   ReadFileOptions,
   IDirectoryEntry,
   BufferEncoding,
-} from '@file-services/types';
-import { createFileSystem } from '@file-services/utils';
+} from "@file-services/types";
+import { createFileSystem } from "@file-services/utils";
 
 const getEntryName = (item: IDirectoryEntry) => item.name;
 
 export function createOverlayFs(
   lowerFs: IFileSystem,
   upperFs: IFileSystem,
-  baseDirectoryPath = lowerFs.cwd()
+  baseDirectoryPath = lowerFs.cwd(),
 ): IFileSystem {
   const { promises: lowerPromises } = lowerFs;
   const { promises: upperPromises } = upperFs;
@@ -29,11 +29,11 @@ export function createOverlayFs(
     const relativeToBase = lowerFs.relative(baseDirectoryPath, resolvedLowerPath);
 
     if (
-      relativeToBase !== '..' &&
+      relativeToBase !== ".." &&
       !relativeToBase.startsWith(lowerFsRelativeUp) &&
       !lowerFs.isAbsolute(relativeToBase)
     ) {
-      return { resolvedLowerPath, resolvedUpperPath: relativeToBase.replace(/\\/g, '/') };
+      return { resolvedLowerPath, resolvedUpperPath: relativeToBase.replace(/\\/g, "/") };
     } else {
       return { resolvedLowerPath };
     }
@@ -94,7 +94,7 @@ export function createOverlayFs(
         }
       }
       return lowerFs.readFileSync(resolvedLowerPath, ...args);
-    } as IBaseFileSystemSyncActions['readFileSync'],
+    } as IBaseFileSystemSyncActions["readFileSync"],
     statSync: function (path: string, ...args: []) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
@@ -108,7 +108,7 @@ export function createOverlayFs(
         }
       }
       return lowerFs.statSync(resolvedLowerPath, ...args);
-    } as IBaseFileSystemSyncActions['statSync'],
+    } as IBaseFileSystemSyncActions["statSync"],
     lstatSync: function lstatSync(path: string, ...args: []) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
@@ -122,7 +122,7 @@ export function createOverlayFs(
         }
       }
       return lowerFs.lstatSync(resolvedLowerPath, ...args);
-    } as IBaseFileSystemSyncActions['lstatSync'],
+    } as IBaseFileSystemSyncActions["lstatSync"],
     realpathSync,
     readlinkSync(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
@@ -148,7 +148,7 @@ export function createOverlayFs(
           const resInUpper = upperFs.readdirSync(resolvedUpperPath, options);
           try {
             const resInLower = lowerFs.readdirSync(resolvedLowerPath, options);
-            if (options !== null && typeof options === 'object' && options.withFileTypes) {
+            if (options !== null && typeof options === "object" && options.withFileTypes) {
               const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
               return [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
             }
@@ -163,7 +163,7 @@ export function createOverlayFs(
         }
       }
       return lowerFs.readdirSync(resolvedLowerPath, options);
-    }) as IBaseFileSystemSyncActions['readdirSync'],
+    }) as IBaseFileSystemSyncActions["readdirSync"],
   };
 
   const basePromiseActions: Partial<IBaseFileSystemPromiseActions> = {
@@ -185,7 +185,7 @@ export function createOverlayFs(
         }
       }
       return lowerPromises.readFile(resolvedLowerPath, ...args);
-    } as IBaseFileSystemPromiseActions['readFile'],
+    } as IBaseFileSystemPromiseActions["readFile"],
     async stat(path) {
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
       if (resolvedUpperPath !== undefined && upperFs.existsSync(resolvedUpperPath)) {
@@ -237,7 +237,7 @@ export function createOverlayFs(
           const resInUpper = await upperPromises.readdir(resolvedUpperPath, options);
           try {
             const resInLower = await lowerPromises.readdir(resolvedLowerPath, options);
-            if (options !== null && typeof options === 'object' && options.withFileTypes) {
+            if (options !== null && typeof options === "object" && options.withFileTypes) {
               const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
               return [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
             }
@@ -251,7 +251,7 @@ export function createOverlayFs(
         }
       }
       return lowerPromises.readdir(resolvedLowerPath, options);
-    } as IBaseFileSystemPromiseActions['readdir'],
+    } as IBaseFileSystemPromiseActions["readdir"],
   };
 
   const baseCallbackActions: Partial<IBaseFileSystemCallbackActions> = {
@@ -272,12 +272,12 @@ export function createOverlayFs(
     readFile(
       path: string,
       options?: ReadFileOptions | CallbackFn<Buffer>,
-      callback?: CallbackFn<string> | CallbackFn<Buffer> | CallbackFn<string | Buffer>
+      callback?: CallbackFn<string> | CallbackFn<Buffer> | CallbackFn<string | Buffer>,
     ): void {
-      if (typeof options === 'function') {
+      if (typeof options === "function") {
         callback = options;
         options = undefined;
-      } else if (typeof callback !== 'function') {
+      } else if (typeof callback !== "function") {
         throw new Error(`callback is not a function.`);
       }
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
@@ -352,12 +352,12 @@ export function createOverlayFs(
     readdir(
       path: string,
       options: string | { withFileTypes?: boolean } | undefined | null | CallbackFn<string[]>,
-      callback?: CallbackFn<string[]> | CallbackFn<IDirectoryEntry[]>
+      callback?: CallbackFn<string[]> | CallbackFn<IDirectoryEntry[]>,
     ) {
-      if (typeof options === 'function') {
+      if (typeof options === "function") {
         callback = options;
         options = undefined;
-      } else if (typeof callback !== 'function') {
+      } else if (typeof callback !== "function") {
         throw new Error(`callback is not a function.`);
       }
       const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
@@ -367,14 +367,14 @@ export function createOverlayFs(
             lowerFs.readdir(
               resolvedLowerPath,
               options as { withFileTypes: true },
-              callback as CallbackFn<IDirectoryEntry[]>
+              callback as CallbackFn<IDirectoryEntry[]>,
             );
           } else {
             lowerFs.readdir(resolvedLowerPath, options as { withFileTypes: true }, (lowerError, resInLower) => {
               if (lowerError) {
                 (callback as CallbackFn<IDirectoryEntry[]>)(upperError, resInUpper);
               } else {
-                if (options !== null && typeof options === 'object' && options.withFileTypes) {
+                if (options !== null && typeof options === "object" && options.withFileTypes) {
                   const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
                   const combined = [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
                   (callback as CallbackFn<IDirectoryEntry[]>)(upperError, combined);
@@ -390,7 +390,7 @@ export function createOverlayFs(
         lowerFs.readdir(
           resolvedLowerPath,
           options as { withFileTypes: true },
-          callback as CallbackFn<IDirectoryEntry[]>
+          callback as CallbackFn<IDirectoryEntry[]>,
         );
       }
     },

@@ -1,11 +1,11 @@
 // @ts-check
 
-import { build, context } from 'esbuild';
-import fs from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
+import { build, context } from "esbuild";
+import fs from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
-const watch = process.argv.includes('-w') || process.argv.includes('--watch');
-const ignoredPackages = new Set(['path']);
+const watch = process.argv.includes("-w") || process.argv.includes("--watch");
+const ignoredPackages = new Set(["path"]);
 const packagesURL = new URL(`../packages/`, import.meta.url);
 
 for (const item of await fs.readdir(packagesURL, { withFileTypes: true })) {
@@ -19,29 +19,29 @@ for (const item of await fs.readdir(packagesURL, { withFileTypes: true })) {
 
   const esmBundleURL = new URL(`fs-${item.name}.mjs`, outPath);
   const cjsBundleURL = new URL(`fs-${item.name}.cjs`, outPath);
-  const entryURL = new URL('src/index.ts', packageURL);
+  const entryURL = new URL("src/index.ts", packageURL);
 
   /** @type {import('esbuild').BuildOptions} */
   const commonBuildOptions = {
     entryPoints: [fileURLToPath(entryURL)],
     bundle: true,
-    target: 'es2022',
+    target: "es2022",
     sourcemap: true,
-    packages: 'external',
-    logLevel: 'info',
+    packages: "external",
+    logLevel: "info",
     color: true,
   };
   /** @type {import('esbuild').BuildOptions} */
   const esmBuildOptions = {
     ...commonBuildOptions,
     outfile: fileURLToPath(esmBundleURL),
-    format: 'esm',
+    format: "esm",
   };
   /** @type {import('esbuild').BuildOptions} */
   const cjsBuildOptions = {
     ...commonBuildOptions,
     outfile: fileURLToPath(cjsBundleURL),
-    format: 'cjs',
+    format: "cjs",
   };
   if (watch) {
     const [esmCtx, cjsCtx] = await Promise.all([context(esmBuildOptions), context(cjsBuildOptions)]);

@@ -1,23 +1,23 @@
-import chai, { expect } from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import { createMemoryFs } from '@file-services/memory';
-import { createDependencyResolver, createRequestResolver } from '@file-services/resolve';
+import chai, { expect } from "chai";
+import sinon from "sinon";
+import sinonChai from "sinon-chai";
+import { createMemoryFs } from "@file-services/memory";
+import { createDependencyResolver, createRequestResolver } from "@file-services/resolve";
 
 chai.use(sinonChai);
 
-describe('dependency resolver', () => {
+describe("dependency resolver", () => {
   // three sample files in the same /src directory
-  const firstFilePath = '/src/first-file.js';
-  const secondFilePath = '/src/second-file.js';
-  const thirdFilePath = '/src/third-file.js';
-  const fourthFilePath = '/src/fourth-file.js';
+  const firstFilePath = "/src/first-file.js";
+  const secondFilePath = "/src/second-file.js";
+  const thirdFilePath = "/src/third-file.js";
+  const fourthFilePath = "/src/fourth-file.js";
 
   // node-like requests to be resolved by our node resolver below
-  const requestFirstFile = './first-file';
-  const requestSecondFile = './second-file';
-  const requestThirdFile = './third-file';
-  const requestMissingFile = './missing-file';
+  const requestFirstFile = "./first-file";
+  const requestSecondFile = "./second-file";
+  const requestThirdFile = "./third-file";
+  const requestMissingFile = "./missing-file";
 
   // first  -> second -> third -> (recursive back to first)
   //        |         -> missing
@@ -40,7 +40,7 @@ describe('dependency resolver', () => {
   const resolveDependencies = createDependencyResolver({
     extractRequests(filePath) {
       // the requests were saved as the stringified content
-      return JSON.parse(fs.readFileSync(filePath, 'utf8')) as string[];
+      return JSON.parse(fs.readFileSync(filePath, "utf8")) as string[];
     },
     resolveRequest(filePath, request) {
       // the node resolver requires directory path, not the origin file path
@@ -48,7 +48,7 @@ describe('dependency resolver', () => {
     },
   });
 
-  it('uses provided request extractor/resolver and resolves all requests by a file', () => {
+  it("uses provided request extractor/resolver and resolves all requests by a file", () => {
     // file with two requests
     expect(resolveDependencies(firstFilePath)).to.eql({
       [firstFilePath]: {
@@ -87,7 +87,7 @@ describe('dependency resolver', () => {
     expect(resolveRequest).to.have.callCount(1);
   });
 
-  it('follows request chain when deep is set to true', () => {
+  it("follows request chain when deep is set to true", () => {
     expect(resolveDependencies(firstFilePath, true /* deep */)).to.eql({
       [firstFilePath]: {
         [requestSecondFile]: secondFilePath,
