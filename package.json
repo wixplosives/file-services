@@ -15,7 +15,7 @@
     "prettify": "prettier --write ."
   },
   "devDependencies": {
-    "@playwright/browser-chromium": "^1.41.1",
+    "@playwright/browser-chromium": "^1.41.2",
     "@ts-tools/node": "^5.0.2",
     "@ts-tools/webpack-loader": "^5.0.2",
     "@types/chai": "^4.3.11",
