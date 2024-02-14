@@ -42,25 +42,25 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         if (!statSyncSafe(resolvedFilePath)?.isFile()) {
           continue;
         }
+        const realResolvedFilePath = realpathSyncSafe(resolvedFilePath);
+        visitedPaths.add(realResolvedFilePath);
         if (targetsBrowser) {
-          const toPackageJson = findUpPackageJson(dirname(resolvedFilePath));
+          const toPackageJson = findUpPackageJson(dirname(realResolvedFilePath));
           if (toPackageJson) {
             visitedPaths.add(toPackageJson.filePath);
-            const remappedFilePath = toPackageJson.browserMappings?.[resolvedFilePath];
+            const remappedFilePath = toPackageJson.browserMappings?.[realResolvedFilePath];
             if (remappedFilePath !== undefined) {
               if (remappedFilePath !== false) {
                 visitedPaths.add(remappedFilePath);
               }
               return {
                 resolvedFile: remappedFilePath,
-                originalFilePath: resolvedFilePath,
+                originalFilePath: realResolvedFilePath,
                 visitedPaths,
               };
             }
           }
         }
-        const realResolvedFilePath = realpathSyncSafe(resolvedFilePath);
-        visitedPaths.add(realResolvedFilePath);
         return { resolvedFile: realResolvedFilePath, visitedPaths };
       }
     }

@@ -552,6 +552,32 @@ describe("request resolver", () => {
       );
     });
 
+    it("supports linked packages remapping their entrypoint", () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          ".store": {
+            "some-package@1.0.0": {
+              "package.json": stringifyPackageJson({ main: "./file.js", browser: { "./file": "./file-browser" } }),
+              "file.js": EMPTY,
+              "file-browser.js": EMPTY,
+            },
+          },
+        },
+      });
+      fs.symlinkSync(".store/some-package@1.0.0", "/node_modules/some-package");
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest("/", "some-package")).to.be.resolvedTo(
+        "/node_modules/.store/some-package@1.0.0/file-browser.js",
+      );
+      expect(resolveRequest("/", "some-package/file")).to.be.resolvedTo(
+        "/node_modules/.store/some-package@1.0.0/file-browser.js",
+      );
+      expect(resolveRequest("/node_modules/some-package", "./file")).to.be.resolvedTo(
+        "/node_modules/.store/some-package@1.0.0/file-browser.js",
+      );
+    });
+
     it("ignores re-mapping when source/target are missing/invalid", () => {
       const fs = createMemoryFs({
         "package.json": stringifyPackageJson({
