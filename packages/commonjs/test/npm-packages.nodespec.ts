@@ -1,14 +1,15 @@
-import util from "util";
-import os from "os";
-import readline from "readline";
-import tty from "tty";
-import stream from "stream";
-import url from "url";
-import { expect } from "chai";
+import { createCjsModuleSystem } from "@file-services/commonjs";
 import fs from "@file-services/node";
 import path from "@file-services/path";
-import { createCjsModuleSystem } from "@file-services/commonjs";
 import { createRequestResolver } from "@file-services/resolve";
+import { expect } from "chai";
+import events from "node:events";
+import os from "node:os";
+import readline from "node:readline";
+import stream from "node:stream";
+import tty from "node:tty";
+import url from "node:url";
+import util from "node:util";
 
 describe("commonjs module system - integration with existing npm packages", function () {
   this.timeout(10_000); // 10s
@@ -62,13 +63,14 @@ describe("commonjs module system - integration with existing npm packages", func
       fs,
       resolver: createRequestResolver({ fs, conditions: ["node", "require"] }),
     });
-    requireCache.set("path", { filename: "path", id: "path", exports: path, children: [] });
-    requireCache.set("stream", { filename: "stream", id: "stream", exports: stream, children: [] });
+    requireCache.set("events", { filename: "events", id: "events", exports: events, children: [] });
     requireCache.set("fs", { filename: "fs", id: "fs", exports: fs, children: [] });
     requireCache.set("os", { filename: "os", id: "os", exports: os, children: [] });
+    requireCache.set("path", { filename: "path", id: "path", exports: path, children: [] });
+    requireCache.set("stream", { filename: "stream", id: "stream", exports: stream, children: [] });
     requireCache.set("tty", { filename: "tty", id: "tty", exports: tty, children: [] });
-    requireCache.set("util", { filename: "util", id: "util", exports: util, children: [] });
     requireCache.set("url", { filename: "url", id: "url", exports: url, children: [] });
+    requireCache.set("util", { filename: "util", id: "util", exports: util, children: [] });
     const mocha = requireFrom(__dirname, "mocha") as typeof import("mocha");
 
     expect(mocha.reporters).to.be.an("object");
