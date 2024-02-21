@@ -1,26 +1,26 @@
-import { createFileSystem, syncToAsyncFs, SetMultiMap } from "@file-services/utils";
 import path from "@file-services/path";
 import {
+  BufferEncoding,
+  FileSystemConstants,
+  IBaseFileSystemSyncActions,
   IDirectoryContents,
+  IDirectoryEntry,
   IFileSystemStats,
   IWatchEvent,
-  WatchEventListener,
-  FileSystemConstants,
-  BufferEncoding,
-  IDirectoryEntry,
-  IBaseFileSystemSyncActions,
-  StatSyncOptions,
   RmOptions,
+  StatSyncOptions,
+  WatchEventListener,
 } from "@file-services/types";
+import { SetMultiMap, createFileSystem, syncToAsyncFs } from "@file-services/utils";
 import { FsErrorCodes } from "./error-codes";
 import type {
-  IMemFileSystem,
   IBaseMemFileSystem,
   IBaseMemFileSystemSync,
-  IFsMemFileNode,
   IFsMemDirectoryNode,
+  IFsMemFileNode,
   IFsMemNodeType,
   IFsMemSymlinkNode,
+  IMemFileSystem,
 } from "./types";
 
 const posixPath = path.posix;
@@ -104,7 +104,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     copyFileSync,
     existsSync,
     lstatSync,
-    mkdirSync: mkdirSync as IBaseFileSystemSyncActions["mkdirSync"],
+    mkdirSync,
     readdirSync,
     readFileSync: readFileSync as IBaseFileSystemSyncActions["readFileSync"],
     realpathSync,
@@ -233,7 +233,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       : Array.from(directoryNode.contents.keys());
   }
 
-  function mkdirSync(directoryPath: string, options?: { recursive?: boolean }): void {
+  function mkdirSync(directoryPath: string, options?: { recursive?: boolean }): undefined {
     const resolvedPath = resolvePath(directoryPath);
     const parentPath = posixPath.dirname(resolvedPath);
     let parentNode = getNode(parentPath);
