@@ -4,6 +4,7 @@ import path from "@file-services/path";
 import { createRequestResolver } from "@file-services/resolve";
 import { expect } from "chai";
 import events from "node:events";
+import nodeModule from "node:module";
 import os from "node:os";
 import readline from "node:readline";
 import stream from "node:stream";
@@ -88,6 +89,7 @@ describe("commonjs module system - integration with existing npm packages", func
     requireCache.set("os", { filename: "os", id: "os", exports: os, children: [] });
     requireCache.set("readline", { filename: "readline", id: "readline", exports: readline, children: [] });
     requireCache.set("util", { filename: "util", id: "util", exports: util, children: [] });
+    requireCache.set("module", { filename: "module", id: "module", exports: nodeModule, children: [] });
 
     const sass = requireFrom(__dirname, "sass") as typeof import("sass");
 
