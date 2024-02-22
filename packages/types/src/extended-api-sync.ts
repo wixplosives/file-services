@@ -57,7 +57,7 @@ export interface IFileSystemExtendedSyncActions {
    *
    * @returns absolute paths of written files.
    */
-  populateDirectorySync(directoryPath: string, contents: IDirectoryContents): string[];
+  populateDirectorySync(directoryPath: string, contents: IDirectoryContents<string | Uint8Array>): string[];
 
   /**
    * Read a file and parse it using `JSON.parse`.

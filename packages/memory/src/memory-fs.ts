@@ -2,7 +2,6 @@ import path from "@file-services/path";
 import {
   BufferEncoding,
   FileSystemConstants,
-  IBaseFileSystemSyncActions,
   IDirectoryContents,
   IDirectoryEntry,
   IFileSystemStats,
@@ -10,6 +9,7 @@ import {
   RmOptions,
   StatSyncOptions,
   WatchEventListener,
+  type ReadFileOptions,
 } from "@file-services/types";
 import { SetMultiMap, createFileSystem, syncToAsyncFs } from "@file-services/utils";
 import { FsErrorCodes } from "./error-codes";
@@ -31,7 +31,7 @@ const posixPath = path.posix;
  *
  * @param rootContents optional data to populate / with
  */
-export function createMemoryFs(rootContents?: IDirectoryContents): IMemFileSystem {
+export function createMemoryFs(rootContents?: IDirectoryContents<string | Uint8Array>): IMemFileSystem {
   const baseFs = createBaseMemoryFs();
 
   const fs: IMemFileSystem = {
@@ -63,6 +63,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   const root: IFsMemDirectoryNode = createMemDirectory("memory-fs-root");
   const pathListeners = new SetMultiMap<string, WatchEventListener>();
   const globalListeners = new Set<WatchEventListener>();
+  const textEncoder = new TextEncoder();
   realpathSync.native = realpathSync;
 
   let workingDirectoryPath: string = posixPath.sep;
@@ -106,7 +107,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     lstatSync,
     mkdirSync,
     readdirSync,
-    readFileSync: readFileSync as IBaseFileSystemSyncActions["readFileSync"],
+    readFileSync,
     realpathSync,
     readlinkSync,
     renameSync,
@@ -131,7 +132,12 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     workingDirectoryPath = resolvePath(directoryPath);
   }
 
-  function readFileSync(filePath: string, _options: { encoding: "utf8" }): string {
+  function readFileSync(filePath: string, options?: { encoding?: null; flag?: string } | null): Uint8Array;
+  function readFileSync(
+    filePath: string,
+    options: { encoding: BufferEncoding; flag?: string } | BufferEncoding,
+  ): string;
+  function readFileSync(filePath: string, options?: ReadFileOptions): string | Uint8Array {
     const resolvedPath = resolvePath(filePath);
     const fileNode = getNode(resolvedPath);
 
@@ -141,10 +147,13 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
     }
 
-    return fileNode.contents;
+    const encoding = typeof options === "string" ? options : options?.encoding;
+    return encoding === null || encoding == undefined
+      ? new Uint8Array(fileNode.contents)
+      : new TextDecoder(encoding).decode(fileNode.contents);
   }
 
-  function writeFileSync(filePath: string, fileContent: string): void {
+  function writeFileSync(filePath: string, fileContent: string | Uint8Array): void {
     if (filePath === "") {
       throw createFsError(filePath, FsErrorCodes.NO_FILE_OR_DIRECTORY, "ENOENT");
     }
@@ -156,7 +165,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
       }
       existingNode.entry = { ...existingNode.entry, mtime: new Date() };
-      existingNode.contents = fileContent;
+      existingNode.contents =
+        typeof fileContent === "string" ? textEncoder.encode(fileContent) : new Uint8Array(fileContent);
       emitWatchEvent({ path: resolvedPath, stats: existingNode.entry });
     } else {
       const parentPath = posixPath.dirname(resolvedPath);
@@ -178,7 +188,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
           isDirectory: returnsFalse,
           isSymbolicLink: returnsFalse,
         },
-        contents: fileContent,
+        contents: typeof fileContent === "string" ? textEncoder.encode(fileContent) : new Uint8Array(fileContent),
       };
       parentNode.contents.set(fileName, newFileNode);
       emitWatchEvent({ path: resolvedPath, stats: newFileNode.entry });

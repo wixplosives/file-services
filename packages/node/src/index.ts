@@ -1,5 +1,5 @@
-import { createNodeFs } from "./node-fs";
 import type { IFileSystem } from "@file-services/types";
+import { createNodeFs } from "./node-fs";
 
 export * from "./node-fs";
 export * from "./watch-service";

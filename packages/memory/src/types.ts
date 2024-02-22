@@ -1,10 +1,10 @@
 import type {
-  IBaseFileSystemSync,
   IBaseFileSystemAsync,
-  IFileSystemAsync,
-  IFileSystemSync,
-  IFileSystemStats,
+  IBaseFileSystemSync,
   IDirectoryEntry,
+  IFileSystemAsync,
+  IFileSystemStats,
+  IFileSystemSync,
 } from "@file-services/types";
 
 export interface IMemFileSystem extends IFileSystemSync, IFileSystemAsync {
@@ -30,7 +30,7 @@ export type IFsMemNodeType = IFsMemFileNode | IFsMemDirectoryNode | IFsMemSymlin
 
 export interface IFsMemFileNode extends IFsMemNode {
   type: "file";
-  contents: string;
+  contents: Uint8Array;
 }
 
 export interface IFsMemDirectoryNode extends IFsMemNode {

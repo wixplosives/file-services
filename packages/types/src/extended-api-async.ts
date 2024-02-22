@@ -61,7 +61,7 @@ export interface IFileSystemExtendedPromiseActions {
    *
    * @returns absolute paths of written files.
    */
-  populateDirectory(directoryPath: string, contents: IDirectoryContents): Promise<string[]>;
+  populateDirectory(directoryPath: string, contents: IDirectoryContents<string | Uint8Array>): Promise<string[]>;
 
   /**
    * Read a file and parse it using `JSON.parse`.
