@@ -33,6 +33,28 @@ export function asyncBaseFsContract(testProvider: () => Promise<ITestInput<IBase
         expect(await readFile(filePath, "utf8")).to.eql(SAMPLE_CONTENT);
       });
 
+      it("can write a binary file", async () => {
+        const {
+          fs: {
+            join,
+            promises: { writeFile, readFile, stat },
+          },
+          tempDirectoryPath,
+        } = testInput;
+
+        const filePath = join(tempDirectoryPath, "file");
+        const BINARY_CONTENT = new Uint8Array([1, 2, 3, 4, 5]);
+        await writeFile(filePath, BINARY_CONTENT);
+
+        expect((await stat(filePath)).isFile()).to.equal(true);
+        const readBackContents = await readFile(filePath);
+        expect(readBackContents).to.be.instanceOf(Uint8Array);
+        expect(readBackContents).to.eql(BINARY_CONTENT);
+        readBackContents[0] = 5;
+        BINARY_CONTENT[0] = 5;
+        expect(await readFile(filePath)).to.eql(new Uint8Array([1, 2, 3, 4, 5]));
+      });
+
       it("can overwrite an existing file", async () => {
         const {
           tempDirectoryPath,
