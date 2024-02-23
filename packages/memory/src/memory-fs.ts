@@ -148,9 +148,16 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     const encoding = typeof options === "string" ? options : options?.encoding;
-    return encoding === null || encoding == undefined
-      ? new Uint8Array(fileNode.contents)
-      : new TextDecoder(encoding).decode(fileNode.contents);
+
+    if (encoding === null || encoding == undefined) {
+      return typeof fileNode.contents === "string"
+        ? textEncoder.encode(fileNode.contents)
+        : new Uint8Array(fileNode.contents);
+    } else {
+      return typeof fileNode.contents === "string"
+        ? fileNode.contents
+        : new TextDecoder(encoding).decode(fileNode.contents);
+    }
   }
 
   function writeFileSync(filePath: string, fileContent: string | Uint8Array): void {
@@ -165,8 +172,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         throw createFsError(resolvedPath, FsErrorCodes.PATH_IS_DIRECTORY, "EISDIR");
       }
       existingNode.entry = { ...existingNode.entry, mtime: new Date() };
-      existingNode.contents =
-        typeof fileContent === "string" ? textEncoder.encode(fileContent) : new Uint8Array(fileContent);
+      existingNode.contents = typeof fileContent === "string" ? fileContent : new Uint8Array(fileContent);
       emitWatchEvent({ path: resolvedPath, stats: existingNode.entry });
     } else {
       const parentPath = posixPath.dirname(resolvedPath);
@@ -188,7 +194,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
           isDirectory: returnsFalse,
           isSymbolicLink: returnsFalse,
         },
-        contents: typeof fileContent === "string" ? textEncoder.encode(fileContent) : new Uint8Array(fileContent),
+        contents: typeof fileContent === "string" ? fileContent : new Uint8Array(fileContent),
       };
       parentNode.contents.set(fileName, newFileNode);
       emitWatchEvent({ path: resolvedPath, stats: newFileNode.entry });
