@@ -1,5 +1,4 @@
 import type { IModule, ICommonJsModuleSystem, LoadModule } from "./types";
-import { envGlobal } from "./global-this";
 
 export interface IBaseModuleSystemOptions {
   /**
@@ -113,7 +112,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     };
 
     const injectedGlobals = {
-      global: envGlobal,
+      global: globalThis,
       ...globals,
     };
 
