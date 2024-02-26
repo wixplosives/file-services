@@ -26,7 +26,7 @@ describe("invalidateModule", () => {
 
     const module = moduleSystem.requireModule(aFile) as ModuleShape;
     module.increment();
-    invalidateModule(aFile, moduleSystem.requireCache);
+    invalidateModule(aFile, moduleSystem.moduleCache);
     const reEvaluatedModule = moduleSystem.requireModule(aFile) as ModuleShape;
     expect(reEvaluatedModule.get()).to.eq(0);
   });
@@ -54,7 +54,7 @@ describe("invalidateModule", () => {
 
     const module = moduleSystem.requireModule(bFile) as ModuleShape;
     module.increment();
-    invalidateModule(aFile, moduleSystem.requireCache);
+    invalidateModule(aFile, moduleSystem.moduleCache);
     const reEvaluatedModule = moduleSystem.requireModule(bFile) as ModuleShape;
     expect(reEvaluatedModule.get()).to.eq(0);
   });
@@ -83,8 +83,8 @@ describe("invalidateModule", () => {
 
     moduleSystem.requireModule(aFile);
 
-    invalidateModule(cFile, moduleSystem.requireCache);
-    const moduleSystemKeys = [...moduleSystem.requireCache.keys()];
+    invalidateModule(cFile, moduleSystem.moduleCache);
+    const moduleSystemKeys = [...moduleSystem.moduleCache.keys()];
 
     expect(moduleSystemKeys).to.not.include(cFile);
     expect(moduleSystemKeys).to.not.include(bFile);
@@ -113,7 +113,7 @@ describe("invalidateModule", () => {
 
     moduleSystem.requireModule(aFile);
     expect(evaluatedModules).to.eql([aFile]);
-    invalidateModule(aFile, moduleSystem.requireCache);
+    invalidateModule(aFile, moduleSystem.moduleCache);
     moduleSystem.requireModule(bFile);
     expect(evaluatedModules).to.eql([aFile, bFile, aFile]);
   });

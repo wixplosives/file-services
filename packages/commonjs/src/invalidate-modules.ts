@@ -3,9 +3,9 @@ import type { IModule } from "./types";
 /**
  * Removes module and it's deep importers from the module cache
  */
-export const invalidateModule = (modulePath: string, requireCache: Map<string, IModule>): void => {
-  for (const { filename } of getModulesTree(modulePath, requireCache)) {
-    requireCache.delete(filename);
+export const invalidateModule = (modulePath: string, moduleCache: Map<string, IModule>): void => {
+  for (const { filename } of getModulesTree(modulePath, moduleCache)) {
+    moduleCache.delete(filename);
   }
 };
 
