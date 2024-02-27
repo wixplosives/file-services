@@ -295,17 +295,9 @@ module.exports = global;`,
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 
-    expect(() => requireModule(sampleFilePath)).to.throw("Thanos is coming!");
-    let e: unknown;
-    try {
-      requireModule(sampleFilePath);
-    } catch (error) {
-      e = error;
-    }
-    expect(e).to.haveOwnProperty("filePath", sampleFilePath);
+    expect(() => requireModule(sampleFilePath)).to.throw(`Failed evaluating: ${sampleFilePath} -> Thanos is coming!`);
 
     fs.writeFileSync(sampleFilePath, `module.exports = 1`);
-
     expect(requireModule(sampleFilePath)).to.equal(1);
   });
 
@@ -316,7 +308,7 @@ module.exports = global;`,
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 
-    expect(() => requireModule(sampleJsonPath)).to.throw();
+    expect(() => requireModule(sampleJsonPath)).to.throw(`Failed evaluating: ${sampleJsonPath}`);
 
     fs.writeFileSync(sampleJsonPath, `{ "name": "test" }`);
 
