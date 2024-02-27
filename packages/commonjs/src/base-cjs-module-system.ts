@@ -26,42 +26,58 @@ export interface IBaseModuleSystemOptions {
    * `undefined` - couldn't resolve request.
    */
   resolveFrom(contextPath: string, request: string, requestOrigin?: string): string | false | undefined;
+
   /**
    * Hook into file module evaluation.
    */
   loadModuleHook?: (loadModule: LoadModule) => LoadModule;
+
+  /**
+   * Inject file path into errors thrown during module evaluation.
+   * Adds file path chain to {@link Error.message}.
+   *
+   * @default true
+   */
+  injectFilePathIntoErrors?: boolean;
 }
 
-const falseModule = {
-  get exports() {
-    return {};
-  },
-  filename: "",
-  id: "",
-  children: [],
-};
-
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
-  const { resolveFrom, dirname, readFileSync, globals = {}, loadModuleHook } = options;
+  const { resolveFrom, dirname, readFileSync, globals = {}, loadModuleHook, injectFilePathIntoErrors = true } = options;
   const moduleCache = new Map<string, IModule>();
+  const seenErrors = new WeakSet<Error>();
+  const evaluationErrorPrefix = "Failed evaluating: ";
+  const falseModule = {
+    get exports() {
+      return {};
+    },
+    filename: "",
+    id: "",
+    children: [],
+  };
 
-  const load = loadModuleHook ? loadModuleHook(loadModule) : loadModule;
+  const loadSync = loadModuleHook ? loadModuleHook(loadModuleSync) : loadModuleSync;
 
   return {
     requireModule(filePath) {
       if (filePath === false) {
         return {};
       }
-      const fileModule = moduleCache.get(filePath) ?? load(filePath);
+      const fileModule = moduleCache.get(filePath) ?? loadSync(filePath);
       return fileModule.exports;
     },
     requireFrom(contextPath, request) {
-      return loadFrom(contextPath, request).exports;
+      return loadFromSync(contextPath, request).exports;
     },
     resolveFrom,
     moduleCache,
     globals,
   };
+
+  function addFilePathToErrorMessage(e: Error, filePath: string) {
+    const originalMessage = seenErrors.has(e) ? e.message.slice(evaluationErrorPrefix.length) : e.message;
+    e.message = `${evaluationErrorPrefix}${filePath} -> ${originalMessage}`;
+    seenErrors.add(e);
+  }
 
   function resolveThrow(contextPath: string, request: string, requestOrigin?: string): string | false {
     const resolvedRequest = resolveFrom(contextPath, request, requestOrigin);
@@ -71,7 +87,7 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     return resolvedRequest;
   }
 
-  function loadFrom(contextPath: string, request: string, requestOrigin?: string): IModule {
+  function loadFromSync(contextPath: string, request: string, requestOrigin?: string): IModule {
     const existingRequestModule = moduleCache.get(request);
     if (existingRequestModule) {
       return existingRequestModule;
@@ -80,22 +96,17 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     if (resolvedPath === false) {
       return falseModule;
     }
-    return moduleCache.get(resolvedPath) ?? load(resolvedPath);
+    return moduleCache.get(resolvedPath) ?? loadSync(resolvedPath);
   }
 
-  function loadModule(filePath: string): IModule {
+  function loadModuleSync(filePath: string): IModule {
     const newModule: IModule = { exports: {}, filename: filePath, id: filePath, children: [] };
 
     const contextPath = dirname(filePath);
     const fileContents = readFileSync(filePath);
 
-    if (filePath.endsWith(".json")) {
-      newModule.exports = JSON.parse(fileContents);
-      moduleCache.set(filePath, newModule);
-      return newModule;
-    }
     const localRequire = (request: string) => {
-      const childModule = loadFrom(contextPath, request, filePath);
+      const childModule = loadFromSync(contextPath, request, filePath);
       if (childModule !== falseModule && !newModule.children.includes(childModule)) {
         newModule.children.push(childModule);
       }
@@ -116,26 +127,27 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       ...globals,
     };
 
-    const fnArgs = Object.keys(moduleBuiltins).join(", ");
-    const globalsArgs = Object.keys(injectedGlobals).join(", ");
-    const moduleSource = `${fileContents}\n//# sourceURL=${filePath}\n`;
-    const globalFn = (0, eval)(`(function (${globalsArgs}){ return (function (${fnArgs}){${moduleSource}}); })`) as (
-      ...args: unknown[]
-    ) => (...args: unknown[]) => void;
-
-    moduleCache.set(filePath, newModule);
-
     try {
+      moduleCache.set(filePath, newModule);
+
+      if (filePath.endsWith(".json")) {
+        newModule.exports = JSON.parse(fileContents);
+        return newModule;
+      }
+
+      const fnArgs = Object.keys(moduleBuiltins).join(", ");
+      const globalsArgs = Object.keys(injectedGlobals).join(", ");
+      const globalFn = (0, eval)(
+        `(function (${globalsArgs}){ return (function (${fnArgs}){${fileContents}\n}); })`,
+      ) as (...args: unknown[]) => (...args: unknown[]) => void;
+
       const moduleFn = globalFn(...Object.values(injectedGlobals));
       moduleFn(...Object.values(moduleBuiltins));
     } catch (e) {
       moduleCache.delete(filePath);
-
-      // switch to Error.cause once more places support it
-      if (e instanceof Error && !(e as { filePath?: string }).filePath) {
-        (e as { filePath?: string }).filePath = filePath;
+      if (injectFilePathIntoErrors && e instanceof Error) {
+        addFilePathToErrorMessage(e, filePath);
       }
-
       throw e;
     }
 
