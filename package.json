@@ -15,14 +15,14 @@
     "prettify": "prettier --write ."
   },
   "devDependencies": {
-    "@playwright/browser-chromium": "^1.41.2",
+    "@playwright/browser-chromium": "^1.42.0",
     "@ts-tools/node": "^5.0.2",
     "@ts-tools/webpack-loader": "^5.0.2",
     "@types/chai": "^4.3.12",
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.6",
     "@types/node": "18",
-    "@types/react": "^18.2.59",
+    "@types/react": "^18.2.60",
     "@types/react-dom": "^18.2.19",
     "@types/sinon": "^17.0.3",
     "@types/sinon-chai": "^3.2.12",
