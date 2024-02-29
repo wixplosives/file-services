@@ -215,6 +215,32 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
           fs.join(directoryPath, "folder2", anotherFileName),
         ]);
       });
+
+      it("respects includeSymbolicLinks option", () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, "dir");
+
+        fs.populateDirectorySync(directoryPath, {
+          [fileName]: "",
+          folder1: {},
+          folder2: {},
+          ignoredFolder: {},
+        });
+
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder1", "link"));
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder2", "ignored-link"));
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "ignoredFolder", "link"));
+
+        expect(fs.findFilesSync(directoryPath)).to.eql([fs.join(directoryPath, fileName)]);
+
+        expect(
+          fs.findFilesSync(directoryPath, {
+            includeSymbolicLinks: true,
+            filterFile: (desc) => desc.name !== "ignored-link",
+            filterDirectory: (desc) => desc.name !== "ignoredFolder",
+          }),
+        ).to.eql([fs.join(directoryPath, fileName), fs.join(directoryPath, "folder1", "link")]);
+      });
     });
 
     describe("findClosestFileSync", () => {

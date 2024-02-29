@@ -119,6 +119,8 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         filePaths.push(nodePath);
       } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
         findFilesSync(nodePath, options, filePaths);
+      } else if (item.isSymbolicLink() && options.includeSymbolicLinks && filterFile(nodeDesc)) {
+        filePaths.push(nodePath);
       }
     }
 
