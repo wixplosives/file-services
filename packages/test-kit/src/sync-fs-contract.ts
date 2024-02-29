@@ -248,8 +248,11 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
           }),
         ).to.eql([
           fs.join(directoryPath, fileName),
-          fs.join(directoryPath, "folder1", "link"),
-          fs.join(directoryPath, "folder3", "link"),
+          fs.join(directoryPath, "folder1", "link"), // /folder1/link is included because of includeSymbolicLinks
+          // /folder2/ignored-link is filtered out by filterFile
+          fs.join(directoryPath, "folder3", "link"), // /folder3/link is included because folder3 is a link to folder1
+          // /ignoredFolder1/link is filtered out by filterDirectory
+          // /ignoredFolder2 is filtered out by filterDirectory
         ]);
       });
     });

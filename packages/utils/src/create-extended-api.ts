@@ -35,8 +35,19 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 }
 
 export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSystemExtendedSyncActions {
-  const { statSync, mkdirSync, writeFileSync, readdirSync, readFileSync, copyFileSync, dirname, join, resolve } =
-    baseFs;
+  const {
+    statSync,
+    mkdirSync,
+    writeFileSync,
+    readdirSync,
+    readFileSync,
+    readlinkSync,
+    copyFileSync,
+    dirname,
+    join,
+    resolve,
+    existsSync,
+  } = baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
     try {
@@ -120,11 +131,14 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
       } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
         findFilesSync(nodePath, options, filePaths);
       } else if (item.isSymbolicLink() && options.includeSymbolicLinks) {
-        const stat = statSync(nodePath);
-        if (stat.isFile() && filterFile(nodeDesc)) {
-          filePaths.push(nodePath);
-        } else if (stat.isDirectory() && filterDirectory(nodeDesc)) {
-          findFilesSync(nodePath, options, filePaths);
+        const linkTarget = readlinkSync(nodePath);
+        if (existsSync(linkTarget)) {
+          const stat = statSync(linkTarget);
+          if (stat.isFile() && filterFile(nodeDesc)) {
+            filePaths.push(nodePath);
+          } else if (stat.isDirectory() && filterDirectory(nodeDesc)) {
+            findFilesSync(nodePath, options, filePaths);
+          }
         }
       }
     }
