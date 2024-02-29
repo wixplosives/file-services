@@ -180,6 +180,62 @@ export function asyncFsContract(testProvider: () => Promise<ITestInput<IFileSyst
           await fs.promises.findFiles(directoryPath, { filterDirectory: ({ name }) => name === "folder2" }),
         ).to.eql([fs.join(directoryPath, fileName), fs.join(directoryPath, "folder2", anotherFileName)]);
       });
+
+      it("respects includeSymbolicLinks option", async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, "dir");
+
+        await fs.promises.populateDirectory(directoryPath, {
+          [fileName]: "",
+          folder1: {},
+          folder2: {},
+          ignoredFolder1: {},
+        });
+
+        // /folder1/link => /fileName
+        await fs.promises.symlink(
+          fs.join(directoryPath, fileName),
+          fs.join(directoryPath, "folder1", "link"),
+          "junction",
+        );
+        // /folder2/ignored-link => /fileName
+        await fs.promises.symlink(
+          fs.join(directoryPath, fileName),
+          fs.join(directoryPath, "folder2", "ignored-link"),
+          "junction",
+        );
+        // /ignoredFolder1/link => /fileName
+        await fs.promises.symlink(
+          fs.join(directoryPath, fileName),
+          fs.join(directoryPath, "ignoredFolder1", "link"),
+          "junction",
+        );
+        // /folder3 => /folder1
+        await fs.promises.symlink(fs.join(directoryPath, "folder1"), fs.join(directoryPath, "folder3"), "junction");
+        // /ignoredFolder2 => /folder1
+        await fs.promises.symlink(
+          fs.join(directoryPath, "folder1"),
+          fs.join(directoryPath, "ignoredFolder2"),
+          "junction",
+        );
+
+        expect(await fs.promises.findFiles(directoryPath)).to.eql([fs.join(directoryPath, fileName)]);
+
+        expect(
+          await fs.promises.findFiles(directoryPath, {
+            includeSymbolicLinks: true,
+            filterFile: (desc) => desc.name !== "ignored-link",
+            filterDirectory: (desc) => desc.name !== "ignoredFolder1" && desc.name !== "ignoredFolder2",
+          }),
+        ).to.eql([
+          fs.join(directoryPath, fileName),
+          fs.join(directoryPath, "folder1", "link"), // /folder1/link is included because of includeSymbolicLinks
+          // /folder2/ignored-link is filtered out by filterFile
+          fs.join(directoryPath, "folder3", "link"), // /folder3/link is included because folder3 is a link to folder1
+          // /ignoredFolder1/link is filtered out by filterDirectory
+          // /ignoredFolder2 is filtered out by filterDirectory
+        ]);
+      });
     });
 
     describe("findClosestFile", () => {
