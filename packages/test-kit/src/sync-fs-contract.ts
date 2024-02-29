@@ -224,12 +224,19 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
           [fileName]: "",
           folder1: {},
           folder2: {},
-          ignoredFolder: {},
+          ignoredFolder1: {},
         });
 
-        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder1", "link"));
-        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder2", "ignored-link"));
-        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "ignoredFolder", "link"));
+        // /folder1/link => /fileName
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder1", "link"), "junction");
+        // /folder2/ignored-link => /fileName
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder2", "ignored-link"), "junction");
+        // /ignoredFolder1/link => /fileName
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "ignoredFolder1", "link"), "junction");
+        // /folder3 => /folder1
+        fs.symlinkSync(fs.join(directoryPath, "folder1"), fs.join(directoryPath, "folder3"), "junction");
+        // /ignoredFolder2 => /folder1
+        fs.symlinkSync(fs.join(directoryPath, "folder1"), fs.join(directoryPath, "ignoredFolder2"), "junction");
 
         expect(fs.findFilesSync(directoryPath)).to.eql([fs.join(directoryPath, fileName)]);
 
@@ -237,9 +244,13 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
           fs.findFilesSync(directoryPath, {
             includeSymbolicLinks: true,
             filterFile: (desc) => desc.name !== "ignored-link",
-            filterDirectory: (desc) => desc.name !== "ignoredFolder",
+            filterDirectory: (desc) => desc.name !== "ignoredFolder1" && desc.name !== "ignoredFolder2",
           }),
-        ).to.eql([fs.join(directoryPath, fileName), fs.join(directoryPath, "folder1", "link")]);
+        ).to.eql([
+          fs.join(directoryPath, fileName),
+          fs.join(directoryPath, "folder1", "link"),
+          fs.join(directoryPath, "folder3", "link"),
+        ]);
       });
     });
 

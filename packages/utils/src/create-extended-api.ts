@@ -119,8 +119,13 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         filePaths.push(nodePath);
       } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
         findFilesSync(nodePath, options, filePaths);
-      } else if (item.isSymbolicLink() && options.includeSymbolicLinks && filterFile(nodeDesc)) {
-        filePaths.push(nodePath);
+      } else if (item.isSymbolicLink() && options.includeSymbolicLinks) {
+        const stat = statSync(nodePath);
+        if (stat.isFile() && filterFile(nodeDesc)) {
+          filePaths.push(nodePath);
+        } else if (stat.isDirectory() && filterDirectory(nodeDesc)) {
+          findFilesSync(nodePath, options, filePaths);
+        }
       }
     }
 
