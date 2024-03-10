@@ -1,7 +1,7 @@
 {
   "name": "@file-services/resolve",
   "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
-  "version": "8.3.3",
+  "version": "9.0.0",
   "main": "./dist/fs-resolve.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
