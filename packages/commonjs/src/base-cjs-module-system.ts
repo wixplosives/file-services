@@ -44,8 +44,7 @@ export interface IBaseModuleSystemOptions {
 export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): ICommonJsModuleSystem {
   const { resolveFrom, dirname, readFileSync, globals = {}, loadModuleHook, injectFilePathIntoErrors = true } = options;
   const moduleCache = new Map<string, IModule>();
-  const seenErrors = new WeakSet<Error>();
-  const evaluationErrorPrefix = "Failed evaluating: ";
+  const visitedErrors = new WeakSet<Error>();
   const falseModule = {
     get exports() {
       return {};
@@ -72,12 +71,6 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
     moduleCache,
     globals,
   };
-
-  function addFilePathToErrorMessage(e: Error, filePath: string) {
-    const originalMessage = seenErrors.has(e) ? e.message.slice(evaluationErrorPrefix.length) : e.message;
-    e.message = `${evaluationErrorPrefix}${filePath} -> ${originalMessage}`;
-    seenErrors.add(e);
-  }
 
   function resolveThrow(contextPath: string, request: string, requestOrigin?: string): string | false {
     const resolvedRequest = resolveFrom(contextPath, request, requestOrigin);
@@ -145,8 +138,9 @@ export function createBaseCjsModuleSystem(options: IBaseModuleSystemOptions): IC
       moduleFn(...Object.values(moduleBuiltins));
     } catch (e) {
       moduleCache.delete(filePath);
-      if (injectFilePathIntoErrors && e instanceof Error) {
-        addFilePathToErrorMessage(e, filePath);
+      if (injectFilePathIntoErrors && e instanceof Error && !visitedErrors.has(e)) {
+        e.message = `Failed evaluating: ${filePath} -> ${e.message}`;
+        visitedErrors.add(e);
       }
       throw e;
     }
