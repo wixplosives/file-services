@@ -150,23 +150,41 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     yield* fileRequestPaths(join(directoryPath, "index"));
   }
 
-  function* packageRequestPaths(initialPath: string, request: string, visitedPaths: Set<string>) {
+  function* packageRequestPaths(initialPath: string, request: string, visitedPaths: Set<string>): Generator<string> {
     const [packageName, innerPath] = parsePackageSpecifier(request);
     if (!packageName.length || (packageName.startsWith("@") && !packageName.includes("/"))) {
       return;
     }
 
     const ownPackageJson = findUpPackageJson(initialPath);
+    if (request.startsWith("#")) {
+      if (ownPackageJson?.imports !== undefined) {
+        for (const matchedValue of matchConditionsField(
+          ownPackageJson.imports,
+          request,
+          ownPackageJson.hasPatternImports,
+        )) {
+          if (isRelative(matchedValue)) {
+            yield join(ownPackageJson.directoryPath, matchedValue);
+          } else {
+            yield* packageRequestPaths(initialPath, matchedValue, visitedPaths);
+          }
+        }
+      }
+      return;
+    }
+
     if (ownPackageJson !== undefined) {
       visitedPaths.add(ownPackageJson.filePath);
       if (ownPackageJson.name === packageName) {
         if (ownPackageJson.exports !== undefined) {
-          yield* matchExportsField(
-            ownPackageJson.directoryPath,
+          for (const matchedValue of matchConditionsField(
             ownPackageJson.exports,
             innerPath,
             ownPackageJson.hasPatternExports,
-          );
+          )) {
+            yield join(ownPackageJson.directoryPath, matchedValue);
+          }
           return;
         }
       }
@@ -182,12 +200,13 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
         visitedPaths.add(resolvedPackageJson.filePath);
       }
       if (resolvedPackageJson?.exports !== undefined) {
-        yield* matchExportsField(
-          packageDirectoryPath,
+        for (const matchedValue of matchConditionsField(
           resolvedPackageJson.exports,
           innerPath,
           resolvedPackageJson.hasPatternExports,
-        );
+        )) {
+          yield join(packageDirectoryPath, matchedValue);
+        }
         return;
       }
       const requestInPackages = join(packagesPath, request);
@@ -196,23 +215,22 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function* matchExportsField(
-    contextPath: string,
-    packageJsonExports: PackageJson.ExportConditions,
+  function* matchConditionsField(
+    conditionsValue: PackageJson.ExportConditions,
     innerPath: string,
-    hasPatternExports?: boolean,
+    hasPatternMatch?: boolean,
   ) {
-    const exactMatchExports = packageJsonExports[innerPath];
+    const exactMatchExports = conditionsValue[innerPath];
     if (exactMatchExports !== undefined) {
       for (const exactMatchValue of matchExportConditions(exactMatchExports, exportConditions)) {
         if (exactMatchValue === null) {
           break;
         }
-        yield join(contextPath, exactMatchValue);
+        yield exactMatchValue;
       }
-    } else if (hasPatternExports) {
-      for (const matchedPattern of matchSubpathPatterns(packageJsonExports, innerPath, exportConditions)) {
-        yield join(contextPath, matchedPattern);
+    } else if (hasPatternMatch) {
+      for (const matchedPattern of matchSubpathPatterns(conditionsValue, innerPath, exportConditions)) {
+        yield matchedPattern;
       }
     }
   }
@@ -259,6 +277,16 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 
     const [desugerifiedExports, hasPatternExports] = desugarifyExportsField(packageJson.exports);
 
+    let hasPatternImports = false;
+    if (packageJson.imports !== undefined) {
+      for (const key of Object.keys(packageJson.imports)) {
+        if (key.includes("*")) {
+          hasPatternImports = true;
+          break;
+        }
+      }
+    }
+
     return {
       name: packageJson.name,
       filePath: packageJsonPath,
@@ -268,7 +296,9 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       browser: typeof browserField === "string" ? browserField : undefined,
       browserMappings,
       exports: desugerifiedExports,
+      imports: packageJson.imports,
       hasPatternExports,
+      hasPatternImports,
     };
   }
 

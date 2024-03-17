@@ -106,5 +106,7 @@ export interface IResolvedPackageJson {
     [from: string]: string | false;
   };
   exports?: PackageJson.ExportConditions;
+  imports?: PackageJson.Imports;
   hasPatternExports?: boolean;
+  hasPatternImports?: boolean;
 }
