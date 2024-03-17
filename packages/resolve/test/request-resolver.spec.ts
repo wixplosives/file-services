@@ -1094,6 +1094,103 @@ describe("request resolver", () => {
     });
   });
 
+  // https://nodejs.org/api/packages.html#imports
+  describe("imports field", () => {
+    it("treats empty object as nothing can be imported", () => {
+      const fs = createMemoryFs({
+        "package.json": stringifyPackageJson({ imports: {} }),
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest("/", "#lodash")).to.be.resolvedTo(undefined);
+      expect(resolveRequest("/", "#fs")).to.be.resolvedTo(undefined);
+      expect(resolveRequest("/", "#another")).to.be.resolvedTo(undefined);
+    });
+
+    it("supports mapping of a specifier to another", () => {
+      const fs = createMemoryFs({
+        "package.json": stringifyPackageJson({
+          imports: {
+            "#lodash": "lodash",
+          },
+        }),
+        node_modules: {
+          lodash: {
+            "index.js": EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest("/", "#lodash")).to.be.resolvedTo("/node_modules/lodash/index.js");
+    });
+
+    it("supports mapping to a local file", () => {
+      const fs = createMemoryFs({
+        "package.json": stringifyPackageJson({
+          imports: {
+            "#react": "./vendor/react.js",
+          },
+        }),
+        vendor: {
+          "react.js": EMPTY,
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest("/", "#react")).to.be.resolvedTo("/vendor/react.js");
+    });
+
+    it("supports different mapping for different resolution conditions", () => {
+      const fs = createMemoryFs({
+        "package.json": stringifyPackageJson({
+          imports: {
+            "#dep": {
+              node: "dep-node-native",
+              default: "./dep-polyfill.js",
+            },
+          },
+        }),
+        "dep-polyfill.js": EMPTY,
+        node_modules: {
+          "dep-node-native": {
+            "package.json": stringifyPackageJson({ main: "main.js" }),
+            "main.js": EMPTY,
+          },
+        },
+      });
+
+      const resolveBrowserRequest = createRequestResolver({ fs });
+      expect(resolveBrowserRequest("/", "#dep")).to.be.resolvedTo("/dep-polyfill.js");
+
+      const resolveNodeRequest = createRequestResolver({ fs, conditions: ["node"] });
+      expect(resolveNodeRequest("/", "#dep")).to.be.resolvedTo("/node_modules/dep-node-native/main.js");
+    });
+
+    // https://nodejs.org/api/packages.html#subpath-patterns
+    it("supports subpath imports", () => {
+      const fs = createMemoryFs({
+        "package.json": stringifyPackageJson({
+          imports: {
+            "#internal/*": "./src/internal/*.js",
+          },
+        }),
+        src: {
+          internal: {
+            "a.js": EMPTY,
+            deep: {
+              "b.js": EMPTY,
+            },
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest("/", "#internal/a")).to.be.resolvedTo("/src/internal/a.js");
+      expect(resolveRequest("/", "#internal/deep/b")).to.be.resolvedTo("/src/internal/deep/b.js");
+    });
+  });
+
   describe("alias", () => {
     it("remaps package requests to other package requests", () => {
       const fs = createMemoryFs({
