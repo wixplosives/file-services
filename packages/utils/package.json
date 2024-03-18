@@ -1,7 +1,7 @@
 {
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "main": "./dist/fs-utils.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -13,7 +13,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@file-services/types": "^9.0.0"
+    "@file-services/types": "^9.1.0"
   },
   "files": [
     "dist",

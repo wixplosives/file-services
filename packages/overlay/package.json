@@ -1,7 +1,7 @@
 {
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "main": "./dist/fs-overlay.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,8 +18,8 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/types": "^9.0.0",
-    "@file-services/utils": "^9.0.0"
+    "@file-services/types": "^9.1.0",
+    "@file-services/utils": "^9.1.0"
   },
   "files": [
     "dist",
