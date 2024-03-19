@@ -36,7 +36,7 @@
     "eslint-plugin-no-only-tests": "^3.1.0",
     "mocha": "^10.3.0",
     "mocha-play": "^7.0.4",
-    "postcss": "^8.4.36",
+    "postcss": "^8.4.37",
     "prettier": "^3.2.5",
     "promise-assist": "^2.0.1",
     "react": "^18.2.0",
