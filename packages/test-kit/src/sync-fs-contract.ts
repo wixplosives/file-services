@@ -215,6 +215,46 @@ export function syncFsContract(testProvider: () => Promise<ITestInput<IFileSyste
           fs.join(directoryPath, "folder2", anotherFileName),
         ]);
       });
+
+      it("respects includeSymbolicLinks option", () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const directoryPath = fs.join(tempDirectoryPath, "dir");
+
+        fs.populateDirectorySync(directoryPath, {
+          [fileName]: "",
+          folder1: {},
+          folder2: {},
+          ignoredFolder1: {},
+        });
+
+        // /folder1/link => /fileName
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder1", "link"), "junction");
+        // /folder2/ignored-link => /fileName
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "folder2", "ignored-link"), "junction");
+        // /ignoredFolder1/link => /fileName
+        fs.symlinkSync(fs.join(directoryPath, fileName), fs.join(directoryPath, "ignoredFolder1", "link"), "junction");
+        // /folder3 => /folder1
+        fs.symlinkSync(fs.join(directoryPath, "folder1"), fs.join(directoryPath, "folder3"), "junction");
+        // /ignoredFolder2 => /folder1
+        fs.symlinkSync(fs.join(directoryPath, "folder1"), fs.join(directoryPath, "ignoredFolder2"), "junction");
+
+        expect(fs.findFilesSync(directoryPath)).to.eql([fs.join(directoryPath, fileName)]);
+
+        expect(
+          fs.findFilesSync(directoryPath, {
+            includeSymbolicLinks: true,
+            filterFile: (desc) => desc.name !== "ignored-link",
+            filterDirectory: (desc) => desc.name !== "ignoredFolder1" && desc.name !== "ignoredFolder2",
+          }),
+        ).to.eql([
+          fs.join(directoryPath, fileName),
+          fs.join(directoryPath, "folder1", "link"), // /folder1/link is included because of includeSymbolicLinks
+          // /folder2/ignored-link is filtered out by filterFile
+          fs.join(directoryPath, "folder3", "link"), // /folder3/link is included because folder3 is a link to folder1
+          // /ignoredFolder1/link is filtered out by filterDirectory
+          // /ignoredFolder2 is filtered out by filterDirectory
+        ]);
+      });
     });
 
     describe("findClosestFileSync", () => {

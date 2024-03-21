@@ -142,6 +142,13 @@ export interface IWalkOptions {
    * @default true returned for all directories.
    */
   filterDirectory?(pathDesc: IFileSystemDescriptor): boolean;
+
+  /**
+   * Optional parameter specifying whether files symbolic links should be included in the result.
+   *
+   * @default false
+   */
+  includeSymbolicLinks?: boolean;
 }
 
 export interface RmOptions {

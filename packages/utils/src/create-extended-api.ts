@@ -35,8 +35,19 @@ export function createSyncFileSystem(baseFs: IBaseFileSystemSync): IFileSystemSy
 }
 
 export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSystemExtendedSyncActions {
-  const { statSync, mkdirSync, writeFileSync, readdirSync, readFileSync, copyFileSync, dirname, join, resolve } =
-    baseFs;
+  const {
+    statSync,
+    mkdirSync,
+    writeFileSync,
+    readdirSync,
+    readFileSync,
+    readlinkSync,
+    copyFileSync,
+    dirname,
+    join,
+    resolve,
+    existsSync,
+  } = baseFs;
 
   function fileExistsSync(filePath: string, statFn = statSync): boolean {
     try {
@@ -119,6 +130,16 @@ export function createExtendedSyncActions(baseFs: IBaseFileSystemSync): IFileSys
         filePaths.push(nodePath);
       } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
         findFilesSync(nodePath, options, filePaths);
+      } else if (item.isSymbolicLink() && options.includeSymbolicLinks) {
+        const linkTarget = readlinkSync(nodePath);
+        if (existsSync(linkTarget)) {
+          const stats = statSync(linkTarget);
+          if (stats.isFile() && filterFile(nodeDesc)) {
+            filePaths.push(nodePath);
+          } else if (stats.isDirectory() && filterDirectory(nodeDesc)) {
+            findFilesSync(nodePath, options, filePaths);
+          }
+        }
       }
     }
 
@@ -203,7 +224,7 @@ export function createExtendedFileSystemPromiseActions(
     dirname,
     resolve,
     join,
-    promises: { stat, mkdir, writeFile, readdir, readFile, copyFile },
+    promises: { stat, mkdir, writeFile, readdir, readFile, readlink, copyFile, exists },
   } = baseFs;
 
   async function fileExists(filePath: string, statFn = stat): Promise<boolean> {
@@ -298,6 +319,16 @@ export function createExtendedFileSystemPromiseActions(
         filePaths.push(nodePath);
       } else if (item.isDirectory() && filterDirectory(nodeDesc)) {
         await findFiles(nodePath, options, filePaths);
+      } else if (item.isSymbolicLink() && options.includeSymbolicLinks) {
+        const linkTarget = await readlink(nodePath);
+        if (await exists(linkTarget)) {
+          const stats = await stat(linkTarget);
+          if (stats.isFile() && filterFile(nodeDesc)) {
+            filePaths.push(nodePath);
+          } else if (stats.isDirectory() && filterDirectory(nodeDesc)) {
+            await findFiles(nodePath, options, filePaths);
+          }
+        }
       }
     }
 
