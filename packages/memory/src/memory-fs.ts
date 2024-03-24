@@ -1,15 +1,15 @@
 import path from "@file-services/path";
 import {
-  BufferEncoding,
   FileSystemConstants,
-  IDirectoryContents,
-  IDirectoryEntry,
-  IFileSystemStats,
-  IWatchEvent,
-  RmOptions,
-  StatSyncOptions,
-  WatchEventListener,
+  type BufferEncoding,
+  type IDirectoryContents,
+  type IDirectoryEntry,
+  type IFileSystemStats,
+  type IWatchEvent,
   type ReadFileOptions,
+  type RmOptions,
+  type StatSyncOptions,
+  type WatchEventListener,
 } from "@file-services/types";
 import { SetMultiMap, createFileSystem, syncToAsyncFs } from "@file-services/utils";
 import { FsErrorCodes } from "./error-codes";
