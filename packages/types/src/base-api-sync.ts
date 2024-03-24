@@ -1,11 +1,11 @@
 import type {
-  IFileSystemStats,
   BufferEncoding,
-  WriteFileOptions,
-  ReadFileOptions,
   IDirectoryEntry,
-  StatSyncOptions,
+  IFileSystemStats,
+  ReadFileOptions,
   RmOptions,
+  StatSyncOptions,
+  WriteFileOptions,
 } from "./common-fs-types";
 import type { IFileSystemPath } from "./path";
 import type { IWatchService } from "./watch-api";
