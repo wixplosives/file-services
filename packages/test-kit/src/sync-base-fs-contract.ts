@@ -1,12 +1,16 @@
-import { FileSystemConstants, IBaseFileSystemSync } from "@file-services/types";
+import { FileSystemConstants, type FSWatcher, type IBaseFileSystemSync } from "@file-services/types";
 import { expect } from "chai";
+import { sleep, waitFor } from "promise-assist";
 import type { ITestInput } from "./types";
 import { WatchEventsValidator } from "./watch-events-validator";
 
 const SAMPLE_CONTENT = "content";
 const DIFFERENT_CONTENT = "another content";
 
-export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseFileSystemSync>>): void {
+export function syncBaseFsContract(
+  testProvider: () => Promise<ITestInput<IBaseFileSystemSync>>,
+  supportsRecursiveWatch = true,
+): void {
   describe("SYNC file system contract", () => {
     let testInput: ITestInput<IBaseFileSystemSync>;
 
@@ -130,6 +134,144 @@ export function syncBaseFsContract(testProvider: () => Promise<ITestInput<IBaseF
     });
 
     describe("watching files", function () {
+      const timeout = 5_000;
+      this.timeout(timeout * 1.5);
+
+      const openWatchers = new Set<FSWatcher>();
+      afterEach(() => {
+        for (const watcher of openWatchers) {
+          watcher.close();
+        }
+        openWatchers.clear();
+      });
+
+      it("emits 'change' event when a watched file changes", async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const testFilePath = fs.join(tempDirectoryPath, "test-file");
+        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
+        const watcher = fs.watch(testFilePath);
+        openWatchers.add(watcher);
+
+        const watchEvents: Array<{ type: string; relativePath: string }> = [];
+        watcher.on("change", (type, relativePath) => watchEvents.push({ type, relativePath }));
+        fs.writeFileSync(testFilePath, DIFFERENT_CONTENT);
+
+        await waitFor(
+          () => {
+            const [firstEvent] = watchEvents;
+            expect(firstEvent).to.eql({ type: "change", relativePath: "test-file" });
+          },
+          { timeout },
+        );
+      });
+
+      it("emits 'rename' event when a watched file is removed", async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const testFilePath = fs.join(tempDirectoryPath, "test-file");
+        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
+        const watcher = fs.watch(testFilePath);
+        openWatchers.add(watcher);
+
+        const watchEvents: Array<{ type: string; relativePath: string }> = [];
+        watcher.on("change", (type, relativePath) => watchEvents.push({ type, relativePath }));
+        fs.unlinkSync(testFilePath);
+
+        await waitFor(
+          () => {
+            const lastEvent = watchEvents[watchEvents.length - 1];
+            expect(lastEvent).to.eql({ type: "rename", relativePath: "test-file" });
+          },
+          { timeout },
+        );
+      });
+
+      it("emits 'change' event when a file is changed in a watched directory", async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const testFilePath = fs.join(tempDirectoryPath, "test-file");
+        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
+        const watcher = fs.watch(tempDirectoryPath);
+        openWatchers.add(watcher);
+
+        const watchEvents: Array<{ type: string; relativePath: string }> = [];
+        watcher.on("change", (type, relativePath) => watchEvents.push({ type, relativePath }));
+        fs.writeFileSync(testFilePath, DIFFERENT_CONTENT);
+
+        await waitFor(
+          () => {
+            const [firstEvent] = watchEvents;
+
+            expect(firstEvent).to.eql({ type: "change", relativePath: "test-file" });
+          },
+          { timeout },
+        );
+      });
+
+      if (supportsRecursiveWatch) {
+        it("emits 'change' event when a deeply nested file is changed in a watched directory (when recursive)", async () => {
+          const { fs, tempDirectoryPath } = testInput;
+          const testFilePath = fs.join(tempDirectoryPath, "test-file");
+          const nestedDirectoryPath = fs.join(tempDirectoryPath, "nested");
+          const deeplyNestedPath = fs.join(nestedDirectoryPath, "deep-file");
+          fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
+          fs.mkdirSync(nestedDirectoryPath);
+          fs.writeFileSync(deeplyNestedPath, SAMPLE_CONTENT);
+
+          const watcher = fs.watch(tempDirectoryPath, { recursive: true });
+          openWatchers.add(watcher);
+
+          // recursive watcher needs some time to set up. don't seem to have event to wait for.
+          await sleep(500);
+
+          const watchEvents: Array<{ type: string; relativePath: string }> = [];
+          watcher.on("change", (type, relativePath) => watchEvents.push({ type, relativePath }));
+
+          fs.writeFileSync(deeplyNestedPath, DIFFERENT_CONTENT);
+
+          await waitFor(
+            () => {
+              const lastEvent = watchEvents[watchEvents.length - 1];
+              expect(lastEvent).to.eql({ type: "change", relativePath: fs.normalize("nested/deep-file") });
+            },
+            { timeout },
+          );
+        });
+      }
+
+      it("emits 'rename' event when a file is removed in a watched directory", async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const testFilePath = fs.join(tempDirectoryPath, "test-file");
+        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
+        const watcher = fs.watch(tempDirectoryPath);
+        openWatchers.add(watcher);
+
+        const watchEvents: Array<{ type: string; relativePath: string }> = [];
+        watcher.on("change", (type, relativePath) => watchEvents.push({ type, relativePath }));
+        fs.unlinkSync(testFilePath);
+
+        await waitFor(() => expect(watchEvents).to.eql([{ type: "rename", relativePath: "test-file" }]), { timeout });
+      });
+
+      it("emits 'rename' event when a file is added in a watched directory", async () => {
+        const { fs, tempDirectoryPath } = testInput;
+        const testFilePath = fs.join(tempDirectoryPath, "test-file");
+        const watcher = fs.watch(tempDirectoryPath);
+        openWatchers.add(watcher);
+
+        const watchEvents: Array<{ type: string; relativePath: string }> = [];
+        watcher.on("change", (type, relativePath) => watchEvents.push({ type, relativePath }));
+        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
+
+        await waitFor(
+          () => {
+            const [firstEvent] = watchEvents;
+            expect(firstEvent).to.eql({ type: "rename", relativePath: "test-file" });
+          },
+          { timeout },
+        );
+      });
+    });
+
+    describe("watching files (using WatchService)", function () {
       this.timeout(10000);
 
       let validator: WatchEventsValidator;

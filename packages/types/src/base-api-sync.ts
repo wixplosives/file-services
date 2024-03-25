@@ -1,10 +1,12 @@
 import type {
   BufferEncoding,
+  FSWatcher,
   IDirectoryEntry,
   IFileSystemStats,
   ReadFileOptions,
   RmOptions,
   StatSyncOptions,
+  WatchOptions,
   WriteFileOptions,
 } from "./common-fs-types";
 import type { IFileSystemPath } from "./path";
@@ -135,4 +137,7 @@ export interface IBaseFileSystemSyncActions {
    * Changes the permissions of a file.
    */
   chmodSync(path: string, mode: number | string): void;
+
+  /** Watch a file or a directory (optionally recursively). */
+  watch(path: string, options?: WatchOptions): FSWatcher;
 }

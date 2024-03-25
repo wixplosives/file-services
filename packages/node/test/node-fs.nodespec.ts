@@ -28,7 +28,8 @@ describe("Node File System Implementation", function () {
   // async contract passes, which is really what we care about.
   // avoid introducing more and more workarounds to support mac watcher being ready synchronously.
   if (platform() !== "darwin") {
-    syncBaseFsContract(testProvider);
+    const supportsRecursiveWatch = parseInt(process.versions.node, 10) >= 20 || platform() !== "linux";
+    syncBaseFsContract(testProvider, supportsRecursiveWatch);
   }
   asyncBaseFsContract(testProvider);
 

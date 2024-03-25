@@ -10,6 +10,7 @@ import {
   type RmOptions,
   type StatSyncOptions,
   type WatchEventListener,
+  type WatchChangeEventListener,
 } from "@file-services/types";
 import { SetMultiMap, createFileSystem, syncToAsyncFs } from "@file-services/utils";
 import { FsErrorCodes } from "./error-codes";
@@ -61,6 +62,9 @@ export function createBaseMemoryFs(): IBaseMemFileSystem {
  */
 export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   const root: IFsMemDirectoryNode = createMemDirectory("memory-fs-root");
+  const changeListeners = new SetMultiMap<string, WatchChangeEventListener>();
+  const recursiveChangeListeners = new SetMultiMap<string, WatchChangeEventListener>();
+  const closeListeners = new SetMultiMap<string, () => void>();
   const pathListeners = new SetMultiMap<string, WatchEventListener>();
   const globalListeners = new Set<WatchEventListener>();
   const textEncoder = new TextEncoder();
@@ -118,6 +122,41 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     unlinkSync,
     writeFileSync,
     chmodSync: () => undefined,
+    watch: (path, options) => {
+      const recursive = options?.recursive;
+      return {
+        close() {
+          const listeners = closeListeners.get(path);
+          if (listeners) {
+            for (const listener of listeners) {
+              listener();
+            }
+            closeListeners.deleteKey(path);
+          }
+        },
+        on(event, listener) {
+          if (event === "change") {
+            if (recursive) {
+              recursiveChangeListeners.add(path, listener as WatchChangeEventListener);
+            } else {
+              changeListeners.add(path, listener as WatchChangeEventListener);
+            }
+          } else if (event === "close") {
+            closeListeners.add(path, listener as () => void);
+          }
+          return this;
+        },
+        off(event, listener) {
+          if (event === "change") {
+            changeListeners.delete(path, listener as WatchChangeEventListener);
+            recursiveChangeListeners.delete(path, listener as WatchChangeEventListener);
+          } else if (event === "close") {
+            closeListeners.delete(path, listener as () => void);
+          }
+          return this;
+        },
+      };
+    },
   };
 
   function resolvePath(...pathSegments: string[]): string {
@@ -174,6 +213,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       existingNode.entry = { ...existingNode.entry, mtime: new Date() };
       existingNode.contents = typeof fileContent === "string" ? fileContent : new Uint8Array(fileContent);
       emitWatchEvent({ path: resolvedPath, stats: existingNode.entry });
+      emitChangeEvent("change", resolvedPath);
     } else {
       const parentPath = posixPath.dirname(resolvedPath);
       const parentNode = getNode(parentPath);
@@ -198,6 +238,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       };
       parentNode.contents.set(fileName, newFileNode);
       emitWatchEvent({ path: resolvedPath, stats: newFileNode.entry });
+      emitChangeEvent("rename", resolvedPath);
     }
   }
 
@@ -221,6 +262,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     parentNode.contents.delete(fileName);
     emitWatchEvent({ path: resolvedPath, stats: null });
+    emitChangeEvent("rename", resolvedPath);
   }
 
   function readdirSync(
@@ -285,6 +327,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName);
     parentNode.contents.set(directoryName, newDirNode);
     emitWatchEvent({ path: resolvedPath, stats: newDirNode.entry });
+    emitChangeEvent("rename", resolvedPath);
   }
 
   function rmdirSync(directoryPath: string): void {
@@ -307,6 +350,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     parentNode.contents.delete(directoryName);
     emitWatchEvent({ path: resolvedPath, stats: null });
+    emitChangeEvent("rename", resolvedPath);
   }
 
   function rmSync(targetPath: string, { force, recursive }: RmOptions = {}): void {
@@ -338,6 +382,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     parentNode.contents.delete(targetName);
     emitWatchEvent({ path: resolvedPath, stats: null });
+    emitChangeEvent("rename", resolvedPath);
   }
 
   function existsSync(nodePath: string): boolean {
@@ -464,6 +509,8 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     emitWatchEvent({ path: resolvedSourcePath, stats: null });
     emitWatchEvent({ path: resolvedDestinationPath, stats: sourceNode.entry });
+    emitChangeEvent("rename", resolvedSourcePath);
+    emitChangeEvent("rename", resolvedDestinationPath);
   }
 
   function copyFileSync(sourcePath: string, destinationPath: string, flags = 0): void {
@@ -508,6 +555,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     destParentNode.contents.set(targetName, newFileNode);
 
     emitWatchEvent({ path: resolvedDestinationPath, stats: newFileNode.entry });
+    emitChangeEvent("rename", resolvedDestinationPath);
   }
 
   function symlinkSync(target: string, linkPath: string) {
@@ -542,6 +590,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     parentNode.contents.set(fileName, symlinkNode);
     emitWatchEvent({ path: resolvedLinkPath, stats: symlinkNode.entry });
+    emitChangeEvent("rename", resolvedLinkPath);
   }
 
   function getNode(nodePath: string): IFsMemFileNode | IFsMemDirectoryNode | undefined {
@@ -576,6 +625,33 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     return node;
+  }
+
+  function emitChangeEvent(type: "change" | "rename", changedPath: string): void {
+    const listenersOnPath = changeListeners.get(changedPath);
+    if (listenersOnPath) {
+      for (const listener of listenersOnPath) {
+        listener(type, posixPath.relative("/", changedPath));
+      }
+    }
+    const parentPath = posixPath.dirname(changedPath);
+    const baseName = posixPath.basename(changedPath);
+    const listenersOnParent = changeListeners.get(parentPath);
+    if (listenersOnParent) {
+      for (const listener of listenersOnParent) {
+        listener(type, baseName);
+      }
+    }
+
+    for (const watchedPath of recursiveChangeListeners.keys()) {
+      const watchedWithSep = watchedPath.endsWith("/") ? watchedPath : watchedPath + posixPath.sep;
+      if (changedPath === watchedPath || changedPath.startsWith(watchedWithSep)) {
+        const listeners = recursiveChangeListeners.get(watchedPath)!;
+        for (const listener of listeners) {
+          listener(type, posixPath.relative(watchedPath, changedPath));
+        }
+      }
+    }
   }
 
   function emitWatchEvent(watchEvent: IWatchEvent): void {
