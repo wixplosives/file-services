@@ -17,6 +17,7 @@ import type { IWatchService } from "./watch-api";
  * Contains a subset of `fs`, watch service, and path methods.
  */
 export interface IBaseFileSystemSync extends IBaseFileSystemSyncActions, IFileSystemPath {
+  /** @deprecated use `fs.watch()` instead. */
   watchService: IWatchService;
   caseSensitive: boolean;
 }

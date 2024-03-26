@@ -3,6 +3,7 @@ import type { IFileSystemStats } from "./common-fs-types";
 /**
  * File watching service.
  * Emits naive watch events containing path and latest stats.
+ * @deprecated use `fs.watch()` instead.
  */
 export interface IWatchService {
   /**
