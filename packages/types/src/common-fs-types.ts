@@ -157,3 +157,28 @@ export interface RmOptions {
    */
   recursive?: boolean | undefined;
 }
+
+export interface WatchOptions {
+  /**
+   * When watching a directory, also watch deeply nested children.
+   * @default false
+   */
+  recursive?: boolean;
+}
+
+export type WatchChangeEventListener = (eventType: "change" | "rename", relativePath: string) => void;
+
+export interface FSWatcher {
+  /**
+   * Stop watching for changes on the given `FSWatcher`. Once stopped, the `FSWatcher` object is no longer usable.
+   */
+  close(): void;
+
+  on(event: "change", listener: WatchChangeEventListener): this;
+  on(event: "close", listener: () => void): this;
+  on(event: "error", listener: (error: Error) => void): this;
+
+  off(event: "change", listener: WatchChangeEventListener): this;
+  off(event: "close", listener: () => void): this;
+  off(event: "error", listener: (error: Error) => void): this;
+}
