@@ -1,7 +1,7 @@
 {
   "name": "@file-services/commonjs",
   "description": "Isomorphic, fs-agnostic implementation of the Node commonjs module system.",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "main": "./dist/fs-commonjs.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,8 +18,8 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/resolve": "^9.1.0",
-    "@file-services/types": "^9.1.0"
+    "@file-services/resolve": "^9.2.0",
+    "@file-services/types": "^9.2.0"
   },
   "files": [
     "dist",
