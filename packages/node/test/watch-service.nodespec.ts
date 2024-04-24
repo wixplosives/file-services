@@ -98,7 +98,7 @@ describe("Node Watch Service", function () {
       await validator.noMoreEvents();
     });
 
-    it("unwatchAllPaths can be invoked immediately after watched dir removal", async () => {
+    it("unwatchAllPaths does not get stuck when invoked immediately after watched dir is removed", async () => {
       await watchService.watchPath(testDirectoryPath);
       await rmdir(testDirectoryPath);
       await watchService.unwatchAllPaths();
