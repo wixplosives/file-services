@@ -97,6 +97,12 @@ describe("Node Watch Service", function () {
       await validator.validateEvents([{ path: testDirectoryPath, stats: null }]);
       await validator.noMoreEvents();
     });
+
+    it("unwatchAllPaths can be invoked immediately after watched dir removal", async () => {
+      await watchService.watchPath(testDirectoryPath);
+      await rmdir(testDirectoryPath);
+      await watchService.unwatchAllPaths();
+    });
   });
 
   describe("mixing watch of directories and files", () => {

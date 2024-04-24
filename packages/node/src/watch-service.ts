@@ -211,6 +211,7 @@ export class NodeWatchService implements IWatchService {
     const watcher = this.fsWatchers.get(path);
     if (watcher) {
       watcher.close();
+      this.fsWatchers.delete(path);
     }
   }
 
