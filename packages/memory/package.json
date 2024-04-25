@@ -1,7 +1,7 @@
 {
   "name": "@file-services/memory",
   "description": "An in-memory, sync/async, file system implementation.",
-  "version": "9.2.0",
+  "version": "9.2.1",
   "main": "./dist/fs-memory.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,9 +18,9 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/path": "^9.2.0",
-    "@file-services/types": "^9.2.0",
-    "@file-services/utils": "^9.2.0"
+    "@file-services/path": "^9.2.1",
+    "@file-services/types": "^9.2.1",
+    "@file-services/utils": "^9.2.1"
   },
   "files": [
     "dist",
