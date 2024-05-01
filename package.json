@@ -44,7 +44,7 @@
     "sass": "^1.76.0",
     "sinon": "^17.0.1",
     "sinon-chai": "^3.7.0",
-    "type-fest": "^4.17.0",
+    "type-fest": "^4.18.0",
     "typescript": "~5.4.5"
   },
   "engines": {
