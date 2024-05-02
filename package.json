@@ -17,7 +17,7 @@
   "devDependencies": {
     "@playwright/browser-chromium": "^1.43.1",
     "@ts-tools/node": "^5.0.2",
-    "@types/chai": "^4.3.14",
+    "@types/chai": "^4.3.15",
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.6",
     "@types/node": "18",
@@ -25,7 +25,7 @@
     "@types/react-dom": "^18.3.0",
     "@types/sinon": "^17.0.3",
     "@types/sinon-chai": "^3.2.12",
-    "@typescript-eslint/eslint-plugin": "^7.7.1",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
     "chai": "^4.4.1",
     "chai-as-promised": "^7.1.1",
     "create-temp-directory": "^2.4.0",
