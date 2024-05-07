@@ -263,17 +263,7 @@ module.exports = global;`,
     });
     const { requireModule } = createCjsModuleSystem({ fs });
 
-    let caughtError: unknown = undefined;
-    expect(() => {
-      try {
-        requireModule(sampleFilePath);
-      } catch (e) {
-        caughtError = e;
-        throw e;
-      }
-    }).to.throw(`Thanos is coming!`);
-
-    expect((caughtError as Error)?.stack).to.include(sampleFilePath);
+    expect(() => requireModule(sampleFilePath)).to.throw(`Failed evaluating: ${sampleFilePath} -> Thanos is coming!`);
   });
 
   it("does not cache module if code parsing failed", () => {
