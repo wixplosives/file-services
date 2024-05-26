@@ -87,7 +87,10 @@ export interface IResolutionFileSystem {
     options?: { throwIfNoEntry?: false },
   ): { isFile(): boolean; isDirectory(): boolean } | undefined;
   readFileSync(path: string, encoding: "utf8"): string;
-  realpathSync(path: string): string;
+  realpathSync: {
+    (path: string): string;
+    native?(path: string): string;
+  };
 
   dirname(path: string): string;
   join(...paths: string[]): string;

@@ -20,6 +20,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     fallback = {},
   } = options;
 
+  const nativeRealPathSync = realpathSync.native ?? realpathSync;
   const exportConditions = new Set(conditions);
   const targetsBrowser = exportConditions.has("browser");
   const targetsEsm = exportConditions.has("import");
@@ -340,7 +341,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     const { stackTraceLimit } = Error;
     try {
       Error.stackTraceLimit = 0;
-      return realpathSync(itemPath);
+      return nativeRealPathSync(itemPath);
     } catch {
       return itemPath;
     } finally {
