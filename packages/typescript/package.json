@@ -1,7 +1,7 @@
 {
   "name": "@file-services/typescript",
   "description": "Helpers for creation of TypeScript hosts",
-  "version": "9.2.1",
+  "version": "9.3.0",
   "main": "./dist/fs-typescript.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -16,7 +16,7 @@
     "typescript": ">=2.8.0"
   },
   "dependencies": {
-    "@file-services/types": "^9.2.1"
+    "@file-services/types": "^9.3.0"
   },
   "files": [
     "dist",

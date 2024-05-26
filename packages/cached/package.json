@@ -1,7 +1,7 @@
 {
   "name": "@file-services/cached",
   "description": "A file system wrapper that adds cache to any `IFileSystem` implementation.",
-  "version": "9.2.1",
+  "version": "9.3.0",
   "main": "./dist/fs-cached.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -18,8 +18,8 @@
     "test:browser": "mocha-play \"./dist/test/**/*.spec.js\""
   },
   "dependencies": {
-    "@file-services/types": "^9.2.1",
-    "@file-services/utils": "^9.2.1"
+    "@file-services/types": "^9.3.0",
+    "@file-services/utils": "^9.3.0"
   },
   "files": [
     "dist",
