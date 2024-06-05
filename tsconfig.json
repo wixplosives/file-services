@@ -26,6 +26,6 @@
 
     { "path": "./packages/typescript/src" },
 
-    { "path": "./packages/utils/src" },
-  ],
+    { "path": "./packages/utils/src" }
+  ]
 }
