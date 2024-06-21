@@ -6,6 +6,7 @@ import { expect } from "chai";
 import events from "node:events";
 import nodeModule from "node:module";
 import os from "node:os";
+import perf_hooks from "node:perf_hooks";
 import readline from "node:readline";
 import stream from "node:stream";
 import tty from "node:tty";
@@ -53,6 +54,7 @@ describe("commonjs module system - integration with existing npm packages", func
     const { requireFrom, moduleCache } = createCjsModuleSystem({ fs });
     moduleCache.set("fs", { filename: "fs", id: "fs", exports: fs, children: [] });
     moduleCache.set("os", { filename: "os", id: "os", exports: os, children: [] });
+    moduleCache.set("perf_hooks", { filename: "perf_hooks", id: "perf_hooks", exports: perf_hooks, children: [] });
 
     const ts = requireFrom(__dirname, "typescript") as typeof import("typescript");
 
