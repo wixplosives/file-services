@@ -82,12 +82,17 @@ export interface IDirectoryEntry {
  */
 export interface IFileSystemStats {
   /**
-   * Creation time
+   * The timestamp indicating the creation time of this file.
    */
   birthtime: Date;
 
   /**
-   * Modification time
+   * The timestamp indicating the last time the file status was changed.
+   */
+  ctime: Date;
+
+  /**
+   * The timestamp indicating the last time this file was modified.
    */
   mtime: Date;
 
