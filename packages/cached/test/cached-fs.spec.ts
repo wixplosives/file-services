@@ -1,9 +1,9 @@
+import { createCachedFs } from "@file-services/cached";
+import { createMemoryFs } from "@file-services/memory";
+import { asyncBaseFsContract, syncBaseFsContract } from "@file-services/test-kit";
 import chai, { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
-import { asyncBaseFsContract, syncBaseFsContract } from "@file-services/test-kit";
-import { createMemoryFs } from "@file-services/memory";
-import { createCachedFs } from "@file-services/cached";
 
 chai.use(chaiAsPromised);
 
@@ -36,43 +36,6 @@ describe("createCachedFs", () => {
       expect(() => fs.statSync("/missing")).to.throw();
       expect(() => fs.statSync("./missing")).to.throw();
       expect(() => fs.statSync("missing")).to.throw();
-
-      expect(statSpy.callCount).to.equal(1);
-    });
-
-    it("caches fs.stat for existing files", async () => {
-      const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
-      const statSpy = sinon.spy(memFs, "stat");
-      const fs = createCachedFs(memFs);
-
-      const stats = await new Promise((res, rej) => fs.stat("/file", (e, s) => (e ? rej(e) : res(s))));
-      const stats2 = await new Promise((res, rej) => fs.stat("/file", (e, s) => (e ? rej(e) : res(s))));
-      const stats3 = await new Promise((res, rej) => fs.stat("./file", (e, s) => (e ? rej(e) : res(s))));
-      const stats4 = await new Promise((res, rej) => fs.stat("file", (e, s) => (e ? rej(e) : res(s))));
-
-      expect(statSpy.callCount).to.equal(1);
-      expect(stats).to.equal(stats2);
-      expect(stats).to.equal(stats3);
-      expect(stats).to.equal(stats4);
-    });
-
-    it("caches fs.stat for missing files", async () => {
-      const memFs = createMemoryFs();
-      const statSpy = sinon.spy(memFs, "stat");
-      const fs = createCachedFs(memFs);
-
-      await expect(
-        new Promise((res, rej) => fs.stat("/missing", (e, s) => (e ? rej(e) : res(s)))),
-      ).to.eventually.be.rejectedWith();
-      await expect(
-        new Promise((res, rej) => fs.stat("/missing", (e, s) => (e ? rej(e) : res(s)))),
-      ).to.eventually.be.rejectedWith();
-      await expect(
-        new Promise((res, rej) => fs.stat("./missing", (e, s) => (e ? rej(e) : res(s)))),
-      ).to.eventually.be.rejectedWith();
-      await expect(
-        new Promise((res, rej) => fs.stat("missing", (e, s) => (e ? rej(e) : res(s)))),
-      ).to.eventually.be.rejectedWith();
 
       expect(statSpy.callCount).to.equal(1);
     });
@@ -122,22 +85,6 @@ describe("createCachedFs", () => {
       expect(actualPath).to.equal(actualPath4);
     });
 
-    it("caches fs.realpath for existing files", async () => {
-      const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
-      const realpathSpy = sinon.spy(memFs, "realpath");
-      const fs = createCachedFs(memFs);
-
-      const actualPath = await new Promise((res, rej) => fs.realpath("/file", (e, p) => (e ? rej(e) : res(p))));
-      const actualPath2 = await new Promise((res, rej) => fs.realpath("/file", (e, p) => (e ? rej(e) : res(p))));
-      const actualPath3 = await new Promise((res, rej) => fs.realpath("./file", (e, p) => (e ? rej(e) : res(p))));
-      const actualPath4 = await new Promise((res, rej) => fs.realpath("file", (e, p) => (e ? rej(e) : res(p))));
-
-      expect(realpathSpy.callCount).to.equal(1);
-      expect(actualPath).to.equal(actualPath2);
-      expect(actualPath).to.equal(actualPath3);
-      expect(actualPath).to.equal(actualPath4);
-    });
-
     it("caches fs.promises.realpath for existing files", async () => {
       const memFs = createMemoryFs({ file: SAMPLE_CONTENT });
       const realpathSpy = sinon.spy(memFs.promises, "realpath");
@@ -172,22 +119,18 @@ describe("createCachedFs", () => {
       const filePath = "/file";
       const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
       const statSyncSpy = sinon.spy(memFs, "statSync");
-      const statSpy = sinon.spy(memFs, "stat");
       const promiseStatSpy = sinon.spy(memFs.promises, "stat");
       const fs = createCachedFs(memFs);
 
       fs.statSync(filePath);
-      await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
       await fs.promises.stat(filePath);
 
       fs.invalidate(filePath);
 
       fs.statSync(filePath);
-      await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
       await fs.promises.stat(filePath);
 
       expect(statSyncSpy.callCount).to.equal(2);
-      expect(statSpy.callCount).to.equal(0);
       expect(promiseStatSpy.callCount).to.equal(0);
     });
 
@@ -195,26 +138,18 @@ describe("createCachedFs", () => {
       const filePath = "/missing";
       const memFs = createMemoryFs();
       const statSyncSpy = sinon.spy(memFs, "statSync");
-      const statSpy = sinon.spy(memFs, "stat");
       const promiseStatSpy = sinon.spy(memFs.promises, "stat");
       const fs = createCachedFs(memFs);
 
       expect(() => fs.statSync(filePath)).to.throw();
-      await expect(
-        new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s)))),
-      ).to.eventually.be.rejectedWith();
       await expect(fs.promises.stat(filePath)).to.eventually.be.rejectedWith();
 
       fs.invalidate(filePath);
 
       expect(() => fs.statSync(filePath)).to.throw();
-      await expect(
-        new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s)))),
-      ).to.eventually.be.rejectedWith();
       await expect(fs.promises.stat(filePath)).to.eventually.be.rejectedWith();
 
       expect(statSyncSpy.callCount).to.equal(2);
-      expect(statSpy.callCount).to.equal(0);
       expect(promiseStatSpy.callCount).to.equal(0);
     });
 
@@ -240,22 +175,18 @@ describe("createCachedFs", () => {
       const filePath = `${dirPath}/${fileName}`;
       const memFs = createMemoryFs({ [filePath]: SAMPLE_CONTENT });
       const statSyncSpy = sinon.spy(memFs, "statSync");
-      const statSpy = sinon.spy(memFs, "stat");
       const promiseStatSpy = sinon.spy(memFs.promises, "stat");
       const fs = createCachedFs(memFs);
 
       fs.statSync(filePath);
-      await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
       await fs.promises.stat(filePath);
 
       fs.invalidate(dirPath, true);
 
       fs.statSync(filePath);
-      await new Promise((res, rej) => fs.stat(filePath, (e, s) => (e ? rej(e) : res(s))));
       await fs.promises.stat(filePath);
 
       expect(statSyncSpy.callCount).to.equal(2);
-      expect(statSpy.callCount).to.equal(0);
       expect(promiseStatSpy.callCount).to.equal(0);
     });
   });
