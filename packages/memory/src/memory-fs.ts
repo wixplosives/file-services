@@ -574,7 +574,7 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       throw createFsError(resolvedLinkPath, FsErrorCodes.PATH_IS_FILE, "ENOTDIR");
     }
 
-    const currentDate = new Date(Date.now());
+    const currentDate = new Date();
     const fileName = posixPath.basename(resolvedLinkPath);
     const symlinkNode: IFsMemSymlinkNode = {
       type: "symlink",
