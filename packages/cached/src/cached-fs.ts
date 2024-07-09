@@ -1,4 +1,4 @@
-import type { IFileSystem, IFileSystemStats, CallbackFnVoid } from "@file-services/types";
+import type { IFileSystem, IFileSystemStats } from "@file-services/types";
 import { createFileSystem } from "@file-services/utils";
 
 const identity = (val: string) => val;
@@ -89,33 +89,17 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
   return {
     ...createFileSystem({
       ...fs,
-      copyFile: function copyFile(sourcePath: string, destinationPath: string, ...args: [CallbackFnVoid]) {
-        destinationPath = fs.resolve(destinationPath);
-        invalidateAbsolute(destinationPath);
-        return fs.copyFile(sourcePath, destinationPath, ...args);
-      } as IFileSystem["copyFile"],
       copyFileSync(sourcePath, destinationPath, ...args) {
         destinationPath = fs.resolve(destinationPath);
         invalidateAbsolute(destinationPath);
         return fs.copyFileSync(sourcePath, destinationPath, ...args);
       },
-      mkdir: function mkdir(directoryPath: string, ...args: [CallbackFnVoid]) {
-        directoryPath = fs.resolve(directoryPath);
-        invalidateAbsolute(directoryPath);
-        return fs.mkdir(directoryPath, ...args);
-      } as IFileSystem["mkdir"],
       mkdirSync(directoryPath, ...args) {
         directoryPath = fs.resolve(directoryPath);
         invalidateAbsolute(directoryPath);
         return fs.mkdirSync(directoryPath, ...args);
       },
-      rename(sourcePath, destinationPath, callback) {
-        sourcePath = fs.resolve(sourcePath);
-        destinationPath = fs.resolve(destinationPath);
-        invalidateAbsolute(sourcePath);
-        invalidateAbsolute(destinationPath);
-        return fs.rename(sourcePath, destinationPath, callback);
-      },
+
       renameSync(sourcePath, destinationPath) {
         sourcePath = fs.resolve(sourcePath);
         destinationPath = fs.resolve(destinationPath);
@@ -123,11 +107,7 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(destinationPath);
         return fs.renameSync(sourcePath, destinationPath);
       },
-      rmdir(directoryPath, callback) {
-        directoryPath = fs.resolve(directoryPath);
-        invalidateAbsolute(directoryPath);
-        return fs.rmdir(directoryPath, callback);
-      },
+
       rmdirSync(directoryPath) {
         directoryPath = fs.resolve(directoryPath);
         invalidateAbsolute(directoryPath);
@@ -143,23 +123,13 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
         invalidateAbsolute(path);
         return fs.symlinkSync(target, path, type);
       },
-      unlink(filePath, callback) {
-        filePath = fs.resolve(filePath);
-        invalidateAbsolute(filePath);
-        return fs.unlink(filePath, callback);
-      },
+
       unlinkSync(filePath) {
         filePath = fs.resolve(filePath);
         invalidateAbsolute(filePath);
         return fs.unlinkSync(filePath);
       },
-      writeFile: function writeFile(filePath: string, ...args: [string, CallbackFnVoid]) {
-        if (filePath) {
-          filePath = fs.resolve(filePath);
-          invalidateAbsolute(filePath);
-        }
-        return fs.writeFile(filePath, ...args);
-      } as IFileSystem["writeFile"],
+
       writeFileSync(filePath, ...args) {
         if (filePath) {
           filePath = fs.resolve(filePath);
@@ -187,45 +157,8 @@ export function createCachedFs(fs: IFileSystem): ICachedFileSystem {
           throw e;
         }
       },
-      stat(path, callback) {
-        path = fs.resolve(path);
-        // force throwIfNoEntry, as callback version doesn't support it
-        const cacheKey = getCanonicalPath(path) + suffixTrue;
-        const cachedStats = statsCache.get(cacheKey);
-        if (cachedStats) {
-          if (cachedStats.kind === "failure") {
-            (callback as (e: Error) => void)(cachedStats.error);
-          } else if (cachedStats.kind === "success") {
-            callback(null, cachedStats.value as IFileSystemStats);
-          }
-        } else {
-          fs.stat(path, (error, stats) => {
-            if (error) {
-              statsCache.set(cacheKey, { kind: "failure", error });
-            } else {
-              statsCache.set(cacheKey, { kind: "success", value: stats });
-            }
 
-            callback(error, stats);
-          });
-        }
-      },
       realpathSync,
-      realpath(path, callback) {
-        path = fs.resolve(path);
-        const cacheKey = getCanonicalPath(path);
-        const cachedActualPath = realpathCache.get(cacheKey);
-        if (cachedActualPath !== undefined) {
-          callback(null, cachedActualPath);
-        } else {
-          fs.realpath(path, (error, actualPath) => {
-            if (!error) {
-              realpathCache.set(cacheKey, actualPath);
-            }
-            callback(error, actualPath);
-          });
-        }
-      },
     }),
     invalidate(path, deep = false) {
       const pathToInvalidate = fs.resolve(path);
