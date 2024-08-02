@@ -15,7 +15,7 @@
   "scripts": {
     "test": "npm run test:node && npm run test:browser",
     "test:node": "mocha \"./test/*.{spec,nodespec}.ts?(x)\"",
-    "test:browser": "mocha-play \"./test/**/*.spec.ts?(x)\""
+    "test:browser": "mocha-web \"./test/**/*.spec.ts?(x)\""
   },
   "dependencies": {
     "type-fest": "^4.23.0"
