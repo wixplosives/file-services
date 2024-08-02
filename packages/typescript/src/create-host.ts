@@ -71,7 +71,7 @@ export function createBaseHost(fs: IFileSystemSync): IBaseHost {
     try {
       Error.stackTraceLimit = 0;
       return realpathSync(path);
-    } catch (e) {
+    } catch {
       return path;
     } finally {
       Error.stackTraceLimit = stackTraceLimit;
