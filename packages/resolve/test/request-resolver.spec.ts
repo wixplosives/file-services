@@ -325,6 +325,22 @@ describe("request resolver", () => {
 
       expect(resolveRequest("/project", "react")).to.be.resolvedTo("/root_libs/react/index.js");
     });
+
+    it("loads new packages added since last resolution", () => {
+      const fs = createMemoryFs({
+        node_modules: {
+          express: {
+            "main.js": EMPTY,
+          },
+        },
+      });
+      const resolveRequest = createRequestResolver({ fs });
+
+      expect(resolveRequest("/", "express")).to.be.resolvedTo(undefined);
+      fs.writeFileSync("/node_modules/express/package.json", stringifyPackageJson({ main: "main.js" }));
+
+      expect(resolveRequest("/", "express")).to.be.resolvedTo("/node_modules/express/main.js");
+    });
   });
 
   describe("browser/module fields (string)", () => {

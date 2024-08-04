@@ -1,5 +1,5 @@
 import type { PackageJson } from "type-fest";
-import type { IRequestResolverOptions, IResolutionOutput, IResolvedPackageJson, RequestResolver } from "./types";
+import type { IRequestResolverOptions, IResolutionOutput, ISanitizedPackageJson, RequestResolver } from "./types";
 
 export const defaultPackageRoots = ["node_modules"] as const;
 export const defaultExtensions = [".js", ".json"] as const;
@@ -15,7 +15,6 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     packageRoots = defaultPackageRoots,
     extensions = defaultExtensions,
     conditions = defaultConditions,
-    resolvedPacakgesCache = new Map<string, IResolvedPackageJson | undefined>(),
     alias = {},
     fallback = {},
   } = options;
@@ -24,49 +23,72 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
   const exportConditions = new Set(conditions);
   const targetsBrowser = exportConditions.has("browser");
   const targetsEsm = exportConditions.has("import");
-
-  const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, resolvedPacakgesCache);
+  const packageCache = new Map<string, ISanitizedPackageJson | undefined>();
+  const loadPackageJsonFromCached = wrapWithCache(loadPackageJsonFrom, packageCache);
   const remapUsingAlias = createRequestRemapper(alias);
   const remapUsingFallback = createRequestRemapper(fallback);
 
   return requestResolver;
 
   function requestResolver(contextPath: string, originalRequest: string): IResolutionOutput {
-    const visitedPaths = new Set<string>();
-    for (const request of requestsToTry(contextPath, originalRequest, visitedPaths)) {
-      if (request === false) {
-        return { resolvedFile: request, visitedPaths };
-      }
-
-      for (const resolvedFilePath of nodeRequestPaths(contextPath, request, visitedPaths)) {
-        visitedPaths.add(resolvedFilePath);
-        if (!statSyncSafe(resolvedFilePath)?.isFile()) {
-          continue;
+    try {
+      const visitedPaths = new Set<string>();
+      for (const request of requestsToTry(contextPath, originalRequest, visitedPaths)) {
+        if (request === false) {
+          return { resolvedFile: request, visitedPaths };
         }
-        const realResolvedFilePath = realpathSyncSafe(resolvedFilePath);
-        visitedPaths.add(realResolvedFilePath);
-        if (targetsBrowser) {
-          const toPackageJson = findUpPackageJson(dirname(realResolvedFilePath));
-          if (toPackageJson) {
-            visitedPaths.add(toPackageJson.filePath);
-            const remappedFilePath = toPackageJson.browserMappings?.[realResolvedFilePath];
-            if (remappedFilePath !== undefined) {
-              if (remappedFilePath !== false) {
-                visitedPaths.add(remappedFilePath);
+
+        for (const resolvedFilePath of nodeRequestPaths(contextPath, request, visitedPaths)) {
+          visitedPaths.add(resolvedFilePath);
+          if (!statSyncSafe(resolvedFilePath)?.isFile()) {
+            continue;
+          }
+          const realResolvedFilePath = realpathSyncSafe(resolvedFilePath);
+          visitedPaths.add(realResolvedFilePath);
+          if (targetsBrowser) {
+            const toPackageJson = findUpPackageJson(dirname(realResolvedFilePath));
+            if (toPackageJson) {
+              visitedPaths.add(toPackageJson.filePath);
+              const to = matchBrowserField(toPackageJson, realResolvedFilePath);
+              if (to !== undefined) {
+                const remappedFilePath = resolveRemappedRequest(toPackageJson.directoryPath, to);
+                if (remappedFilePath !== undefined) {
+                  if (typeof remappedFilePath === "string") {
+                    visitedPaths.add(remappedFilePath);
+                  }
+                  return {
+                    resolvedFile: remappedFilePath,
+                    originalFilePath: realResolvedFilePath,
+                    visitedPaths,
+                  };
+                }
               }
-              return {
-                resolvedFile: remappedFilePath,
-                originalFilePath: realResolvedFilePath,
-                visitedPaths,
-              };
             }
           }
+          return { resolvedFile: realResolvedFilePath, visitedPaths };
         }
-        return { resolvedFile: realResolvedFilePath, visitedPaths };
+      }
+
+      return { resolvedFile: undefined, visitedPaths };
+    } finally {
+      packageCache.clear();
+    }
+  }
+
+  function matchBrowserField({ browserMappings, directoryPath }: ISanitizedPackageJson, filePath: string) {
+    if (browserMappings === undefined) {
+      return undefined;
+    }
+    for (const [from, to] of Object.entries(browserMappings)) {
+      if (!isRelative(from)) {
+        continue;
+      }
+      const fromPath = join(directoryPath, from);
+      if (filePath === fromPath || (filePath.startsWith(fromPath) && resolveRelative(fromPath) === filePath)) {
+        return to;
       }
     }
-
-    return { resolvedFile: undefined, visitedPaths };
+    return undefined;
   }
 
   function* requestsToTry(contextPath: string, request: string, visitedPaths: Set<string>) {
@@ -81,10 +103,10 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       const fromPackageJson = findUpPackageJson(contextPath);
       if (fromPackageJson) {
         visitedPaths.add(fromPackageJson.filePath);
-        const remappedRequest = fromPackageJson.browserMappings?.[request];
-        if (remappedRequest !== undefined) {
+        const to = fromPackageJson.browserMappings?.[request];
+        if (to !== undefined) {
           emittedCandidate = true;
-          yield remappedRequest;
+          yield typeof to === "string" && isRelative(to) ? join(fromPackageJson.directoryPath, to) : to;
         }
       }
     }
@@ -244,7 +266,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     }
   }
 
-  function findUpPackageJson(initialPath: string): IResolvedPackageJson | undefined {
+  function findUpPackageJson(initialPath: string): ISanitizedPackageJson | undefined {
     for (const directoryPath of pathChainToRoot(initialPath)) {
       const resolvedPackageJson = loadPackageJsonFromCached(directoryPath);
       if (resolvedPackageJson) {
@@ -254,27 +276,18 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
     return undefined;
   }
 
-  function loadPackageJsonFrom(directoryPath: string): IResolvedPackageJson | undefined {
+  function loadPackageJsonFrom(directoryPath: string): ISanitizedPackageJson | undefined {
     const packageJsonPath = join(directoryPath, PACKAGE_JSON);
+
+    if (!statSyncSafe(packageJsonPath)?.isFile()) {
+      return undefined;
+    }
+
     const packageJson = readJsonFileSyncSafe(packageJsonPath) as PackageJson | null | undefined;
     if (typeof packageJson !== "object" || packageJson === null) {
       return undefined;
     }
     const { main: mainField, module: moduleField, browser: browserField } = packageJson;
-
-    let browserMappings: Record<string, string | false> | undefined = undefined;
-    if (targetsBrowser && typeof browserField === "object" && browserField !== null) {
-      browserMappings = Object.create(null) as Record<string, string | false>;
-      for (const [from, to] of Object.entries(browserField)) {
-        const resolvedFrom = isRelative(from) ? resolveRelative(join(directoryPath, from)) : from;
-        if (resolvedFrom && to !== undefined) {
-          const resolvedTo = resolveRemappedRequest(directoryPath, to);
-          if (resolvedTo !== undefined) {
-            browserMappings[resolvedFrom] = resolvedTo;
-          }
-        }
-      }
-    }
 
     const [desugerifiedExports, hasPatternExports] = desugarifyExportsField(packageJson.exports);
 
@@ -295,7 +308,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
       main: typeof mainField === "string" ? mainField : undefined,
       module: typeof moduleField === "string" ? moduleField : undefined,
       browser: typeof browserField === "string" ? browserField : undefined,
-      browserMappings,
+      browserMappings: typeof browserField === "object" && browserField !== null ? browserField : undefined,
       exports: desugerifiedExports,
       imports: packageJson.imports,
       hasPatternExports,
@@ -380,7 +393,7 @@ export function createRequestResolver(options: IRequestResolverOptions): Request
 function wrapWithCache<K, T>(fn: (key: K) => T, cache = new Map<K, T>()): (key: K) => T {
   return (key: K) => {
     if (cache.has(key)) {
-      return cache.get(key) as T;
+      return cache.get(key)!;
     } else {
       const result = fn(key);
       cache.set(key, result);

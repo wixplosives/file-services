@@ -29,12 +29,6 @@ export interface IRequestResolverOptions {
   conditions?: string[];
 
   /**
-   * Cache for resolved packages. Map keys are directoryPaths.
-   * If not provided, resolver will create an internal Map (still caches).
-   */
-  resolvedPacakgesCache?: Map<string, IResolvedPackageJson | undefined>;
-
-  /**
    * Aliases for package requests.
    * Record key is the request to be mapped, value is the new target.
    * Alias is attempted before original request.
@@ -98,16 +92,14 @@ export interface IResolutionFileSystem {
   isAbsolute(path: string): boolean;
 }
 
-export interface IResolvedPackageJson {
+export interface ISanitizedPackageJson {
   filePath: string;
   directoryPath: string;
   name?: string;
   main?: string;
   module?: string;
   browser?: string;
-  browserMappings?: {
-    [from: string]: string | false;
-  };
+  browserMappings?: Exclude<PackageJson["browser"], string>;
   exports?: PackageJson.ExportConditions;
   imports?: PackageJson.Imports;
   hasPatternExports?: boolean;
