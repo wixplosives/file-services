@@ -1,9 +1,4 @@
-import type {
-  IBaseFileSystemSync,
-  IBaseFileSystemAsync,
-  IBaseFileSystemPromiseActions,
-  CallbackFnVoid,
-} from "@file-services/types";
+import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions, IBaseFileSystemSync } from "@file-services/types";
 
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
   return {
@@ -61,35 +56,5 @@ export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync
         return syncFs.chmodSync(...args);
       },
     },
-    exists(nodePath, callback) {
-      callback(syncFs.existsSync(nodePath));
-    },
-    readFile: callbackify(syncFs.readFileSync) as IBaseFileSystemAsync["readFile"],
-    writeFile: callbackify(syncFs.writeFileSync) as IBaseFileSystemAsync["writeFile"],
-    copyFile: callbackify(syncFs.copyFileSync) as IBaseFileSystemAsync["copyFile"],
-    unlink: callbackify(syncFs.unlinkSync),
-    readdir: callbackify(syncFs.readdirSync) as IBaseFileSystemAsync["readdir"],
-    mkdir: callbackify(syncFs.mkdirSync) as unknown as IBaseFileSystemAsync["mkdir"],
-    rmdir: callbackify(syncFs.rmdirSync),
-    stat: callbackify(syncFs.statSync) as unknown as IBaseFileSystemAsync["stat"],
-    lstat: callbackify(syncFs.lstatSync) as unknown as IBaseFileSystemAsync["lstat"],
-    realpath: callbackify(syncFs.realpathSync),
-    rename: callbackify(syncFs.renameSync),
-    readlink: callbackify(syncFs.readlinkSync),
-  };
-}
-
-function callbackify<T extends unknown[], R>(fn: (...args: [...T]) => R) {
-  return (...args: [...T, (error: Error | null, value: R) => void]): void => {
-    const callback = args.pop() as (error: Error | null, value: R) => void;
-    if (typeof callback !== "function") {
-      throw new Error("callback is not a function");
-    }
-    try {
-      const result = fn(...(args as unknown as [...T]));
-      callback(null, result);
-    } catch (e) {
-      (callback as CallbackFnVoid)(e as Error | undefined | null);
-    }
   };
 }
