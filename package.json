@@ -47,7 +47,7 @@
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.24.0",
     "typescript": "~5.5.4",
-    "typescript-eslint": "^8.0.1"
+    "typescript-eslint": "^8.1.0"
   },
   "engines": {
     "npm": ">=8"
