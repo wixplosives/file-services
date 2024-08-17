@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@playwright/browser-chromium": "^1.46.0",
+    "@playwright/browser-chromium": "^1.46.1",
     "@ts-tools/node": "^5.0.2",
     "@types/chai": "^4.3.17",
     "@types/chai-as-promised": "^7.1.8",
@@ -29,7 +29,7 @@
     "chai": "^4.5.0",
     "chai-as-promised": "^7.1.2",
     "create-temp-directory": "^2.4.0",
-    "esbuild": "^0.23.0",
+    "esbuild": "^0.23.1",
     "eslint": "^9.9.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-no-only-tests": "^3.3.0",
@@ -44,7 +44,7 @@
     "sass": "^1.77.8",
     "sinon": "^18.0.0",
     "sinon-chai": "^3.7.0",
-    "type-fest": "^4.24.0",
+    "type-fest": "^4.25.0",
     "typescript": "~5.5.4",
     "typescript-eslint": "^8.1.0"
   },
