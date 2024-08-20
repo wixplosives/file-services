@@ -3,7 +3,6 @@ import type { IBaseFileSystemAsync, IBaseFileSystemPromiseActions, IBaseFileSyst
 export function syncToAsyncFs(syncFs: IBaseFileSystemSync): IBaseFileSystemAsync {
   return {
     ...syncFs,
-    watchService: syncFs.watchService,
     caseSensitive: syncFs.caseSensitive,
 
     promises: {
