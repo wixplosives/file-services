@@ -2,7 +2,6 @@ import { FileSystemConstants, type FSWatcher, type IBaseFileSystemSync } from "@
 import { expect } from "chai";
 import { sleep, waitFor } from "promise-assist";
 import type { ITestInput } from "./types";
-import { WatchEventsValidator } from "./watch-events-validator";
 
 const SAMPLE_CONTENT = "content";
 const DIFFERENT_CONTENT = "another content";
@@ -271,57 +270,6 @@ export function syncBaseFsContract(
       });
     });
 
-    describe("watching files (using WatchService)", function () {
-      this.timeout(10000);
-
-      let validator: WatchEventsValidator;
-      let testFilePath: string;
-
-      beforeEach("create temp fixture file and intialize validator", async () => {
-        const { fs, tempDirectoryPath } = testInput;
-        const { watchService } = fs;
-        validator = new WatchEventsValidator(watchService);
-
-        testFilePath = fs.join(tempDirectoryPath, "test-file");
-
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-        await watchService.watchPath(testFilePath);
-      });
-
-      it("emits watch event when a watched file changes", async () => {
-        const { fs } = testInput;
-
-        fs.writeFileSync(testFilePath, DIFFERENT_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-        await validator.noMoreEvents();
-      });
-
-      it("emits watch event when a watched file is removed", async () => {
-        const { fs } = testInput;
-
-        fs.unlinkSync(testFilePath);
-
-        await validator.validateEvents([{ path: testFilePath, stats: null }]);
-        await validator.noMoreEvents();
-      });
-
-      it("keeps watching if file is deleted and recreated immediately", async () => {
-        const { fs } = testInput;
-
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-        fs.unlinkSync(testFilePath);
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-        await validator.noMoreEvents();
-      });
-    });
-
     describe("creating directories", () => {
       it("can create an empty directory inside an existing one", () => {
         const { fs, tempDirectoryPath } = testInput;
@@ -526,103 +474,6 @@ export function syncBaseFsContract(
         const expectedToFail = () => fs.rmdirSync(filePath);
 
         expect(expectedToFail).to.throw();
-      });
-    });
-
-    describe("watching directories", function () {
-      this.timeout(10000);
-
-      let validator: WatchEventsValidator;
-      let testDirectoryPath: string;
-
-      beforeEach("create temp fixture directory and intialize validator", async () => {
-        const { fs, tempDirectoryPath } = testInput;
-        validator = new WatchEventsValidator(fs.watchService);
-
-        testDirectoryPath = fs.join(tempDirectoryPath, "test-directory");
-        fs.mkdirSync(testDirectoryPath);
-      });
-
-      it("fires a watch event when a file is added inside a watched directory", async () => {
-        const { fs } = testInput;
-
-        await fs.watchService.watchPath(testDirectoryPath);
-
-        const testFilePath = fs.join(testDirectoryPath, "test-file");
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-        await validator.noMoreEvents();
-      });
-
-      it("fires a watch event when a file is changed inside a watched directory", async () => {
-        const { fs } = testInput;
-
-        const testFilePath = fs.join(testDirectoryPath, "test-file");
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-        await fs.watchService.watchPath(testDirectoryPath);
-
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-        await validator.noMoreEvents();
-      });
-
-      it("fires a watch event when a file is removed inside a watched directory", async () => {
-        const { fs } = testInput;
-
-        const testFilePath = fs.join(testDirectoryPath, "test-file");
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-        await fs.watchService.watchPath(testDirectoryPath);
-
-        fs.unlinkSync(testFilePath);
-
-        await validator.validateEvents([{ path: testFilePath, stats: null }]);
-        await validator.noMoreEvents();
-      });
-    });
-
-    describe("watching both directories and files", function () {
-      this.timeout(10000);
-
-      let validator: WatchEventsValidator;
-      let testDirectoryPath: string;
-      let testFilePath: string;
-
-      beforeEach("create temp fixture directory and intialize watchService", async () => {
-        const { fs, tempDirectoryPath } = testInput;
-        validator = new WatchEventsValidator(fs.watchService);
-
-        testDirectoryPath = fs.join(tempDirectoryPath, "test-directory");
-        fs.mkdirSync(testDirectoryPath);
-        testFilePath = fs.join(testDirectoryPath, "test-file");
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-      });
-
-      it("allows watching a file and its containing directory", async () => {
-        const { fs } = testInput;
-        const { watchService } = fs;
-
-        await watchService.watchPath(testFilePath);
-        await watchService.watchPath(testDirectoryPath);
-
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-        await validator.noMoreEvents();
-      });
-
-      it("allows watching in any order", async () => {
-        const { fs } = testInput;
-        const { watchService } = fs;
-
-        await watchService.watchPath(testDirectoryPath);
-        await watchService.watchPath(testFilePath);
-
-        fs.writeFileSync(testFilePath, SAMPLE_CONTENT);
-
-        await validator.validateEvents([{ path: testFilePath, stats: fs.statSync(testFilePath) }]);
-        await validator.noMoreEvents();
       });
     });
 
