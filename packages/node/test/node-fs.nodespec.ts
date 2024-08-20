@@ -7,8 +7,7 @@ import { platform } from "node:os";
 describe("Node File System Implementation", function () {
   this.timeout(10_000);
 
-  const fs = createNodeFs({ watchOptions: { debounceWait: 500 } });
-  const { watchService } = fs;
+  const fs = createNodeFs();
 
   const testProvider = async () => {
     const tempDirectory = await createTempDirectory("fs-test-");
@@ -16,8 +15,6 @@ describe("Node File System Implementation", function () {
     return {
       fs,
       dispose: async () => {
-        watchService.clearGlobalListeners();
-        await watchService.unwatchAllPaths();
         await tempDirectory.remove();
       },
       tempDirectoryPath: fs.realpathSync(tempDirectory.path),
