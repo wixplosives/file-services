@@ -10,15 +10,12 @@ import type {
   WriteFileOptions,
 } from "./common-fs-types";
 import type { IFileSystemPath } from "./path";
-import type { IWatchService } from "./watch-api";
 
 /**
  * SYNC-only base file system.
  * Contains a subset of `fs`, watch service, and path methods.
  */
 export interface IBaseFileSystemSync extends IBaseFileSystemSyncActions, IFileSystemPath {
-  /** @deprecated use `fs.watch()` instead. */
-  watchService: IWatchService;
   caseSensitive: boolean;
 }
 
