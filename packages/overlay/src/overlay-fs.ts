@@ -1,12 +1,9 @@
 import type {
-  IFileSystem,
-  IBaseFileSystemSyncActions,
   IBaseFileSystemPromiseActions,
-  IBaseFileSystemCallbackActions,
-  CallbackFn,
-  ReadFileOptions,
+  IBaseFileSystemSyncActions,
   IDirectoryEntry,
-  BufferEncoding,
+  IFileSystem,
+  ReadFileOptions,
 } from "@file-services/types";
 import { createFileSystem } from "@file-services/utils";
 
@@ -254,152 +251,9 @@ export function createOverlayFs(
     } as IBaseFileSystemPromiseActions["readdir"],
   };
 
-  const baseCallbackActions: Partial<IBaseFileSystemCallbackActions> = {
-    exists(path, callback) {
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.exists(resolvedUpperPath, (pathExists) => {
-          if (pathExists) {
-            callback(pathExists);
-          } else {
-            lowerFs.exists(resolvedLowerPath, callback);
-          }
-        });
-      } else {
-        lowerFs.exists(resolvedLowerPath, callback);
-      }
-    },
-    readFile(
-      path: string,
-      options?: ReadFileOptions | CallbackFn<Uint8Array>,
-      callback?: CallbackFn<string> | CallbackFn<Uint8Array> | CallbackFn<string | Uint8Array>,
-    ): void {
-      if (typeof options === "function") {
-        callback = options;
-        options = undefined;
-      } else if (typeof callback !== "function") {
-        throw new Error(`callback is not a function.`);
-      }
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.readFile(resolvedUpperPath, options, (upperError, upperValue) => {
-          if (upperError) {
-            lowerFs.readFile(resolvedLowerPath, options as BufferEncoding, callback as CallbackFn<string | Uint8Array>);
-          } else {
-            (callback as CallbackFn<string | Uint8Array>)(upperError, upperValue);
-          }
-        });
-      } else {
-        lowerFs.readFile(resolvedLowerPath, options, callback as CallbackFn<string | Uint8Array>);
-      }
-    },
-    stat(path, callback) {
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.stat(resolvedUpperPath, (e, stats) => {
-          if (e) {
-            lowerFs.stat(resolvedLowerPath, callback);
-          } else {
-            callback(e, stats);
-          }
-        });
-      } else {
-        lowerFs.stat(resolvedLowerPath, callback);
-      }
-    },
-    lstat(path, callback) {
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.lstat(resolvedUpperPath, (e, stats) => {
-          if (e) {
-            lowerFs.lstat(resolvedLowerPath, callback);
-          } else {
-            callback(e, stats);
-          }
-        });
-      } else {
-        lowerFs.lstat(resolvedLowerPath, callback);
-      }
-    },
-    realpath(path, callback) {
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.realpath(resolvedUpperPath, (e, realPath) => {
-          if (e) {
-            lowerFs.realpath(resolvedLowerPath, callback);
-          } else {
-            callback(e, lowerFs.join(baseDirectoryPath, realPath));
-          }
-        });
-      } else {
-        lowerFs.realpath(resolvedLowerPath, callback);
-      }
-    },
-    readlink(path, callback) {
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.readlink(resolvedUpperPath, (e, linkPath) => {
-          if (e) {
-            lowerFs.readlink(resolvedLowerPath, callback);
-          } else {
-            callback(e, linkPath);
-          }
-        });
-      } else {
-        lowerFs.readlink(resolvedLowerPath, callback);
-      }
-    },
-    readdir(
-      path: string,
-      options: string | { withFileTypes?: boolean } | undefined | null | CallbackFn<string[]>,
-      callback?: CallbackFn<string[]> | CallbackFn<IDirectoryEntry[]>,
-    ) {
-      if (typeof options === "function") {
-        callback = options;
-        options = undefined;
-      } else if (typeof callback !== "function") {
-        throw new Error(`callback is not a function.`);
-      }
-      const { resolvedLowerPath, resolvedUpperPath } = resolvePaths(path);
-      if (resolvedUpperPath !== undefined) {
-        upperFs.readdir(resolvedUpperPath, options as { withFileTypes: true }, (upperError, resInUpper) => {
-          if (upperError) {
-            lowerFs.readdir(
-              resolvedLowerPath,
-              options as { withFileTypes: true },
-              callback as CallbackFn<IDirectoryEntry[]>,
-            );
-          } else {
-            lowerFs.readdir(resolvedLowerPath, options as { withFileTypes: true }, (lowerError, resInLower) => {
-              if (lowerError) {
-                (callback as CallbackFn<IDirectoryEntry[]>)(upperError, resInUpper);
-              } else {
-                if (options !== null && typeof options === "object" && options.withFileTypes) {
-                  const namesInUpper = new Set<string>(resInUpper.map(getEntryName));
-                  const combined = [...resInLower.filter((item) => !namesInUpper.has(item.name)), ...resInUpper];
-                  (callback as CallbackFn<IDirectoryEntry[]>)(upperError, combined);
-                } else {
-                  const combined = Array.from(new Set([...resInLower, ...resInUpper]));
-                  (callback as CallbackFn<IDirectoryEntry[]>)(upperError, combined);
-                }
-              }
-            });
-          }
-        });
-      } else {
-        lowerFs.readdir(
-          resolvedLowerPath,
-          options as { withFileTypes: true },
-          callback as CallbackFn<IDirectoryEntry[]>,
-        );
-      }
-    },
-  };
-
   return createFileSystem({
     ...lowerFs,
     ...baseSyncActions,
-    ...baseCallbackActions,
     promises: { ...lowerPromises, ...basePromiseActions },
   });
 }
