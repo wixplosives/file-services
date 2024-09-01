@@ -5,5 +5,6 @@ export default {
     { name: "@types/chai-as-promised", reason: "v8 is pure esm" },
     { name: "sinon-chai", reason: "v4 requires chai@5" },
     { name: "rimraf", reason: "v6 drops node 18 support" },
+    { name: "mocha-web", reason: "v2 drops node 18 support" },
   ],
 };
