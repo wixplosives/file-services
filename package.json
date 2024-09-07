@@ -15,7 +15,7 @@
     "prettify": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.9.1",
+    "@eslint/js": "^9.10.0",
     "@playwright/browser-chromium": "^1.47.0",
     "@ts-tools/node": "^6.0.0",
     "@types/chai": "^4.3.19",
@@ -30,7 +30,7 @@
     "chai-as-promised": "^7.1.2",
     "create-temp-directory": "^2.4.0",
     "esbuild": "^0.23.1",
-    "eslint": "^9.9.1",
+    "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^10.7.3",
