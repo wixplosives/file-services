@@ -15,8 +15,8 @@
     "prettify": "prettier --write ."
   },
   "devDependencies": {
-    "@eslint/js": "^9.10.0",
-    "@playwright/browser-chromium": "^1.47.1",
+    "@eslint/js": "^9.11.0",
+    "@playwright/browser-chromium": "^1.47.2",
     "@ts-tools/node": "^6.0.0",
     "@types/chai": "^4.3.19",
     "@types/chai-as-promised": "^7.1.8",
@@ -30,7 +30,7 @@
     "chai-as-promised": "^7.1.2",
     "create-temp-directory": "^2.4.0",
     "esbuild": "^0.23.1",
-    "eslint": "^9.10.0",
+    "eslint": "^9.11.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^10.7.3",
@@ -41,7 +41,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^5.0.8",
-    "sass": "^1.79.2",
+    "sass": "^1.79.3",
     "sinon": "^19.0.2",
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.26.1",
