@@ -4,7 +4,6 @@
 
 File system test-kit, containing contracts and validators.
 
-- WatchEventsValidator
 - asyncBaseFsContract
 - syncBaseFsContract
 - asyncFsContract
