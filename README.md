@@ -16,7 +16,7 @@ Various file system packages.
 
 - **[@file-services/utils](./packages/utils)** - Common file system utility functions.
 
-- **[@file-services/test-kit](./packages/test-kit)** - File system test validators and behavior contracts.
+- **[@file-services/test-kit](./packages/test-kit)** - File system test contracts.
 
 - **[@file-services/typescript](./packages/typescript)** - Methods for creation of TypeScript hosts.
 
