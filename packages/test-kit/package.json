@@ -1,6 +1,6 @@
 {
   "name": "@file-services/test-kit",
-  "description": "File system test-kit, containing contracts and validators.",
+  "description": "File system test-kit, containing test contracts.",
   "version": "9.4.1",
   "main": "./dist/fs-test-kit.cjs",
   "types": "./dist/index.d.ts",
