@@ -9,7 +9,7 @@ for (const config of pluginTypescript.configs.recommendedTypeChecked) {
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  { ignores: ["**/dist/"] },
+  { ignores: ["**/dist/", "packages/path/index.d.ts"] },
   pluginJs.configs.recommended,
   { plugins: { "no-only-tests": pluginNoOnlyTests } },
   {
