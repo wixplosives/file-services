@@ -7,15 +7,12 @@ import type {
   WriteFileOptions,
 } from "./common-fs-types";
 import type { IFileSystemPath } from "./path";
-import type { IWatchService } from "./watch-api";
 
 /**
  * ASYNC-only base file system.
  * Contains a subset of `fs`, watch service, and path methods.
  */
 export interface IBaseFileSystemAsync extends IFileSystemPath {
-  /** @deprecated use `fs.watch()` instead. */
-  watchService: IWatchService;
   caseSensitive: boolean;
 
   promises: IBaseFileSystemPromiseActions;
