@@ -18,7 +18,7 @@
     "test:browser": "mocha-web \"./test/**/*.spec.ts?(x)\""
   },
   "dependencies": {
-    "type-fest": "^4.28.1"
+    "type-fest": "^4.29.0"
   },
   "files": [
     "dist",
