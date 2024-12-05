@@ -24,7 +24,7 @@ describe("commonjs module system - integration with existing npm packages", func
 
     expect(React.createElement).to.be.instanceOf(Function);
     expect(React.Component).to.be.instanceOf(Function);
-    expect(ReactDOM.render).to.be.instanceOf(Function);
+    expect(ReactDOM.createPortal).to.be.instanceOf(Function);
   });
 
   it("evaluates chai successfully", () => {
