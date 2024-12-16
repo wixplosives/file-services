@@ -17,7 +17,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wixplosives/file-services.git",
+    "url": "git+https://github.com/wixplosives/file-services.git",
     "directory": "packages/path"
   },
   "homepage": "https://github.com/wixplosives/file-services",
