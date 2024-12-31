@@ -33,7 +33,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^11.0.1",
-    "mocha-web": "^1.0.2",
+    "mocha-web": "^2.0.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
     "promise-assist": "^2.0.1",
