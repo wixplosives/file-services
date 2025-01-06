@@ -21,7 +21,7 @@
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.10",
     "@types/node": "18",
-    "@types/react": "^19.0.2",
+    "@types/react": "^19.0.3",
     "@types/react-dom": "^19.0.2",
     "@types/sinon": "^17.0.3",
     "@types/sinon-chai": "^3.2.12",
@@ -45,7 +45,7 @@
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.31.0",
     "typescript": "~5.7.2",
-    "typescript-eslint": "^8.19.0"
+    "typescript-eslint": "^8.19.1"
   },
   "engines": {
     "npm": ">=8"
