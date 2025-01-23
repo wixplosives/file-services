@@ -15,13 +15,13 @@
     "prettify": "prettier --write ."
   },
   "devDependencies": {
-    "@playwright/browser-chromium": "^1.49.1",
+    "@playwright/browser-chromium": "^1.50.0",
     "@ts-tools/node": "^6.1.0",
     "@types/chai": "^4.3.20",
     "@types/chai-as-promised": "^7.1.8",
     "@types/mocha": "^10.0.10",
     "@types/node": "20",
-    "@types/react": "^19.0.7",
+    "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/sinon": "^17.0.3",
     "@types/sinon-chai": "^3.2.12",
