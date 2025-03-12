@@ -15,7 +15,7 @@
     "prettify": "prettier --write ."
   },
   "devDependencies": {
-    "@playwright/browser-chromium": "^1.50.1",
+    "@playwright/browser-chromium": "^1.51.0",
     "@ts-tools/node": "^6.1.0",
     "@types/chai": "^4.3.20",
     "@types/chai-as-promised": "^7.1.8",
@@ -28,9 +28,9 @@
     "chai": "^4.5.0",
     "chai-as-promised": "^7.1.2",
     "create-temp-directory": "^2.4.0",
-    "esbuild": "^0.25.0",
-    "eslint": "^9.21.0",
-    "eslint-config-prettier": "^10.0.2",
+    "esbuild": "^0.25.1",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^11.1.0",
     "mocha-web": "^2.0.1",
@@ -43,9 +43,9 @@
     "sass": "^1.85.1",
     "sinon": "^19.0.2",
     "sinon-chai": "^3.7.0",
-    "type-fest": "^4.36.0",
+    "type-fest": "^4.37.0",
     "typescript": "~5.8.2",
-    "typescript-eslint": "^8.26.0"
+    "typescript-eslint": "^8.26.1"
   },
   "engines": {
     "npm": ">=8"
