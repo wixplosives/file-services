@@ -691,7 +691,7 @@ const returnsFalse = () => false;
 
 function createFsError(
   path: string,
-  message: FsErrorCodes,
+  message: string,
   code: "ENOENT" | "EEXIST" | "EISDIR" | "ENOTDIR" | "ENOTEMPTY" | "EINVAL",
 ): Error {
   const error = new Error(`${path} ${message}`);

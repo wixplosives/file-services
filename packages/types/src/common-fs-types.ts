@@ -35,13 +35,13 @@ export type ReadFileOptions =
   | BufferEncoding
   | null;
 
-export enum FileSystemConstants {
+export const FileSystemConstants = {
   /**
    * When passed as a flag to `copyFile` or `copyFileSync`,
    * causes operation to fail if destination already exists.
    */
-  COPYFILE_EXCL = 1,
-}
+  COPYFILE_EXCL: 1,
+} as const;
 
 export interface IDirectoryContents<T extends Uint8Array | string = string> {
   [nodeName: string]: T | IDirectoryContents<T>;

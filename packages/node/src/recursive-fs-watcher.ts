@@ -11,14 +11,15 @@ export interface WatcherEvents {
 export class RecursiveFSWatcher extends EventEmitter<WatcherEvents> {
   #directoryPathToWatcher = new Map<string, FSWatcher>();
 
-  constructor(
-    private rootDirectoryPath: string,
-    private options?: WatchOptions,
-  ) {
+  private rootDirectoryPath: string;
+  private options: WatchOptions;
+
+  constructor(rootDirectoryPath: string, options?: WatchOptions) {
     super();
     if (!options?.recursive) {
       throw new Error("RecursiveFSWatcher requires recursive option to be set");
     }
+    this.rootDirectoryPath = rootDirectoryPath;
     this.options = { ...options, recursive: false };
     this.#watchDirectoryDeep(rootDirectoryPath);
   }
