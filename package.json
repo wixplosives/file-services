@@ -33,19 +33,19 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^11.1.0",
-    "mocha-web": "^2.0.1",
+    "mocha-web": "^2.1.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "promise-assist": "^2.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "rimraf": "^6.0.1",
-    "sass": "^1.86.0",
+    "sass": "^1.86.1",
     "sinon": "^20.0.0",
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.38.0",
     "typescript": "~5.8.2",
-    "typescript-eslint": "^8.28.0"
+    "typescript-eslint": "^8.29.0"
   },
   "engines": {
     "npm": ">=8"
