@@ -43,7 +43,7 @@
     "sass": "^1.86.2",
     "sinon": "^20.0.0",
     "sinon-chai": "^3.7.0",
-    "type-fest": "^4.39.0",
+    "type-fest": "^4.39.1",
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.29.0"
   },
