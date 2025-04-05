@@ -29,7 +29,7 @@
     "chai-as-promised": "^7.1.2",
     "create-temp-directory": "^2.4.0",
     "esbuild": "^0.25.2",
-    "eslint": "^9.23.0",
+    "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^11.1.0",
@@ -44,7 +44,7 @@
     "sinon": "^20.0.0",
     "sinon-chai": "^3.7.0",
     "type-fest": "^4.39.1",
-    "typescript": "~5.8.2",
+    "typescript": "~5.8.3",
     "typescript-eslint": "^8.29.0"
   },
   "engines": {
