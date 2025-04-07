@@ -5,11 +5,9 @@ import {
   type IDirectoryContents,
   type IDirectoryEntry,
   type IFileSystemStats,
-  type IWatchEvent,
   type ReadFileOptions,
   type RmOptions,
   type StatSyncOptions,
-  type WatchEventListener,
   type WatchChangeEventListener,
 } from "@file-services/types";
 import { SetMultiMap, createFileSystem, syncToAsyncFs } from "@file-services/utils";
@@ -65,8 +63,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
   const changeListeners = new SetMultiMap<string, WatchChangeEventListener>();
   const recursiveChangeListeners = new SetMultiMap<string, WatchChangeEventListener>();
   const closeListeners = new SetMultiMap<string, () => void>();
-  const pathListeners = new SetMultiMap<string, WatchEventListener>();
-  const globalListeners = new Set<WatchEventListener>();
   const textEncoder = new TextEncoder();
   realpathSync.native = realpathSync;
 
@@ -75,34 +71,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     root,
     ...posixPath,
     resolve: resolvePath,
-    watchService: {
-      async watchPath(path, listener) {
-        const resolvedPath = resolvePath(path);
-        if (listener) {
-          pathListeners.add(resolvedPath, listener);
-        }
-      },
-      async unwatchPath(path, listener) {
-        const resolvedPath = resolvePath(path);
-        if (listener) {
-          pathListeners.delete(resolvedPath, listener);
-        } else {
-          pathListeners.deleteKey(resolvedPath);
-        }
-      },
-      async unwatchAllPaths() {
-        pathListeners.clear();
-      },
-      addGlobalListener(listener) {
-        globalListeners.add(listener);
-      },
-      removeGlobalListener(listener) {
-        globalListeners.delete(listener);
-      },
-      clearGlobalListeners() {
-        globalListeners.clear();
-      },
-    },
     caseSensitive: true,
     cwd,
     chdir,
@@ -212,7 +180,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
       }
       existingNode.entry = { ...existingNode.entry, mtime: new Date() };
       existingNode.contents = typeof fileContent === "string" ? fileContent : new Uint8Array(fileContent);
-      emitWatchEvent({ path: resolvedPath, stats: existingNode.entry });
       emitChangeEvent("change", resolvedPath);
     } else {
       const parentPath = posixPath.dirname(resolvedPath);
@@ -238,7 +205,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         contents: typeof fileContent === "string" ? fileContent : new Uint8Array(fileContent),
       };
       parentNode.contents.set(fileName, newFileNode);
-      emitWatchEvent({ path: resolvedPath, stats: newFileNode.entry });
       emitChangeEvent("rename", resolvedPath);
     }
   }
@@ -262,7 +228,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     parentNode.contents.delete(fileName);
-    emitWatchEvent({ path: resolvedPath, stats: null });
     emitChangeEvent("rename", resolvedPath);
   }
 
@@ -327,7 +292,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
 
     const newDirNode: IFsMemDirectoryNode = createMemDirectory(directoryName);
     parentNode.contents.set(directoryName, newDirNode);
-    emitWatchEvent({ path: resolvedPath, stats: newDirNode.entry });
     emitChangeEvent("rename", resolvedPath);
   }
 
@@ -350,7 +314,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     parentNode.contents.delete(directoryName);
-    emitWatchEvent({ path: resolvedPath, stats: null });
     emitChangeEvent("rename", resolvedPath);
   }
 
@@ -382,7 +345,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     }
 
     parentNode.contents.delete(targetName);
-    emitWatchEvent({ path: resolvedPath, stats: null });
     emitChangeEvent("rename", resolvedPath);
   }
 
@@ -508,8 +470,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     sourceNode.entry = { ...sourceNode.entry, name: destinationName, mtime: new Date() };
     destinationParentNode.contents.set(destinationName, sourceNode);
 
-    emitWatchEvent({ path: resolvedSourcePath, stats: null });
-    emitWatchEvent({ path: resolvedDestinationPath, stats: sourceNode.entry });
     emitChangeEvent("rename", resolvedSourcePath);
     emitChangeEvent("rename", resolvedDestinationPath);
   }
@@ -555,7 +515,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     };
     destParentNode.contents.set(targetName, newFileNode);
 
-    emitWatchEvent({ path: resolvedDestinationPath, stats: newFileNode.entry });
     emitChangeEvent("rename", resolvedDestinationPath);
   }
 
@@ -591,7 +550,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
     };
 
     parentNode.contents.set(fileName, symlinkNode);
-    emitWatchEvent({ path: resolvedLinkPath, stats: symlinkNode.entry });
     emitChangeEvent("rename", resolvedLinkPath);
   }
 
@@ -652,18 +610,6 @@ export function createBaseMemoryFsSync(): IBaseMemFileSystemSync {
         for (const listener of listeners) {
           listener(type, posixPath.relative(watchedPath, changedPath));
         }
-      }
-    }
-  }
-
-  function emitWatchEvent(watchEvent: IWatchEvent): void {
-    for (const listener of globalListeners) {
-      listener(watchEvent);
-    }
-    const listeners = pathListeners.get(watchEvent.path);
-    if (listeners) {
-      for (const listener of listeners) {
-        listener(watchEvent);
       }
     }
   }
