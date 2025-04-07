@@ -21,7 +21,9 @@ export class RecursiveFSWatcher extends EventEmitter<WatcherEvents> {
     }
     this.rootDirectoryPath = rootDirectoryPath;
     this.options = { ...options, recursive: false };
-    this.#watchDirectoryDeep(rootDirectoryPath);
+    setImmediate(() => {
+      this.#watchDirectoryDeep(rootDirectoryPath);
+    });
   }
 
   close() {
