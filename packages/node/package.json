@@ -1,7 +1,7 @@
 {
   "name": "@file-services/node",
   "description": "Node.js file system implementation.",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "main": "./dist/fs-node.cjs",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -17,8 +17,8 @@
     "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\""
   },
   "dependencies": {
-    "@file-services/types": "^10.0.0",
-    "@file-services/utils": "^10.0.0"
+    "@file-services/types": "^10.0.1",
+    "@file-services/utils": "^10.0.1"
   },
   "files": [
     "dist",
