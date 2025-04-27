@@ -12,11 +12,6 @@
     },
     "./package.json": "./package.json"
   },
-  "scripts": {
-    "test": "npm run test:node && npm run test:browser",
-    "test:node": "mocha \"./dist/test/*.{spec,nodespec}.js\"",
-    "test:browser": "mocha-web \"./dist/test/**/*.spec.js\""
-  },
   "dependencies": {
     "@file-services/resolve": "^10.0.1",
     "@file-services/types": "^10.0.1"
