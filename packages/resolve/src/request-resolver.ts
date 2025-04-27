@@ -1,5 +1,5 @@
 import type { PackageJson } from "type-fest";
-import type { IRequestResolverOptions, IResolutionOutput, ISanitizedPackageJson, RequestResolver } from "./types";
+import type { IRequestResolverOptions, IResolutionOutput, ISanitizedPackageJson, RequestResolver } from "./types.js";
 
 export const defaultPackageRoots = ["node_modules"] as const;
 export const defaultExtensions = [".js", ".json"] as const;

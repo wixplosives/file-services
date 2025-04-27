@@ -2,13 +2,11 @@
   "name": "@file-services/commonjs",
   "description": "Isomorphic, fs-agnostic implementation of the Node commonjs module system.",
   "version": "10.0.1",
-  "main": "./dist/fs-commonjs.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-commonjs.mjs",
-      "require": "./dist/fs-commonjs.cjs"
+      "default": "./dist/fs-commonjs.js"
     },
     "./package.json": "./package.json"
   },

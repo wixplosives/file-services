@@ -2,13 +2,11 @@
   "name": "@file-services/overlay",
   "description": "Overlay files and directories from one file system on top of another.",
   "version": "10.0.1",
-  "main": "./dist/fs-overlay.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-overlay.mjs",
-      "require": "./dist/fs-overlay.cjs"
+      "default": "./dist/fs-overlay.js"
     },
     "./package.json": "./package.json"
   },

@@ -1,7 +1,8 @@
 import { createCachedFs } from "@file-services/cached";
 import { createMemoryFs } from "@file-services/memory";
 import { asyncBaseFsContract, syncBaseFsContract } from "@file-services/test-kit";
-import chai, { expect } from "chai";
+import * as chai from "chai";
+import { expect } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import sinon from "sinon";
 

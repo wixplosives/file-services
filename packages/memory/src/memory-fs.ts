@@ -11,7 +11,7 @@ import {
   type WatchChangeEventListener,
 } from "@file-services/types";
 import { SetMultiMap, createFileSystem, syncToAsyncFs } from "@file-services/utils";
-import { FsErrorCodes } from "./error-codes";
+import { FsErrorCodes } from "./error-codes.js";
 import type {
   IBaseMemFileSystem,
   IBaseMemFileSystemSync,
@@ -20,7 +20,7 @@ import type {
   IFsMemNodeType,
   IFsMemSymlinkNode,
   IMemFileSystem,
-} from "./types";
+} from "./types.js";
 
 const posixPath = path.posix;
 

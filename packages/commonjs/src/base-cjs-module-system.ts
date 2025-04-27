@@ -1,4 +1,4 @@
-import type { IModule, ICommonJsModuleSystem, LoadModule } from "./types";
+import type { IModule, ICommonJsModuleSystem, LoadModule } from "./types.js";
 
 export interface IBaseModuleSystemOptions {
   /**

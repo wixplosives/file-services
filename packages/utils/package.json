@@ -2,13 +2,11 @@
   "name": "@file-services/utils",
   "description": "Common file system utility functions.",
   "version": "10.0.1",
-  "main": "./dist/fs-utils.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-utils.mjs",
-      "require": "./dist/fs-utils.cjs"
+      "default": "./dist/fs-utils.js"
     },
     "./package.json": "./package.json"
   },

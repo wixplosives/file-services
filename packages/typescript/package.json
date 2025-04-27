@@ -2,13 +2,11 @@
   "name": "@file-services/typescript",
   "description": "Helpers for creation of TypeScript hosts",
   "version": "10.0.1",
-  "main": "./dist/fs-typescript.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-typescript.mjs",
-      "require": "./dist/fs-typescript.cjs"
+      "default": "./dist/fs-typescript.js"
     },
     "./package.json": "./package.json"
   },

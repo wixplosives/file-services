@@ -1,3 +1,3 @@
-export * from "./error-codes";
-export * from "./memory-fs";
-export * from "./types";
+export * from "./error-codes.js";
+export * from "./memory-fs.js";
+export * from "./types.js";

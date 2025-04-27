@@ -2,13 +2,11 @@
   "name": "@file-services/cached",
   "description": "A file system wrapper that adds cache to any `IFileSystem` implementation.",
   "version": "10.0.1",
-  "main": "./dist/fs-cached.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-cached.mjs",
-      "require": "./dist/fs-cached.cjs"
+      "default": "./dist/fs-cached.js"
     },
     "./package.json": "./package.json"
   },

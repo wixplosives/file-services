@@ -1,7 +1,7 @@
 import { FileSystemConstants, type FSWatcher, type IBaseFileSystemSync } from "@file-services/types";
 import { expect } from "chai";
 import { sleep, waitFor } from "promise-assist";
-import type { ITestInput } from "./types";
+import type { ITestInput } from "./types.js";
 
 const SAMPLE_CONTENT = "content";
 const DIFFERENT_CONTENT = "another content";

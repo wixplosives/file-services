@@ -17,36 +17,23 @@ for (const item of await fs.readdir(packagesURL, { withFileTypes: true })) {
   await fs.rm(outPath, { recursive: true, force: true });
   await fs.mkdir(outPath, { recursive: true });
 
-  const esmBundleURL = new URL(`fs-${item.name}.mjs`, outPath);
-  const cjsBundleURL = new URL(`fs-${item.name}.cjs`, outPath);
-  const entryURL = new URL("src/index.ts", packageURL);
-
   /** @type {import('esbuild').BuildOptions} */
-  const commonBuildOptions = {
-    entryPoints: [fileURLToPath(entryURL)],
+  const buildOptions = {
+    entryPoints: [fileURLToPath(new URL("src/index.ts", packageURL))],
     bundle: true,
     target: "es2022",
     sourcemap: true,
     packages: "external",
     logLevel: "info",
     color: true,
-  };
-  /** @type {import('esbuild').BuildOptions} */
-  const esmBuildOptions = {
-    ...commonBuildOptions,
-    outfile: fileURLToPath(esmBundleURL),
+    outfile: fileURLToPath(new URL(`fs-${item.name}.js`, outPath)),
     format: "esm",
   };
-  /** @type {import('esbuild').BuildOptions} */
-  const cjsBuildOptions = {
-    ...commonBuildOptions,
-    outfile: fileURLToPath(cjsBundleURL),
-    format: "cjs",
-  };
+
   if (watch) {
-    const [esmCtx, cjsCtx] = await Promise.all([context(esmBuildOptions), context(cjsBuildOptions)]);
-    await Promise.all([esmCtx.watch(), cjsCtx.watch()]);
+    const buildContext = await context(buildOptions);
+    await buildContext.watch();
   } else {
-    await Promise.all([build(esmBuildOptions), build(cjsBuildOptions)]);
+    await build(buildOptions);
   }
 }

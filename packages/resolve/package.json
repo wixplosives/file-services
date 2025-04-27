@@ -2,13 +2,11 @@
   "name": "@file-services/resolve",
   "description": "Isomorphic, fs-agnostic implementation of the Node resolution algorithm.",
   "version": "10.0.1",
-  "main": "./dist/fs-resolve.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-resolve.mjs",
-      "require": "./dist/fs-resolve.cjs"
+      "default": "./dist/fs-resolve.js"
     },
     "./package.json": "./package.json"
   },

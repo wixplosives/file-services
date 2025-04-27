@@ -1,5 +1,5 @@
-import type { IWalkOptions, IDirectoryContents, BufferEncoding } from "./common-fs-types";
-import type { IBaseFileSystemSync } from "./base-api-sync";
+import type { IWalkOptions, IDirectoryContents, BufferEncoding } from "./common-fs-types.js";
+import type { IBaseFileSystemSync } from "./base-api-sync.js";
 
 /**
  * SYNC-only file system.
