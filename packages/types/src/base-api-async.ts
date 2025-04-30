@@ -5,8 +5,8 @@ import type {
   ReadFileOptions,
   RmOptions,
   WriteFileOptions,
-} from "./common-fs-types";
-import type { IFileSystemPath } from "./path";
+} from "./common-fs-types.js";
+import type { IFileSystemPath } from "./path.js";
 
 /**
  * ASYNC-only base file system.

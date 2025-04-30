@@ -19,21 +19,12 @@ describe("commonjs module system - integration with existing npm packages", func
   it("evaluates react/react-dom successfully", () => {
     const { requireFrom } = createCjsModuleSystem({ fs });
 
-    const React = requireFrom(__dirname, "react") as typeof import("react");
-    const ReactDOM = requireFrom(__dirname, "react-dom") as typeof import("react-dom");
+    const React = requireFrom(import.meta.dirname, "react") as typeof import("react");
+    const ReactDOM = requireFrom(import.meta.dirname, "react-dom") as typeof import("react-dom");
 
     expect(React.createElement).to.be.instanceOf(Function);
     expect(React.Component).to.be.instanceOf(Function);
     expect(ReactDOM.createPortal).to.be.instanceOf(Function);
-  });
-
-  it("evaluates chai successfully", () => {
-    const { requireFrom } = createCjsModuleSystem({ fs });
-
-    const chai = requireFrom(__dirname, "chai") as typeof import("chai");
-
-    expect(chai.expect).to.be.instanceOf(Function);
-    expect(chai.use).to.be.instanceOf(Function);
   });
 
   it("evaluates postcss successfully", () => {
@@ -45,7 +36,7 @@ describe("commonjs module system - integration with existing npm packages", func
     moduleCache.set("url", { filename: "url", id: "url", exports: url, children: [] });
     moduleCache.set("tty", { filename: "tty", id: "tty", exports: tty, children: [] });
     moduleCache.set("fs", { filename: "fs", id: "fs", exports: fs, children: [] });
-    const postcss = requireFrom(__dirname, "postcss") as typeof import("postcss");
+    const postcss = requireFrom(import.meta.dirname, "postcss") as typeof import("postcss");
 
     expect(postcss.parse).to.be.instanceOf(Function);
   });
@@ -56,7 +47,7 @@ describe("commonjs module system - integration with existing npm packages", func
     moduleCache.set("os", { filename: "os", id: "os", exports: os, children: [] });
     moduleCache.set("perf_hooks", { filename: "perf_hooks", id: "perf_hooks", exports: perf_hooks, children: [] });
 
-    const ts = requireFrom(__dirname, "typescript") as typeof import("typescript");
+    const ts = requireFrom(import.meta.dirname, "typescript") as typeof import("typescript");
 
     expect(ts.transpileModule).to.be.instanceOf(Function);
   });
@@ -74,7 +65,7 @@ describe("commonjs module system - integration with existing npm packages", func
     moduleCache.set("tty", { filename: "tty", id: "tty", exports: tty, children: [] });
     moduleCache.set("url", { filename: "url", id: "url", exports: url, children: [] });
     moduleCache.set("util", { filename: "util", id: "util", exports: util, children: [] });
-    const mocha = requireFrom(__dirname, "mocha") as typeof import("mocha");
+    const mocha = requireFrom(import.meta.dirname, "mocha") as typeof import("mocha");
 
     expect(mocha.reporters).to.be.an("object");
   });
@@ -93,7 +84,7 @@ describe("commonjs module system - integration with existing npm packages", func
     moduleCache.set("util", { filename: "util", id: "util", exports: util, children: [] });
     moduleCache.set("module", { filename: "module", id: "module", exports: nodeModule, children: [] });
 
-    const sass = requireFrom(__dirname, "sass") as typeof import("sass");
+    const sass = requireFrom(import.meta.dirname, "sass") as typeof import("sass");
 
     expect(sass.render).to.be.instanceOf(Function);
     expect(sass.renderSync).to.be.instanceOf(Function);

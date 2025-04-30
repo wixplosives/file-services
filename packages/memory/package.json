@@ -2,13 +2,11 @@
   "name": "@file-services/memory",
   "description": "An in-memory, sync/async, file system implementation.",
   "version": "10.0.1",
-  "main": "./dist/fs-memory.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-memory.mjs",
-      "require": "./dist/fs-memory.cjs"
+      "default": "./dist/fs-memory.js"
     },
     "./package.json": "./package.json"
   },

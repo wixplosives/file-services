@@ -2,13 +2,11 @@
   "name": "@file-services/types",
   "description": "Common file system interfaces",
   "version": "10.0.1",
-  "main": "./dist/fs-types.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-types.mjs",
-      "require": "./dist/fs-types.cjs"
+      "default": "./dist/fs-types.js"
     },
     "./package.json": "./package.json"
   },

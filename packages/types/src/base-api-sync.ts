@@ -8,8 +8,8 @@ import type {
   StatSyncOptions,
   WatchOptions,
   WriteFileOptions,
-} from "./common-fs-types";
-import type { IFileSystemPath } from "./path";
+} from "./common-fs-types.js";
+import type { IFileSystemPath } from "./path.js";
 
 /**
  * SYNC-only base file system.

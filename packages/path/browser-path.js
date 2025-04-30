@@ -1288,4 +1288,25 @@ posix.posix = win32.posix = posix;
 win32._makeLong = win32.toNamespacedPath;
 posix._makeLong = posix.toNamespacedPath;
 
-module.exports = _process.platform === "win32" ? win32 : posix;
+const api = _process.platform === "win32" ? win32 : posix;
+
+const { basename, delimiter, dirname, extname, format, isAbsolute, join, normalize, parse, relative, resolve, sep } =
+  api;
+
+export default api;
+export {
+  basename,
+  delimiter,
+  dirname,
+  extname,
+  format,
+  isAbsolute,
+  join,
+  normalize,
+  parse,
+  relative,
+  resolve,
+  sep,
+  win32,
+  posix,
+};

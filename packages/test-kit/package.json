@@ -2,19 +2,17 @@
   "name": "@file-services/test-kit",
   "description": "File system test-kit, containing test contracts.",
   "version": "10.0.1",
-  "main": "./dist/fs-test-kit.cjs",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fs-test-kit.mjs",
-      "require": "./dist/fs-test-kit.cjs"
+      "default": "./dist/fs-test-kit.js"
     },
     "./package.json": "./package.json"
   },
   "dependencies": {
     "@file-services/types": "^10.0.1",
-    "chai": "^4.5.0",
+    "chai": "^5.2.0",
     "promise-assist": "^2.0.1"
   },
   "files": [

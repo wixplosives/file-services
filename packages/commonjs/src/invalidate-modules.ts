@@ -1,4 +1,4 @@
-import type { IModule } from "./types";
+import type { IModule } from "./types.js";
 
 /**
  * Removes module and it's deep importers from the module cache
