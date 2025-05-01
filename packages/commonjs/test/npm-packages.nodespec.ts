@@ -57,14 +57,15 @@ describe("commonjs module system - integration with existing npm packages", func
       fs,
       resolver: createRequestResolver({ fs, conditions: ["node", "require"] }),
     });
-    moduleCache.set("events", { filename: "events", id: "events", exports: events, children: [] });
-    moduleCache.set("fs", { filename: "fs", id: "fs", exports: fs, children: [] });
+    moduleCache.set("node:events", { filename: "events", id: "events", exports: events, children: [] });
+    moduleCache.set("node:fs", { filename: "fs", id: "fs", exports: fs, children: [] });
     moduleCache.set("os", { filename: "os", id: "os", exports: os, children: [] });
-    moduleCache.set("path", { filename: "path", id: "path", exports: path, children: [] });
+    moduleCache.set("node:path", { filename: "path", id: "path", exports: path, children: [] });
     moduleCache.set("stream", { filename: "stream", id: "stream", exports: stream, children: [] });
     moduleCache.set("tty", { filename: "tty", id: "tty", exports: tty, children: [] });
-    moduleCache.set("url", { filename: "url", id: "url", exports: url, children: [] });
+    moduleCache.set("node:url", { filename: "url", id: "url", exports: url, children: [] });
     moduleCache.set("util", { filename: "util", id: "util", exports: util, children: [] });
+    moduleCache.set("node:util", { filename: "util", id: "util", exports: util, children: [] });
     const mocha = requireFrom(import.meta.dirname, "mocha") as typeof import("mocha");
 
     expect(mocha.reporters).to.be.an("object");
