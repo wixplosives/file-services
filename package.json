@@ -18,7 +18,7 @@
   "devDependencies": {
     "@playwright/browser-chromium": "^1.52.0",
     "@ts-tools/esm": "^6.1.0",
-    "@types/chai": "^5.2.1",
+    "@types/chai": "^5.2.2",
     "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "20",
@@ -46,7 +46,7 @@
     "sinon-chai": "^4.0.0",
     "type-fest": "^4.40.1",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.31.1"
+    "typescript-eslint": "^8.32.0"
   },
   "engines": {
     "npm": ">=8"
