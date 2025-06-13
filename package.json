@@ -42,7 +42,7 @@
     "react-dom": "^19.1.0",
     "rimraf": "^6.0.1",
     "sass": "^1.89.2",
-    "sinon": "^20.0.0",
+    "sinon": "^21.0.0",
     "sinon-chai": "^4.0.0",
     "type-fest": "^4.41.0",
     "typescript": "~5.8.3",
