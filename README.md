@@ -1,7 +1,5 @@
 # file-services
 
-[![Build Status](https://github.com/wixplosives/file-services/workflows/tests/badge.svg)](https://github.com/wixplosives/file-services/actions)
-
 Various file system packages.
 
 ### Packages
