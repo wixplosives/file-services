@@ -36,7 +36,7 @@
     "mocha": "^11.6.0",
     "mocha-web": "^2.3.0",
     "postcss": "^8.5.6",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.0",
     "promise-assist": "^2.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
