@@ -31,7 +31,7 @@
     "create-temp-directory": "^2.4.0",
     "esbuild": "^0.25.6",
     "eslint": "^9.31.0",
-    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-no-only-tests": "^3.3.0",
     "mocha": "^11.7.1",
     "mocha-web": "^2.3.0",
