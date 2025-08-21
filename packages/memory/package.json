@@ -24,10 +24,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wixplosives/file-services.git",
+    "url": "git+https://github.com/dazl-dev/file-services.git",
     "directory": "packages/memory"
   },
-  "homepage": "https://github.com/wixplosives/file-services",
+  "homepage": "https://github.com/dazl-dev/file-services",
   "publishConfig": {
     "access": "public"
   },
